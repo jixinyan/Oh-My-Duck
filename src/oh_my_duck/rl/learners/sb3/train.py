@@ -107,6 +107,7 @@ def main():
                     "resume_source": str(args.resume) if args.resume else None,
                     "official_agent": asdict(official_agent), "provenance":provenance})
         adapter = MjlabSb3VecEnv(create_environment(task,cfg,backend=args.backend,device=args.device))
+        progress_source = "fresh_environment"
         if args.resume:
             previous = json.loads((args.resume / "run.json").read_text())
             validate_resume(previous,task=args.task,backend=args.backend,framework="sb3")
@@ -114,6 +115,8 @@ def main():
                 raise ValueError("Resume task or upstream pin differs")
             normalized = VecNormalize.load(args.resume / "vecnormalize.pkl", adapter)
             model = PPO.load(args.resume / "model.zip", env=normalized, device=args.device)
+            from .checkpoint import restore_progress
+            adapter.env.common_step_counter, progress_source = restore_progress(previous, model.num_timesteps)
         else:
             normalized = VecNormalize(adapter, norm_obs=True, norm_reward=False, clip_obs=100.0)
             algorithm = official_agent.algorithm
@@ -130,6 +133,7 @@ def main():
         normalized.training = True
         callback = RewardAudit(adapter)
         before = model.num_timesteps
+        environment_step_before = adapter.env.common_step_counter
         model.learn(total_timesteps=args.iterations * args.num_envs * official_agent.num_steps_per_env,
                     callback=callback, reset_num_timesteps=not bool(args.resume))
         model.save(args.output / "model.zip")
@@ -150,6 +154,9 @@ def main():
             "num_envs": args.num_envs, "iterations": args.iterations,
             "timesteps_before": before, "timesteps_after": model.num_timesteps,
             "resume": str(args.resume) if args.resume else None,
+            "env_state_before": {"common_step_counter": environment_step_before},
+            "env_state": {"common_step_counter": adapter.env.common_step_counter},
+            "env_state_restore": progress_source,
             "episode_length_s_override": args.episode_length_s,
             "terminal_snapshots": adapter.terminal_count, "timeouts": adapter.timeout_count,
             "reward_ranges": callback.ranges, "step_reward_ranges": callback.step_ranges, "reload_max_abs_error": float(np.max(np.abs(actual - expected))),

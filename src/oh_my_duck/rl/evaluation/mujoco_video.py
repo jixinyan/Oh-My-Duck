@@ -6,7 +6,6 @@ can explicitly select OSMesa software rendering. Binary model/state transfer pre
 """
 
 import argparse
-import os
 from pathlib import Path
 import struct
 import subprocess
