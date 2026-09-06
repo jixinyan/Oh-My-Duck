@@ -53,12 +53,12 @@ A five-iteration checkpoint only validates training plumbing. Official pretraine
 
 ```text
 omd.py                         public command entry point
-scripts/bootstrap.py           fixed sources/models and isolated installation
-scripts/run.py                 process dispatch into backend environments
-scripts/submit.py              scheduler submission and provenance
-training/common/protocol.py    shared timing and joint contract
-training/mujoco/probe.py        worker GPU / EGL check
-training/mujoco/eval.py         official ONNX + BAM headless replay
+src/oh_my_duck/infrastructure/bootstrap.py           fixed sources/models and isolated installation
+src/oh_my_duck/infrastructure/run.py                 process dispatch into backend environments
+src/oh_my_duck/infrastructure/submit.py              scheduler submission and provenance
+src/oh_my_duck/robotics/microduck/protocol.py    shared timing and joint contract
+src/oh_my_duck/rl/backends/mujoco/probe.py        worker GPU / EGL check
+src/oh_my_duck/rl/evaluation/mujoco.py         official ONNX + BAM headless replay
 configs/                       source pins and evaluation protocols
 tests/                         meaningful contract and behavior checks
 docs/                          design, execution, audit and measured results

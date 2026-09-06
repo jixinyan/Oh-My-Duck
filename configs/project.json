@@ -5,27 +5,27 @@
   "entry_point": "omd.py",
   "components": {
     "contracts": {
-      "module": "oh_my_duck.contracts",
+      "module": "oh_my_duck.core.contracts",
       "state": "implemented",
       "role": "Identity, sensor validity, task and episode schemas"
     },
     "robot_backends": {
-      "module": "oh_my_duck.backends",
+      "module": "oh_my_duck.robotics.backends",
       "state": "interface_only",
       "role": "Online simulation/real robot execution"
     },
     "skills": {
-      "module": "oh_my_duck.skills",
+      "module": "oh_my_duck.agentic.skills",
       "state": "interface_only",
       "role": "Skill declarations and execution lifecycle"
     },
     "tools": {
-      "module": "oh_my_duck.tools",
+      "module": "oh_my_duck.agentic.tools",
       "state": "registry_implemented",
       "role": "Expose only registered tool handlers"
     },
     "harness": {
-      "module": "oh_my_duck.harness",
+      "module": "oh_my_duck.agentic.harness",
       "state": "interface_only",
       "role": "External harness bridge; deterministic mock is next"
     },
@@ -35,12 +35,12 @@
       "role": "ASR, voice profile, TTS and audio interfaces"
     },
     "recording": {
-      "module": "oh_my_duck.recording",
+      "module": "oh_my_duck.experience",
       "state": "jsonl_implemented",
       "role": "Persist episode evidence without memory/planning"
     },
     "training": {
-      "module": "oh_my_duck.training",
+      "module": "oh_my_duck.rl.training",
       "state": "owned_task_source_migrated_gpu_revalidation_pending",
       "role": "Independent simulation-backend and RL-framework selection, offline training and evaluation"
     },
@@ -50,12 +50,12 @@
       "role": "Active observation and evidence-backed target records"
     },
     "policies": {
-      "module": "oh_my_duck.policies",
+      "module": "oh_my_duck.robotics.policies",
       "state": "interface_only",
       "role": "Distinct joint, velocity and action-sequence policy adapters"
     },
     "application": {
-      "module": "oh_my_duck.application",
+      "module": "oh_my_duck.agentic.application",
       "state": "composition_interface",
       "role": "Explicit injection of services without starting models or an agent loop"
     }
@@ -86,5 +86,5 @@
     "headless": true,
     "video": "offscreen"
   },
-  "rl_framework_registry": "oh_my_duck.training.frameworks:default_framework_registry"
+  "rl_framework_registry": "oh_my_duck.rl.training.frameworks:default_framework_registry"
 }

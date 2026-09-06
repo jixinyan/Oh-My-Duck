@@ -2,7 +2,7 @@
 
 The acceptance scope is **Flat Walking** and **Flat StandUp**, each on MuJoCo/mjlab and Isaac Lab/Newton with RSL-RL and Stable-Baselines3. Walking covers continuous command tracking and the walk collision model; StandUp covers recovery and the ground-contact model. The 33-task official registry is retained as an inventory for future extension, not a promise that every task has been reproduced.
 
-`configs/training.json` owns the selected tasks and logging defaults. `python omd.py tasks` lists the representative tasks; `--all` shows the pinned registry inventory. Regenerate inventory with `.envs/mujoco/bin/python training/mujoco/catalog.py --output configs/official_tasks.json`. Registration and validation are separate: adding a name cannot make an unsupported Isaac task available.
+`configs/training.json` owns the selected tasks and logging defaults. `python omd.py tasks` lists the representative tasks; `--all` shows the pinned registry inventory. Regenerate inventory with `.envs/mujoco/bin/python src/oh_my_duck/rl/tasks/catalog.py --output configs/official_tasks.json`. Registration and validation are separate: adding a name cannot make an unsupported Isaac task available.
 
 ## Acceptance matrix
 

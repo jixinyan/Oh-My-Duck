@@ -8,10 +8,10 @@ import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / 'src'))
-from oh_my_duck.training.base import BackendCommand
-from oh_my_duck.training.frameworks import FrameworkBinding, RLFrameworkRegistry, default_framework_registry
-from oh_my_duck.training.registry import BackendUnavailable, default_registry
-from oh_my_duck.training.isaac_newton import DIAGNOSTIC_TASK
+from oh_my_duck.rl.training.base import BackendCommand
+from oh_my_duck.rl.training.frameworks import FrameworkBinding, RLFrameworkRegistry, default_framework_registry
+from oh_my_duck.rl.training.registry import BackendUnavailable, default_registry
+from oh_my_duck.rl.training.isaac_newton import DIAGNOSTIC_TASK
 
 
 class FrameworkTests(unittest.TestCase):
@@ -51,7 +51,7 @@ class FrameworkTests(unittest.TestCase):
             args = ['--task', DIAGNOSTIC_TASK]
             sb3 = registry.command('sb3', 'isaac-newton', root, 'train', args)
             rsl = registry.command('rsl-rl', 'isaac-newton', root, 'train', args)
-            self.assertEqual(sb3.argv[:3], (str(interpreter), '-m', 'omd_isaac.sb3_train'))
+            self.assertEqual(sb3.argv[:3], (str(interpreter), '-m', 'oh_my_duck.rl.backends.isaac_newton.sb3_train'))
             self.assertEqual({**sb3.environment, 'WANDB_MODE': 'offline'}, rsl.environment)
             self.assertEqual(sb3.cwd, rsl.cwd)
             self.assertNotIn('stable_baselines3', sys.modules)

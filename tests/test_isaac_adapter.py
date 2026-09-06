@@ -11,11 +11,10 @@ from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
-sys.path.insert(0, str(ROOT / "training/isaac_newton"))
-from omd_isaac.contracts import JOINT_NAMES, joint_indices
-from omd_isaac.paths import asset_dir, require_asset, source_fingerprint, usd_path
-from oh_my_duck.training.registry import BackendUnavailable, default_registry
-from oh_my_duck.training.isaac_newton import DIAGNOSTIC_TASK
+from oh_my_duck.rl.backends.isaac_newton.contracts import JOINT_NAMES, joint_indices
+from oh_my_duck.rl.backends.isaac_newton.paths import asset_dir, require_asset, source_fingerprint, usd_path
+from oh_my_duck.rl.training.registry import BackendUnavailable, default_registry
+from oh_my_duck.rl.training.isaac_newton import DIAGNOSTIC_TASK
 
 
 class IsaacAdapterTests(unittest.TestCase):
@@ -49,7 +48,7 @@ class IsaacAdapterTests(unittest.TestCase):
             self.assertNotIn("isaaclab", sys.modules)
 
     def test_asset_startup_requires_explicit_acceptance_before_child_launch(self):
-        from omd_isaac import assets
+        from oh_my_duck.rl.backends.isaac_newton import assets
         with tempfile.TemporaryDirectory() as directory, \
              patch.object(assets, "asset_dir", return_value=Path(directory)), \
              patch.object(sys, "prefix", directory), \
@@ -62,7 +61,7 @@ class IsaacAdapterTests(unittest.TestCase):
             run.assert_not_called()
 
     def test_asset_acceptance_is_child_scoped_and_failure_is_preserved(self):
-        from omd_isaac import assets
+        from oh_my_duck.rl.backends.isaac_newton import assets
         with tempfile.TemporaryDirectory() as directory, \
              patch.object(assets, "asset_dir", return_value=Path(directory)), \
              patch.object(sys, "prefix", directory), \
@@ -80,7 +79,10 @@ class IsaacAdapterTests(unittest.TestCase):
             root = Path(directory)
             (root / "configs").mkdir()
             (root / "configs/upstream.json").write_text("{}")
-            source = root / "training/microduck/src/omd_microduck/robot/microduck"
+            (root / "configs/project.json").write_text("{}")
+            (root / "environments/isaac-assets").mkdir(parents=True)
+            (root / "environments/isaac-assets/uv.lock").write_text("fixture lock")
+            source = root / "src/oh_my_duck/robotics/microduck/microduck"
             source.mkdir(parents=True)
             xml = source / "robot_walk.xml"
             xml.write_text("source A")

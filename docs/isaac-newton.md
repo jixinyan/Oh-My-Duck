@@ -46,13 +46,13 @@ Probe checks the actual Newton `SolverMuJoCo`, canonical joint/action mapping, r
 
 | Module | Responsibility |
 |---|---|
-| `src/oh_my_duck/training/isaac_newton.py` | Lightweight process dispatch and explicit availability boundaries |
-| `training/isaac_newton/bootstrap_env.py` | Pinned source acquisition and isolated installation |
-| `omd_isaac/paths.py`, `contracts.py` | Asset provenance and canonical joint mapping without simulator imports |
-| `omd_isaac/assets.py`, `convert_asset.py`, `asset_reference.py` | Isolated conversion, source reference dump and generated-file integrity |
-| `omd_isaac/config.py`, `mdp.py`, `environment.py`, `agent.py` | Explicit diagnostic scene, observations, runtime guards and PPO config |
-| `omd_isaac/physics.py` | Actual solver inspection and raw-asset comparison; private access stays here |
-| `omd_isaac/rollout.py`, `probe.py`, `eval.py`, `export.py` | Finite evidence-producing workers and numerical export validation |
+| `src/oh_my_duck/rl/training/isaac_newton.py` | Lightweight process dispatch and explicit availability boundaries |
+| `training/isaac_newton/oh_my_duck.infrastructure.bootstrap_isaac.py` | Pinned source acquisition and isolated installation |
+| `oh_my_duck.rl.backends.isaac_newton/paths.py`, `contracts.py` | Asset provenance and canonical joint mapping without simulator imports |
+| `oh_my_duck.rl.backends.isaac_newton/assets.py`, `convert_asset.py`, `asset_reference.py` | Isolated conversion, source reference dump and generated-file integrity |
+| `oh_my_duck.rl.backends.isaac_newton/config.py`, `mdp.py`, `environment.py`, `agent.py` | Explicit diagnostic scene, observations, runtime guards and PPO config |
+| `oh_my_duck.rl.backends.isaac_newton/physics.py` | Actual solver inspection and raw-asset comparison; private access stays here |
+| `oh_my_duck.rl.backends.isaac_newton/rollout.py`, `probe.py`, `eval.py`, `export.py` | Finite evidence-producing workers and numerical export validation |
 
 Converted USD and its payloads live under `artifacts/isaac-newton/walk/<fingerprint>/`. The fingerprint includes official source content, upstream pins, converter implementation and its dependency lock. `build.json` hashes generated files; it is written only after conversion succeeds. Parent-process artifact verification prevents a Kit teardown exit code from falsely reporting success. The nested-body transform correction is attributed in [third-party notices](../THIRD_PARTY_NOTICES.md).
 

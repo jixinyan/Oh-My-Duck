@@ -4,7 +4,7 @@ import types
 import unittest
 from pathlib import Path
 from unittest.mock import patch
-from oh_my_duck.training.tasks import ConfigRef, TaskBinding, TaskRegistry, TaskSpec, project_tasks
+from oh_my_duck.rl.training.tasks import ConfigRef, TaskBinding, TaskRegistry, TaskSpec, project_tasks
 
 ROOT = Path(__file__).resolve().parents[1]
 

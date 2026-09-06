@@ -7,14 +7,14 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "omd_microduck.tasks.microduck_velocity_env_cfg:make_microduck_velocity_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_env_cfg:make_microduck_velocity_env_cfg",
             "kwargs": {}
           },
           "rsl_config": {
-            "symbol": "omd_microduck.tasks.microduck_velocity_env_cfg:MicroduckRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_env_cfg:MicroduckRlCfg"
           },
           "runner": {
-            "symbol": "omd_microduck.rl.rsl_runner:MicroduckOnPolicyRunner"
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
           }
         }
       },
@@ -26,16 +26,16 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "omd_microduck.tasks.microduck_velocity_env_cfg:make_microduck_velocity_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_env_cfg:make_microduck_velocity_env_cfg",
             "kwargs": {
               "rough": true
             }
           },
           "rsl_config": {
-            "symbol": "omd_microduck.tasks.microduck_velocity_env_cfg:MicroduckRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_env_cfg:MicroduckRlCfg"
           },
           "runner": {
-            "symbol": "omd_microduck.rl.rsl_runner:MicroduckOnPolicyRunner"
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
           }
         }
       },
@@ -47,14 +47,14 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "omd_microduck.tasks.microduck_velstand_env_cfg:make_microduck_velstand_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.microduck_velstand_env_cfg:make_microduck_velstand_env_cfg",
             "kwargs": {}
           },
           "rsl_config": {
-            "symbol": "omd_microduck.tasks.microduck_velstand_env_cfg:MicroduckVelStandRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.microduck_velstand_env_cfg:MicroduckVelStandRlCfg"
           },
           "runner": {
-            "symbol": "omd_microduck.rl.rsl_runner:MicroduckOnPolicyRunner"
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
           }
         }
       },
@@ -66,16 +66,16 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "omd_microduck.tasks.microduck_velstand_env_cfg:make_microduck_velstand_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.microduck_velstand_env_cfg:make_microduck_velstand_env_cfg",
             "kwargs": {
               "rough": true
             }
           },
           "rsl_config": {
-            "symbol": "omd_microduck.tasks.microduck_velstand_env_cfg:MicroduckVelStandRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.microduck_velstand_env_cfg:MicroduckVelStandRlCfg"
           },
           "runner": {
-            "symbol": "omd_microduck.rl.rsl_runner:MicroduckOnPolicyRunner"
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
           }
         }
       },
@@ -87,14 +87,14 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "omd_microduck.tasks.microduck_standup_env_cfg:make_microduck_standup_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.microduck_standup_env_cfg:make_microduck_standup_env_cfg",
             "kwargs": {}
           },
           "rsl_config": {
-            "symbol": "omd_microduck.tasks.microduck_standup_env_cfg:MicroduckStandUpRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.microduck_standup_env_cfg:MicroduckStandUpRlCfg"
           },
           "runner": {
-            "symbol": "omd_microduck.rl.rsl_runner:MicroduckOnPolicyRunner"
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
           }
         }
       },
@@ -106,16 +106,16 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "omd_microduck.tasks.microduck_standup_env_cfg:make_microduck_standup_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.microduck_standup_env_cfg:make_microduck_standup_env_cfg",
             "kwargs": {
               "rough": true
             }
           },
           "rsl_config": {
-            "symbol": "omd_microduck.tasks.microduck_standup_env_cfg:MicroduckStandUpRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.microduck_standup_env_cfg:MicroduckStandUpRlCfg"
           },
           "runner": {
-            "symbol": "omd_microduck.rl.rsl_runner:MicroduckOnPolicyRunner"
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
           }
         }
       },
@@ -127,14 +127,14 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "omd_microduck.tasks.microduck_sitstand_env_cfg:make_microduck_sitstand_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.microduck_sitstand_env_cfg:make_microduck_sitstand_env_cfg",
             "kwargs": {}
           },
           "rsl_config": {
-            "symbol": "omd_microduck.tasks.microduck_sitstand_env_cfg:MicroduckSitStandRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.microduck_sitstand_env_cfg:MicroduckSitStandRlCfg"
           },
           "runner": {
-            "symbol": "omd_microduck.rl.rsl_runner:MicroduckOnPolicyRunner"
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
           }
         }
       },
@@ -146,16 +146,16 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "omd_microduck.tasks.microduck_sitstand_env_cfg:make_microduck_sitstand_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.microduck_sitstand_env_cfg:make_microduck_sitstand_env_cfg",
             "kwargs": {
               "rough": true
             }
           },
           "rsl_config": {
-            "symbol": "omd_microduck.tasks.microduck_sitstand_env_cfg:MicroduckSitStandRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.microduck_sitstand_env_cfg:MicroduckSitStandRlCfg"
           },
           "runner": {
-            "symbol": "omd_microduck.rl.rsl_runner:MicroduckOnPolicyRunner"
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
           }
         }
       },
@@ -167,14 +167,14 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "omd_microduck.tasks.microduck_ground_pick_env_cfg:make_microduck_ground_pick_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.microduck_ground_pick_env_cfg:make_microduck_ground_pick_env_cfg",
             "kwargs": {}
           },
           "rsl_config": {
-            "symbol": "omd_microduck.tasks.microduck_ground_pick_env_cfg:MicroduckGroundPickRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.microduck_ground_pick_env_cfg:MicroduckGroundPickRlCfg"
           },
           "runner": {
-            "symbol": "omd_microduck.rl.rsl_runner:MicroduckOnPolicyRunner"
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
           }
         }
       },
@@ -186,14 +186,14 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "omd_microduck.tasks.microduck_ball_kick_env_cfg:make_microduck_ball_kick_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.microduck_ball_kick_env_cfg:make_microduck_ball_kick_env_cfg",
             "kwargs": {}
           },
           "rsl_config": {
-            "symbol": "omd_microduck.tasks.microduck_ball_kick_env_cfg:MicroduckBallKickRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.microduck_ball_kick_env_cfg:MicroduckBallKickRlCfg"
           },
           "runner": {
-            "symbol": "omd_microduck.rl.rsl_runner:MicroduckOnPolicyRunner"
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
           }
         }
       },
@@ -205,16 +205,16 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "omd_microduck.tasks.microduck_ground_pick_env_cfg:make_microduck_ground_pick_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.microduck_ground_pick_env_cfg:make_microduck_ground_pick_env_cfg",
             "kwargs": {
               "rough": true
             }
           },
           "rsl_config": {
-            "symbol": "omd_microduck.tasks.microduck_ground_pick_env_cfg:MicroduckGroundPickRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.microduck_ground_pick_env_cfg:MicroduckGroundPickRlCfg"
           },
           "runner": {
-            "symbol": "omd_microduck.rl.rsl_runner:MicroduckOnPolicyRunner"
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
           }
         }
       },
@@ -226,14 +226,14 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "omd_microduck.tasks.microduck_velocity_rollers_env_cfg:make_microduck_velocity_rollers_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_rollers_env_cfg:make_microduck_velocity_rollers_env_cfg",
             "kwargs": {}
           },
           "rsl_config": {
-            "symbol": "omd_microduck.tasks.microduck_velocity_rollers_env_cfg:MicroduckRollersRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_rollers_env_cfg:MicroduckRollersRlCfg"
           },
           "runner": {
-            "symbol": "omd_microduck.rl.rsl_runner:MicroduckOnPolicyRunner"
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
           }
         }
       },
@@ -245,14 +245,14 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "omd_microduck.tasks.microduck_velocity_swizzle_env_cfg:make_microduck_velocity_swizzle_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_swizzle_env_cfg:make_microduck_velocity_swizzle_env_cfg",
             "kwargs": {}
           },
           "rsl_config": {
-            "symbol": "omd_microduck.tasks.microduck_velocity_swizzle_env_cfg:MicroduckSwizzleRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_swizzle_env_cfg:MicroduckSwizzleRlCfg"
           },
           "runner": {
-            "symbol": "omd_microduck.rl.rsl_runner:MicroduckOnPolicyRunner"
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
           }
         }
       },
@@ -264,14 +264,14 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "omd_microduck.tasks.microduck_roller_crouch_env_cfg:make_microduck_roller_crouch_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.microduck_roller_crouch_env_cfg:make_microduck_roller_crouch_env_cfg",
             "kwargs": {}
           },
           "rsl_config": {
-            "symbol": "omd_microduck.tasks.microduck_roller_crouch_env_cfg:MicroduckRollerCrouchRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.microduck_roller_crouch_env_cfg:MicroduckRollerCrouchRlCfg"
           },
           "runner": {
-            "symbol": "omd_microduck.rl.rsl_runner:MicroduckOnPolicyRunner"
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
           }
         }
       },
@@ -283,14 +283,14 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "omd_microduck.tasks.microduck_roller_slope_env_cfg:make_microduck_roller_slope_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.microduck_roller_slope_env_cfg:make_microduck_roller_slope_env_cfg",
             "kwargs": {}
           },
           "rsl_config": {
-            "symbol": "omd_microduck.tasks.microduck_roller_slope_env_cfg:MicroduckRollerSlopeRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.microduck_roller_slope_env_cfg:MicroduckRollerSlopeRlCfg"
           },
           "runner": {
-            "symbol": "omd_microduck.rl.rsl_runner:MicroduckOnPolicyRunner"
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
           }
         }
       },
@@ -302,14 +302,14 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "omd_microduck.tasks.microduck_roller_standup_env_cfg:make_microduck_roller_standup_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.microduck_roller_standup_env_cfg:make_microduck_roller_standup_env_cfg",
             "kwargs": {}
           },
           "rsl_config": {
-            "symbol": "omd_microduck.tasks.microduck_roller_standup_env_cfg:MicroduckRollerStandUpRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.microduck_roller_standup_env_cfg:MicroduckRollerStandUpRlCfg"
           },
           "runner": {
-            "symbol": "omd_microduck.rl.rsl_runner:MicroduckOnPolicyRunner"
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
           }
         }
       },
@@ -321,14 +321,14 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "omd_microduck.tasks.microduck_spin_env_cfg:make_microduck_spin_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.microduck_spin_env_cfg:make_microduck_spin_env_cfg",
             "kwargs": {}
           },
           "rsl_config": {
-            "symbol": "omd_microduck.tasks.microduck_spin_env_cfg:MicroduckSpinRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.microduck_spin_env_cfg:MicroduckSpinRlCfg"
           },
           "runner": {
-            "symbol": "omd_microduck.rl.rsl_runner:MicroduckOnPolicyRunner"
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
           }
         }
       },
@@ -340,14 +340,14 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "omd_microduck.tasks.microduck_roulade_env_cfg:make_microduck_roulade_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.microduck_roulade_env_cfg:make_microduck_roulade_env_cfg",
             "kwargs": {}
           },
           "rsl_config": {
-            "symbol": "omd_microduck.tasks.microduck_roulade_env_cfg:MicroduckRouladeRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.microduck_roulade_env_cfg:MicroduckRouladeRlCfg"
           },
           "runner": {
-            "symbol": "omd_microduck.rl.rsl_runner:MicroduckOnPolicyRunner"
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
           }
         }
       },
@@ -359,17 +359,17 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "omd_microduck.tasks.microduck_velocity_env_cfg:make_microduck_velocity_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_env_cfg:make_microduck_velocity_env_cfg",
             "kwargs": {}
           },
           "rsl_config": {
-            "symbol": "omd_microduck.tasks.microduck_velocity_env_cfg:MicroduckRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_env_cfg:MicroduckRlCfg"
           },
           "runner": {
-            "symbol": "omd_microduck.rl.rsl_runner:MicroduckOnPolicyRunner"
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
           },
           "robot_variant": {
-            "symbol": "omd_microduck.robot.microduck_constants:MICRODUCK_WALK_BACKLASH_ROBOT_CFG"
+            "symbol": "oh_my_duck.robotics.microduck.microduck_constants:MICRODUCK_WALK_BACKLASH_ROBOT_CFG"
           }
         }
       },
@@ -381,19 +381,19 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "omd_microduck.tasks.microduck_velocity_env_cfg:make_microduck_velocity_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_env_cfg:make_microduck_velocity_env_cfg",
             "kwargs": {
               "rough": true
             }
           },
           "rsl_config": {
-            "symbol": "omd_microduck.tasks.microduck_velocity_env_cfg:MicroduckRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_env_cfg:MicroduckRlCfg"
           },
           "runner": {
-            "symbol": "omd_microduck.rl.rsl_runner:MicroduckOnPolicyRunner"
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
           },
           "robot_variant": {
-            "symbol": "omd_microduck.robot.microduck_constants:MICRODUCK_WALK_BACKLASH_ROBOT_CFG"
+            "symbol": "oh_my_duck.robotics.microduck.microduck_constants:MICRODUCK_WALK_BACKLASH_ROBOT_CFG"
           }
         }
       },
@@ -405,17 +405,17 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "omd_microduck.tasks.microduck_velstand_env_cfg:make_microduck_velstand_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.microduck_velstand_env_cfg:make_microduck_velstand_env_cfg",
             "kwargs": {}
           },
           "rsl_config": {
-            "symbol": "omd_microduck.tasks.microduck_velstand_env_cfg:MicroduckVelStandRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.microduck_velstand_env_cfg:MicroduckVelStandRlCfg"
           },
           "runner": {
-            "symbol": "omd_microduck.rl.rsl_runner:MicroduckOnPolicyRunner"
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
           },
           "robot_variant": {
-            "symbol": "omd_microduck.robot.microduck_constants:MICRODUCK_BACKLASH_ROBOT_CFG"
+            "symbol": "oh_my_duck.robotics.microduck.microduck_constants:MICRODUCK_BACKLASH_ROBOT_CFG"
           }
         }
       },
@@ -427,19 +427,19 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "omd_microduck.tasks.microduck_velstand_env_cfg:make_microduck_velstand_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.microduck_velstand_env_cfg:make_microduck_velstand_env_cfg",
             "kwargs": {
               "rough": true
             }
           },
           "rsl_config": {
-            "symbol": "omd_microduck.tasks.microduck_velstand_env_cfg:MicroduckVelStandRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.microduck_velstand_env_cfg:MicroduckVelStandRlCfg"
           },
           "runner": {
-            "symbol": "omd_microduck.rl.rsl_runner:MicroduckOnPolicyRunner"
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
           },
           "robot_variant": {
-            "symbol": "omd_microduck.robot.microduck_constants:MICRODUCK_BACKLASH_ROBOT_CFG"
+            "symbol": "oh_my_duck.robotics.microduck.microduck_constants:MICRODUCK_BACKLASH_ROBOT_CFG"
           }
         }
       },
@@ -451,17 +451,17 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "omd_microduck.tasks.microduck_standup_env_cfg:make_microduck_standup_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.microduck_standup_env_cfg:make_microduck_standup_env_cfg",
             "kwargs": {}
           },
           "rsl_config": {
-            "symbol": "omd_microduck.tasks.microduck_standup_env_cfg:MicroduckStandUpRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.microduck_standup_env_cfg:MicroduckStandUpRlCfg"
           },
           "runner": {
-            "symbol": "omd_microduck.rl.rsl_runner:MicroduckOnPolicyRunner"
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
           },
           "robot_variant": {
-            "symbol": "omd_microduck.robot.microduck_constants:MICRODUCK_BACKLASH_ROBOT_CFG"
+            "symbol": "oh_my_duck.robotics.microduck.microduck_constants:MICRODUCK_BACKLASH_ROBOT_CFG"
           }
         }
       },
@@ -473,19 +473,19 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "omd_microduck.tasks.microduck_standup_env_cfg:make_microduck_standup_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.microduck_standup_env_cfg:make_microduck_standup_env_cfg",
             "kwargs": {
               "rough": true
             }
           },
           "rsl_config": {
-            "symbol": "omd_microduck.tasks.microduck_standup_env_cfg:MicroduckStandUpRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.microduck_standup_env_cfg:MicroduckStandUpRlCfg"
           },
           "runner": {
-            "symbol": "omd_microduck.rl.rsl_runner:MicroduckOnPolicyRunner"
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
           },
           "robot_variant": {
-            "symbol": "omd_microduck.robot.microduck_constants:MICRODUCK_BACKLASH_ROBOT_CFG"
+            "symbol": "oh_my_duck.robotics.microduck.microduck_constants:MICRODUCK_BACKLASH_ROBOT_CFG"
           }
         }
       },
@@ -497,17 +497,17 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "omd_microduck.tasks.microduck_sitstand_env_cfg:make_microduck_sitstand_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.microduck_sitstand_env_cfg:make_microduck_sitstand_env_cfg",
             "kwargs": {}
           },
           "rsl_config": {
-            "symbol": "omd_microduck.tasks.microduck_sitstand_env_cfg:MicroduckSitStandRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.microduck_sitstand_env_cfg:MicroduckSitStandRlCfg"
           },
           "runner": {
-            "symbol": "omd_microduck.rl.rsl_runner:MicroduckOnPolicyRunner"
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
           },
           "robot_variant": {
-            "symbol": "omd_microduck.robot.microduck_constants:MICRODUCK_BACKLASH_ROBOT_CFG"
+            "symbol": "oh_my_duck.robotics.microduck.microduck_constants:MICRODUCK_BACKLASH_ROBOT_CFG"
           }
         }
       },
@@ -519,19 +519,19 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "omd_microduck.tasks.microduck_sitstand_env_cfg:make_microduck_sitstand_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.microduck_sitstand_env_cfg:make_microduck_sitstand_env_cfg",
             "kwargs": {
               "rough": true
             }
           },
           "rsl_config": {
-            "symbol": "omd_microduck.tasks.microduck_sitstand_env_cfg:MicroduckSitStandRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.microduck_sitstand_env_cfg:MicroduckSitStandRlCfg"
           },
           "runner": {
-            "symbol": "omd_microduck.rl.rsl_runner:MicroduckOnPolicyRunner"
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
           },
           "robot_variant": {
-            "symbol": "omd_microduck.robot.microduck_constants:MICRODUCK_BACKLASH_ROBOT_CFG"
+            "symbol": "oh_my_duck.robotics.microduck.microduck_constants:MICRODUCK_BACKLASH_ROBOT_CFG"
           }
         }
       },
@@ -543,17 +543,17 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "omd_microduck.tasks.microduck_ground_pick_env_cfg:make_microduck_ground_pick_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.microduck_ground_pick_env_cfg:make_microduck_ground_pick_env_cfg",
             "kwargs": {}
           },
           "rsl_config": {
-            "symbol": "omd_microduck.tasks.microduck_ground_pick_env_cfg:MicroduckGroundPickRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.microduck_ground_pick_env_cfg:MicroduckGroundPickRlCfg"
           },
           "runner": {
-            "symbol": "omd_microduck.rl.rsl_runner:MicroduckOnPolicyRunner"
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
           },
           "robot_variant": {
-            "symbol": "omd_microduck.robot.microduck_constants:MICRODUCK_BACKLASH_ROBOT_CFG"
+            "symbol": "oh_my_duck.robotics.microduck.microduck_constants:MICRODUCK_BACKLASH_ROBOT_CFG"
           }
         }
       },
@@ -565,19 +565,19 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "omd_microduck.tasks.microduck_ground_pick_env_cfg:make_microduck_ground_pick_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.microduck_ground_pick_env_cfg:make_microduck_ground_pick_env_cfg",
             "kwargs": {
               "rough": true
             }
           },
           "rsl_config": {
-            "symbol": "omd_microduck.tasks.microduck_ground_pick_env_cfg:MicroduckGroundPickRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.microduck_ground_pick_env_cfg:MicroduckGroundPickRlCfg"
           },
           "runner": {
-            "symbol": "omd_microduck.rl.rsl_runner:MicroduckOnPolicyRunner"
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
           },
           "robot_variant": {
-            "symbol": "omd_microduck.robot.microduck_constants:MICRODUCK_BACKLASH_ROBOT_CFG"
+            "symbol": "oh_my_duck.robotics.microduck.microduck_constants:MICRODUCK_BACKLASH_ROBOT_CFG"
           }
         }
       },
@@ -589,17 +589,17 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "omd_microduck.tasks.microduck_ball_kick_env_cfg:make_microduck_ball_kick_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.microduck_ball_kick_env_cfg:make_microduck_ball_kick_env_cfg",
             "kwargs": {}
           },
           "rsl_config": {
-            "symbol": "omd_microduck.tasks.microduck_ball_kick_env_cfg:MicroduckBallKickRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.microduck_ball_kick_env_cfg:MicroduckBallKickRlCfg"
           },
           "runner": {
-            "symbol": "omd_microduck.rl.rsl_runner:MicroduckOnPolicyRunner"
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
           },
           "robot_variant": {
-            "symbol": "omd_microduck.robot.microduck_constants:MICRODUCK_BACKLASH_ROBOT_CFG"
+            "symbol": "oh_my_duck.robotics.microduck.microduck_constants:MICRODUCK_BACKLASH_ROBOT_CFG"
           }
         }
       },
@@ -611,17 +611,17 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "omd_microduck.tasks.microduck_velocity_rollers_env_cfg:make_microduck_velocity_rollers_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_rollers_env_cfg:make_microduck_velocity_rollers_env_cfg",
             "kwargs": {}
           },
           "rsl_config": {
-            "symbol": "omd_microduck.tasks.microduck_velocity_rollers_env_cfg:MicroduckRollersRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_rollers_env_cfg:MicroduckRollersRlCfg"
           },
           "runner": {
-            "symbol": "omd_microduck.rl.rsl_runner:MicroduckOnPolicyRunner"
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
           },
           "robot_variant": {
-            "symbol": "omd_microduck.robot.microduck_constants:MICRODUCK_ROLLERS_BACKLASH_ROBOT_CFG"
+            "symbol": "oh_my_duck.robotics.microduck.microduck_constants:MICRODUCK_ROLLERS_BACKLASH_ROBOT_CFG"
           }
         }
       },
@@ -633,17 +633,17 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "omd_microduck.tasks.microduck_velocity_swizzle_env_cfg:make_microduck_velocity_swizzle_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_swizzle_env_cfg:make_microduck_velocity_swizzle_env_cfg",
             "kwargs": {}
           },
           "rsl_config": {
-            "symbol": "omd_microduck.tasks.microduck_velocity_swizzle_env_cfg:MicroduckSwizzleRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_swizzle_env_cfg:MicroduckSwizzleRlCfg"
           },
           "runner": {
-            "symbol": "omd_microduck.rl.rsl_runner:MicroduckOnPolicyRunner"
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
           },
           "robot_variant": {
-            "symbol": "omd_microduck.robot.microduck_constants:MICRODUCK_ROLLERS_BACKLASH_ROBOT_CFG"
+            "symbol": "oh_my_duck.robotics.microduck.microduck_constants:MICRODUCK_ROLLERS_BACKLASH_ROBOT_CFG"
           }
         }
       },
@@ -655,17 +655,17 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "omd_microduck.tasks.microduck_roller_crouch_env_cfg:make_microduck_roller_crouch_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.microduck_roller_crouch_env_cfg:make_microduck_roller_crouch_env_cfg",
             "kwargs": {}
           },
           "rsl_config": {
-            "symbol": "omd_microduck.tasks.microduck_roller_crouch_env_cfg:MicroduckRollerCrouchRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.microduck_roller_crouch_env_cfg:MicroduckRollerCrouchRlCfg"
           },
           "runner": {
-            "symbol": "omd_microduck.rl.rsl_runner:MicroduckOnPolicyRunner"
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
           },
           "robot_variant": {
-            "symbol": "omd_microduck.robot.microduck_constants:MICRODUCK_ROLLERS_BACKLASH_ROBOT_CFG"
+            "symbol": "oh_my_duck.robotics.microduck.microduck_constants:MICRODUCK_ROLLERS_BACKLASH_ROBOT_CFG"
           }
         }
       },
@@ -677,17 +677,17 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "omd_microduck.tasks.microduck_roller_slope_env_cfg:make_microduck_roller_slope_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.microduck_roller_slope_env_cfg:make_microduck_roller_slope_env_cfg",
             "kwargs": {}
           },
           "rsl_config": {
-            "symbol": "omd_microduck.tasks.microduck_roller_slope_env_cfg:MicroduckRollerSlopeRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.microduck_roller_slope_env_cfg:MicroduckRollerSlopeRlCfg"
           },
           "runner": {
-            "symbol": "omd_microduck.rl.rsl_runner:MicroduckOnPolicyRunner"
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
           },
           "robot_variant": {
-            "symbol": "omd_microduck.robot.microduck_constants:MICRODUCK_ROLLERS_BACKLASH_ROBOT_CFG"
+            "symbol": "oh_my_duck.robotics.microduck.microduck_constants:MICRODUCK_ROLLERS_BACKLASH_ROBOT_CFG"
           }
         }
       },

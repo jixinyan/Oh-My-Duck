@@ -1,6 +1,6 @@
 # Owned Microduck source migration — 2026-09-06
 
-The user requires Microduck tasks, rewards, actor/critic configuration and related implementations to be editable parts of Oh My Duck. The previous cached-upstream delegation has been replaced for Microduck code. Source is in `training/microduck/src/omd_microduck`, with Apache-2.0 license, original guidance and file-level provenance from official commit `29e887ecfbf5d37144759e5a9f8a176dfb83d547`.
+The user requires Microduck tasks, rewards, actor/critic configuration and related implementations to be editable parts of Oh My Duck. The previous cached-upstream delegation has been replaced for Microduck code. Source is in `src/oh_my_duck`, with Apache-2.0 license, original guidance and file-level provenance from official commit `29e887ecfbf5d37144759e5a9f8a176dfb83d547`.
 
 ## Completed in this change
 

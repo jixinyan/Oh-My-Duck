@@ -33,7 +33,7 @@
 
 ### 相同维度不等于相同策略语义
 
-源码确认：actor 顺序为角速度3、重力3、关节位置14、关节速度14、上次动作14、twist3、head4、body6；本地 AST 比较确认其 HOME 的14个名称、字典顺序与值均和 `training/common/protocol.py` 相同。
+源码确认：actor 顺序为角速度3、重力3、关节位置14、关节速度14、上次动作14、twist3、head4、body6；本地 AST 比较确认其 HOME 的14个名称、字典顺序与值均和 `src/oh_my_duck/robotics/microduck/protocol.py` 相同。
 
 但其 action 和 joint observation 使用排除 `passive_` 的正则选择器，未显式指定官方14关节序列；其资产文档也报告 Isaac 与 MuJoCo articulation 顺序不同。因此“可直接交换 ONNX”尚缺 runtime 顺序证明。我们需要按名称建立双向 permutation，并对观测、动作、HOME、limits、导出 metadata 同时应用；用每个关节不同的哨兵值验收，不能只验61/14维度。冻结伙伴的实现直接拼接 articulation 全部 joint state，也不能原样推广到包含 passive joints 的模型。
 

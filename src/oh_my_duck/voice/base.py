@@ -1,7 +1,7 @@
 from dataclasses import dataclass
 from typing import Protocol
 
-from ..contracts.sensors import PayloadRef
+from oh_my_duck.core.contracts.sensors import PayloadRef
 
 
 @dataclass(frozen=True)

@@ -113,11 +113,17 @@ Full official AGENTS.md read; 199 official CPU regressions passed, 1 skipped. Of
 
 ## 2026-09-06：任务源码归属调整
 
-根据用户要求，Microduck 的 task/MDP、actor/critic 配置、机器人模型、BAM 扩展、runner、导出与 CPU 回放迁入 `training/microduck/src/omd_microduck`，成为项目内可编辑源码。`UPSTREAM.json` 与 Apache-2.0 许可证保留官方来源；缓存仓库只作对照，不再提供 Microduck 运行时任务。MuJoCo 两种框架与 Isaac 的共享机器人/BAM 引用已切换；通用 mjlab、Isaac Lab、Newton 和原生 PPO 仍作为依赖。初始 33 项配置清单在命名空间变更之外与官方基线一致，验收仍只覆盖 Walking/StandUp。
+根据用户要求，Microduck 的 task/MDP、actor/critic 配置、机器人模型、BAM 扩展、runner、导出与 CPU 回放迁入 `src/oh_my_duck`，成为项目内可编辑源码。`UPSTREAM.json` 与 Apache-2.0 许可证保留官方来源；缓存仓库只作对照，不再提供 Microduck 运行时任务。MuJoCo 两种框架与 Isaac 的共享机器人/BAM 引用已切换；通用 mjlab、Isaac Lab、Newton 和原生 PPO 仍作为依赖。初始 33 项配置清单在命名空间变更之外与官方基线一致，验收仍只覆盖 Walking/StandUp。
 
 这是源码归属迁移，不等于完整 Isaac 任务接入或有效策略训练完成。迁移后 GPU smoke、恢复、导出和 Isaac 新指纹资产重建仍待验证；此前训练结果属于旧入口。扩展入口及下一步见 [Microduck package](../training/microduck/README.md) 与 [迁移交接](reports/owned-task-migration.md)。
 
 
 ### 2026-09-06：框架重构进行中
 
-用户进一步明确：源码接管不足以完成集成，需要重构为框架能力。现新增核心层 `oh_my_duck.training.tasks` 和唯一任务注册源 `configs/tasks.json`，CLI、SB3 和原生 mjlab 注册均从该源读取；支持不含 MicroDuck 的自定义任务 ID，后端绑定缺失时明确拒绝。原 7,000 余行 MDP 已拆为 commands、observations、events、curricula、terminations、state 与 reward families，兼容修补移入后端模块；226 个有效函数/类保持原定义逻辑，仅增加显式模块依赖。完整 Newton 任务绑定、GPU 重新验收和有效策略训练继续进行，不视为已完成。usage 限制按用户最新指令取消。
+用户进一步明确：源码接管不足以完成集成，需要重构为框架能力。现新增核心层 `oh_my_duck.rl.training.tasks` 和唯一任务注册源 `configs/tasks.json`，CLI、SB3 和原生 mjlab 注册均从该源读取；支持不含 MicroDuck 的自定义任务 ID，后端绑定缺失时明确拒绝。原 7,000 余行 MDP 已拆为 commands、observations、events、curricula、terminations、state 与 reward families，兼容修补移入后端模块；226 个有效函数/类保持原定义逻辑，仅增加显式模块依赖。完整 Newton 任务绑定、GPU 重新验收和有效策略训练继续进行，不视为已完成。usage 限制按用户最新指令取消。
+
+## 2026-09-06 — approved domain architecture refactor
+
+业务实现统一进入 `src/oh_my_duck`，按 RL、agentic、robotics、perception、voice、experience、core 和 infrastructure 分层。训练依赖锁独立保存在 `environments/`；任务、MDP、机器人和策略配置均为项目源码。外部 harness 保持规划/记忆职责，尚未实现的适配器不声明可用。详见 [architecture.md](architecture.md)。
+
+迁移后轻量测试 21 项、MuJoCo/SB3/官方 MDP 与 manifest 测试 53 项通过；新训练入口和 Newton 任务适配仍需 GPU 验证。双任务 × 双后端 × 双框架的训练、恢复、导出与回放验收尚未全部完成。旧代码清理在对应验证通过后执行。

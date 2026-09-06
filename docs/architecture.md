@@ -25,26 +25,40 @@ flowchart TB
 
 Only concrete adapters import MuJoCo, Isaac, model SDKs or transport libraries. The application framework uses the standard library and imports no simulator at startup. The external harness owns reasoning, general scheduling and long-term memory. A skill may have a local feedback loop, but that is not another agent scheduler.
 
-## Module boundaries
+## Source organization
 
-| Module | Public contract / implementation | Next concrete adapter |
-|---|---|---|
-| `application.py` | `ApplicationServices` dependency injection | Reference UI / service composition |
-| `contracts/` | Identity, execution domain, task handles/results, sensor frames, episode events | Versioned serialization validation as protocols stabilize |
-| `backends/` | `RobotBackend`, capabilities, measured state and stop confirmation | Simulated robot, later official runtime client |
-| `skills/` | `SkillSpec`, `SkillRunner` | Bounded velocity skill and cancellation backed by measured state |
-| `tools/` | Working `ToolCatalog` with explicit registration | Capability/state/skill/sensor handlers |
-| `perception/` | `ActivePerception`, `LookTarget`, `TargetRecord` | Timestamped look/inspect and target tracking |
-| `policies/` | `PolicySpec`, `PolicyAdapter` | Joint / velocity / action-sequence adapters |
-| `harness/` | `HarnessBridge` | Deterministic protocol mock, then external harness adapter |
-| `voice/` | ASR, voice profile store, TTS, audio device interfaces | Host audio, Qwen adapters, then onboard audio transport |
-| `recording/` | Working append-only JSONL episode recorder | Payload storage and episode replay |
-| `training/` inside package | Typed offline requests/artifacts, process protocol and extensible backend registry | Backend-specific process commands |
-| Top-level `training/common/` | 14-joint contract and exact command schedule | Shared comparisons and policy compatibility checks |
-| Top-level `training/mujoco/` | Initial worker probe and official BAM headless evaluator | Worker validation, training/export validation |
-| `training/isaac_newton/` | Newton asset conversion and PD diagnostic; RSL-RL and optional SB3 launchers | BAM locomotion, framework-specific lifecycle validation |
+All first-party implementation lives in `src/oh_my_duck/`:
 
-Online `RobotBackend` and offline `TrainingBackend` are different interfaces. A simulation execution adapter exposes sensors and commands; a training adapter launches experiments and exports artifacts. Keep that distinction when adding the two simulators.
+```text
+cli/                         unified public commands
+core/                        shared contracts and project configuration
+agentic/                     harness, tools, skills and application assembly
+robotics/                    execution backends, policies and Microduck models/motors
+rl/tasks/                    editable task recipes and catalog
+rl/mdp/                      observations, rewards, resets, commands and curricula
+rl/models/                   configurable actor/critic definitions
+rl/backends/{mujoco,isaac_newton}/
+rl/learners/{rsl_rl,sb3}/      native PPO integrations
+rl/training/                 task/framework registry and process dispatch
+rl/artifacts/                normalized export and schema-2 packaging
+rl/evaluation/               audits, metrics and deployment rehearsal
+perception/                  active perception interfaces
+voice/                       audio, ASR, TTS and persistent voice interfaces
+experience/                  episode recording and replay contracts
+infrastructure/              scheduler, environment setup and offline tracking
+```
+
+`environments/` contains dependency manifests and locks only. MuJoCo, Isaac/Newton,
+and asset conversion keep separate environments because their native libraries have
+incompatible pins. `tests/rl/` separates dependency-specific tests from the lightweight
+core suite. Robot source assets are package data; generated assets and experiment
+outputs are ignored. Upstream ancestry and licenses live in `third_party/`.
+
+RL and agentic share robot/policy contracts rather than importing each other's
+implementation. `robotics/backends` implements online robot execution;
+`rl/backends` supplies batched simulation. Optional runtime imports remain inside
+concrete adapters. A task binding must be explicitly implemented before it becomes
+trainable on another backend; no diagnostic fallback is allowed.
 
 ## Data through the system
 
@@ -71,7 +85,7 @@ Current contracts are Python interface proposals, not a frozen external wire pro
 
 **A training backend:** keep simulator dependencies in its own environment. Produce commands/artifacts through the offline adapter interface, reuse the same evaluation timing/units and record versions. Isaac is specifically Newton; do not silently fall back to PhysX.
 
-**An RL framework:** register supported backend/operation bindings in `training/frameworks.py`, keep native VecEnv and checkpoint logic in isolated runtime adapters, and preserve the shared task contract. See [RL framework extension](rl-frameworks.md).
+**An RL framework:** register supported backend/operation bindings in `rl/training/frameworks.py`, keep native VecEnv and checkpoint logic in isolated runtime adapters, and preserve the shared task contract. See [RL framework extension](rl-frameworks.md).
 
 ## Current framework limits
 
@@ -89,6 +103,8 @@ The interfaces are intentional scaffolding. They do not claim implemented sensor
 
 The original Project Design and Execution Plan remain the product and milestone authorities. Update them together with this architecture document when changing boundaries.
 
-## Isaac diagnostic implementation
+## Validation boundary
 
-The offline backend now dispatches to the independently packaged `training/isaac_newton/omd_isaac/` code. Its conversion and training dependency environments are separate; the application core imports neither. The implemented task is explicitly PD diagnostic only; BAM locomotion remains pending. See [the integration guide](isaac-newton.md) for entry points, artifact integrity and extension boundaries.
+Directory migration does not establish task parity. Existing PD diagnostics remain
+labelled diagnostic. Full Newton Walking/StandUp binding, export, rehearsal and
+behavior validation are tracked separately in the implementation status.
