@@ -88,6 +88,10 @@ def spawn_walk_ground(prim_path, cfg, translation=None, orientation=None, **kwar
     body = UsdPhysics.RigidBodyAPI.Apply(root)
     body.CreateRigidBodyEnabledAttr(True)
     body.CreateKinematicEnabledAttr(True)
+    # Explicit world joint gives the imported rigid object a named articulation
+    # and keeps it immovable in both Newton state and SolverMuJoCo.
+    joint = UsdPhysics.FixedJoint.Define(root.GetStage(), str(root.GetPath()) + "/WorldFixedJoint")
+    joint.CreateBody1Rel().SetTargets([root.GetPath()])
     return root
 
 
