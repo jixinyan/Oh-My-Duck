@@ -41,7 +41,7 @@
     },
     "training": {
       "module": "oh_my_duck.rl.training",
-      "state": "owned_task_source_migrated_gpu_revalidation_pending",
+      "state": "representative_native_smoke_resume_export_verified_behavior_pending",
       "role": "Independent simulation-backend and RL-framework selection, offline training and evaluation"
     },
     "perception": {
@@ -62,19 +62,19 @@
   },
   "training_backends": {
     "mujoco": {
-      "state": "owned_source_cpu_verified_gpu_revalidation_pending",
+      "state": "owned_tasks_native_smoke_resume_export_passed",
       "physics": "MuJoCo-Warp",
       "environment": ".envs/mujoco",
       "environment_framework": "mjlab"
     },
     "isaac-newton": {
-      "state": "pd_physics_video_and_rl_smoke_passed",
+      "state": "owned_tasks_native_smoke_resume_export_passed",
       "physics": "Newton",
       "solver": "MuJoCo-Warp",
       "environment": ".envs/isaac-newton",
       "asset_environment": ".envs/isaac-assets",
-      "locomotion": "official_BAM_replay_exercised_collision_and_task_migration_in_progress",
-      "environment_state": "installed_cpu_configuration_checked",
+      "locomotion": "physics_audited_behavior_unvalidated",
+      "environment_state": "locked_installed_runtime_exercised",
       "asset_environment_state": "conversion_worker_verified",
       "environment_framework": "Isaac Lab"
     }
@@ -82,9 +82,10 @@
   "execution": {
     "hardware_available": false,
     "harness": "external_with_planned_mock",
-    "server_jobs": "Alaya HTrain",
+    "server_jobs": "Alaya HTrain for multi-GPU only",
     "headless": true,
-    "video": "offscreen"
+    "video": "offscreen_1280x720",
+    "single_gpu": "direct_development_host"
   },
   "rl_framework_registry": "oh_my_duck.rl.training.frameworks:default_framework_registry"
 }

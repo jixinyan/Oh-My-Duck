@@ -1,4 +1,4 @@
-# Modified by Oh My Duck: test the maintained omd_microduck namespace.
+# Modified by Oh My Duck: test the maintained oh_my_duck namespace.
 """`uv run publish` writes what the microduck daemon loads — schema 2, checked before upload.
 
 The daemon (`pollen-robotics/microduck`) refuses a policy whose manifest disagrees with its

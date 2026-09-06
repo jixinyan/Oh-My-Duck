@@ -9,7 +9,7 @@ The user requires Microduck tasks, rewards, actor/critic configuration and relat
 - Switched both MuJoCo framework environments to the maintained package, uninstalling cached `mjlab-microduck`. Isaac now consumes the same local BAM and robot source. Native simulator/PPO libraries remain dependencies; Isaac Lab's generic launcher remains external.
 - Updated both environment locks without changing physics or PPO pins. The unused `rustypot` package was removed from MuJoCo environments. All three training environments installed the local package successfully.
 - Switched MuJoCo export and CPU replay to maintained modules. Publishing provenance identifies `jixinyan/Oh-My-Duck`; original ancestry is recorded separately. No upload or W&B sync occurred.
-- Documented customization and future task registration in `training/microduck/README.md`; synchronized the original design/execution documents and maturity status.
+- Documented customization and future task registration in `docs/rl-task-extension.md`; synchronized the original design/execution documents and maturity status.
 
 ## Checks after migration
 

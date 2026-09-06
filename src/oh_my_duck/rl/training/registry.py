@@ -36,6 +36,10 @@ class MujocoTrainingBackend:
         interpreter = self.root / ".envs/mujoco/bin/python"
         if not interpreter.exists():
             raise BackendUnavailable("Run python omd.py setup first")
+        if operation == 'eval' and '--task' in arguments:
+            return BackendCommand((str(interpreter), '-m', 'oh_my_duck.rl.evaluation.task',
+                *arguments, '--backend', 'mujoco'), self.root,
+                {'PYTHONPATH': str(self.root/'src'), 'MUJOCO_GL': 'egl', 'MPLBACKEND': 'Agg'})
         if operation == "train":
             entry = ("-m", "oh_my_duck.rl.learners.rsl_rl.train")
         elif operation == "export":

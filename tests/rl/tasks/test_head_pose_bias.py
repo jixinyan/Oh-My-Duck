@@ -1,4 +1,4 @@
-# Modified by Oh My Duck: test the maintained omd_microduck namespace.
+# Modified by Oh My Duck: test the maintained oh_my_duck namespace.
 """head_pose_bias_penalty: prices sustained standing droop, never the recovery.
 
 The velocity-env lesson (run 5yay13u4): instantaneous posture precision is an

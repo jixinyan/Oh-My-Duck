@@ -32,6 +32,10 @@ class IsaacNewtonTrainingBackend:
             raise BackendUnavailable("Run python omd.py setup --backend isaac-newton first; Newton is never replaced by PhysX")
         if operation not in {"assets", "probe", "train", "eval", "export"}:
             raise ValueError(f"Unsupported Isaac/Newton operation: {operation}")
+        if operation == 'eval' and '--task' in arguments:
+            return BackendCommand((str(interpreter), '-m', 'oh_my_duck.rl.evaluation.task',
+                *arguments, '--backend', 'isaac-newton'), self.root,
+                {'PYTHONPATH': str(self.root/'src'), 'MUJOCO_GL': 'egl', 'MPLBACKEND': 'Agg'})
         if operation == 'train' and not is_diagnostic(arguments):
             require_task(self.root, arguments)
             return BackendCommand((str(interpreter), '-m', 'oh_my_duck.rl.learners.rsl_rl.train',

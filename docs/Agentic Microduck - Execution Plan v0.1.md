@@ -1,4 +1,7 @@
 ---
+
+> 当前实现状态（2026-09-06）：源码按 `src/oh_my_duck/{rl,agentic,robotics,core,perception,voice,experience,infrastructure,cli}` 分域，旧 `training/` 包已移除。两个代表任务、两个仿真后端与两个原生 PPO 已有 smoke/恢复/导出证据；行为、sim2sim 和最终统一验收单独记录。单卡本机运行，多卡才提交 job；W&B 离线。采用“模块成批实现 → 静态/CPU 检查 → 必要物理门槛 → 统一端到端验收”的开发节奏。详见 [当前状态](implementation-status.md) 与 [证据](reports/domain-refactor.md)。
+
 title: Agentic Microduck — 分步执行计划
 version: 0.2
 status: In progress
@@ -408,7 +411,7 @@ tags:
 
 根据用户要求，Microduck 的 task/MDP、actor/critic 配置、机器人模型、BAM 扩展、runner、导出与 CPU 回放迁入 `src/oh_my_duck`，成为项目内可编辑源码。`UPSTREAM.json` 与 Apache-2.0 许可证保留官方来源；缓存仓库只作对照，不再提供 Microduck 运行时任务。MuJoCo 两种框架与 Isaac 的共享机器人/BAM 引用已切换；通用 mjlab、Isaac Lab、Newton 和原生 PPO 仍作为依赖。初始 33 项配置清单在命名空间变更之外与官方基线一致，验收仍只覆盖 Walking/StandUp。
 
-这是源码归属迁移，不等于完整 Isaac 任务接入或有效策略训练完成。迁移后 GPU smoke、恢复、导出和 Isaac 新指纹资产重建仍待验证；此前训练结果属于旧入口。扩展入口及下一步见 [Microduck package](../training/microduck/README.md) 与 [迁移交接](reports/owned-task-migration.md)。
+这是源码归属迁移，不等于完整 Isaac 任务接入或有效策略训练完成。迁移后 GPU smoke、恢复、导出和 Isaac 新指纹资产重建仍待验证；此前训练结果属于旧入口。扩展入口及下一步见 [Microduck package](rl-task-extension.md) 与 [迁移交接](reports/owned-task-migration.md)。
 
 
 ### 2026-09-06：框架重构进行中

@@ -1,4 +1,4 @@
-# Modified by Oh My Duck: test the maintained omd_microduck namespace.
+# Modified by Oh My Duck: test the maintained oh_my_duck namespace.
 """The critic obs must survive a non-finite sensor reading.
 
 Regression for the 2026-08-21 crash: rsl_rl's check_nan killed a

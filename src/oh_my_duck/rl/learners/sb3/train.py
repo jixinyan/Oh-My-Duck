@@ -88,6 +88,8 @@ def main():
     if args.num_envs < 1 or args.iterations < 1:
         parser.error("num-envs and iterations must be positive")
     configure_torch_backends()
+    from oh_my_duck.infrastructure.provenance import source_provenance, validate_resume
+    provenance = source_provenance()
     task = project_tasks().get(args.task)
     binding = task.binding(args.backend)
     cfg, official_agent = build_environment(binding), binding.rsl_config.build()
@@ -103,10 +105,11 @@ def main():
         tracking = start_run(backend=args.backend, framework="sb3", task=args.task, directory=args.output,
             config={"num_envs": args.num_envs, "iterations": args.iterations, "seed": args.seed,
                     "resume_source": str(args.resume) if args.resume else None,
-                    "official_agent": asdict(official_agent)})
+                    "official_agent": asdict(official_agent), "provenance":provenance})
         adapter = MjlabSb3VecEnv(create_environment(task,cfg,backend=args.backend,device=args.device))
         if args.resume:
             previous = json.loads((args.resume / "run.json").read_text())
+            validate_resume(previous,task=args.task,backend=args.backend,framework="sb3")
             if previous["backend"] != args.backend or previous["task"] != args.task or previous["upstream"] != json.loads((ROOT / "configs/upstream.json").read_text())["repositories"]:
                 raise ValueError("Resume task or upstream pin differs")
             normalized = VecNormalize.load(args.resume / "vecnormalize.pkl", adapter)
@@ -159,7 +162,7 @@ def main():
                 "Finite float32 action-space bounds, no additional action filter",
                 "Terminal observation sampled before reset from copied delay/history buffers"],
             "policy_status": "trained; behavior_unvalidated; export_requires_separate_gate",
-            "wall_time_s": time.monotonic() - started,
+            "wall_time_s": time.monotonic() - started, "provenance":provenance,
             "wandb": {"id": tracking.id, "url": tracking.url, "mode": tracking.settings.mode}}
         report["files"] = {name: hashlib.sha256((args.output / name).read_bytes()).hexdigest()
                            for name in ("model.zip", "vecnormalize.pkl")}

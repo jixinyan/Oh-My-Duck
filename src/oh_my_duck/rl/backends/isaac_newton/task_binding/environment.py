@@ -30,8 +30,8 @@ class NewtonTaskEnvironment(ManagerBasedRlEnv):
         from oh_my_duck.rl.backends.isaac_newton.task_binding.collisions import configure_scene
         from oh_my_duck.rl.backends.isaac_newton.paths import require_asset
         from oh_my_duck.rl.backends.isaac_newton.contracts import JOINT_NAMES
-        if render_mode is not None:
-            raise ValueError('Use the headless policy evaluator for video')
+        if render_mode not in (None, 'rgb_array'):
+            raise ValueError('Only headless rgb_array rendering is supported')
         if set(cfg.scene.entities) != {'robot'} or cfg.scene.terrain is None or cfg.scene.terrain.terrain_type != 'plane':
             raise ValueError('Only the explicit flat robot scene is currently bound')
         self.cfg=cfg
@@ -39,6 +39,13 @@ class NewtonTaskEnvironment(ManagerBasedRlEnv):
         scene_cfg=SceneCfg(num_envs=cfg.scene.num_envs,env_spacing=cfg.scene.env_spacing)
         scene_cfg.robot.spawn.usd_path=str(require_asset(task.model))
         configure_scene(scene_cfg,task.model)
+        if render_mode == 'rgb_array':
+            from isaaclab.sensors import CameraCfg
+            from isaaclab.sim import PinholeCameraCfg
+            from isaaclab_newton.renderers import NewtonWarpRendererCfg
+            scene_cfg.camera = CameraCfg(prim_path='{ENV_REGEX_NS}/Camera', width=cfg.viewer.width,
+                height=cfg.viewer.height, data_types=['rgb'], update_period=0., update_latest_camera_pose=True,
+                spawn=PinholeCameraCfg(clipping_range=(0.01, 10.)), renderer_cfg=NewtonWarpRendererCfg())
         scene_cfg.robot.actuators={'official_bam':OfficialBamActuatorCfg(joint_names_expr=list(JOINT_NAMES))}
         native_cfg=ManagerBasedEnvCfg(scene=scene_cfg,decimation=1,actions=PhysicsOnlyTerms(),observations=PhysicsOnlyTerms(),events=PhysicsOnlyTerms(),seed=cfg.seed,
             sim=SimulationCfg(device=device,dt=cfg.sim.mujoco.timestep,render_interval=cfg.decimation,
@@ -72,6 +79,19 @@ class NewtonTaskEnvironment(ManagerBasedRlEnv):
             except Exception as cleanup_error:
                 error.add_note(f"Cleanup also failed: {cleanup_error!r}")
             raise
+
+    def render(self):
+        if self.render_mode is None:
+            return None
+        from oh_my_duck.rl.backends.isaac_newton.mdp import as_torch
+        camera = self.native.scene['camera']
+        lookat = self.scene['robot'].data.root_link_pos_w.clone()
+        eye = lookat + torch.tensor([0.6, 0.6, 0.35], device=self.device)
+        camera.set_world_poses_from_view(eye, lookat)
+        self.native.sim.render()
+        camera.update(0., force_recompute=True)
+        torch.testing.assert_close(as_torch(camera.data.pos_w), eye, atol=1e-5, rtol=0)
+        return as_torch(camera.data.output['rgb'])[0, ..., :3].cpu().numpy()
 
     def close(self):
         if hasattr(self,'recorder_manager'):self.recorder_manager.close()

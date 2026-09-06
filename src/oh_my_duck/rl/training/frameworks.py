@@ -87,13 +87,13 @@ def _sb3(backend, root, operation, arguments):
 def default_framework_registry():
     registry = RLFrameworkRegistry()
     registry.register("rsl-rl", "RSL-RL", [
-        FrameworkBinding("mujoco", ("train", "export"), "official_walking_smoke_and_export_passed", _rsl_rl),
-        FrameworkBinding("isaac-newton", ("train", "export"), "task_physics_audited_training_validation_pending", _rsl_rl,
+        FrameworkBinding("mujoco", ("train", "export"), "representative_smoke_resume_export_passed", _rsl_rl),
+        FrameworkBinding("isaac-newton", ("train", "export"), "representative_smoke_resume_export_passed", _rsl_rl,
                          "Registered BAM tasks use shared native PPO; PD diagnostic remains explicit"),
     ])
     registry.register("sb3", "Stable-Baselines3", [
-        FrameworkBinding("mujoco", ("train", "export"), "official_walking_train_resume_and_export_passed", _sb3, "Official mjlab task; 64-env smoke, 768 timeouts, and normalized official-runner export passed; gait quality unvalidated"),
-        FrameworkBinding("isaac-newton", ("train", "export"), "task_physics_audited_training_validation_pending", _sb3,
+        FrameworkBinding("mujoco", ("train", "export"), "representative_smoke_resume_export_passed", _sb3, "Official mjlab task; 64-env smoke, 768 timeouts, and normalized official-runner export passed; gait quality unvalidated"),
+        FrameworkBinding("isaac-newton", ("train", "export"), "representative_smoke_resume_export_passed", _sb3,
                          "Registered BAM tasks use native SB3; normalized export uses official MuJoCo metadata reference"),
     ])
     return registry

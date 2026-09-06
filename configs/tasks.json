@@ -41,6 +41,12 @@
         "sb3": {
           "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
         }
+      },
+      "evaluation": {
+        "symbol": "oh_my_duck.rl.evaluation.protocols:walking"
+      },
+      "policy_package": {
+        "symbol": "oh_my_duck.rl.artifacts.profiles:walking"
       }
     },
     {
@@ -168,6 +174,12 @@
         "sb3": {
           "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
         }
+      },
+      "evaluation": {
+        "symbol": "oh_my_duck.rl.evaluation.protocols:standup"
+      },
+      "policy_package": {
+        "symbol": "oh_my_duck.rl.artifacts.profiles:standup"
       }
     },
     {

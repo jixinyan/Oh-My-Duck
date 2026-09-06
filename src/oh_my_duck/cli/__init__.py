@@ -18,6 +18,9 @@ COMMANDS = {
     "probe": ("run.py", "Check allocated GPU, physics and headless rendering"),
     "train": ("run.py", "Train using an explicitly selected backend"),
     "export": ("run.py", "Export through the selected backend"),
+    "compare": ("run.py", "Run one policy through both simulation backends"),
+    "rehearsal": ("run.py", "Run official CPU MuJoCo/BAM deployment batteries"),
+    "package": ("run.py", "Create a local official policy package without uploading"),
     "eval": ("run.py", "Replay a policy headlessly and optionally save video"),
 }
 

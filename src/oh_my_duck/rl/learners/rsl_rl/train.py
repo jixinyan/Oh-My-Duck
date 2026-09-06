@@ -26,6 +26,10 @@ class TrainConfig:
 
 def run_train(task_id, cfg, log_dir):
     import torch
+    import time
+    from oh_my_duck.infrastructure.provenance import source_provenance, validate_resume
+    provenance = source_provenance()
+    started = time.monotonic()
     from mjlab.rl import RslRlVecEnvWrapper
     from mjlab.utils.os import dump_yaml, get_checkpoint_path
     from mjlab.utils.torch import configure_torch_backends
@@ -53,11 +57,16 @@ def run_train(task_id, cfg, log_dir):
         if rank == 0:
             dump_yaml(log_dir / 'params/env.yaml', asdict(cfg.env))
             dump_yaml(log_dir / 'params/agent.yaml', agent_cfg)
+        agent_cfg['omd'] = {'task':task_id, 'backend':cfg.backend, 'provenance':provenance}
         runner = binding.runner.resolve()(native_env, agent_cfg, str(log_dir), device)
         runner.add_git_repo_to_log(__file__)
         resume = None
         if cfg.agent.resume:
             resume = get_checkpoint_path(log_dir.parent, cfg.agent.load_run, cfg.agent.load_checkpoint)
+            previous = json.loads((Path(resume).parent/'run.json').read_text())
+            validate_resume(previous,task=task_id,backend=cfg.backend,framework='rsl-rl')
+            if previous.get('provenance',{}).get('upstream',provenance['upstream']) != provenance['upstream']:
+                raise ValueError('Resume upstream pins differ')
             print(f'[INFO] Loading native checkpoint {resume}', flush=True)
             runner.load(str(resume))
         before = runner.current_learning_iteration
@@ -71,7 +80,7 @@ def run_train(task_id, cfg, log_dir):
                 'iteration_before': before, 'iteration_after': runner.current_learning_iteration,
                 'resume': str(resume) if resume else None, 'wandb_mode': settings()['mode'],
                 'project_commit': subprocess.check_output(['git','rev-parse','HEAD'], cwd=ROOT, text=True).strip(),
-                'behavior': 'unvalidated'}, indent=2)+'\n')
+                'behavior': 'unvalidated', 'provenance':provenance, 'wall_time_s':time.monotonic()-started}, indent=2)+'\n')
     finally:
         env.close()
         if rank == 0:

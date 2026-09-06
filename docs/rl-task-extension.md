@@ -26,3 +26,10 @@ The `omd tasks --all` inventory includes recipes outside the two representative
 validation tasks. Registration is not evidence of learned behavior. Newton bindings
 must pass actual motor/contact/reset/sensor checks; a PD diagnostic cannot stand in
 for a task. See [official invariants](../third_party/microduck_rl/UPSTREAM_GUIDELINES.md).
+
+Evaluation and packaging also use task factories: `evaluation` returns an
+`EvaluationProtocol` battery with scenario resets and behavior scoring;
+`policy_package` returns a `PackageProfile` for the official schema-2 format.
+Adding these profiles requires no learner edits. Run `omd compare`, `omd rehearsal`
+and `omd package` through the same CLI. CPU rehearsal currently supports the two
+representative robot models and rejects unsupported scene mappings explicitly.

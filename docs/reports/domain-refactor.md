@@ -96,3 +96,27 @@ compatible environment. This is an explicit export reference, not a training
 fallback. Export provenance records the checkpoint's training backend. Newton's
 newer Warp cannot instantiate mjlab's old export-reference simulation directly;
 that failed attempt is retained. Lifecycle and behavioral validation continue.
+
+## Lifecycle verified; evaluation modules consolidated
+
+Newton Walking and StandUp both completed native RSL and SB3 64-env/5-iteration
+training, native resume and official normalized export. RSL exports audited 44/51
+scalar tags and 9 penalties each. SB3 exports matched 32 inputs (including clipped
+outliers) within 9.54e-7. Both SB3 timeout resumes recorded 768 snapshots and
+advanced 7680 to 15360 transitions. Evidence uses `outputs/newton-*-local-0906-*`
+and the `newton_*_local` / `newton_*_resume` native RSL run directories.
+
+Task-registered evaluation, CPU BAM rehearsal, sim2sim comparison, local schema-2
+packaging and source/checkpoint identity checks are now implemented under `rl/`
+and `infrastructure/`. Newton native 1280×720 video was exercised: Walking failed
+at 60 ticks; all four StandUp smoke-policy scenarios completed but failed the
+sustained upright gate. These are honest behavioral failures, not trained skills.
+MuJoCo task video produced a black frame; explicit camera tracking is included in
+the consolidated validation batch. Failed frames and original traces are retained.
+
+The next unified batch validates the assembled interfaces before longer training.
+Current CPU checks: 24 lightweight tests, 59 task/SB3 tests. All first-party code
+is under `src/oh_my_duck`; the obsolete tracked training packages and their stale
+bytecode/metadata have been removed. Original licenses and experiment evidence
+remain. The user confirmed module-batched implementation, then consolidated
+validation, with early physics gates where later work depends on physical semantics.

@@ -6,7 +6,7 @@ emits `actor(normalizer(obs))`, so what the robot runs is what training saw. In-
 applies the normalizer itself and hides a hand-converted checkpoint that forgot it — never
 convert by hand.
 
-`scripts/export.py` is the command-line wrapper; `oh_my_duck.rl.artifacts.publish` calls
+`python omd.py export` is the command-line entry; `oh_my_duck.rl.artifacts.publish` calls
 :func:`run_export` directly so a published policy cannot skip this step.
 """
 
@@ -265,17 +265,22 @@ def run_export(task_id: str, cfg: ExportConfig) -> ExportResult:
     filename = os.path.basename(onnx_path)
 
     runner.export_policy_to_onnx(path, filename)
+    from oh_my_duck.rl.artifacts.parity import verify_runner_export
+    parity = verify_runner_export(runner, Path(onnx_path))
 
     metadata = get_base_metadata(runner.env.unwrapped, run_path=cfg.checkpoint_file)
     attach_metadata_to_onnx(onnx_path, metadata)
 
     import json
+    import hashlib
     source_report = resume_path.parent / 'run.json' if resume_path is not None else None
     source = json.loads(source_report.read_text()) if source_report and source_report.exists() else {}
     Path(onnx_path).with_suffix('.provenance.json').write_text(json.dumps({
         'task': task_id, 'training_backend': source.get('backend', 'unknown'),
-        'metadata_reference_backend': 'mujoco', 'source_checkpoint': str(resume_path),
-        'normalization': 'native runner export', 'behavior_validation': 'separate_gate'}, indent=2)+'\n')
+        'metadata_reference_backend': 'mujoco', 'source_checkpoint': str(resume_path.resolve()) if resume_path else None,
+        'checkpoint_sha256': hashlib.sha256(resume_path.read_bytes()).hexdigest() if resume_path else None,
+        'policy_sha256': hashlib.sha256(Path(onnx_path).read_bytes()).hexdigest(),
+        'normalization': 'native runner export', 'numerical_parity':parity, 'behavior_validation': 'separate_gate'}, indent=2)+'\n')
     print(f"Written {onnx_path}")
 
     env.close()

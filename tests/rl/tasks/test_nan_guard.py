@@ -1,4 +1,4 @@
-# Modified by Oh My Duck: test the maintained omd_microduck namespace.
+# Modified by Oh My Duck: test the maintained oh_my_duck namespace.
 """robot_state_is_nan doit attraper un état non-fini n'importe où (joints OU base
 OU roues), pas seulement dans joint_pos — sinon un free-joint qui diverge en NaN
 échappe au reset et corrompt l'obs critic (base_lin_vel/wheel_vel), ce qui tue

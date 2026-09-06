@@ -16,14 +16,21 @@ from oh_my_duck.rl.training.frameworks import default_framework_registry
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__, add_help=False)
-    parser.add_argument("action", choices=["assets", "probe", "train", "export", "eval"])
+    parser.add_argument("action", choices=["assets", "probe", "train", "export", "eval", "compare", "rehearsal", "package"])
     parser.add_argument("--backend", default="mujoco")
     parser.add_argument("--rl-framework", default=None)
     args, extra = parser.parse_known_args()
     if extra and extra[0] == "--":
         extra = extra[1:]
     try:
-        if args.action in {"train", "export"}:
+        if args.action in {'compare','rehearsal','package'}:
+            from oh_my_duck.rl.training.base import BackendCommand
+            entry={'compare':'oh_my_duck.rl.evaluation.sim2sim', 'rehearsal':'oh_my_duck.rl.evaluation.rehearsal.task',
+                   'package':'oh_my_duck.rl.artifacts.package_policy'}[args.action]
+            interpreter=sys.executable if args.action=='compare' else str(ROOT/'.envs/mujoco/bin/python')
+            command=BackendCommand((interpreter,'-m',entry,*extra),ROOT,
+                {'PYTHONPATH':str(ROOT/'src'),'MUJOCO_GL':'egl','MPLBACKEND':'Agg','WANDB_MODE':'offline'})
+        elif args.action in {"train", "export"}:
             framework = args.rl_framework or "rsl-rl"
             command = default_framework_registry().command(framework, args.backend, ROOT, args.action, extra)
         else:

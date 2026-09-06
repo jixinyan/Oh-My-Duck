@@ -51,6 +51,8 @@ class TaskSpec:
     bindings: dict[str, TaskBinding]
     representative: bool = False
     policy_configs: dict[str, ConfigRef] = field(default_factory=dict)
+    evaluation: ConfigRef | None = None
+    policy_package: ConfigRef | None = None
 
     def binding(self, backend: str) -> TaskBinding:
         try:
@@ -88,7 +90,9 @@ class TaskRegistry:
             bindings = {name: TaskBinding(**{key: ConfigRef(**value) if value is not None else None for key, value in values.items()})
                         for name, values in task["bindings"].items()}
             policies = {name: ConfigRef(**value) for name, value in task.get("policy_configs", {}).items()}
-            registry.register(TaskSpec(**{**task, "bindings": bindings, "policy_configs": policies}))
+            registry.register(TaskSpec(**{**task, "bindings": bindings, "policy_configs": policies,
+                "evaluation": ConfigRef(**task["evaluation"]) if task.get("evaluation") else None,
+                "policy_package": ConfigRef(**task["policy_package"]) if task.get("policy_package") else None}))
         return registry
 
 
