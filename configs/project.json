@@ -68,7 +68,7 @@
       "environment_framework": "mjlab"
     },
     "isaac-newton": {
-      "state": "pd_physics_probe_passed_training_pending",
+      "state": "pd_physics_video_and_rl_smoke_passed",
       "physics": "Newton",
       "solver": "MuJoCo-Warp",
       "environment": ".envs/isaac-newton",

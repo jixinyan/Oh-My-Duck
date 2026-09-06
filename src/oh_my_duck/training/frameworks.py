@@ -60,12 +60,12 @@ def default_framework_registry():
     registry = RLFrameworkRegistry()
     registry.register("rsl-rl", "RSL-RL", [
         FrameworkBinding("mujoco", ("train", "export"), "adapter_runtime_unvalidated", _rsl_rl),
-        FrameworkBinding("isaac-newton", ("train", "export"), "diagnostic_runtime_unvalidated", _rsl_rl,
+        FrameworkBinding("isaac-newton", ("train", "export"), "diagnostic_train_and_numerical_export_passed", _rsl_rl,
                          "Explicit PD diagnostic task only; BAM locomotion pending"),
     ])
     registry.register("sb3", "Stable-Baselines3", [
         FrameworkBinding("mujoco", (), "planned", None, "mjlab VecEnv adapter pending"),
-        FrameworkBinding("isaac-newton", ("train",), "diagnostic_runtime_unvalidated", _sb3,
+        FrameworkBinding("isaac-newton", ("train",), "diagnostic_train_and_timeouts_passed", _sb3,
                          "Optional SB3 install; PD PPO only; native checkpoint resume and ONNX export pending"),
     ])
     return registry

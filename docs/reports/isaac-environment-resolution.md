@@ -36,3 +36,7 @@ The asset CLI help also exits 0 through the actual conversion interpreter. Asset
 ## Worker result update
 
 Both jobs left the queue. MuJoCo probe succeeded (device availability, CPU stepping, EGL image only). Isaac conversion failed during Kit first-run EULA input with `EOF when reading a line`, before conversion or Newton simulation. No noninteractive license acceptance is configured. Task IDs and evidence are recorded in [implementation status](../implementation-status.md).
+
+## Successful worker follow-up
+
+The user subsequently approved the EULA; conversion succeeded. Newton finite simulation/video and RSL-RL/SB3 short PPO runs are now verified, with RSL-RL numerical ONNX export. See [the worker validation report](isaac-rl-validation.md) for exact scope, later runtime fixes, task IDs and evidence.

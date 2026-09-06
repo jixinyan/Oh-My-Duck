@@ -1,6 +1,6 @@
 # Isaac Lab / Newton integration
 
-This backend is in development. The code currently implements **asset conversion and a PD diagnostic task**, not the official BAM walking recipe. The training environment is installed and its four CPU configuration tests pass. The conversion environment is also installed and dependency-checked; no Isaac GPU run has passed yet. Keep the full product scope in the [Project Design](Agentic%20Microduck%20-%20Project%20Design%20v0.1.md).
+This backend is in development. The code currently implements **asset conversion and a PD diagnostic task**, not the official BAM walking recipe. Asset conversion and Newton finite physics/video probes have passed on a GPU worker. RSL-RL and optional Stable-Baselines3 have completed short PD training runs; 7 installed-runtime CPU checks pass with SB3 enabled. See [worker evidence](reports/isaac-rl-validation.md) and [RL framework selection](rl-frameworks.md). Keep the full product scope in the [Project Design](Agentic%20Microduck%20-%20Project%20Design%20v0.1.md).
 
 ## Environments and source versions
 
@@ -36,6 +36,8 @@ python omd.py submit --name omd-isaac-pd-video-001 --gpus 1 --   python omd.py e
 
 The conversion command's `--accept-eula` explicitly accepts the NVIDIA Omniverse EULA for that child process; omit it only if acceptance is already provided through `OMNI_KIT_ACCEPT_EULA=YES` or Kit's prior-acceptance marker. The project does not enable acceptance globally. Without acceptance, conversion exits with an actionable message before importing Kit. See [NVIDIA's headless installation instructions](https://docs.isaacsim.omniverse.nvidia.com/6.0.0/installation/install_python.html).
 
+The diagnostic ground is a local USD with explicit collision and friction; it requires no remote grid asset. Moving cameras refresh their actual pose before frame capture.
+
 Train registers our task before running the unchanged pinned Isaac Lab RSL-RL script, retaining its callback and headless flag. Early registration also makes upstream task-aware help work. Checkpoints are under `logs/rsl_rl/omd_isaac_pd_diagnostic/`. Training without an explicit diagnostic task fails because BAM locomotion is not implemented. The diagnostic task has a small posture reward, zero commands, a compact network and explicit PD actuation. Its checkpoints are not walking-policy candidates and are labeled accordingly when exported.
 
 Probe checks the actual Newton `SolverMuJoCo`, canonical joint/action mapping, raw asset mass/COM/principal inertia/limits/armature, finite stepping and a non-uniform offscreen image. Eval supports bounded zero-action PD holding and optional 61D ONNX replay, but this is still a PD diagnostic, not a BAM sim2sim comparison. It stops on termination rather than treating automatic resets as successful continuation. Export includes the actor's normalizer and compares Torch/ONNX outputs on 16 identical synthetic inputs; these are numerical checks, not behavior certification.
@@ -58,7 +60,7 @@ Worker outputs include `result.json`, `trajectory.npz`, `frame.png`, and optiona
 
 ## Remaining migration work
 
-1. The first-run prompt has an explicit headless acceptance option. Obtain user agreement to the NVIDIA Omniverse EULA, rerun conversion, then run the Newton probe. The first conversion job failed before producing assets; installation and CPU configuration checks have passed. See [worker results](implementation-status.md).
+1. Asset conversion, Newton PD physics/video and both short RL training paths are verified. Complete checkpoint/export lifecycle checks and then progress to BAM locomotion; see [worker results](reports/isaac-rl-validation.md).
 2. Validate final solver contact/axis parameters and preserve official training overrides.
 3. Implement BAM m6 with verified world/DOF mapping, per-world friction/damping storage, voltage and action delays. Current solver field inspection performs **no BAM writes**.
 4. Add official delayed observations, encoder bias, commands, rewards and domain randomization; verify the shared contract on actual states.
@@ -70,4 +72,4 @@ Worker outputs include `result.json`, `trajectory.npz`, `frame.png`, and optiona
 CUDA_VISIBLE_DEVICES='' .envs/isaac-newton/bin/python -m unittest discover -s training/isaac_newton/tests -v
 ```
 
-These tests use actual installed Isaac packages, construct configs and verify rejection before simulator startup. They are separate from the lightweight root suite and do not establish GPU/physics/video correctness. The source-only `isaaclab-physx` material shim and `isaaclab-contrib` scene-config imports are required by the pinned core; runtime physics remains explicitly Newton/MJWarp.
+These tests use actual installed Isaac packages, construct configs and verify rejection before simulator startup. They are separate from the lightweight root suite and do not establish GPU/physics/video correctness. With the optional SB3 extra installed, the suite also validates pre-reset observation capture and timeout bootstrapping. The source-only `isaaclab-physx` material shim and `isaaclab-contrib` scene-config imports are required by the pinned core; runtime physics remains explicitly Newton/MJWarp.

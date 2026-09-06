@@ -23,9 +23,11 @@ Run `python omd.py frameworks` for the registered compatibility matrix. `--backe
 | Combination | Implemented entry points | Validation / remaining work |
 |---|---|---|
 | MuJoCo + RSL-RL | Official train/export | Robot training/export worker verification pending |
-| Isaac/Newton + RSL-RL | PD diagnostic train/export | Configuration checked; training/export worker verification pending |
-| Isaac/Newton + SB3 | PD diagnostic PPO train | Optional install and real launcher help checked; training worker verification pending |
+| Isaac/Newton + RSL-RL | PD diagnostic train/export | 5-iteration GPU train, native checkpoint inspection and normalized ONNX numerical export passed |
+| Isaac/Newton + SB3 | PD diagnostic PPO train | 5-rollout GPU train passed, including 192 timeout snapshots; checkpoint + normalizer saved |
 | MuJoCo + SB3 | Planned | mjlab vector-environment bridge required |
+
+The pinned upstream SB3 wrapper is subclassed locally to substitute exact pre-reset observations for automatic-reset terminal states. The same diagnostic environment supplies snapshots; no upstream files are modified. See [validation evidence](reports/isaac-rl-validation.md).
 
 SB3 does not yet implement native checkpoint resume or ONNX export in this project. Resume is explicitly rejected until matching normalization state is restored and verified. Training saves the upstream native `model.zip` and `model_vecnormalize.pkl`; retain both. A checkpoint from one framework cannot be resumed by another; a shared ONNX inference contract is a separate compatibility milestone. SB3 currently uses its upstream CPU NumPy VecEnv boundary around GPU simulation; do not assume the throughput or distributed capabilities of RSL-RL.
 

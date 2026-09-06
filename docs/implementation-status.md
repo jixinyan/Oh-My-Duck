@@ -19,7 +19,7 @@ Updated: 2026-09-06. Current priority: **complete the whole-project framework, t
 | Shared command schedule / joint contract | Implemented and tested | Exact 50 Hz boundaries and invalid input rejection |
 | Official MuJoCo training/export adapter | Implemented, worker validation pending | Python 3.12.13 environment and key package metadata present; worker validation pending |
 | CPU MuJoCo/BAM headless evaluator | Initial implementation, unvalidated | Run fixed command sequence and save EGL video after setup |
-| Isaac Lab / Newton Microduck task | PD diagnostic integration implemented; runtime unvalidated | Independent locked environments, conversion, canonical mapping, finite probe/video and export; BAM locomotion remains pending. See [integration guide](isaac-newton.md) |
+| Isaac Lab / Newton Microduck task | PD physics/video and short training verified | Raw asset checks, RSL-RL/SB3 smoke training, RSL-RL numerical export pass; BAM locomotion remains pending. See [worker report](reports/isaac-rl-validation.md) |
 | Sim2sim comparison | Planned | Requires both actual backends and measured baselines |
 | Hardware | Unavailable / deferred | No physical-robot tests |
 
@@ -87,3 +87,11 @@ The user explicitly agreed to the NVIDIA Omniverse EULA. Submitted `omd-isaac-as
 - Probe `omd-isaac-probe-20260906-01` failed at argument parsing because the submitted separator was misplaced; no simulation occurred. Corrected probe `omd-isaac-probe-20260906-02`, task `f525ac94-c18b-4fb7-aa85-425e448f46ed`, succeeded: 2 environments, 100 control ticks, Newton `SolverMuJoCo` on `cuda:0`, canonical joint/action mapping and raw asset checks passed. Evidence: `outputs/isaac-probe-20260906-02/`.
 - Manual inspection found the initial video's camera pose was stale despite nonuniform frames. `69c3329` enables live camera pose updates and asserts rendered camera position; repeat validation pending. Existing physical checks remain valid, but that video is not accepted as a useful visual diagnostic. USD physics-material binding warnings, contact parity and BAM remain open.
 - Per user steering, branch `feat/rl-framework-selection` introduces independent RL-framework selection. RSL-RL routes preserve the existing launch commands; SB3 PPO delegates to pinned Isaac Lab with an optional dependency extra. Actual SB3 install and task-aware CLI help pass; GPU learning and framework-native checkpoint lifecycle verification remain pending. Root suite: 17 passing tests. See [RL framework scope and boundaries](rl-frameworks.md).
+
+## Current checkpoint: Newton and two RL frameworks validated for diagnostics (2026-09-06)
+
+This supersedes the previous camera/queue/training/export-pending checkpoints. EULA bootstrap is resolved. The local-ground/camera-corrected Newton probe passed 100 ticks and visual inspection. Both RSL-RL and SB3 PPO completed short GPU training. SB3's corrected adapter captured 192 exact pre-reset observations for 192 timeout truncations; native model and normalizer were saved. RSL-RL normalized ONNX export passed 16 Torch/ORT comparisons (maximum absolute error `3.5762786865234375e-07`).
+
+The application now independently selects simulation with `--backend` and learning with `--rl-framework`; `omd frameworks` lists actual combination/operation status. 17 lightweight tests and 7 installed-runtime CPU checks pass. Focused commits are on `feat/rl-framework-selection`; source, docs and local ground asset are tracked, runtime outputs/environments remain ignored. Full evidence, task IDs, failures and artifact paths: [Isaac/RL validation](reports/isaac-rl-validation.md).
+
+Still pending: MuJoCo robot training/export verification and SB3 adapter; SB3 native resume/ONNX export; RSL-RL resume/policy replay; BAM locomotion, sim2sim and upper-level functionality. A PD smoke run is not a trained walking policy.
