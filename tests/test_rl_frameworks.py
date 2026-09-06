@@ -32,7 +32,7 @@ class FrameworkTests(unittest.TestCase):
     def test_unsupported_combinations_never_fall_back(self):
         registry = default_framework_registry()
         for framework, backend, op in [('unknown', 'mujoco', 'train'), ('sb3', 'mujoco', 'unsupported'),
-                                        ('sb3', 'isaac-newton', 'export'), ('rsl-rl', 'unknown', 'train')]:
+                                        ('rsl-rl', 'unknown', 'train')]:
             with self.subTest(framework=framework, backend=backend, operation=op):
                 with self.assertRaises(BackendUnavailable):
                     registry.command(framework, backend, ROOT, op, [])

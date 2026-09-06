@@ -12,6 +12,8 @@ dependencies = [
   "onnxruntime", "imageio[ffmpeg]",
    "mjlab==1.3.0", "better-actuator-models", "scipy>=1.16",
   "moviepy==2.2.1",
+  # RSL 5.0.1 uses Wandb Settings.start_method; match the validated MuJoCo CLI/logger.
+  "wandb==0.24.0", "tyro==1.0.5",
 ]
 
 [project.optional-dependencies]

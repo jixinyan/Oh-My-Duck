@@ -5,6 +5,7 @@ import os
 from pathlib import Path
 from typing import Callable, Sequence
 from oh_my_duck.rl.training.base import BackendCommand
+from oh_my_duck.rl.training.isaac_newton import is_diagnostic, require_task
 from oh_my_duck.rl.training.registry import BackendUnavailable, default_registry
 
 CommandFactory = Callable[[str, Path, str, Sequence[str]], BackendCommand]
@@ -54,7 +55,7 @@ def _rsl_rl(backend, root, operation, arguments):
     if operation == "train":
         defaults = json.loads((root / "configs/training.json").read_text())["logger"]
         options = {a.split("=", 1)[0] for a in arguments}
-        logger_key, project_key = (("--agent.logger", "--agent.wandb-project") if backend == "mujoco"
+        logger_key, project_key = (("--agent.logger", "--agent.wandb-project") if backend == "mujoco" or not is_diagnostic(arguments)
                                    else ("--logger", "--log_project_name"))
         if logger_key not in options:
             arguments += [logger_key, "wandb"]
@@ -67,12 +68,18 @@ def _rsl_rl(backend, root, operation, arguments):
 
 
 def _sb3(backend, root, operation, arguments):
-    if backend == "mujoco":
-        interpreter = root / ".envs/mujoco-sb3/bin/python"
+    if backend == 'mujoco' or not is_diagnostic(arguments):
+        if backend == 'isaac-newton' and operation == 'train':
+            require_task(root, arguments)
+        environment_name = 'mujoco-sb3' if backend == 'mujoco' or operation == 'export' else 'isaac-newton'
+        interpreter = root / f'.envs/{environment_name}/bin/python'
         if not interpreter.exists():
-            raise BackendUnavailable("Run python omd.py setup --backend mujoco --rl-framework sb3 first")
-        return BackendCommand((str(interpreter), "-m", ("oh_my_duck.rl.learners.sb3.train" if operation == "train" else "oh_my_duck.rl.artifacts.sb3_export"), *arguments),
-                              root, {"MUJOCO_GL": "egl", "MPLBACKEND": "Agg", "PYTHONUNBUFFERED": "1"})
+            raise BackendUnavailable(f'Run python omd.py setup --backend {backend} --rl-framework sb3 first')
+        extras = ['--backend', backend] if operation == 'train' else []
+        environment = {'PYTHONPATH': str(root/'src'), 'OMD_PROJECT_ROOT': str(root),
+                       'MUJOCO_GL': 'egl', 'MPLBACKEND': 'Agg', 'PYTHONUNBUFFERED': '1', 'WANDB_MODE': 'offline'}
+        return BackendCommand((str(interpreter), '-m', ('oh_my_duck.rl.learners.sb3.train' if operation == 'train'
+            else 'oh_my_duck.rl.artifacts.sb3_export'), *arguments, *extras), root, environment)
     command = default_registry().get(backend, root).command(operation, arguments)
     return replace(command, argv=(command.argv[0], "-m", "oh_my_duck.rl.backends.isaac_newton.sb3_train", *arguments))
 
@@ -81,12 +88,12 @@ def default_framework_registry():
     registry = RLFrameworkRegistry()
     registry.register("rsl-rl", "RSL-RL", [
         FrameworkBinding("mujoco", ("train", "export"), "official_walking_smoke_and_export_passed", _rsl_rl),
-        FrameworkBinding("isaac-newton", ("train", "export"), "diagnostic_train_and_numerical_export_passed", _rsl_rl,
-                         "Explicit PD diagnostic task only; BAM locomotion pending"),
+        FrameworkBinding("isaac-newton", ("train", "export"), "task_physics_audited_training_validation_pending", _rsl_rl,
+                         "Registered BAM tasks use shared native PPO; PD diagnostic remains explicit"),
     ])
     registry.register("sb3", "Stable-Baselines3", [
         FrameworkBinding("mujoco", ("train", "export"), "official_walking_train_resume_and_export_passed", _sb3, "Official mjlab task; 64-env smoke, 768 timeouts, and normalized official-runner export passed; gait quality unvalidated"),
-        FrameworkBinding("isaac-newton", ("train",), "diagnostic_train_and_timeouts_passed", _sb3,
-                         "Optional SB3 install; PD PPO only; native checkpoint resume and ONNX export pending"),
+        FrameworkBinding("isaac-newton", ("train", "export"), "task_physics_audited_training_validation_pending", _sb3,
+                         "Registered BAM tasks use native SB3; normalized export uses official MuJoCo metadata reference"),
     ])
     return registry

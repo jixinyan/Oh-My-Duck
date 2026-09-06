@@ -84,8 +84,8 @@ def main():
     args = parser.parse_args()
     run = json.loads((args.run / "run.json").read_text())
     task = run["task"]
-    if run["backend"] != "mujoco" or run["framework"] != "sb3":
-        parser.error("Expected a MuJoCo SB3 run")
+    if run["backend"] not in {"mujoco", "isaac-newton"} or run["framework"] != "sb3":
+        parser.error("Expected a supported native SB3 run")
     if task not in list_tasks():
         parser.error("Source run must name a pinned official Microduck task")
     alias = "Omd-SB3-Export-" + task
@@ -106,7 +106,7 @@ def main():
     session = ort.InferenceSession(str(result.onnx_path), providers=["CPUExecutionProvider"])
     actual = np.concatenate([session.run(None, {session.get_inputs()[0].name: row[None]})[0] for row in batch])
     np.testing.assert_allclose(actual, expected, atol=2e-5, rtol=1e-5)
-    report = {"status": "passed", "task": task, "framework": "sb3", "backend": "mujoco",
+    report = {"status": "passed", "task": task, "framework": "sb3", "backend": run["backend"], "metadata_reference_backend": "mujoco",
         "export_path": "oh_my_duck.rl.artifacts.export.run_export -> inherited OnPolicyRunner.export_policy_to_onnx",
         "normalizer": "native SB3 VecNormalize mean/variance/epsilon/clip baked into graph",
         "samples": len(batch), "max_abs_error": float(np.max(np.abs(actual-expected))),

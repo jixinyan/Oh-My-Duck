@@ -19,6 +19,21 @@
           "runtime": {
             "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
           }
+        },
+        "isaac-newton": {
+          "environment": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_env_cfg:make_microduck_velocity_env_cfg",
+            "kwargs": {}
+          },
+          "rsl_config": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_env_cfg:MicroduckRlCfg"
+          },
+          "runner": {
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.isaac_newton.task_binding.environment:NewtonTaskEnvironment"
+          }
         }
       },
       "representative": true,
@@ -130,6 +145,21 @@
           },
           "runtime": {
             "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
+          }
+        },
+        "isaac-newton": {
+          "environment": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_standup_env_cfg:make_microduck_standup_env_cfg",
+            "kwargs": {}
+          },
+          "rsl_config": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_standup_env_cfg:MicroduckStandUpRlCfg"
+          },
+          "runner": {
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.isaac_newton.task_binding.environment:NewtonTaskEnvironment"
           }
         }
       },

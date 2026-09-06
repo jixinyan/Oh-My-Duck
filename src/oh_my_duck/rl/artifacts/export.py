@@ -269,6 +269,13 @@ def run_export(task_id: str, cfg: ExportConfig) -> ExportResult:
     metadata = get_base_metadata(runner.env.unwrapped, run_path=cfg.checkpoint_file)
     attach_metadata_to_onnx(onnx_path, metadata)
 
+    import json
+    source_report = resume_path.parent / 'run.json' if resume_path is not None else None
+    source = json.loads(source_report.read_text()) if source_report and source_report.exists() else {}
+    Path(onnx_path).with_suffix('.provenance.json').write_text(json.dumps({
+        'task': task_id, 'training_backend': source.get('backend', 'unknown'),
+        'metadata_reference_backend': 'mujoco', 'source_checkpoint': str(resume_path),
+        'normalization': 'native runner export', 'behavior_validation': 'separate_gate'}, indent=2)+'\n')
     print(f"Written {onnx_path}")
 
     env.close()

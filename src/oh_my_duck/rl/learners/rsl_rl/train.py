@@ -95,7 +95,10 @@ def main():
         add_help=False, return_unknown_args=True, config=mjlab.TYRO_FLAGS)
     # Shared recipe default. Unsupported backend bindings still fail before creating physics.
     task = tasks.get(task_id)
-    binding = task.binding('mujoco')
+    backend = next((arg.split('=', 1)[1] for arg in remaining if arg.startswith('--backend=')), 'mujoco')
+    if '--backend' in remaining:
+        backend = remaining[remaining.index('--backend') + 1]
+    binding = task.binding(backend)
     cfg = tyro.cli(TrainConfig, args=remaining,
         default=TrainConfig(build_environment(binding), binding.rsl_config.build()), config=mjlab.TYRO_FLAGS)
     task.binding(cfg.backend)

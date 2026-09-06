@@ -18,9 +18,9 @@ Only generic simulator and native PPO packages are external dependencies.
    `Sb3PolicyCfg`. It receives `task_id` and the task's `agent_cfg`; reference
    `kwargs` may supply extra parameters. Return an editable native
    `ActorCriticPolicy` subclass when required. PPO itself remains native.
-5. Verify configuration and physical assumptions, then submit 64 environments /
+5. Verify configuration and physical assumptions, then run locally with 64 environments /
    5 iterations. Audit every weighted penalty, native resume and timeout state,
-   normalized ONNX export, and deployment rehearsal before scaling training.
+   normalized ONNX export, and deployment rehearsal before scaling training. Submit a job only for multi-GPU experiments.
 
 The `omd tasks --all` inventory includes recipes outside the two representative
 validation tasks. Registration is not evidence of learned behavior. Newton bindings

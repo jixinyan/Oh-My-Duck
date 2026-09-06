@@ -13,7 +13,7 @@ class TaskRegistryTests(unittest.TestCase):
     def test_discovery_is_lightweight_and_reports_only_explicit_bindings(self):
         registry = project_tasks(ROOT)
         self.assertEqual(len(registry.list()), 33)
-        self.assertEqual(registry.list('isaac-newton'), [])
+        self.assertEqual([t.id for t in registry.list('isaac-newton')], ['Mjlab-StandUp-Flat-MicroDuck', 'Mjlab-Velocity-Flat-MicroDuck'])
         for name in ('mujoco', 'torch', 'warp', 'isaaclab'):
             self.assertNotIn(name, sys.modules)
 

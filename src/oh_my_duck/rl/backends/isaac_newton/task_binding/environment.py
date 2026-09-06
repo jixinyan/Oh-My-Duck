@@ -23,7 +23,8 @@ class NewtonTaskEnvironment(ManagerBasedRlEnv):
         from isaaclab.envs import ManagerBasedEnv, ManagerBasedEnvCfg
         from isaaclab_tasks.utils import launch_simulation
         from isaaclab.sim import SimulationCfg
-        from isaaclab_newton.physics import NewtonCfg, MJWarpSolverCfg
+        from isaaclab_newton.physics import NewtonCfg
+        from .manager import OfficialTaskSolverCfg
         from oh_my_duck.rl.backends.isaac_newton.config import SceneCfg
         from oh_my_duck.rl.backends.isaac_newton.bam_actuator import OfficialBamActuatorCfg
         from oh_my_duck.rl.backends.isaac_newton.task_binding.collisions import configure_scene
@@ -41,7 +42,7 @@ class NewtonTaskEnvironment(ManagerBasedRlEnv):
         scene_cfg.robot.actuators={'official_bam':OfficialBamActuatorCfg(joint_names_expr=list(JOINT_NAMES))}
         native_cfg=ManagerBasedEnvCfg(scene=scene_cfg,decimation=1,actions=PhysicsOnlyTerms(),observations=PhysicsOnlyTerms(),events=PhysicsOnlyTerms(),seed=cfg.seed,
             sim=SimulationCfg(device=device,dt=cfg.sim.mujoco.timestep,render_interval=cfg.decimation,
-                physics=NewtonCfg(solver_cfg=MJWarpSolverCfg(iterations=cfg.sim.mujoco.iterations,
+                physics=NewtonCfg(solver_cfg=OfficialTaskSolverCfg(robot_model=task.model, iterations=cfg.sim.mujoco.iterations,
                     ls_iterations=cfg.sim.mujoco.ls_iterations, njmax=cfg.sim.njmax, nconmax=cfg.sim.nconmax,
                     integrator=cfg.sim.mujoco.integrator, solver=cfg.sim.mujoco.solver,
                     impratio=cfg.sim.mujoco.impratio, cone=cfg.sim.mujoco.cone, tolerance=cfg.sim.mujoco.tolerance,

@@ -131,3 +131,5 @@ Full official AGENTS.md read; 199 official CPU regressions passed, 1 skipped. Of
 **目录重构验证更新**：MuJoCo 两个代表任务 × 两种原生 PPO 的短训练、恢复与归一化导出已通过。Newton 的完整任务桥接仍处于物理/MDP gate，尚未开放任务注册；不能据此声明双后端行为验收完成。源码快照、失败记录和细节见 [domain-refactor.md](reports/domain-refactor.md)。
 
 **执行方式更新（2026-09-06，用户最新指示）**：单 GPU 开发、验证和训练直接在开发机 headless 运行；涉及多 GPU 的实验再提交 job。此前已提交任务保留其独立证据记录。
+
+**Newton 任务接入更新（2026-09-06）**：Walking/StandUp 已通过实际物理与 MDP 门槛并注册共用运行时；StandUp 使用项目内 Isaac manager 在 graph 捕获前精确编译官方接触规则。两个原生 PPO 共用任务入口，恢复、导出及行为验收继续按独立门槛记录。导出的官方 MuJoCo 元数据参考与策略训练后端分别标注。详见 `docs/reports/domain-refactor.md`。

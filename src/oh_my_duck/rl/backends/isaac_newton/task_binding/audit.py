@@ -1,6 +1,8 @@
 """Inspect the actual Newton solver against the owned official robot recipe."""
 import numpy as np
 import torch
+import mujoco
+import warp as wp
 from oh_my_duck.rl.backends.isaac_newton.collision_checks import _points
 from oh_my_duck.rl.backends.isaac_newton.task_binding.collisions import reference_model, source_geom
 
@@ -22,18 +24,23 @@ def audit_collisions(env, model):
         assert actual.geom_condim[geom] == reference.geom_condim[ref]
         assert actual.geom_priority[geom] == reference.geom_priority[ref]
     pairs = {tuple(sorted((int(a), int(b)))) for a, b in zip(actual.pair_geom1, actual.pair_geom2)}
-    excluded = set(map(int, actual.exclude_signature))
+    actual_pairs = wp.to_torch(env.sim.wp_model.nxn_pairid).cpu().numpy()[:, 0]
     checked = 0
     for a in range(actual.ngeom):
         for b in range(a + 1, actual.ngeom):
-            enabled = bool((actual.geom_contype[a] & actual.geom_conaffinity[b]) or (actual.geom_contype[b] & actual.geom_conaffinity[a]))
-            ba, bb = sorted((int(actual.geom_bodyid[a]), int(actual.geom_bodyid[b])))
-            if (ba << 16) + bb in excluded:
-                enabled = False
-            enabled = enabled or (a, b) in pairs
+            enabled = int(actual_pairs[checked]) != -2
             ta, aa = (1, 1) if a == ground else (reference.geom_contype[mapping[a]], reference.geom_conaffinity[mapping[a]])
             tb, ab = (1, 1) if b == ground else (reference.geom_contype[mapping[b]], reference.geom_conaffinity[mapping[b]])
-            assert enabled == bool((ta & ab) or (tb & aa)), (labels[a], labels[b], enabled)
+            expected_enabled = bool((ta & ab) or (tb & aa))
+            if a != ground and b != ground:
+                ra, rb = int(reference.geom_bodyid[mapping[a]]), int(reference.geom_bodyid[mapping[b]])
+                wa, wb = int(reference.body_weldid[ra]), int(reference.body_weldid[rb])
+                pa, pb = int(reference.body_weldid[reference.body_parentid[wa]]), int(reference.body_weldid[reference.body_parentid[wb]])
+                same_body = wa == wb
+                adjacent = not (reference.opt.disableflags & mujoco.mjtDisableBit.mjDSBL_FILTERPARENT) and wa != 0 and wb != 0 and (wa == pb or wb == pa)
+                excluded = (min(ra, rb) << 16) + max(ra, rb) in reference.exclude_signature
+                expected_enabled = expected_enabled and not (same_body or adjacent or excluded)
+            assert enabled == expected_enabled, (labels[a], labels[b], enabled)
             checked += 1
     expected_ground = sum(bool(reference.geom_contype[r] & 1 or reference.geom_conaffinity[r] & 1) for r in expected)
     assert actual.npair == expected_ground

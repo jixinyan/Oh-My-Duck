@@ -73,3 +73,26 @@ The corrected official `write_root_link_pose_to_sim` API passed a fresh local
 regression test now checks against the real Entity class; 56 task/SB3 tests pass.
 Native contact-force parity also corrected the primary-to-secondary sign used by
 the official contact sensor. Failed scale jobs are retained, not counted as passes.
+
+## Exact contact compilation and native learner bindings
+
+Newton graph coloring introduced extra StandUp contacts between source mask groups.
+The project now extends Isaac's native MJWarp manager and recompiles only static
+contact tables from official masks before CUDA graph capture. StandUp audit 06
+passed all 11 hulls (maximum support error 9.64e-9 m), 66 candidate pairs and
+10 explicit ground contacts, non-accumulating DR, native mass/COM synchronization,
+4 BAM calls per 50 Hz action, finite state and nonpositive weighted penalties.
+Evidence: `outputs/newton-stand-audit-local-0906-06/result.json`. Earlier failed
+attempts are preserved, including incorrect audit field/name assumptions.
+
+Both representative task bindings are now explicit in `configs/tasks.json`.
+Newton/SB3 Walking completed 64 envs × 5 rollouts (7680 transitions), saved native
+PPO and VecNormalize, and passed native reload. RSL 5.0.1 rejected W&B 0.29's
+removed `start_method`; Isaac now locks the same W&B 0.24.0 and Tyro 1.0.5 as the
+validated MuJoCo environment. Native PPO semantics are unchanged.
+
+Normalized exports use the official MuJoCo metadata reference in its isolated
+compatible environment. This is an explicit export reference, not a training
+fallback. Export provenance records the checkpoint's training backend. Newton's
+newer Warp cannot instantiate mjlab's old export-reference simulation directly;
+that failed attempt is retained. Lifecycle and behavioral validation continue.
