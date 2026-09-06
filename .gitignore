@@ -1,11 +1,11 @@
 # Environments, upstream research checkouts and downloaded models
-/.envs/
+/.envs
 /.venv/
-/.cache/
-/artifacts/
-/outputs/
-/logs/
-/wandb/
+/.cache
+/artifacts
+/outputs
+/logs
+/wandb
 *.onnx
 *.pt
 *.pth
@@ -39,3 +39,6 @@ dist/
 *.log
 /core
 /core.*
+
+# Immutable Git worktrees used by scheduled jobs
+/.job-sources

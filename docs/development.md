@@ -20,6 +20,7 @@ Keep training dependencies out of agentic, voice, recording and CLI imports.
 
 - Commit code, small reproducible configs, documentation, audit inventories and compact measured reports.
 - Ignore upstream checkouts, Python environments, package caches, credentials, checkpoints, videos and raw trajectories. Obtain upstreams from the checked-in revision manifest.
+- Each job runs from a detached Git worktree of its committed revision under `.job-sources/`; source imports and configuration point at that snapshot. Commit pending changes before submission. Environments, pristine upstream dependencies and output directories are shared through explicit links. Existing snapshots are never edited.
 - Each job has a unique name and immutable output directory. Save source revision, dirty state, actual invocation, dependency versions, source/model hashes and results alongside outputs.
 - Worker commands use shared absolute paths. `/tmp` is for disposable research, not distributed-job dependencies.
 - Large evidence stays under `outputs/` / `logs/`; link it from compact reports with hashes and job identifiers. A machine-local output path is not a portable published artifact.

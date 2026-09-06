@@ -26,7 +26,12 @@ def main():
     command = args.command[1:] if args.command[:1] == ["--"] else args.command
     if not command or not 1 <= len(args.name) <= 33:
         parser.error("Provide a command after -- and a task name of 1–33 characters")
-    command_text = "cd " + shlex.quote(str(ROOT)) + " && exec " + shlex.join(command)
+    source_root = ROOT
+    if not args.dry_run:
+        from oh_my_duck.infrastructure.snapshot import source_snapshot
+        source_root, _ = source_snapshot(ROOT)
+    command_text = ("cd " + shlex.quote(str(source_root)) + " && exec env "
+        + shlex.join(["OMD_PROJECT_ROOT=" + str(source_root), "PYTHONPATH=" + str(source_root / "src"), *command]))
     log_dir = ROOT / "outputs/jobs" / args.name
     argv = ["submit", "--project", args.project, "--nodes", "1", "--gpus-per-node", str(args.gpus),
             "--name", args.name, "--log-path", str(log_dir / "scheduler.log"), "--cmd", command_text]
@@ -39,7 +44,7 @@ def main():
         return result.stdout.strip() if result.returncode == 0 else None
     record = {"created_at": datetime.now(timezone.utc).isoformat(), "project": args.project,
               "nodes": 1, "gpus_per_node": args.gpus, "command": command,
-              "cwd": str(ROOT), "git_commit": git("rev-parse", "HEAD"),
+              "cwd": str(source_root), "source_snapshot": str(source_root), "git_commit": git("rev-parse", "HEAD"),
               "git_status": git("status", "--porcelain"), "submit_argv": argv}
     (log_dir / "submission.json").write_text(json.dumps(record, indent=2) + "\n")
     result = subprocess.run(argv, text=True, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
