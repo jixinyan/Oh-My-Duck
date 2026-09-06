@@ -80,8 +80,8 @@ def main(mode="eval"):
             report["packages"] = {n: importlib.metadata.version(n) for n in ("isaaclab", "newton", "mujoco-warp", "warp-lang", "torch")}
             session = None
             if args.policy:
-                import onnxruntime as ort
-                session = ort.InferenceSession(str(args.policy), providers=["CPUExecutionProvider"])
+                from oh_my_duck.rl.artifacts.inference import cpu_session
+                session = cpu_session(str(args.policy), providers=["CPUExecutionProvider"])
                 if session.get_inputs()[0].shape != [1, 61] or session.get_outputs()[0].shape != [1, 14]:
                     raise ValueError("Expected a 61-input/14-output policy")
                 metadata = session.get_modelmeta().custom_metadata_map

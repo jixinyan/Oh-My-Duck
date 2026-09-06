@@ -12,7 +12,7 @@ import pickle
 from types import SimpleNamespace
 
 import numpy as np
-import onnxruntime as ort
+from oh_my_duck.rl.artifacts.inference import cpu_session
 import torch
 from stable_baselines3 import PPO
 from rsl_rl.runners import OnPolicyRunner
@@ -103,7 +103,7 @@ def main():
     # Include outliers to exercise the normalization clip boundary explicitly.
     batch[16:] *= 1000
     expected, _ = model.predict(normalizer.normalize_obs(batch.copy()), deterministic=True)
-    session = ort.InferenceSession(str(result.onnx_path), providers=["CPUExecutionProvider"])
+    session = cpu_session(str(result.onnx_path), providers=["CPUExecutionProvider"])
     actual = np.concatenate([session.run(None, {session.get_inputs()[0].name: row[None]})[0] for row in batch])
     np.testing.assert_allclose(actual, expected, atol=2e-5, rtol=1e-5)
     report = {"status": "passed", "task": task, "framework": "sb3", "backend": run["backend"], "metadata_reference_backend": "mujoco",

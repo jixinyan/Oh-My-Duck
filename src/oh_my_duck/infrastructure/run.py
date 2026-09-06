@@ -41,7 +41,7 @@ def main():
         parser.error(str(error))
     if args.action in {"train", "export"}:
         print("RL framework:", framework, flush=True)
-    env = {**os.environ, **command.environment}
+    env = {**os.environ, **command.environment, "PYTHONUNBUFFERED": "1"}
     print("Backend:", args.backend, "Action:", args.action, flush=True)
     return subprocess.call(command.argv, cwd=command.cwd, env=env)
 

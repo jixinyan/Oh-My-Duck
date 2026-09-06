@@ -285,10 +285,10 @@ def smoke_run_onnx(path: Path, steps: int = 50, seed: int = 0) -> None:
     before anything is uploaded.
     """
     import numpy as np
-    import onnxruntime as ort
+    from oh_my_duck.rl.artifacts.inference import cpu_session
 
     shape = inspect_onnx(path)
-    session = ort.InferenceSession(str(path), providers=["CPUExecutionProvider"])
+    session = cpu_session(path)
     rng = np.random.default_rng(seed)
     obs = np.zeros((1, shape.obs_len), dtype=np.float32)
     outputs = []

@@ -3,6 +3,7 @@
 The only private bridge is SolverMuJoCo's coordinate synchronization. It is pinned
 and tested against Isaac articulation state, including writes before the first step.
 """
+
 import numpy as np
 import torch
 import warp as wp
@@ -17,15 +18,20 @@ class NewtonSimulation:
     def __init__(self, native, cfg):
         from isaaclab_newton.physics.newton_manager import NewtonManager
         from newton.solvers import SolverMuJoCo
+
         self.native, self.cfg = native, cfg
         self.manager = NewtonManager
         self.solver = NewtonManager._solver
         if not isinstance(self.solver, SolverMuJoCo) or self.solver.mjw_model is None:
-            raise RuntimeError('A task binding requires the native Newton GPU solver')
+            raise RuntimeError("A task binding requires the native Newton GPU solver")
         self.device = str(native.device)
         self.num_envs = native.scene.num_envs
         self.wp_device = wp.get_device(self.device)
-        self.mj_model, self.wp_model, self.wp_data = self.solver.mj_model, self.solver.mjw_model, self.solver.mjw_data
+        self.mj_model, self.wp_model, self.wp_data = (
+            self.solver.mj_model,
+            self.solver.mjw_model,
+            self.solver.mjw_data,
+        )
         self.model = WarpBridge(self.wp_model, nworld=self.num_envs)
         self.data = WarpBridge(self.wp_data)
         self.motor_data = NewtonMotorData(self.data)
@@ -46,15 +52,20 @@ class NewtonSimulation:
     def expand_model_fields(self, fields):
         for name in fields:
             field = getattr(self.model, name)
-            if field.numel() and (field.shape[0] != self.num_envs or (self.num_envs > 1 and field.stride(0) == 0)):
-                raise RuntimeError(f'Newton field {name} is not independently allocated per world')
+            if field.numel() and (
+                field.shape[0] != self.num_envs or (self.num_envs > 1 and field.stride(0) == 0)
+            ):
+                raise RuntimeError(f"Newton field {name} is not independently allocated per world")
             self.get_default_field(name)
             self.expanded_fields.add(name)
 
     def get_default_field(self, name):
         if name not in self._default_model_fields:
-            self._default_model_fields[name] = torch.as_tensor(np.array(getattr(self.mj_model, name)),
-                device=self.device, dtype=getattr(self.model, name).dtype).clone()
+            self._default_model_fields[name] = torch.as_tensor(
+                np.array(getattr(self.mj_model, name)),
+                device=self.device,
+                dtype=getattr(self.model, name).dtype,
+            ).clone()
         return self._default_model_fields[name]
 
     def recompute_constants(self, level):
@@ -72,7 +83,7 @@ class NewtonSimulation:
         wp.to_torch(model.body_inv_mass)[ids] = self.model.body_mass[valid].reciprocal()
         wp.to_torch(model.body_com)[ids] = self.model.body_ipos[valid]
         rotation = matrix_from_quat(self.model.body_iquat[valid])
-        inertia = rotation @ torch.diag_embed(self.model.body_inertia[valid]) @ rotation.transpose(-1,-2)
+        inertia = rotation @ torch.diag_embed(self.model.body_inertia[valid]) @ rotation.transpose(-1, -2)
         wp.to_torch(model.body_inertia)[ids] = inertia
         wp.to_torch(model.body_inv_inertia)[ids] = torch.linalg.inv(inertia)
         dofs = wp.to_torch(self.solver.mjc_dof_to_newton_dof).long()
@@ -82,7 +93,7 @@ class NewtonSimulation:
             g1, g2 = self.mj_model.pair_geom1[pair], self.mj_model.pair_geom2[pair]
             robot_geom = g2 if self.mj_model.geom_bodyid[g1] == 0 else g1
             friction = self.model.geom_friction[:, robot_geom]
-            self.model.pair_friction[:, pair] = friction[:, [0,0,1,2,2]]
+            self.model.pair_friction[:, pair] = friction[:, [0, 0, 1, 2, 2]]
 
     def forward(self):
         self.manager.forward()
