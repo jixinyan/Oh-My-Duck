@@ -70,3 +70,9 @@ This supersedes the queued status above.
 - MuJoCo probe `omd-probe-20260906-01` **succeeded**, task ID `8f5e9735-5fdc-4029-8801-8f41c416d836`. Worker evidence: one NVIDIA H200, CUDA/Warp device availability, finite CPU MuJoCo stepping and EGL image output. Evidence: `outputs/probe-20260906-01/environment.json`, `egl.png`, and `outputs/jobs/omd-probe-20260906-01/scheduler.log`. The probe does not execute MuJoCo-Warp GPU physics, a robot policy, or training.
 - Isaac conversion `omd-isaac-assets-20260906-01` **failed**, task ID `e9fdca75-aeb9-4133-8c82-79341865dd51`. Omniverse Kit requested first-run EULA acceptance in a noninteractive worker and exited with `Unable to bootstrap inner kit kernel: EOF when reading a line`. Evidence: `outputs/jobs/omd-isaac-assets-20260906-01/scheduler.log`. No completed asset manifest or Newton simulation result exists. License acceptance has not been configured by this project.
 - Next: address the conversion startup prompt, rerun conversion and Newton diagnostics; complete official MuJoCo policy replay and short training/export verification. BAM, full Isaac locomotion and sim2sim remain pending.
+
+## Headless startup fix prepared (2026-09-06)
+
+Added explicit `assets -- --accept-eula`, which sets NVIDIA's supported `OMNI_KIT_ACCEPT_EULA=YES` only in the conversion child environment. Missing acceptance fails before importing Kit; an existing verified asset can still be reused. Two mocked regression tests cover rejection before child launch and process-scoped acceptance with failure propagation; no license is accepted by the tests.
+
+Automatic approval review rejected the attempted commit-and-submit command because explicit user agreement to the EULA was not provided. That command did not execute; no retry job was submitted and no license was accepted. Local implementation and documentation can proceed independently. Actual conversion retry requires explicit user agreement to the NVIDIA Omniverse EULA.

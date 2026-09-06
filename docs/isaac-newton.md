@@ -23,7 +23,7 @@ The conversion environment resolves Isaac Sim's dependencies independently becau
 Run these stages in order after setup finishes. Each job/output name must be unique; inspect its result before starting the next stage. These are commands to execute, not evidence of completed runs.
 
 ```bash
-python omd.py submit --name omd-isaac-assets-001 --gpus 1 --   python omd.py assets --backend isaac-newton
+python omd.py submit --name omd-isaac-assets-001 --gpus 1 --   python omd.py assets --backend isaac-newton -- --accept-eula
 
 python omd.py submit --name omd-isaac-probe-001 --gpus 1 --   python omd.py probe --backend isaac-newton --output outputs/isaac-probe-001
 
@@ -33,6 +33,8 @@ python omd.py submit --name omd-isaac-pd-export-001 --gpus 1 --   python omd.py 
 
 python omd.py submit --name omd-isaac-pd-video-001 --gpus 1 --   python omd.py eval --backend isaac-newton --output outputs/isaac-video-001   --num-envs 1 --steps 100 --video
 ```
+
+The conversion command's `--accept-eula` explicitly accepts the NVIDIA Omniverse EULA for that child process; omit it only if acceptance is already provided through `OMNI_KIT_ACCEPT_EULA=YES` or Kit's prior-acceptance marker. The project does not enable acceptance globally. Without acceptance, conversion exits with an actionable message before importing Kit. See [NVIDIA's headless installation instructions](https://docs.isaacsim.omniverse.nvidia.com/6.0.0/installation/install_python.html).
 
 Train registers our task before running the unchanged pinned Isaac Lab RSL-RL script, retaining its callback and headless flag. Early registration also makes upstream task-aware help work. Checkpoints are under `logs/rsl_rl/omd_isaac_pd_diagnostic/`. Training without an explicit diagnostic task fails because BAM locomotion is not implemented. The diagnostic task has a small posture reward, zero commands, a compact network and explicit PD actuation. Its checkpoints are not walking-policy candidates and are labeled accordingly when exported.
 
@@ -56,7 +58,7 @@ Worker outputs include `result.json`, `trajectory.npz`, `frame.png`, and optiona
 
 ## Remaining migration work
 
-1. Resolve the first-run Omniverse Kit EULA prompt in the noninteractive conversion job, rerun conversion, then run the Newton probe. The first conversion job failed before producing assets; installation and CPU configuration checks have passed. See [worker results](implementation-status.md).
+1. The first-run prompt has an explicit headless acceptance option. Obtain user agreement to the NVIDIA Omniverse EULA, rerun conversion, then run the Newton probe. The first conversion job failed before producing assets; installation and CPU configuration checks have passed. See [worker results](implementation-status.md).
 2. Validate final solver contact/axis parameters and preserve official training overrides.
 3. Implement BAM m6 with verified world/DOF mapping, per-world friction/damping storage, voltage and action delays. Current solver field inspection performs **no BAM writes**.
 4. Add official delayed observations, encoder bias, commands, rewards and domain randomization; verify the shared contract on actual states.

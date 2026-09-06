@@ -1,3 +1,5 @@
+import contextlib
+import io
 import hashlib
 import json
 import os
@@ -45,6 +47,33 @@ class IsaacAdapterTests(unittest.TestCase):
             self.assertIn("isaac-newton/bin/python", train.argv[0])
             self.assertIn("isaac-assets/bin/python", assets.argv[0])
             self.assertNotIn("isaaclab", sys.modules)
+
+    def test_asset_startup_requires_explicit_acceptance_before_child_launch(self):
+        from omd_isaac import assets
+        with tempfile.TemporaryDirectory() as directory, \
+             patch.object(assets, "asset_dir", return_value=Path(directory)), \
+             patch.object(sys, "prefix", directory), \
+             patch.object(sys, "argv", ["assets"]), \
+             patch.dict(os.environ, {}, clear=True), \
+             patch.object(assets.subprocess, "run") as run:
+            with contextlib.redirect_stderr(io.StringIO()), self.assertRaises(SystemExit) as error:
+                assets.main()
+            self.assertEqual(error.exception.code, 2)
+            run.assert_not_called()
+
+    def test_asset_acceptance_is_child_scoped_and_failure_is_preserved(self):
+        from omd_isaac import assets
+        with tempfile.TemporaryDirectory() as directory, \
+             patch.object(assets, "asset_dir", return_value=Path(directory)), \
+             patch.object(sys, "prefix", directory), \
+             patch.object(sys, "argv", ["assets", "--accept-eula"]), \
+             patch.dict(os.environ, {}, clear=True), \
+             patch.object(assets.subprocess, "run") as run:
+            # Mock only: this test never imports Kit or accepts an actual license.
+            run.return_value.returncode = 7
+            self.assertEqual(assets.main(), 7)
+            self.assertEqual(run.call_args.kwargs["env"]["OMNI_KIT_ACCEPT_EULA"], "YES")
+            self.assertNotIn("OMNI_KIT_ACCEPT_EULA", os.environ)
 
     def test_generated_assets_require_complete_unchanged_content(self):
         with tempfile.TemporaryDirectory() as directory, patch.dict(os.environ, {"OMD_PROJECT_ROOT": directory}):
