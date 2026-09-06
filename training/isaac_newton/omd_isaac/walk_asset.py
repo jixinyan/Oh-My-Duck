@@ -46,6 +46,15 @@ def spawn_official_walk(prim_path, cfg, translation=None, orientation=None, **kw
     from isaaclab_newton.physics.newton_manager import NewtonManager
     root = spawn_from_usd.__wrapped__(prim_path, cfg, translation, orientation, **kwargs)
     stage = root.GetStage()
+    # SolverMuJoCo translates exact shape filters into body exclusions. A plane
+    # attached directly to the world has no Newton body, so those exclusions
+    # cannot represent its filters. Give it an immovable kinematic body.
+    ground = stage.GetPrimAtPath("/World/ground/terrain")
+    if not ground.IsValid():
+        raise ValueError("Official walk collision filtering requires the local ground plane")
+    ground_body = UsdPhysics.RigidBodyAPI.Apply(ground)
+    ground_body.CreateRigidBodyEnabledAttr(True)
+    ground_body.CreateKinematicEnabledAttr(True)
     # Author local overrides; cached source USD and upstream MJCF stay immutable.
     # De-instance before writing through referenced part geometry.
     while True:

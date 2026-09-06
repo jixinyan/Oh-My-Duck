@@ -61,10 +61,14 @@ def check_walk_collisions(env):
     if seen != set(reference_geoms):
         raise AssertionError(f'Missing official collision geoms: {set(reference_geoms)-seen}')
     pairs = 0
+    excluded = set(map(int, actual.exclude_signature))
     for i in range(actual.ngeom):
         for j in range(i+1, actual.ngeom):
             enabled = bool((actual.geom_contype[i] & actual.geom_conaffinity[j]) or
                            (actual.geom_contype[j] & actual.geom_conaffinity[i]))
+            body_a, body_b = sorted((int(actual.geom_bodyid[i]), int(actual.geom_bodyid[j])))
+            if (body_a << 16) + body_b in excluded:
+                enabled = False
             expected = collider_group(labels[i]) == collider_group(labels[j])
             if enabled != expected:
                 raise AssertionError(f'Collision mask differs: {labels[i]} / {labels[j]}')
