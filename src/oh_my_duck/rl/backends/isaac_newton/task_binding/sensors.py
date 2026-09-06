@@ -47,24 +47,32 @@ class NewtonContactSensor(ContactSensor):
         mjw.contact_force(sim.wp_model,sim.wp_data,self._contact_ids_wp,True,self._force_wp)
         force = wp.to_torch(self._force_wp)[:,:3]
         body = torch.as_tensor(sim.mj_model.geom_bodyid,device=self._device)
-        ground0, ground1 = body[geom[:,0].clamp_min(0)]==0, body[geom[:,1].clamp_min(0)]==0
-        found, forces = [], []
-        ids = self.primary_ids if self.is_feet else [None]
-        for primary in ids:
-            if self.is_feet:
-                primary0 = (geom[:,0]==primary) & ground1
-                primary1 = (geom[:,1]==primary) & ground0
-                mask = valid & (primary0 | primary1)
-                signed = torch.where(primary0[:,None],-force,force)
-            else:
-                mask = valid & ~ground0 & ~ground1
-                signed = force
-            counts = torch.zeros(sim.num_envs,device=self._device)
-            counts.scatter_add_(0,safe_world,mask.float())
-            net = torch.zeros(sim.num_envs,3,device=self._device)
-            net.index_add_(0,safe_world,signed*mask[:,None])
-            found.append(counts);forces.append(net)
-        return ContactData(found=torch.stack(found,1),force=torch.stack(forces,1) if 'force' in self.cfg.fields else None)
+        counts,forces = aggregate_contacts(geom,safe_world,valid,force,body,self.primary_ids,sim.num_envs)
+        return ContactData(found=counts,force=forces if 'force' in self.cfg.fields else None)
+
+
+def aggregate_contacts(geom,world,valid,force,geom_bodyid,primary_ids,num_envs):
+    """Match the official contact sensor's primary-to-secondary signed netforce."""
+    ground0 = geom_bodyid[geom[:,0].clamp(0,len(geom_bodyid)-1)]==0
+    ground1 = geom_bodyid[geom[:,1].clamp(0,len(geom_bodyid)-1)]==0
+    found,forces=[],[]
+    for primary in primary_ids if primary_ids is not None else [None]:
+        if primary is not None:
+            primary0=(geom[:,0]==primary)&ground1
+            primary1=(geom[:,1]==primary)&ground0
+            mask=valid&(primary0|primary1)
+            # Native contact sensors use + for obj1/ref2 and - for obj2/ref1.
+            signed=torch.where(primary0[:,None],force,-force)
+        else:
+            mask=valid&~ground0&~ground1
+            signed=force
+        counts=torch.zeros(num_envs,device=force.device,dtype=force.dtype)
+        counts.scatter_add_(0,world,mask.to(force.dtype))
+        net=torch.zeros(num_envs,3,device=force.device,dtype=force.dtype)
+        net.index_add_(0,world,signed*mask[:,None])
+        found.append(counts);forces.append(net)
+    return torch.stack(found,1),torch.stack(forces,1)
+
 
 
 class NewtonBuiltinSensor(BuiltinSensor):

@@ -29,7 +29,7 @@ source-to-USD matching covers all 5 walk and 11 groundcontact collision meshes.
 
 The wheel build includes CLI, shared contracts, RL export, both robot resource
 families and Newton's ground plane. No cached Microduck task package is installed.
-CPU tests cover the 21 lightweight core cases, migrated MDP/manifest/SB3 behavior,
+CPU tests cover the 22 lightweight core cases, migrated MDP/manifest/SB3 behavior,
 native Isaac diagnostic contracts, virtual sensor parity and permuted-joint resets.
 The StandUp entity-API reset is bit-identical to its prior implementation under the
 same seed on the canonical model; it also respects permuted solver joint indices.
@@ -56,3 +56,20 @@ explicit shared links. Snapshots are ignored and are never edited during a run.
 
 Obsolete training-package metadata will be removed after its replacements pass the
 remaining relevant gates. Failed experiment evidence and licensing are retained.
+
+## Local validation after execution-policy update
+
+Single-GPU work now runs directly on the development host; multi-GPU experiments
+still use immutable scheduled snapshots. Walking and StandUp both passed 64-world,
+120-step Newton task execution (`outputs/newton-task-local-0906-01` and
+`outputs/newton-stand-local-0906-01`), with finite 61D actor observations and rewards.
+Walking also passed actual hull/mask, non-accumulating DR, native mass/COM mirror,
+4 BAM calls per action, and weighted-penalty audits
+(`outputs/newton-walk-audit-local-0906-01`).
+
+The larger MuJoCo StandUp attempts exposed a wrong entity write method name.
+The corrected official `write_root_link_pose_to_sim` API passed a fresh local
+64-env/5-rollout SB3 run (`outputs/domain-stand-sb3-local-0906-01`). The interface
+regression test now checks against the real Entity class; 56 task/SB3 tests pass.
+Native contact-force parity also corrected the primary-to-secondary sign used by
+the official contact sensor. Failed scale jobs are retained, not counted as passes.

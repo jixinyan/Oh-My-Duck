@@ -765,7 +765,7 @@ def set_random_ground_state(
     pose = asset.data.data.qpos[env_ids][:, asset.indexing.free_joint_q_adr].clone()
     pose[:, 2] = new_z
     pose[:, 3:7] = new_quat
-    asset.write_root_pose_to_sim(pose, env_ids=env_ids)
+    asset.write_root_link_pose_to_sim(pose, env_ids=env_ids)
     asset.write_root_link_velocity_to_sim(torch.zeros(num, 6, device=env.device), env_ids=env_ids)
 
     servo_ids = _servo_joint_ids(env, asset)

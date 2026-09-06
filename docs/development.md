@@ -43,3 +43,5 @@ History at the start of the Isaac reference review: local `main` already contain
 Update the original design and execution documents when scope, module responsibilities or milestone status changes. Distinguish implemented, executed and validated. Record failed experiments, including job IDs and failure causes. A generated source inventory is not a complete semantic code audit, a mock is not an autonomous Harness, and a smoke checkpoint is not a walking-policy benchmark.
 
 Resource allocation is explicit and based on the experiment. The user permits single-node multi-GPU jobs and does not impose an artificial runtime or task-count cap. Never infer that reserving more GPUs automatically parallelizes a single-GPU trainer.
+
+**执行方式更新（2026-09-06，用户最新指示）**：单 GPU 开发、验证和训练直接在开发机 headless 运行；涉及多 GPU 的实验再提交 job。此前已提交任务保留其独立证据记录。

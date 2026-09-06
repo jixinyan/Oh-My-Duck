@@ -35,7 +35,7 @@ def run_train(task_id, cfg, log_dir):
     os.environ['WANDB_MODE'] = settings()['mode']
     local_rank, rank = int(os.environ.get('LOCAL_RANK', 0)), int(os.environ.get('RANK', 0))
     if not torch.cuda.is_available():
-        raise RuntimeError('Training requires a scheduled GPU allocation')
+        raise RuntimeError('Training requires an available CUDA GPU')
     device = f'cuda:{local_rank}'
     torch.cuda.set_device(device)
     os.environ['MUJOCO_EGL_DEVICE_ID'] = str(local_rank)
