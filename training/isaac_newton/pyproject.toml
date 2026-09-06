@@ -21,6 +21,9 @@ sb3 = ["isaaclab-rl[sb3]", "stable-baselines3==2.7.1"]
 [tool.setuptools.packages.find]
 include = ["omd_isaac*"]
 
+[tool.setuptools.package-data]
+omd_isaac = ["resources/*.usda"]
+
 [tool.uv]
 index-strategy = "unsafe-best-match"
 prerelease = "allow"

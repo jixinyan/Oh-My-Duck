@@ -25,7 +25,7 @@ def main():
     # Register in this process first, then run the unchanged official entry point.
     register_tasks()
     sys.path.insert(0, str(script.parent))
-    sys.argv = [str(script), *args, "--external_callback", "omd_isaac.tasks.register_tasks", "--headless"]
+    sys.argv = [str(script), *args, "--external_callback", "omd_isaac.tasks.register_tasks", "--headless", "--visualizer", "none"]
     runpy.run_path(str(script), run_name="__main__")
 
 if __name__ == "__main__":

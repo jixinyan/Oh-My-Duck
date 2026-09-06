@@ -1,4 +1,5 @@
 """Explicit Newton/MJWarp diagnostic scene with canonical policy joint ordering."""
+from pathlib import Path
 from isaaclab.actuators import IdealPDActuatorCfg
 from isaaclab.assets import ArticulationCfg
 from isaaclab.envs import ManagerBasedRLEnvCfg
@@ -16,7 +17,8 @@ from . import mdp
 
 @configclass
 class SceneCfg(InteractiveSceneCfg):
-    terrain = TerrainImporterCfg(prim_path="/World/ground", terrain_type="plane")
+    terrain = TerrainImporterCfg(prim_path="/World/ground", terrain_type="usd",
+        usd_path=str(Path(__file__).parent / "resources/ground_plane.usda"))
     robot = ArticulationCfg(prim_path="{ENV_REGEX_NS}/Robot",
         spawn=UsdFileCfg(usd_path=str(usd_path()), articulation_props=ArticulationRootPropertiesCfg(enabled_self_collisions=True)),
         init_state=ArticulationCfg.InitialStateCfg(pos=(0, 0, 0.125), joint_pos=dict(zip(JOINT_NAMES, HOME)), joint_vel={".*": 0}),
