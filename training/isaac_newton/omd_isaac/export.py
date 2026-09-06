@@ -11,6 +11,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--checkpoint", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--agent-config", type=Path, help="Saved params/agent.yaml; defaults to checkpoint sibling directory")
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=False)
     import numpy as np
@@ -20,17 +21,22 @@ def main():
     from rsl_rl.runners import OnPolicyRunner
     from isaaclab_rl.rsl_rl import RslRlVecEnvWrapper
     from isaaclab_tasks.utils import launch_simulation
-    from .agent import DiagnosticRunnerCfg
     from .config import DiagnosticEnvCfg
     from .environment import DiagnosticEnv
     cfg = DiagnosticEnvCfg()
     cfg.scene.num_envs = 1
-    report = {"status": "failed", "validation": "unvalidated", "actuator": "diagnostic_pd"}
+    report = {"status": "failed", "validation": "unvalidated", "actuator": "diagnostic_pd",
+              "rl_framework": "rsl-rl", "backend": "isaac-newton"}
     env = None
     try:
+        import yaml
+        agent_path = args.agent_config or args.checkpoint.parent / "params/agent.yaml"
+        agent_cfg = yaml.safe_load(agent_path.read_text())
+        report["agent_config_sha256"] = hashlib.sha256(agent_path.read_bytes()).hexdigest()
         with launch_simulation(cfg, {"headless": True}):
             env = DiagnosticEnv(cfg)
-            runner = OnPolicyRunner(RslRlVecEnvWrapper(env), DiagnosticRunnerCfg().to_dict(), device=env.device)
+            runner = OnPolicyRunner(RslRlVecEnvWrapper(env, clip_actions=agent_cfg.get("clip_actions")),
+                agent_cfg, device=env.device)
             runner.load(str(args.checkpoint), map_location=env.device)
             model = runner.alg.get_policy().as_onnx(verbose=False).cpu().eval()
             destination = args.output / "policy.onnx"
@@ -40,7 +46,8 @@ def main():
             graph = onnx.load(str(destination))
             metadata = {"joint_names": ",".join(JOINT_NAMES), "default_joint_pos": ",".join(map(str, HOME)),
                 "action_scale": "1.0", "observation_names": ",".join(OBSERVATION_NAMES),
-                "command_names": "twist,head_pose,body_pose", "actuator": "diagnostic_pd", "validation": "unvalidated"}
+                "command_names": "twist,head_pose,body_pose", "rl_framework": "rsl-rl",
+                "backend": "isaac-newton", "actuator": "diagnostic_pd", "validation": "unvalidated"}
             for key, value in metadata.items():
                 entry = graph.metadata_props.add(); entry.key = key; entry.value = value
             onnx.save(graph, str(destination))
