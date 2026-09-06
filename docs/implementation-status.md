@@ -19,7 +19,7 @@ Updated: 2026-09-06. Current priority: **complete the whole-project framework, t
 | Shared command schedule / joint contract | Implemented and tested | Exact 50 Hz boundaries and invalid input rejection |
 | Official MuJoCo training/export adapter | Implemented, worker validation pending | Isolated setup still downloading dependencies |
 | CPU MuJoCo/BAM headless evaluator | Initial implementation, unvalidated | Run fixed command sequence and save EGL video after setup |
-| Isaac Lab / Newton Microduck task | Planned | Compatibility, assets, BAM, observations, training and export |
+| Isaac Lab / Newton Microduck task | Reference review complete; implementation planned | [Pinned third-party source review](reports/isaac-newton-reference-review.md); compatibility, assets, BAM, joint mapping and export remain unvalidated |
 | Sim2sim comparison | Planned | Requires both actual backends and measured baselines |
 | Hardware | Unavailable / deferred | No physical-robot tests |
 
@@ -34,3 +34,9 @@ Updated: 2026-09-06. Current priority: **complete the whole-project framework, t
 - No training or evaluation job has been submitted in this framework-first iteration.
 
 See [framework validation](reports/framework-validation.md) and [architecture](architecture.md). Subsequent job results will include task IDs, configurations, logs, metrics and video links.
+
+## Isaac reference review and Git workflow (2026-09-06)
+
+Reviewed `kabilankb/isaaclab-microduck` at `4310fe0` without running its simulator. Static comparison confirms the same HOME names/order/values as our contract; asset parity, runtime joint order, BAM, delayed observations, environment compatibility and video remain unvalidated. The reference uses explicit PD and has inconsistent locomotion status descriptions; its results are not our baseline. See the [review and implementation sequence](reports/isaac-newton-reference-review.md).
+
+Local history already contained framework commit `bca0a90`; this investigation uses `docs/isaac-newton-reference-review`. Subsequent features use focused branches and commits per [development conventions](development.md). No remote push has occurred.
