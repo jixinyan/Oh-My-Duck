@@ -93,12 +93,12 @@ def spawn_walk_ground(prim_path, cfg, translation=None, orientation=None, **kwar
 
 def configure_walk_scene(scene_cfg):
     from pathlib import Path
-    from isaaclab.assets import AssetBaseCfg
+    from isaaclab.assets import RigidObjectCfg
     from isaaclab.sim import UsdFileCfg
     # Global Newton worlds cannot hold bodies. Replicate the immovable plane
     # alongside each robot so body exclusions survive solver translation.
     scene_cfg.terrain = None
-    scene_cfg.ground = AssetBaseCfg(prim_path="{ENV_REGEX_NS}/ground",
+    scene_cfg.ground = RigidObjectCfg(prim_path="{ENV_REGEX_NS}/ground",
         spawn=UsdFileCfg(usd_path=str(Path(__file__).parent / "resources/ground_plane.usda"),
                          func=spawn_walk_ground))
     scene_cfg.robot.spawn.func = spawn_official_walk
