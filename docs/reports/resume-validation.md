@@ -15,5 +15,10 @@ saved counter forward, independently of the new environment count.
 
 Six regression cases cover saved state, original and resumed legacy runs,
 checkpoint identity and invalid counts. The combined task/SB3 CPU suite passes
-72 tests. Separate runtime checks follow for both representative tasks and both
-simulation backends, including a second resume from a newly saved run.
+72 tests. Runtime checks at `b65e8f9` passed both representative tasks and both
+simulation backends: restored counter 120, saved counter 240, followed by fresh
+normalized exports and local packages. A second MuJoCo StandUp resume restored
+240 from the new manifest and saved 360. Every first resume recorded 768 timeout
+snapshots. Evidence is in `outputs/sb3-curriculum-resume-0906-01/`.
+The initial training/replay artifacts remain valid; earlier resume evidence did
+not establish curriculum continuity.

@@ -157,3 +157,11 @@ checks and schema-2 local packaging. Results are in
 exports/packages, this establishes eight lifecycle paths through packaging.
 It does not establish learned behavior or a successful full replay battery.
 Pre-merge tests: 24 lightweight + 64 task/SB3; local Markdown links checked.
+
+
+## Completed single-GPU execution acceptance
+
+All eight combinations completed the lifecycle and both-backend/CPU replay.
+Sixty 720p videos and finite traces were checked; all short policies failed
+behavior gates. SB3 curriculum state now survives consecutive resumes. See
+[final evidence and remaining work](rl-pipeline-acceptance.md).

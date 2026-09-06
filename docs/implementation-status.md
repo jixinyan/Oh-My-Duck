@@ -12,12 +12,12 @@ explicit evidence for implemented functionality. Architecture merged into local 
 | Core contracts/tool catalog/recording | Tested contracts, tool registry and JSONL event storage |
 | Agentic Harness, skills, robot execution | Interfaces; deterministic external-Harness mock remains future work |
 | Perception, voice, policy adapters | Interfaces for future implementation; no runtime capability claim |
-| MuJoCo RL | Both representative tasks × both native PPO frameworks have smoke/resume/export evidence |
-| Isaac/Newton RL | Both representative tasks × both native PPO frameworks have smoke/resume/export evidence |
+| MuJoCo RL | Both representative tasks × both native PPO frameworks passed the single-GPU lifecycle and completed replay |
+| Isaac/Newton RL | Both representative tasks × both native PPO frameworks passed the single-GPU lifecycle and completed replay |
 | Newton physics | Actual solver, canonical state/sensors, precise collisions, BAM cadence, DR and penalties audited |
-| Task behavior | Short smoke policies fail learned-behavior gates; longer training awaits consolidated acceptance |
-| Task replay | Shared protocol API, manual resets and 720p video implemented; Newton four-pose replay executed |
-| CPU rehearsal/sim2sim/local packages | Unified task interfaces implemented; consolidated runtime validation in progress |
+| Task behavior | All five-iteration policies fail behavior gates; long training and convergence acceptance remain |
+| Task replay | All 24 replay contexts completed; 60 videos and finite 61/14 traces checked |
+| CPU rehearsal/sim2sim/local packages | All eight policies exported/packaged and replayed in both backends plus CPU/BAM |
 | Multi-GPU | Native RSL MuJoCo DDP previously passed; Newton DDP queued; no distributed SB3 gradient claim |
 | Hardware | Unavailable; all hardware acceptance deferred |
 
@@ -29,14 +29,16 @@ checks and local schema-2 packaging using source `6303ca4`. Evidence:
 preserved; ordinary parity uses elementwise tolerance and extreme stress inputs
 use a reported per-action-vector infinity norm tolerance.
 
-MuJoCo EGL pixel readback remains unreliable; explicit OSMesa rendering has
-completed Walking task and CPU/BAM replay with valid 720p video. Complete replay,
-sim2sim, learned behavior and queued Newton DDP acceptance remain open. These
-issues do not block the completed architecture merge.
+The complete replay matrix used `a0b1f0f`; all eight policies completed both
+simulation backends and CPU/BAM rehearsal without runtime errors. Behavior failed
+as expected for short smoke checkpoints. Explicit MuJoCo OSMesa video and native
+Newton video produced 60 verified 720p clips. SB3 curriculum restoration was then
+validated at `b65e8f9` on both tasks/backends, including a second saved-state resume.
 
-The latest rendering batch passed 27 lightweight tests and 66 task/SB3 tests. Earlier
-installed-runtime checks passed seven Isaac tests and two Newton binding tests.
-Local Markdown links and imports contain no obsolete source paths.
+Latest tests passed 27 lightweight and 72 task/SB3 cases. Earlier installed-runtime
+checks passed seven Isaac and two Newton binding tests. Wheel resources/licenses,
+bytecode exclusion, three environment locks and local Markdown links were checked.
+See [complete acceptance evidence](reports/rl-pipeline-acceptance.md).
 
 Single-GPU work runs directly on the development host; only multi-GPU experiments
 use scheduler jobs. W&B remains offline. Current host workloads contend for GPUs,

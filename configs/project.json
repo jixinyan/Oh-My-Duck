@@ -41,7 +41,7 @@
     },
     "training": {
       "module": "oh_my_duck.rl.training",
-      "state": "representative_native_smoke_resume_export_verified_behavior_pending",
+      "state": "representative_single_gpu_pipeline_verified_behavior_failed_smoke",
       "role": "Independent simulation-backend and RL-framework selection, offline training and evaluation"
     },
     "perception": {
@@ -62,13 +62,13 @@
   },
   "training_backends": {
     "mujoco": {
-      "state": "owned_tasks_native_smoke_resume_export_passed",
+      "state": "owned_tasks_single_gpu_pipeline_verified",
       "physics": "MuJoCo-Warp",
       "environment": ".envs/mujoco",
       "environment_framework": "mjlab"
     },
     "isaac-newton": {
-      "state": "owned_tasks_native_smoke_resume_export_passed",
+      "state": "owned_tasks_single_gpu_pipeline_verified",
       "physics": "Newton",
       "solver": "MuJoCo-Warp",
       "environment": ".envs/isaac-newton",
@@ -85,7 +85,9 @@
     "server_jobs": "Alaya HTrain for multi-GPU only",
     "headless": true,
     "video": "offscreen_1280x720",
-    "single_gpu": "direct_development_host"
+    "single_gpu": "direct_development_host",
+    "mujoco_video": "explicit_osmesa_on_current_host; native_newton_video_unchanged",
+    "representative_videos_verified": 60
   },
   "rl_framework_registry": "oh_my_duck.rl.training.frameworks:default_framework_registry",
   "rl_acceptance": {

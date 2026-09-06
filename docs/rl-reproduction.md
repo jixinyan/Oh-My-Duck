@@ -49,4 +49,8 @@ ONNX export uses the official runner path and deployment metadata reference;
 SB3 bakes VecNormalize's mean, variance, epsilon and clipping. Numerical parity
 and behavior are separate gates. See [task/actor/reward extension](rl-task-extension.md)
 and [Newton integration](isaac-newton.md). Current work is on
-`feat/domain-architecture`; no commits have been pushed.
+`feat/rl-pipeline-validation`; no commits have been pushed.
+
+The [single-GPU execution matrix](reports/rl-pipeline-acceptance.md) is complete
+for all eight combinations. Learned behavior is not complete: all smoke policies
+failed the battery. Newton DDP remains queued.

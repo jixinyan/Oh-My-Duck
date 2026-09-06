@@ -40,7 +40,7 @@ package is patched.
   video; result `behavior_failed`.
 - The CPU batch passed 27 lightweight tests and 66 task/SB3 tests, including a
   regression that rejects a renderer which never writes the output buffer.
-- Full eight-policy replay/sim2sim validation follows this source checkpoint.
+- Full eight-policy replay/sim2sim validation passed execution checks at `a0b1f0f`: 60 videos, 24 replay contexts, finite 61/14 traces. All policies failed behavior gates. See [final evidence](rl-pipeline-acceptance.md).
 
 Failed attempts remain in their original directories, including the earlier
 EGL, thread-setting and isolated-EGL-worker experiments. The initial SB3 matrix's
