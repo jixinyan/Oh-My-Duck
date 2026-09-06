@@ -24,7 +24,16 @@ def main():
     spec = importlib.util.spec_from_file_location("omd_upstream_sb3_train", script)
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
-    module.run([*args, "--headless"])
+    # The upstream launcher imports its wrapper inside run(). Replace that one
+    # binding only for this process, retaining the upstream trainer unchanged.
+    import isaaclab_rl.sb3 as sb3
+    from .sb3_env import DiagnosticSb3VecEnvWrapper
+    original = sb3.Sb3VecEnvWrapper
+    sb3.Sb3VecEnvWrapper = DiagnosticSb3VecEnvWrapper
+    try:
+        module.run([*args, "--headless", "--visualizer", "none"])
+    finally:
+        sb3.Sb3VecEnvWrapper = original
 
 
 if __name__ == "__main__":
