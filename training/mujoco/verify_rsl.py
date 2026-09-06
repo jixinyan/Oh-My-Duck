@@ -6,6 +6,8 @@ import numpy as np
 from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
 import mjlab.tasks
 from mjlab.tasks.registry import load_env_cfg
+from omd_microduck.backends.mujoco.registration import register_tasks
+register_tasks()
 from omd_microduck.export import run_export, ExportConfig
 from omd_microduck.publish.manifest import check_onnx, smoke_run_onnx
 

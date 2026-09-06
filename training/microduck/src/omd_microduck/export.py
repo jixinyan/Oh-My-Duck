@@ -71,6 +71,8 @@ def _iteration_of(checkpoint_path: Path | None) -> int | None:
 
 
 def run_export(task_id: str, cfg: ExportConfig) -> ExportResult:
+    from omd_microduck.backends.mujoco.registration import register_tasks
+    register_tasks()
     configure_torch_backends()
 
     device = cfg.device or ("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -283,6 +285,8 @@ def main():
     # Import tasks to populate the registry.
     import mjlab.tasks  # noqa: F401
 
+    from omd_microduck.backends.mujoco.registration import register_tasks
+    register_tasks()
     all_tasks = list_tasks()
     chosen_task, remaining_args = tyro.cli(
         tyro.extras.literal_type_from_choices(all_tasks),

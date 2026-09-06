@@ -5,6 +5,8 @@ from pathlib import Path
 import mjlab.tasks
 from oh_my_duck.training.tasks import project_tasks
 from mjlab.tasks.registry import list_tasks, load_env_cfg, load_rl_cfg
+from omd_microduck.backends.mujoco.registration import register_tasks
+register_tasks()
 
 ROOT = Path(__file__).resolve().parents[2]
 

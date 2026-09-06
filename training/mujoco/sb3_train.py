@@ -17,6 +17,8 @@ import mjlab.tasks  # official entry-point registration, including MDP safety pa
 from mjlab.envs import ManagerBasedRlEnv
 from mjlab.managers.recorder_manager import RecorderTermCfg
 from mjlab.tasks.registry import list_tasks, load_env_cfg, load_rl_cfg
+from omd_microduck.backends.mujoco.registration import register_tasks
+register_tasks()
 from mjlab.utils.torch import configure_torch_backends
 from oh_my_duck.training.tasks import project_tasks
 from omd_microduck.rl.sb3 import make_policy_cfg

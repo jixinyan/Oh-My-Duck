@@ -75,6 +75,8 @@ class SB3ExportRunner(OnPolicyRunner):
 
 
 def main():
+    from omd_microduck.backends.mujoco.registration import register_tasks
+    register_tasks()
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--run", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
@@ -84,7 +86,7 @@ def main():
     task = run["task"]
     if run["backend"] != "mujoco" or run["framework"] != "sb3":
         parser.error("Expected a MuJoCo SB3 run")
-    if task not in list_tasks() or "MicroDuck" not in task:
+    if task not in list_tasks():
         parser.error("Source run must name a pinned official Microduck task")
     alias = "Omd-SB3-Export-" + task
     register_mjlab_task(alias, load_env_cfg(task), load_env_cfg(task, play=True), load_rl_cfg(task), SB3ExportRunner)
