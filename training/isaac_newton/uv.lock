@@ -1565,6 +1565,11 @@ wheels = [
 ]
 
 [[package]]
+name = "oh-my-duck"
+version = "0.1.0"
+source = { editable = "../../" }
+
+[[package]]
 name = "oh-my-duck-isaac-newton"
 version = "0.1.0"
 source = { editable = "." }
@@ -1585,6 +1590,7 @@ dependencies = [
     { name = "mujoco" },
     { name = "mujoco-warp" },
     { name = "newton", extra = ["sim"] },
+    { name = "oh-my-duck" },
     { name = "oh-my-duck-microduck" },
     { name = "onnxruntime" },
     { name = "scipy" },
@@ -1618,6 +1624,7 @@ requires-dist = [
     { name = "mujoco", specifier = "==3.8.0" },
     { name = "mujoco-warp", specifier = "==3.8.0.3" },
     { name = "newton", extras = ["sim"], specifier = "==1.2.1" },
+    { name = "oh-my-duck", editable = "../../" },
     { name = "oh-my-duck-microduck", editable = "../microduck" },
     { name = "onnxruntime" },
     { name = "scipy", specifier = ">=1.16" },
@@ -1636,6 +1643,7 @@ dependencies = [
     { name = "better-actuator-models" },
     { name = "huggingface-hub" },
     { name = "mjlab" },
+    { name = "oh-my-duck" },
     { name = "onnxruntime" },
     { name = "scipy" },
 ]
@@ -1645,6 +1653,7 @@ requires-dist = [
     { name = "better-actuator-models" },
     { name = "huggingface-hub", specifier = ">=0.27.0" },
     { name = "mjlab", specifier = "==1.3.0" },
+    { name = "oh-my-duck" },
     { name = "onnxruntime", specifier = ">=1.24.4" },
     { name = "scipy", specifier = ">=1.16" },
 ]

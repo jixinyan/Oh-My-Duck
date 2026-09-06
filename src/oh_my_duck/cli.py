@@ -47,11 +47,13 @@ def main():
         parser = argparse.ArgumentParser(description=COMMANDS[command][1])
         parser.add_argument("--all", action="store_true", help="Include tasks outside the representative validation scope")
         args = parser.parse_args(sys.argv[2:])
-        catalog = json.loads((root / "configs/official_tasks.json").read_text())
+        from .training.tasks import project_tasks
+        catalog = project_tasks(root)
         selected = json.loads((root / "configs/training.json").read_text())["representative_tasks"]
-        for task in catalog["tasks"]:
-            if args.all or task["id"] in selected:
-                print(task["id"], "[representative]" if task["id"] in selected else "[inventory only]")
+        for task in catalog.list():
+            if args.all or task.id in selected:
+                print(task.id, "[representative]" if task.id in selected else "[inventory only]",
+                      "backends=" + ",".join(task.bindings))
         print("Task registration does not imply training or behavior validation. See docs/rl-reproduction.md.")
         return 0
     if command == "frameworks":

@@ -8,13 +8,13 @@ version = "0.1.0"
 description = "Project-owned Microduck tasks, robot models, actuators and policy interfaces"
 requires-python = ">=3.12,<3.13"
 license = {file = "LICENSE"}
-dependencies = ["mjlab==1.3.0", "better-actuator-models", "scipy>=1.16", "onnxruntime>=1.24.4", "huggingface_hub>=0.27.0"]
+dependencies = ["oh-my-duck", "mjlab==1.3.0", "better-actuator-models", "scipy>=1.16", "onnxruntime>=1.24.4", "huggingface_hub>=0.27.0"]
 
 [project.scripts]
 omd-publish = "omd_microduck.publish.cli:main"
 
 [project.entry-points."mjlab.tasks"]
-omd_microduck = "omd_microduck.tasks"
+omd_microduck = "omd_microduck.backends.mujoco.registration"
 
 [tool.setuptools.packages.find]
 where = ["src"]

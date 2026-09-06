@@ -8,6 +8,7 @@ version = "0.1.0"
 description = "Isolated Isaac Lab and Newton integration for Oh My Duck"
 requires-python = ">=3.12,<3.13"
 dependencies = [
+  "oh-my-duck",
   "isaaclab", "isaaclab-assets", "isaaclab-newton[all]",
   "isaaclab-ov", "isaaclab-contrib", "isaaclab-physx", "isaaclab-rl[rsl-rl]", "isaaclab-tasks", "isaaclab-visualizers",
   "torch==2.10.0", "torchvision==0.25.0", "newton[sim]==1.2.1",
@@ -40,6 +41,7 @@ environments = ["sys_platform == 'linux' and platform_machine == 'x86_64'"]
 url = "https://pypi.nvidia.com"
 
 [tool.uv.sources]
+oh-my-duck = { path = "../..", editable = true }
 oh-my-duck-microduck = { path = "../microduck", editable = true }
 better-actuator-models = { git = "https://github.com/Rhoban/bam", rev = "62bd8ce12154340be97e06f7f41a0ca8f116d967" }
 isaaclab = { path = "../../.cache/upstream/IsaacLab/source/isaaclab", editable = true }

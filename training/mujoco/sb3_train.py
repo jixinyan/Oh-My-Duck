@@ -18,6 +18,7 @@ from mjlab.envs import ManagerBasedRlEnv
 from mjlab.managers.recorder_manager import RecorderTermCfg
 from mjlab.tasks.registry import list_tasks, load_env_cfg, load_rl_cfg
 from mjlab.utils.torch import configure_torch_backends
+from oh_my_duck.training.tasks import project_tasks
 from omd_microduck.rl.sb3 import make_policy_cfg
 from sb3_env import MjlabSb3VecEnv, TerminalObservationRecorder
 
@@ -71,7 +72,7 @@ class RewardAudit(BaseCallback):
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("task", choices=[t for t in list_tasks() if "MicroDuck" in t])
+    parser.add_argument("task", choices=[t.id for t in project_tasks().list("mujoco")])
     parser.add_argument("--num-envs", type=int, default=64)
     parser.add_argument("--iterations", type=int, default=5)
     parser.add_argument("--seed", type=int, default=42)

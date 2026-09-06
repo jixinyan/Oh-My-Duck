@@ -3,6 +3,7 @@ import argparse
 import json
 from pathlib import Path
 import mjlab.tasks
+from oh_my_duck.training.tasks import project_tasks
 from mjlab.tasks.registry import list_tasks, load_env_cfg, load_rl_cfg
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -14,9 +15,8 @@ def name(value):
 
 def catalog():
     tasks = []
-    for task in list_tasks():
-        if 'MicroDuck' not in task:
-            continue
+    for spec in project_tasks().list('mujoco'):
+        task = spec.id
         cfg, agent = load_env_cfg(task), load_rl_cfg(task)
         model = cfg.scene.entities['robot'].build().compile()
         servos = [model.joint(i).name for i in range(model.njnt)
