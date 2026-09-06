@@ -98,6 +98,10 @@ def main():
         # Verify native reload including normalization, not just ZIP existence.
         batch = np.random.default_rng(args.seed).normal(size=(16, 61)).astype(np.float32)
         batch[:, 3:6] = (0, 0, -1)
+        # Official configure_torch_backends enables TF32 for training. Compare
+        # reload in FP32 so GPU tensor-core rounding is not mistaken for lost state.
+        torch.backends.cuda.matmul.allow_tf32 = False
+        torch.backends.cudnn.allow_tf32 = False
         expected, _ = model.predict(normalized.normalize_obs(batch.copy()), deterministic=True)
         loaded_norm = VecNormalize.load(args.output / "vecnormalize.pkl", adapter)
         loaded = PPO.load(args.output / "model.zip", device="cpu")
@@ -123,6 +127,10 @@ def main():
                            for name in ("model.zip", "vecnormalize.pkl")}
         (args.output / "run.json").write_text(json.dumps(report, indent=2) + "\n")
         print(json.dumps(report, indent=2))
+    except Exception as error:
+        (args.output / "failure.json").write_text(json.dumps({"status": "failed",
+            "error": f"{type(error).__name__}: {error}"}, indent=2) + "\n")
+        raise
     finally:
         if adapter is not None:
             adapter.close()
