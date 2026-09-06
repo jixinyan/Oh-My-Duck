@@ -13,7 +13,7 @@ def project_root():
 
 
 def asset_source():
-    return project_root() / ".cache/upstream/microduck_rl/src/mjlab_microduck/robot/microduck"
+    return project_root() / "training/microduck/src/omd_microduck/robot/microduck"
 
 
 ROBOT_MODELS = {"walk": "robot_walk.xml", "groundcontact": "robot_groundcontact.xml"}

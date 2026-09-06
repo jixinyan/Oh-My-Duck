@@ -109,3 +109,10 @@ Full official AGENTS.md read; 199 official CPU regressions passed, 1 skipped. Of
 ## Representative RL reproduction scope (2026-09-06)
 
 用户收敛验收范围为官方 Flat Walking 与 Flat StandUp，覆盖 MuJoCo/mjlab 与 Isaac Lab/Newton、RSL-RL 与 SB3，共 8 个组合。完整 33 项官方任务仅作扩展清单，不能把注册当作复现通过。各框架保留原生 PPO：RSL-RL 使用原生多 GPU 分布式学习，SB3 使用向量环境与跨 GPU 独立任务并行，不引入异步 actor–learner。吞吐通过实际测量决定 GPU/环境数量。W&B 为标配但只用 offline，现有线上账号不是用户账号，禁止上传或同步。当前已验证结果保持原有范围，新增组合仍需 smoke、恢复、导出、有效行为与 sim2sim 验收。任务选择和日志默认值集中在 `configs/training.json`，详细矩阵见 [RL reproduction](rl-reproduction.md)。本地 main 已合并，新开发分支为 `feat/rl-task-reproduction`。
+
+
+## 2026-09-06：任务源码归属调整
+
+根据用户要求，Microduck 的 task/MDP、actor/critic 配置、机器人模型、BAM 扩展、runner、导出与 CPU 回放迁入 `training/microduck/src/omd_microduck`，成为项目内可编辑源码。`UPSTREAM.json` 与 Apache-2.0 许可证保留官方来源；缓存仓库只作对照，不再提供 Microduck 运行时任务。MuJoCo 两种框架与 Isaac 的共享机器人/BAM 引用已切换；通用 mjlab、Isaac Lab、Newton 和原生 PPO 仍作为依赖。初始 33 项配置清单在命名空间变更之外与官方基线一致，验收仍只覆盖 Walking/StandUp。
+
+这是源码归属迁移，不等于完整 Isaac 任务接入或有效策略训练完成。迁移后 GPU smoke、恢复、导出和 Isaac 新指纹资产重建仍待验证；此前训练结果属于旧入口。扩展入口及下一步见 [Microduck package](../training/microduck/README.md) 与 [迁移交接](reports/owned-task-migration.md)。

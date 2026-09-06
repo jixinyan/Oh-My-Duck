@@ -18,8 +18,8 @@ from stable_baselines3 import PPO
 from rsl_rl.runners import OnPolicyRunner
 import mjlab.tasks
 from mjlab.tasks.registry import register_mjlab_task, load_env_cfg, load_rl_cfg, list_tasks
-from mjlab_microduck.export import ExportConfig, run_export
-from mjlab_microduck.publish.manifest import check_onnx, smoke_run_onnx
+from omd_microduck.export import ExportConfig, run_export
+from omd_microduck.publish.manifest import check_onnx, smoke_run_onnx
 
 
 class NormalizedSB3Actor(torch.nn.Module):
@@ -105,7 +105,7 @@ def main():
     actual = np.concatenate([session.run(None, {session.get_inputs()[0].name: row[None]})[0] for row in batch])
     np.testing.assert_allclose(actual, expected, atol=2e-5, rtol=1e-5)
     report = {"status": "passed", "task": task, "framework": "sb3", "backend": "mujoco",
-        "export_path": "mjlab_microduck.export.run_export -> inherited OnPolicyRunner.export_policy_to_onnx",
+        "export_path": "omd_microduck.export.run_export -> inherited OnPolicyRunner.export_policy_to_onnx",
         "normalizer": "native SB3 VecNormalize mean/variance/epsilon/clip baked into graph",
         "samples": len(batch), "max_abs_error": float(np.max(np.abs(actual-expected))),
         "policy_sha256": hashlib.sha256(result.onnx_path.read_bytes()).hexdigest(),

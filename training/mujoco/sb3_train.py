@@ -1,4 +1,4 @@
-"""Train PPO with SB3 using the unchanged official Microduck task registry."""
+"""Train PPO with SB3 using the project-owned Microduck task registry."""
 import argparse
 from dataclasses import asdict
 import hashlib
@@ -18,6 +18,7 @@ from mjlab.envs import ManagerBasedRlEnv
 from mjlab.managers.recorder_manager import RecorderTermCfg
 from mjlab.tasks.registry import list_tasks, load_env_cfg, load_rl_cfg
 from mjlab.utils.torch import configure_torch_backends
+from omd_microduck.rl.sb3 import make_policy_cfg
 from sb3_env import MjlabSb3VecEnv, TerminalObservationRecorder
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -106,14 +107,14 @@ def main():
         else:
             normalized = VecNormalize(adapter, norm_obs=True, norm_reward=False, clip_obs=100.0)
             algorithm = official_agent.algorithm
-            model = PPO("MlpPolicy", normalized, n_steps=official_agent.num_steps_per_env,
+            policy_cfg = make_policy_cfg(args.task, official_agent)
+            model = PPO(policy_cfg.policy, normalized, n_steps=official_agent.num_steps_per_env,
                 batch_size=args.num_envs * official_agent.num_steps_per_env // algorithm.num_mini_batches,
                 n_epochs=algorithm.num_learning_epochs, learning_rate=algorithm.learning_rate,
                 gamma=algorithm.gamma, gae_lambda=algorithm.lam, clip_range=algorithm.clip_param,
                 ent_coef=algorithm.entropy_coef, vf_coef=algorithm.value_loss_coef,
                 max_grad_norm=algorithm.max_grad_norm, target_kl=algorithm.desired_kl,
-                policy_kwargs={"activation_fn": torch.nn.ELU,
-                    "net_arch": dict(pi=list(official_agent.actor.hidden_dims), vf=list(official_agent.critic.hidden_dims))},
+                policy_kwargs=policy_cfg.kwargs,
                 device=args.device, seed=args.seed, verbose=1, tensorboard_log=str(args.output / "tensorboard"))
         model.tensorboard_log = str(args.output / "tensorboard")
         normalized.training = True

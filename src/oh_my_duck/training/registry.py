@@ -36,11 +36,10 @@ class MujocoTrainingBackend:
         interpreter = self.root / ".envs/mujoco/bin/python"
         if not interpreter.exists():
             raise BackendUnavailable("Run python omd.py setup first")
-        upstream = self.root / ".cache/upstream/microduck_rl"
         if operation == "train":
             entry = (str(self.root / "training/mujoco/rsl_train.py"),)
         elif operation == "export":
-            entry = (str(upstream / "scripts/export.py"),)
+            entry = ("-m", "omd_microduck.export")
         elif operation in ("probe", "eval"):
             entry = (str(self.root / "training/mujoco" / f"{operation}.py"),)
         else:

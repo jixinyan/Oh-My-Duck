@@ -41,7 +41,7 @@
     },
     "training": {
       "module": "oh_my_duck.training",
-      "state": "interface_and_initial_adapter",
+      "state": "owned_task_source_migrated_gpu_revalidation_pending",
       "role": "Independent simulation-backend and RL-framework selection, offline training and evaluation"
     },
     "perception": {
@@ -62,7 +62,7 @@
   },
   "training_backends": {
     "mujoco": {
-      "state": "official_walking_train_export_and_sb3_resume_verified",
+      "state": "owned_source_cpu_verified_gpu_revalidation_pending",
       "physics": "MuJoCo-Warp",
       "environment": ".envs/mujoco",
       "environment_framework": "mjlab"

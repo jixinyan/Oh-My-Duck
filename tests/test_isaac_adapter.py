@@ -80,7 +80,7 @@ class IsaacAdapterTests(unittest.TestCase):
             root = Path(directory)
             (root / "configs").mkdir()
             (root / "configs/upstream.json").write_text("{}")
-            source = root / ".cache/upstream/microduck_rl/src/mjlab_microduck/robot/microduck"
+            source = root / "training/microduck/src/omd_microduck/robot/microduck"
             source.mkdir(parents=True)
             xml = source / "robot_walk.xml"
             xml.write_text("source A")

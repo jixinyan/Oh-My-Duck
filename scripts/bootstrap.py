@@ -60,8 +60,9 @@ def main():
         env.update(UV_PROJECT_ENVIRONMENT=str(ROOT / (".envs/mujoco-sb3" if args.rl_framework == "sb3" else ".envs/mujoco")),
                    UV_CACHE_DIR=str(ROOT / ".cache/uv"),
                    UV_PYTHON_INSTALL_DIR=str(ROOT / ".cache/python"), UV_HTTP_TIMEOUT="600")
-        project = ROOT / "training/mujoco" if args.rl_framework == "sb3" else upstream / "microduck_rl"
-        run(["uv", "sync", "--project", project, "--locked", "--python", "3.12"], env=env)
+        project = ROOT / "training/mujoco"
+        extras = ["--extra", "sb3"] if args.rl_framework == "sb3" else []
+        run(["uv", "sync", "--project", project, "--locked", "--python", "3.12", *extras], env=env)
     print("Bootstrap complete. GPU validation must run through the scheduler.")
 
 

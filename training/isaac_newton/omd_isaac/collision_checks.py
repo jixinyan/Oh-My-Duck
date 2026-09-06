@@ -29,7 +29,7 @@ def _key(label):
 
 def check_walk_collisions(env):
     bam_cfg()  # registers the pinned source path without copying its constants
-    from mjlab_microduck.robot.microduck_constants import MICRODUCK_WALK_ROBOT_CFG
+    from omd_microduck.robot.microduck_constants import MICRODUCK_WALK_ROBOT_CFG
     reference = MICRODUCK_WALK_ROBOT_CFG.build().compile()
     reference_geoms = {}
     for i in range(reference.ngeom):

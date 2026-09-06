@@ -1585,6 +1585,7 @@ dependencies = [
     { name = "mujoco" },
     { name = "mujoco-warp" },
     { name = "newton", extra = ["sim"] },
+    { name = "oh-my-duck-microduck" },
     { name = "onnxruntime" },
     { name = "scipy" },
     { name = "torch" },
@@ -1617,6 +1618,7 @@ requires-dist = [
     { name = "mujoco", specifier = "==3.8.0" },
     { name = "mujoco-warp", specifier = "==3.8.0.3" },
     { name = "newton", extras = ["sim"], specifier = "==1.2.1" },
+    { name = "oh-my-duck-microduck", editable = "../microduck" },
     { name = "onnxruntime" },
     { name = "scipy", specifier = ">=1.16" },
     { name = "stable-baselines3", marker = "extra == 'sb3'", specifier = "==2.7.1" },
@@ -1625,6 +1627,27 @@ requires-dist = [
     { name = "warp-lang", specifier = "==1.13.0" },
 ]
 provides-extras = ["sb3"]
+
+[[package]]
+name = "oh-my-duck-microduck"
+version = "0.1.0"
+source = { editable = "../microduck" }
+dependencies = [
+    { name = "better-actuator-models" },
+    { name = "huggingface-hub" },
+    { name = "mjlab" },
+    { name = "onnxruntime" },
+    { name = "scipy" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "better-actuator-models" },
+    { name = "huggingface-hub", specifier = ">=0.27.0" },
+    { name = "mjlab", specifier = "==1.3.0" },
+    { name = "onnxruntime", specifier = ">=1.24.4" },
+    { name = "scipy", specifier = ">=1.16" },
+]
 
 [[package]]
 name = "omegaconf"

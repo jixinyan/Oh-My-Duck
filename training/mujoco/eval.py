@@ -8,7 +8,6 @@ from __future__ import annotations
 import argparse
 from collections import defaultdict
 import hashlib
-import importlib.util
 import json
 import math
 import os
@@ -40,16 +39,13 @@ def main():
     config = json.loads(args.config.read_text())
     schedule = compile_schedule(config)
     lock = json.loads((ROOT / "configs/upstream.json").read_text())
-    upstream = ROOT / ".cache/upstream/microduck_rl"
     policy_path = (args.policy or ROOT / "artifacts/policies/official" / lock["policy"]["revision"] / "alpha_walking.onnx").resolve()
     args.output.mkdir(parents=True, exist_ok=False)
     (args.output / "config.json").write_text(json.dumps(config, indent=2) + "\n")
-    spec = importlib.util.spec_from_file_location("official_infer_policy", upstream / "scripts/infer_policy.py")
-    ip = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(ip)
+    from omd_microduck.rehearsal import infer_policy as ip
     np.random.seed(config["seed"])
     bam = config["bam"]
-    scene = upstream / ip.MICRODUCK_XML
+    scene = Path(ip.MICRODUCK_XML)
     bam_model = ip.load_bam_model(bam["kp_fw"], bam["vin"], ip.BAM_MAX_CURRENT)
     model, data, controller, _ = ip.load_mujoco_with_bam(str(scene), bam_model, config["physics_dt"],
                                                        bam["vin_drop_gain"], ip.BAM_VIN_MIN)
@@ -156,7 +152,7 @@ def main():
                   "mean_contact_foot_horizontal_speed_m_s": float(np.mean(contact_speeds)) if contact_speeds else None,
                   "policy": str(policy_path), "policy_sha256": digest(policy_path),
                   "config_sha256": digest(args.config), "upstream": lock["repositories"],
-                  "scene": str(scene.relative_to(upstream)), "onnx_metadata": session.get_modelmeta().custom_metadata_map,
+                  "scene": str(scene.relative_to(ROOT)), "onnx_metadata": session.get_modelmeta().custom_metadata_map,
                   "video": "rollout.mp4" if args.video else None,
                   "note": "Single walking policy, no recovery, no additional action filtering or delay. CPU rehearsal collision model."}
         (args.output / "result.json").write_text(json.dumps(result, indent=2) + "\n")

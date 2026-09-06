@@ -11,8 +11,8 @@ from pathlib import Path
 import shutil
 import tempfile
 
-from mjlab_microduck.publish.cli import PublishConfig, run
-from mjlab_microduck.publish import manifest as official
+from omd_microduck.publish.cli import PublishConfig, run
+from omd_microduck.publish import manifest as official
 
 ROOT = Path(__file__).resolve().parents[2]
 

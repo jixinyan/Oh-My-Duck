@@ -8,8 +8,8 @@ The acceptance scope is **Flat Walking** and **Flat StandUp**, each on MuJoCo/mj
 
 | Official task | MuJoCo / RSL-RL | MuJoCo / SB3 | Isaac Newton / RSL-RL | Isaac Newton / SB3 |
 |---|---|---|---|---|
-| Mjlab-Velocity-Flat-MicroDuck | Single-GPU smoke/export passed; distributed and learned behavior pending | Single-GPU smoke/resume/export passed; learned behavior pending | BAM/contact replay passed; full task pending | Full task pending |
-| Mjlab-StandUp-Flat-MicroDuck | Official implementation available; verification pending | Official factory and export adapter available; verification pending | Ground-contact asset and full task pending | Ground-contact asset and full task pending |
+| Mjlab-Velocity-Flat-MicroDuck | Earlier single/dual-GPU smoke and export passed; owned-source GPU rerun and learned behavior pending | Single-GPU smoke/resume/export passed; learned behavior pending | BAM/contact replay passed; full task pending | Full task pending |
+| Mjlab-StandUp-Flat-MicroDuck | Earlier dual-GPU smoke/reward audit/export passed; owned-source rerun and behavior pending | Earlier smoke/reward audit/resume/export passed; owned-source rerun and behavior pending | Earlier ground-contact conversion passed; new source fingerprint and full task pending | Earlier ground-contact conversion passed; new source fingerprint and full task pending |
 
 Every combination requires configuration/state/reward checks, the official 64-environment / 5-iteration smoke, native checkpoint continuation, normalized official-runner ONNX export, task-specific behavior measurements and recorded playback. Smoke checkpoints do not establish task reproduction. Cross-simulator replay must preserve commands, observation/servo ordering, HOME, BAM, timing and task-specific spawn semantics.
 
@@ -28,8 +28,12 @@ Keep local W&B run data alongside checkpoints, normalization state, source revis
 ## Implementation order
 
 1. Verify representative MuJoCo tasks, native RSL-RL multi-GPU launch and offline W&B for both frameworks.
-2. Migrate full official task semantics into a reusable Isaac binding: observations, commands, sensors, rewards, DR, curricula and NaN/reset handling. Keep task recipes sourced from the official factories; unsupported terms fail explicitly.
+2. Migrate full official task semantics into a reusable Isaac binding: observations, commands, sensors, rewards, DR, curricula and NaN/reset handling. Keep task recipes in the project-owned factories under `training/microduck`; unsupported terms fail explicitly.
 3. Validate Isaac training, resume and official-compatible export for both frameworks, then train and evaluate behavior in both simulators.
 4. Benchmark environment/GPU configurations after correctness gates, and use the measured configuration for longer native-PPO training.
 
 Local `main` includes merge `0ab535a`. Further work is on `feat/rl-task-reproduction`. Neither branch has been pushed by this workflow.
+
+## Owned-source migration
+
+Tasks and policy configuration are now maintained under [training/microduck](../training/microduck/README.md). Existing evidence predates this source switch; CPU inventory parity is not GPU acceptance. See [migration handoff](reports/owned-task-migration.md).

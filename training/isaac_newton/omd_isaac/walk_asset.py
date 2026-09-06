@@ -36,7 +36,7 @@ def align_collision_groups(*_event_args):
     # preserves the plane and exactly the two official foot-ground contacts.
     from .official import bam_cfg
     bam_cfg()
-    from mjlab_microduck.robot.microduck_constants import MICRODUCK_WALK_ROBOT_CFG
+    from omd_microduck.robot.microduck_constants import MICRODUCK_WALK_ROBOT_CFG
     reference = MICRODUCK_WALK_ROBOT_CFG.build().compile()
     builder.shape_collision_group[ground[0]] = 0
     for world, group in groups.items():

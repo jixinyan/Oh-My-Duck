@@ -1,6 +1,5 @@
 """Official BAM three-second noisy HOME settle, with measured height and tilt."""
 import argparse
-import importlib.util
 import json
 from pathlib import Path
 import sys
@@ -18,15 +17,12 @@ def main():
     parser.add_argument('--samples', type=int, default=64)
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=False)
-    upstream = ROOT / '.cache/upstream/microduck_rl'
-    spec = importlib.util.spec_from_file_location('official_infer_policy', upstream / 'scripts/infer_policy.py')
-    ip = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(ip)
+    from omd_microduck.rehearsal import infer_policy as ip
     rng = np.random.default_rng(42)
     records = []
     for seed in range(args.samples):
         bam = ip.load_bam_model(ip.BAM_KP_FW, float(rng.uniform(*ip.BAM_VIN_RANGE)), ip.BAM_MAX_CURRENT)
-        model, data, controller, _ = ip.load_mujoco_with_bam(str(upstream / ip.MICRODUCK_XML), bam, .005,
+        model, data, controller, _ = ip.load_mujoco_with_bam(str(ip.MICRODUCK_XML), bam, .005,
             float(rng.uniform(*ip.BAM_VIN_DROP_GAIN_RANGE)), ip.BAM_VIN_MIN)
         joint_ids = model.actuator_trnid[:, 0]
         qids = model.jnt_qposadr[joint_ids]

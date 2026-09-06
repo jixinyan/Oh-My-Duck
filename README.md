@@ -67,7 +67,7 @@ RL frameworks are a separate extension axis: RSL-RL and Stable-Baselines3 are th
 
 Both training backends are part of the project scope. The official backend remains available after the Isaac migration. **Isaac uses Newton**, initially targeting its MuJoCo-Warp solver; a PhysX substitution is not an equivalent backend.
 
-The first task is flat-ground velocity tracking. BAM actuator behavior, joint mapping, observation/action timing and normalization must match before comparing learning results. Compatible joint policies follow the official **61-observation / 14-action, 50 Hz** contract. Vision/navigation policies need their own adapters; an arbitrary VLA cannot be deployed by simply renaming its output.
+Representative RL tasks are flat-ground Walking and StandUp. Task recipes, MDP functions, robot assets and actor/critic settings are maintained in the [Microduck package](training/microduck/README.md); both backends build on this owned source. BAM actuator behavior, joint mapping, observation/action timing and normalization must match before comparing learning results. Compatible joint policies follow the official **61-observation / 14-action, 50 Hz** contract. Vision/navigation policies need their own adapters; an arbitrary VLA cannot be deployed by simply renaming its output.
 
 Training and evaluation run headlessly. Optional offscreen video supports visual inspection alongside numerical metrics. Server jobs may use one or multiple GPUs as the experiment requires.
 
