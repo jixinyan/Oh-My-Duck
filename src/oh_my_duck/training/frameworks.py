@@ -70,7 +70,7 @@ def default_framework_registry():
                          "Explicit PD diagnostic task only; BAM locomotion pending"),
     ])
     registry.register("sb3", "Stable-Baselines3", [
-        FrameworkBinding("mujoco", ("train", "export"), "official_walking_train_and_resume_passed", _sb3, "Official mjlab task; 64-env smoke and 768 timeouts passed; export runner validation pending"),
+        FrameworkBinding("mujoco", ("train", "export"), "official_walking_train_resume_and_export_passed", _sb3, "Official mjlab task; 64-env smoke, 768 timeouts, and normalized official-runner export passed; gait quality unvalidated"),
         FrameworkBinding("isaac-newton", ("train",), "diagnostic_train_and_timeouts_passed", _sb3,
                          "Optional SB3 install; PD PPO only; native checkpoint resume and ONNX export pending"),
     ])

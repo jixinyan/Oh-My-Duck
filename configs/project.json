@@ -62,7 +62,7 @@
   },
   "training_backends": {
     "mujoco": {
-      "state": "implementation_unvalidated",
+      "state": "official_walking_train_export_and_sb3_resume_verified",
       "physics": "MuJoCo-Warp",
       "environment": ".envs/mujoco",
       "environment_framework": "mjlab"
@@ -73,7 +73,7 @@
       "solver": "MuJoCo-Warp",
       "environment": ".envs/isaac-newton",
       "asset_environment": ".envs/isaac-assets",
-      "locomotion": "BAM_migration_pending",
+      "locomotion": "official_BAM_replay_exercised_collision_and_task_migration_in_progress",
       "environment_state": "installed_cpu_configuration_checked",
       "asset_environment_state": "conversion_worker_verified",
       "environment_framework": "Isaac Lab"
