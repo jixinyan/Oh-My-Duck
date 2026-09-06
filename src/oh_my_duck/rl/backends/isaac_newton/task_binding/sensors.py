@@ -117,6 +117,9 @@ class NewtonFlatHeightSensor(TerrainHeightSensor):
             raise ValueError('Only the verified flat vertical terrain scan is bound')
         self.site_ids = [robot.site_names.index(frame.name) for frame in cfg.frame]
         self.offsets,self.directions = cfg.pattern.generate_rays(None,simulation.device)
+        self._num_frames = len(self.site_ids)
+        self._num_rays_per_frame = len(self.offsets)
+        self._num_rays = self._num_frames * self._num_rays_per_frame
         if not torch.allclose(self.directions,torch.tensor([0.,0.,-1.],device=simulation.device).expand_as(self.directions)) or torch.any(self.offsets[:,2]!=0):
             raise ValueError('Flat height binding requires horizontal offsets and downward rays')
         self.plane_z = float(reference.geom_pos[allowed[0],2])

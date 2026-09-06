@@ -759,37 +759,27 @@ def set_random_ground_state(
     new_z = torch.where(is_sit, z_sit, new_z)
     new_z = torch.where(is_stand, z_stand, new_z)
 
-    env.sim.data.qpos[env_ids, 2]   = new_z
-    env.sim.data.qpos[env_ids, 3:7] = new_quat
-    env.sim.data.qvel[env_ids, :6]  = 0.0
-
-    # Sitting-bucket joint overrides (e.g. knee/ankle bent to keyframe).
-    # Override keys are SERVO indices (14-joint layout); translate to entity
-    # joint indices so models with interleaved passive_* joints (backlash)
-    # write the intended joints. qpos column = 7 + entity joint index
-    # (robot free joint first, all hinges 1-dof).
+    # Read the just-written root from generalized state, not stale forward
+    # kinematics. Entity writes preserve native joint order on each backend.
     asset: Entity = env.scene[asset_cfg.name]
-    servo_ids = _servo_joint_ids(env, asset)
-    if sitting_joint_overrides:
-        sit_env_ids = env_ids[is_sit]
-        if len(sit_env_ids) > 0:
-            for jnt_idx, angle in sitting_joint_overrides.items():
-                env.sim.data.qpos[sit_env_ids, 7 + servo_ids[jnt_idx]] = angle
+    pose = asset.data.data.qpos[env_ids][:, asset.indexing.free_joint_q_adr].clone()
+    pose[:, 2] = new_z
+    pose[:, 3:7] = new_quat
+    asset.write_root_pose_to_sim(pose, env_ids=env_ids)
+    asset.write_root_link_velocity_to_sim(torch.zeros(num, 6, device=env.device), env_ids=env_ids)
 
-    # Joint noise for sitting envs: Gaussian noise on every actuated joint
-    # so the policy sees a distribution of plausible "sit" starts rather than
-    # a single canonical pose. Captures real-world transfer where the robot's
-    # joint angles won't match the SIT keyframe exactly when the standup
-    # policy takes over from the sit policy.
-    if sitting_joint_noise_std > 0.0:
-        sit_env_ids = env_ids[is_sit]
-        if len(sit_env_ids) > 0:
-            # Servo joints only: passive_* joints (backlash hinges) have tiny
-            # ranges and must stay at 0 on reset.
-            n_sit = len(sit_env_ids)
-            cols = torch.tensor([7 + j for j in servo_ids], device=env.device, dtype=torch.long)
-            noise = torch.randn(n_sit, len(cols), device=env.device) * sitting_joint_noise_std
-            env.sim.data.qpos[sit_env_ids.unsqueeze(1).long(), cols.unsqueeze(0)] += noise
+    servo_ids = _servo_joint_ids(env, asset)
+    sit_env_ids = env_ids[is_sit]
+    if len(sit_env_ids) > 0 and (sitting_joint_overrides or sitting_joint_noise_std > 0.0):
+        joints = asset.data.joint_pos[sit_env_ids].clone()
+        if sitting_joint_overrides:
+            for jnt_idx, angle in sitting_joint_overrides.items():
+                joints[:, servo_ids[jnt_idx]] = angle
+        if sitting_joint_noise_std > 0.0:
+            cols = torch.tensor(servo_ids, device=env.device, dtype=torch.long)
+            noise = torch.randn(len(sit_env_ids), len(cols), device=env.device) * sitting_joint_noise_std
+            joints[:, cols] += noise
+        asset.write_joint_position_to_sim(joints, env_ids=sit_env_ids)
 
 
 def set_random_crouch_state(

@@ -16,7 +16,7 @@ class NewtonScene(Scene):
         self._spec = reference_scene.spec
         self._sensor_context = None
         self._default_env_origins = as_torch(native.scene.env_origins)
-        self._terrain = None
+        self._terrain = SimpleNamespace(cfg=cfg.terrain,env_origins=self._default_env_origins,terrain_generator=None)
         self._entities = {'robot':NewtonEntity(cfg.entities['robot'],native.scene['robot'],simulation)}
         robot = self._entities['robot']
         self._sensors = {}
