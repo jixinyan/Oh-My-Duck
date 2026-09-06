@@ -1,6 +1,6 @@
 # Isaac Lab / Newton integration
 
-This backend is in development. The code currently implements **asset conversion and a PD diagnostic task**, not the official BAM walking recipe. No Isaac GPU run has passed yet. Keep the full product scope in the [Project Design](Agentic%20Microduck%20-%20Project%20Design%20v0.1.md).
+This backend is in development. The code currently implements **asset conversion and a PD diagnostic task**, not the official BAM walking recipe. The training environment is installed and its four CPU configuration tests pass. The conversion environment is still installing; no Isaac GPU run has passed yet. Keep the full product scope in the [Project Design](Agentic%20Microduck%20-%20Project%20Design%20v0.1.md).
 
 ## Environments and source versions
 
@@ -34,7 +34,7 @@ python omd.py submit --name omd-isaac-pd-export-001 --gpus 1 --   python omd.py 
 python omd.py submit --name omd-isaac-pd-video-001 --gpus 1 --   python omd.py eval --backend isaac-newton --output outputs/isaac-video-001   --num-envs 1 --steps 100 --video
 ```
 
-Train delegates to the pinned Isaac Lab RSL-RL script with our registration hook and headless flag. Checkpoints are under `logs/rsl_rl/omd_isaac_pd_diagnostic/`. Training without an explicit diagnostic task fails because BAM locomotion is not implemented. The diagnostic task has a small posture reward, zero commands, a compact network and explicit PD actuation. Its checkpoints are not walking-policy candidates and are labeled accordingly when exported.
+Train registers our task before running the unchanged pinned Isaac Lab RSL-RL script, retaining its callback and headless flag. Early registration also makes upstream task-aware help work. Checkpoints are under `logs/rsl_rl/omd_isaac_pd_diagnostic/`. Training without an explicit diagnostic task fails because BAM locomotion is not implemented. The diagnostic task has a small posture reward, zero commands, a compact network and explicit PD actuation. Its checkpoints are not walking-policy candidates and are labeled accordingly when exported.
 
 Probe checks the actual Newton `SolverMuJoCo`, canonical joint/action mapping, raw asset mass/COM/principal inertia/limits/armature, finite stepping and a non-uniform offscreen image. Eval supports bounded zero-action PD holding and optional 61D ONNX replay, but this is still a PD diagnostic, not a BAM sim2sim comparison. It stops on termination rather than treating automatic resets as successful continuation. Export includes the actor's normalizer and compares Torch/ONNX outputs on 16 identical synthetic inputs; these are numerical checks, not behavior certification.
 
@@ -61,3 +61,11 @@ Worker outputs include `result.json`, `trajectory.npz`, `frame.png`, and optiona
 3. Implement BAM m6 with verified world/DOF mapping, per-world friction/damping storage, voltage and action delays. Current solver field inspection performs **no BAM writes**.
 4. Add official delayed observations, encoder bias, commands, rewards and domain randomization; verify the shared contract on actual states.
 5. Replay the same official policy in both validated backends; then train, resume, export and measure locomotion. Keep diagnostic results separate from this milestone.
+
+## CPU configuration checks
+
+```bash
+CUDA_VISIBLE_DEVICES='' .envs/isaac-newton/bin/python -m unittest discover -s training/isaac_newton/tests -v
+```
+
+These tests use actual installed Isaac packages, construct configs and verify rejection before simulator startup. They are separate from the lightweight root suite and do not establish GPU/physics/video correctness. The source-only `isaaclab-physx` material shim and `isaaclab-contrib` scene-config imports are required by the pinned core; runtime physics remains explicitly Newton/MJWarp.

@@ -697,6 +697,27 @@ version = "0.3.4"
 source = { editable = "../../.cache/upstream/IsaacLab/source/isaaclab_assets" }
 
 [[package]]
+name = "isaaclab-contrib"
+version = "0.4.4"
+source = { editable = "../../.cache/upstream/IsaacLab/source/isaaclab_contrib" }
+
+[package.metadata]
+requires-dist = [
+    { name = "albumentations", marker = "extra == 'rlinf'", specifier = ">=1.4.18" },
+    { name = "av", marker = "extra == 'rlinf'", specifier = ">=12.3.0" },
+    { name = "decord2", marker = "extra == 'rlinf'" },
+    { name = "diffusers", marker = "extra == 'rlinf'", specifier = ">=0.35.0" },
+    { name = "dm-tree", marker = "extra == 'rlinf'", specifier = ">=0.1.8" },
+    { name = "numpydantic", marker = "extra == 'rlinf'", specifier = ">=1.7.0" },
+    { name = "pandas", marker = "extra == 'rlinf'" },
+    { name = "peft", marker = "extra == 'rlinf'", specifier = ">=0.17.0" },
+    { name = "pydantic", marker = "extra == 'rlinf'", specifier = ">=2.7,<2.12" },
+    { name = "ray", extras = ["default"], marker = "extra == 'rlinf'", specifier = ">=2.47.0" },
+    { name = "timm", marker = "extra == 'rlinf'", specifier = ">=1.0.14" },
+]
+provides-extras = ["rlinf"]
+
+[[package]]
 name = "isaaclab-newton"
 version = "0.13.6"
 source = { editable = "../../.cache/upstream/IsaacLab/source/isaaclab_newton" }
@@ -729,6 +750,15 @@ requires-dist = [
     { name = "ovrtx", marker = "extra == 'ovrtx'", specifier = ">=0.3.0,<0.4.0" },
 ]
 provides-extras = ["ovrtx", "all"]
+
+[[package]]
+name = "isaaclab-physx"
+version = "1.1.3"
+source = { editable = "../../.cache/upstream/IsaacLab/source/isaaclab_physx" }
+
+[package.metadata]
+requires-dist = [{ name = "newton", extras = ["sim"], marker = "extra == 'newton'", specifier = "==1.2.1" }]
+provides-extras = ["newton"]
 
 [[package]]
 name = "isaaclab-rl"
@@ -1237,8 +1267,10 @@ dependencies = [
     { name = "imageio", extra = ["ffmpeg"] },
     { name = "isaaclab" },
     { name = "isaaclab-assets" },
+    { name = "isaaclab-contrib" },
     { name = "isaaclab-newton", extra = ["all"] },
     { name = "isaaclab-ov" },
+    { name = "isaaclab-physx" },
     { name = "isaaclab-rl", extra = ["rsl-rl"] },
     { name = "isaaclab-tasks" },
     { name = "isaaclab-visualizers" },
@@ -1256,8 +1288,10 @@ requires-dist = [
     { name = "imageio", extras = ["ffmpeg"] },
     { name = "isaaclab", editable = "../../.cache/upstream/IsaacLab/source/isaaclab" },
     { name = "isaaclab-assets", editable = "../../.cache/upstream/IsaacLab/source/isaaclab_assets" },
+    { name = "isaaclab-contrib", editable = "../../.cache/upstream/IsaacLab/source/isaaclab_contrib" },
     { name = "isaaclab-newton", extras = ["all"], editable = "../../.cache/upstream/IsaacLab/source/isaaclab_newton" },
     { name = "isaaclab-ov", editable = "../../.cache/upstream/IsaacLab/source/isaaclab_ov" },
+    { name = "isaaclab-physx", editable = "../../.cache/upstream/IsaacLab/source/isaaclab_physx" },
     { name = "isaaclab-rl", extras = ["rsl-rl"], editable = "../../.cache/upstream/IsaacLab/source/isaaclab_rl" },
     { name = "isaaclab-tasks", editable = "../../.cache/upstream/IsaacLab/source/isaaclab_tasks" },
     { name = "isaaclab-visualizers", editable = "../../.cache/upstream/IsaacLab/source/isaaclab_visualizers" },

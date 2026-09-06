@@ -54,3 +54,7 @@ Git inspection found 54 tracked project files and no modified or untracked entri
 - User authorized Isaac development while MuJoCo waits. Branch: `feat/isaac-newton-integration`; main includes the earlier framework/review history.
 - Two independent Isaac locks resolved, installation started. Diagnostic task/asset conversion/worker entry points are implemented and pending runtime checks. BAM and full locomotion task are not implemented.
 - **11 lightweight tests pass**: the original eight plus reordered/passive joint mapping, explicit diagnostic-backend boundaries, and rejection of stale/missing generated assets. Compilation and CLI help pass. These are not Isaac runtime tests.
+
+## Isaac installed-package checks (2026-09-06)
+
+Newton training environment installation completed. Dependency checks pass for 156 packages; task configuration, Newton camera configuration, runtime imports and actual training CLI help pass on CPU. There are now **11 lightweight framework tests plus 4 installed-Isaac CPU tests passing**. The asset-conversion environment is still installing at this checkpoint. No GPU simulation/training/video or BAM migration result is claimed. See [environment evidence and fixes](reports/isaac-environment-resolution.md).

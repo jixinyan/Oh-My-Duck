@@ -1,9 +1,10 @@
 """Delegate diagnostic PPO training to the pinned Isaac Lab RSL-RL entry point."""
 import os
+import runpy
 from pathlib import Path
 import sys
 from .paths import project_root
-from .tasks import TASK_ID
+from .tasks import TASK_ID, register_tasks
 
 
 def main():
@@ -20,8 +21,12 @@ def main():
         raise FileNotFoundError("Pinned Isaac Lab trainer missing; run setup")
     os.environ["PYTHONPATH"] = str(script.parent) + os.pathsep + os.environ.get("PYTHONPATH", "")
     os.chdir(project_root())
-    os.execv(sys.executable, [sys.executable, str(script), *args,
-        "--external_callback", "omd_isaac.tasks.register_tasks", "--headless"])
+    # Upstream --help inspects the task before invoking external_callback.
+    # Register in this process first, then run the unchanged official entry point.
+    register_tasks()
+    sys.path.insert(0, str(script.parent))
+    sys.argv = [str(script), *args, "--external_callback", "omd_isaac.tasks.register_tasks", "--headless"]
+    runpy.run_path(str(script), run_name="__main__")
 
 if __name__ == "__main__":
     main()

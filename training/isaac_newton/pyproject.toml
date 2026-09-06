@@ -9,7 +9,7 @@ description = "Isolated Isaac Lab and Newton integration for Oh My Duck"
 requires-python = ">=3.12,<3.13"
 dependencies = [
   "isaaclab", "isaaclab-assets", "isaaclab-newton[all]",
-  "isaaclab-ov", "isaaclab-rl[rsl-rl]", "isaaclab-tasks", "isaaclab-visualizers",
+  "isaaclab-ov", "isaaclab-contrib", "isaaclab-physx", "isaaclab-rl[rsl-rl]", "isaaclab-tasks", "isaaclab-visualizers",
   "torch==2.10.0", "torchvision==0.25.0", "newton[sim]==1.2.1",
   "warp-lang==1.13.0", "mujoco-warp==3.8.0.3", "mujoco==3.8.0",
   "onnxruntime", "imageio[ffmpeg]",
@@ -30,6 +30,8 @@ url = "https://pypi.nvidia.com"
 isaaclab = { path = "../../.cache/upstream/IsaacLab/source/isaaclab", editable = true }
 isaaclab-assets = { path = "../../.cache/upstream/IsaacLab/source/isaaclab_assets", editable = true }
 isaaclab-newton = { path = "../../.cache/upstream/IsaacLab/source/isaaclab_newton", editable = true }
+isaaclab-physx = { path = "../../.cache/upstream/IsaacLab/source/isaaclab_physx", editable = true }
+isaaclab-contrib = { path = "../../.cache/upstream/IsaacLab/source/isaaclab_contrib", editable = true }
 isaaclab-ov = { path = "../../.cache/upstream/IsaacLab/source/isaaclab_ov", editable = true }
 isaaclab-rl = { path = "../../.cache/upstream/IsaacLab/source/isaaclab_rl", editable = true }
 isaaclab-tasks = { path = "../../.cache/upstream/IsaacLab/source/isaaclab_tasks", editable = true }

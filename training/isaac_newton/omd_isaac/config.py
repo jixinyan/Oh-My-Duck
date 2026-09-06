@@ -7,7 +7,7 @@ from isaaclab.managers import EventTermCfg, ObservationGroupCfg, ObservationTerm
 from isaaclab.scene import InteractiveSceneCfg
 from isaaclab.sim import SimulationCfg, UsdFileCfg, ArticulationRootPropertiesCfg
 from isaaclab.terrains import TerrainImporterCfg
-from isaaclab.utils import configclass
+from isaaclab.utils.configclass import configclass
 from isaaclab_newton.physics import NewtonCfg, MJWarpSolverCfg
 from .contracts import JOINT_NAMES, HOME
 from .paths import usd_path
