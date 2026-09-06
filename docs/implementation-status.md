@@ -2,8 +2,8 @@
 
 Updated 2026-09-06. The product scope remains the Agentic Microduck Project Design.
 Implementation proceeds by domain, with interfaces for later capabilities and
-explicit evidence for implemented functionality. Work is local on
-`feat/domain-architecture`; no push or public policy upload has occurred.
+explicit evidence for implemented functionality. Architecture merged into local `main` at `6303ca4`; follow-up validation is on
+`feat/rl-pipeline-validation`. No push or public policy upload has occurred.
 
 | Component | Current state |
 |---|---|
@@ -22,16 +22,20 @@ explicit evidence for implemented functionality. Work is local on
 | Hardware | Unavailable; all hardware acceptance deferred |
 
 The consolidated batch at `5971dca` passed training and resume for all eight
-combinations. All four SB3 exports/local packages and the MuJoCo Walking RSL
-export/package passed. Three RSL exports hit the extreme-input numerical gate;
-normal inputs passed. The revised gate retains elementwise nominal checks and
-reports normwise stress error separately; runtime revalidation is pending.
-MuJoCo EGL video remains intermittent, including in CPU rehearsal. These are
-open validation issues, not evidence of accepted learned policies. The architecture
-is ready to merge locally; validation continues on a separate feature branch.
+combinations. Four SB3 exports and local packages passed there. After the merge,
+all four RSL checkpoints passed export, numerical parity, finite scalar/penalty
+checks and local schema-2 packaging using source `6303ca4`. Evidence:
+`outputs/postmerge-rsl-export-0906-01/result.json`. The earlier failures remain
+preserved; ordinary parity uses elementwise tolerance and extreme stress inputs
+use a reported per-action-vector infinity norm tolerance.
 
-The most recent CPU batch passed 24 lightweight tests and 59 task/SB3 semantic
-tests. Installed-runtime Isaac/sensor checks and the final end-to-end batch follow.
+MuJoCo EGL video remains intermittent, including CPU rehearsal. Complete replay,
+sim2sim, learned behavior and queued Newton DDP acceptance remain open. These
+issues do not block the completed architecture merge.
+
+Pre-merge checks passed 24 lightweight tests and 64 task/SB3 tests. Earlier
+installed-runtime checks passed seven Isaac tests and two Newton binding tests.
+Local Markdown links and imports contain no obsolete source paths.
 
 Single-GPU work runs directly on the development host; only multi-GPU experiments
 use scheduler jobs. W&B remains offline. Current host workloads contend for GPUs,

@@ -145,3 +145,15 @@ Blank-frame rejection now also covers CPU rehearsal. Failed attempts remain in
 `outputs/acceptance-20260906-{rsl-rl,sb3}-01` and thread/EGL diagnostic directories.
 Newton DDP remains queued. No smoke checkpoint demonstrates learned behavior,
 and no policy was uploaded. Validation continues after the local main merge.
+
+
+## Post-merge export acceptance
+
+Local main merge: `6303ca4`; follow-up branch: `feat/rl-pipeline-validation`.
+At that immutable source, all four RSL checkpoints from the consolidated batch
+passed native normalized export, numeric parity, reward/penalty audit, provenance
+checks and schema-2 local packaging. Results are in
+`outputs/postmerge-rsl-export-0906-01/result.json`. Together with the four SB3
+exports/packages, this establishes eight lifecycle paths through packaging.
+It does not establish learned behavior or a successful full replay battery.
+Pre-merge tests: 24 lightweight + 64 task/SB3; local Markdown links checked.

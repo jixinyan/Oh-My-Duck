@@ -13,7 +13,7 @@ tags:
   - project-design
 ---
 
-> 当前实现状态（2026-09-06）：源码按 `src/oh_my_duck/{rl,agentic,robotics,core,perception,voice,experience,infrastructure,cli}` 分域，旧 `training/` 包已移除。两个代表任务、两个仿真后端与两个原生 PPO 已有 smoke/恢复/导出证据；行为、sim2sim 和最终统一验收单独记录。单卡本机运行，多卡才提交 job；W&B 离线。采用“模块成批实现 → 静态/CPU 检查 → 必要物理门槛 → 统一端到端验收”的开发节奏。结构重构先合入本地 main，验证另开分支：8/8 短训练与恢复通过；极端输入导出门槛、MuJoCo EGL 视频及完整行为验收仍待完成。详见 [当前状态](implementation-status.md) 与 [证据](reports/domain-refactor.md)。
+> 当前实现状态（2026-09-06）：源码按 `src/oh_my_duck/{rl,agentic,robotics,core,perception,voice,experience,infrastructure,cli}` 分域，旧 `training/` 包已移除。两个代表任务、两个仿真后端与两个原生 PPO 已有 smoke/恢复/导出证据；行为、sim2sim 和最终统一验收单独记录。单卡本机运行，多卡才提交 job；W&B 离线。采用“模块成批实现 → 静态/CPU 检查 → 必要物理门槛 → 统一端到端验收”的开发节奏。结构重构已合入本地 main（6303ca4），后续验证分支为 feat/rl-pipeline-validation：8/8 短训练、恢复、导出与本地打包通过；MuJoCo EGL 视频、完整 sim2sim/行为与 Newton 多卡验收仍待完成。详见 [当前状态](implementation-status.md) 与 [证据](reports/domain-refactor.md)。
 
 # Agentic Microduck
 

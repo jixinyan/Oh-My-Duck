@@ -92,11 +92,13 @@
     "state": "validation_in_progress",
     "smoke_and_resume": "8_of_8_passed_at_5971dca",
     "open_items": [
-      "RSL extreme-input export parity revalidation",
       "MuJoCo EGL video and CPU rehearsal",
       "consolidated sim2sim",
       "Newton multi-GPU execution queued",
       "learned behavior validation"
-    ]
+    ],
+    "architecture_merge": "6303ca4",
+    "validation_branch": "feat/rl-pipeline-validation",
+    "export_and_local_package": "8_of_8_passed; RSL revalidated at 6303ca4"
   }
 }
