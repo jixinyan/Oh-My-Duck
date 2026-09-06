@@ -72,7 +72,7 @@ MuJoCo video can explicitly use software rasterization on hosts with unreliable
 EGL readback. Install the optional pinned local library on Ubuntu 22.04 amd64:
 
 ```bash
-python omd.py setup --backend mujoco -- --software-renderer --skip-env
+python omd.py setup --backend mujoco --software-renderer --skip-env
 python omd.py rehearsal -- --task Mjlab-Velocity-Flat-MicroDuck --policy /path/policy.onnx --output outputs/rehearsal-new --video --mujoco-renderer osmesa
 python omd.py compare -- --task Mjlab-Velocity-Flat-MicroDuck --policy /path/policy.onnx --output outputs/compare-new --video --mujoco-renderer osmesa
 ```
