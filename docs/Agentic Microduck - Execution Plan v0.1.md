@@ -26,7 +26,7 @@ tags:
 - **已确认**：`mujoco`（mjlab / MuJoCo-Warp）与 `isaac-newton` 是两个正式训练后端；Isaac 必须用 Newton。服务器通过 `submit` 跑 headless job，按需保存视频。允许单节点多 GPU，无额外任务数量或时长上限。
 - **已实现、验证进行中**：本地 Git 与 origin、图解 README / gitignore、统一 `omd.py` 入口、固定源码与模型版本、隔离环境安装、任务提交、公共命令序列、官方训练/导出适配、CPU MuJoCo/BAM headless 回放。
 - **第 01 步进行中**：关键路径与环境已核查；完整文件阅读覆盖和依赖审读仍需补全，不能将清单数量当作完整审计。
-- **第 02 步进行中**：隔离环境已安装，worker设备检查、CPU MuJoCo基础仿真与EGL渲染已通过；机器人训练或回放尚未提交。整体框架已有轻量测试证据。实际通过状态随[实现进度与证据](implementation-status.md)同步。
+- **第 02 步进行中**：隔离环境已安装，worker设备检查、CPU MuJoCo基础仿真与EGL渲染已通过；官方平地 walking 已完成 64 环境、5 轮训练和官方 ONNX 导出；回放命令跟踪仍待解决。整体框架已有轻量测试证据。实际通过状态随[实现进度与证据](implementation-status.md)同步。
 - **待实现**：Isaac/Newton Microduck 完整行走任务、BAM 迁移、跨后端评测，以及之后的工具与 Harness mock。
 - **延后**：当前没有真机；外部 Harness 未完成。硬件结果与真实 agent 闭环不作为本阶段已支持能力。
 
@@ -34,11 +34,13 @@ tags:
 
 **RL框架扩展（2026-09-06）**：当前训练环境服务于RL，仿真后端（MuJoCo / Isaac-Newton）与RL框架（首批RSL-RL / Stable-Baselines3）独立选择。新增 `--rl-framework` 与兼容矩阵入口 `omd frameworks`；不同框架共用任务、观测/动作和评测契约，各自适配VecEnv、算法配置、checkpoint、normalizer与导出。Isaac/Newton上的RSL-RL与SB3 PPO均已通过短训练，SB3额外验证192次超时重置；RSL-RL归一化ONNX导出数值检查通过；MuJoCo SB3和SB3恢复/导出仍待实现，不将所有组合标为已支持。后续框架通过注册扩展，详见[RL框架接入](rl-frameworks.md)。
 
+**官方兼容性补审（2026-09-06）**：已全文审读官方 `AGENTS.md`，官方 CPU 回归测试 199 通过、1 跳过。MuJoCo 官方 flat walking 64 环境/5 轮训练及官方导出成功。官方预训练策略的 CPU BAM 回放完成 14 秒并生成视频，但前进/转向跟踪不足，不能标记 walking 验证通过。此前 Isaac PD 诊断不等同于官方 BAM 任务迁移。所有新增组合均须通过官方约定的 settle、smoke、归一化导出、回放和 schema-2 格式检查；不因时间目标简化物理/任务契约。见[兼容性审计与证据](reports/official-rl-compliance.md)。
+
 **最新进度（2026-09-06）**：MuJoCo基础设备/CPU仿真/EGL检查通过。用户明确同意EULA后，Isaac资产转换重试成功；Newton诊断在2个环境完成100步，实际solver为 `SolverMuJoCo`、设备 `cuda:0`，原始资产质量/惯量/质心/关节范围/armature及动作顺序检查通过。相机位姿刷新和本地地面资产修复后，视频重跑通过并完成人工检查。RSL-RL与SB3各完成16环境、5轮短训练；RSL-RL导出与Torch的16组输入比较通过（最大误差约3.6e-7）。17项轻量测试与7项安装环境CPU测试通过。BAM、完整行走训练和sim2sim仍未完成。详见[实时进度](implementation-status.md)。
 
 **Isaac 参考审读（2026-09-06）**：已静态审读 `kabilankb/isaaclab-microduck` 默认分支的固定版本 `4310fe0`，借鉴独立任务包、显式 Newton/MJWarp 配置、资产转换与行为评测方法。参考实现仍缺 BAM 与观测延迟，关节排列和最终 solver 参数需独立验证；它不替代官方 MuJoCo 基线，也不表示本项目 Isaac 已实现。第 03–07 步按环境 → 资产与映射 → BAM → 同策略 sim2sim → 训练导出逐步验收，详见[审读与迁移细化](reports/isaac-newton-reference-review.md)。独立功能使用分支，每个可检查阶段及时提交；完整项目 scope 保持不变。
 
-**框架验收（2026-09-06）**：8 项轻量测试通过，覆盖模块依赖隔离、工具注册/请求关联、事件域与证据保存、50 Hz 时序及 Newton 禁止静默降级；Python 语法编译通过。尚未提交 GPU 训练/回放 job，具体功能继续逐步实现。见[验证记录](reports/framework-validation.md)。
+**框架验收（2026-09-06）**：8 项轻量测试通过，覆盖模块依赖隔离、工具注册/请求关联、事件域与证据保存、50 Hz 时序及 Newton 禁止静默降级；Python 语法编译通过。此处为早期框架验收记录；后续 GPU 训练/回放结果见最新进度。见[验证记录](reports/framework-validation.md)。
 
 ## 1. 总览：按什么顺序做
 

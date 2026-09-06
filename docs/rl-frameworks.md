@@ -22,7 +22,7 @@ Run `python omd.py frameworks` for the registered compatibility matrix. `--backe
 
 | Combination | Implemented entry points | Validation / remaining work |
 |---|---|---|
-| MuJoCo + RSL-RL | Official train/export | Robot training/export worker verification pending |
+| MuJoCo + RSL-RL | Official train/export | Official flat walking 64-env / 5-iteration train and official ONNX export passed; gait quality not validated |
 | Isaac/Newton + RSL-RL | PD diagnostic train/export | 5-iteration GPU train, native checkpoint inspection and normalized ONNX numerical export passed |
 | Isaac/Newton + SB3 | PD diagnostic PPO train | 5-rollout GPU train passed, including 192 timeout snapshots; checkpoint + normalizer saved |
 | MuJoCo + SB3 | Planned | mjlab vector-environment bridge required |

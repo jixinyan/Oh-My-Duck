@@ -59,7 +59,7 @@ def _sb3(backend, root, operation, arguments):
 def default_framework_registry():
     registry = RLFrameworkRegistry()
     registry.register("rsl-rl", "RSL-RL", [
-        FrameworkBinding("mujoco", ("train", "export"), "adapter_runtime_unvalidated", _rsl_rl),
+        FrameworkBinding("mujoco", ("train", "export"), "official_walking_smoke_and_export_passed", _rsl_rl),
         FrameworkBinding("isaac-newton", ("train", "export"), "diagnostic_train_and_numerical_export_passed", _rsl_rl,
                          "Explicit PD diagnostic task only; BAM locomotion pending"),
     ])
