@@ -2,11 +2,19 @@
 
 ## Boundaries and entry points
 
-`omd.py` / `oh_my_duck.cli` is the public CLI. `src/oh_my_duck/` holds the complete application framework and interfaces; see [architecture.md](architecture.md). `scripts/` contains acquisition, process dispatch and job submission; it must remain usable without importing a simulator. Backend implementation belongs under `training/<backend>/`. `training/common/` holds only interfaces and data semantics shared by both simulators, never implicit simulator defaults.
+`omd.py` / `oh_my_duck.cli` is the public CLI. All first-party implementation is
+under `src/oh_my_duck/`, grouped by project capability; see [architecture.md](architecture.md).
+`infrastructure/` owns setup, process dispatch and scheduler submission and imports
+no simulator at startup. `rl/` owns task recipes, MDP, learners, export and evaluation;
+`robotics/microduck/` owns models, assets, motor behavior and robot conventions.
 
-The MuJoCo training algorithm remains upstream: the launcher delegates to its installed trainer and exporter. Local headless evaluation imports the pinned official inference implementation. Changes to source pins, policy format, physics or command semantics require corresponding design and evaluation updates.
+Task factories and policy configuration are editable project source. Native RSL-RL
+and SB3 PPO remain dependencies. Microduck task code is never loaded from the
+upstream cache. `environments/{mujoco,isaac-newton,isaac-assets}` holds dependency
+manifests and locks; run their setup through `omd setup`.
 
-The Isaac backend must use Newton. A fallback to PhysX is a scope change, not a silent compatibility fix. Keep `.envs/mujoco` and the future `.envs/isaac-newton` independent.
+The Isaac backend requires Newton. Unsupported task bindings fail explicitly.
+Keep training dependencies out of agentic, voice, recording and CLI imports.
 
 ## Files and provenance
 
@@ -15,7 +23,7 @@ The Isaac backend must use Newton. A fallback to PhysX is a scope change, not a 
 - Each job has a unique name and immutable output directory. Save source revision, dirty state, actual invocation, dependency versions, source/model hashes and results alongside outputs.
 - Worker commands use shared absolute paths. `/tmp` is for disposable research, not distributed-job dependencies.
 - Large evidence stays under `outputs/` / `logs/`; link it from compact reports with hashes and job identifiers. A machine-local output path is not a portable published artifact.
-- Keep upstream code and asset notices separate. Do not copy meshes or weights into the Git repository merely to make an example self-contained.
+- Keep upstream code and asset notices separate. The maintained Microduck source meshes are package data with preserved upstream ancestry. Generated USD and downloaded policy weights remain ignored.
 
 ## Version control
 

@@ -18,11 +18,9 @@ class NewtonTaskEnvironment(ManagerBasedRlEnv):
         from isaaclab_newton.physics import NewtonCfg, MJWarpSolverCfg
         from oh_my_duck.rl.backends.isaac_newton.config import SceneCfg
         from oh_my_duck.rl.backends.isaac_newton.bam_actuator import OfficialBamActuatorCfg
-        from oh_my_duck.rl.backends.isaac_newton.walk_asset import configure_walk_scene
+        from oh_my_duck.rl.backends.isaac_newton.task_binding.collisions import configure_scene
         from oh_my_duck.rl.backends.isaac_newton.paths import require_asset
         from oh_my_duck.rl.backends.isaac_newton.contracts import JOINT_NAMES
-        if task.model != 'walk':
-            raise ValueError('Groundcontact collision mapping has not passed its gate yet')
         if render_mode is not None:
             raise ValueError('Use the headless policy evaluator for video')
         if set(cfg.scene.entities) != {'robot'} or cfg.scene.terrain is None or cfg.scene.terrain.terrain_type != 'plane':
@@ -31,9 +29,9 @@ class NewtonTaskEnvironment(ManagerBasedRlEnv):
         if cfg.seed is not None:self.cfg.seed=self.seed(cfg.seed)
         scene_cfg=SceneCfg(num_envs=cfg.scene.num_envs,env_spacing=cfg.scene.env_spacing)
         scene_cfg.robot.spawn.usd_path=str(require_asset(task.model))
-        configure_walk_scene(scene_cfg)
+        configure_scene(scene_cfg,task.model)
         scene_cfg.robot.actuators={'official_bam':OfficialBamActuatorCfg(joint_names_expr=list(JOINT_NAMES))}
-        native_cfg=ManagerBasedEnvCfg(scene=scene_cfg,decimation=1,observations={},events={},seed=cfg.seed,
+        native_cfg=ManagerBasedEnvCfg(scene=scene_cfg,decimation=1,actions={},observations={},events={},seed=cfg.seed,
             sim=SimulationCfg(device=device,dt=cfg.sim.mujoco.timestep,render_interval=cfg.decimation,
                 physics=NewtonCfg(solver_cfg=MJWarpSolverCfg(iterations=cfg.sim.mujoco.iterations,
                     ls_iterations=cfg.sim.mujoco.ls_iterations, njmax=cfg.sim.njmax, nconmax=cfg.sim.nconmax,

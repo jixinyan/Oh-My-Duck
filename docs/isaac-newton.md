@@ -47,7 +47,7 @@ Probe checks the actual Newton `SolverMuJoCo`, canonical joint/action mapping, r
 | Module | Responsibility |
 |---|---|
 | `src/oh_my_duck/rl/training/isaac_newton.py` | Lightweight process dispatch and explicit availability boundaries |
-| `training/isaac_newton/oh_my_duck.infrastructure.bootstrap_isaac.py` | Pinned source acquisition and isolated installation |
+| `src/oh_my_duck/infrastructure/bootstrap_isaac.py` | Pinned source acquisition and isolated installation |
 | `oh_my_duck.rl.backends.isaac_newton/paths.py`, `contracts.py` | Asset provenance and canonical joint mapping without simulator imports |
 | `oh_my_duck.rl.backends.isaac_newton/assets.py`, `convert_asset.py`, `asset_reference.py` | Isolated conversion, source reference dump and generated-file integrity |
 | `oh_my_duck.rl.backends.isaac_newton/config.py`, `mdp.py`, `environment.py`, `agent.py` | Explicit diagnostic scene, observations, runtime guards and PPO config |
@@ -69,7 +69,7 @@ Worker outputs include `result.json`, `trajectory.npz`, `frame.png`, and optiona
 ## CPU configuration checks
 
 ```bash
-CUDA_VISIBLE_DEVICES='' .envs/isaac-newton/bin/python -m unittest discover -s training/isaac_newton/tests -v
+CUDA_VISIBLE_DEVICES='' .envs/isaac-newton/bin/python -m unittest discover -s tests/rl/isaac_newton -v
 ```
 
 These tests use actual installed Isaac packages, construct configs and verify rejection before simulator startup. They are separate from the lightweight root suite and do not establish GPU/physics/video correctness. With the optional SB3 extra installed, the suite also validates pre-reset observation capture and timeout bootstrapping. The source-only `isaaclab-physx` material shim and `isaaclab-contrib` scene-config imports are required by the pinned core; runtime physics remains explicitly Newton/MJWarp.
