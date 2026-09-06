@@ -15,12 +15,16 @@ def main(mode="eval"):
     parser.add_argument("--steps", type=int, default=100)
     parser.add_argument("--num-envs", type=int, default=2)
     parser.add_argument("--video", action="store_true")
+    parser.add_argument("--video-width", type=int, default=1280)
+    parser.add_argument("--video-height", type=int, default=720)
     parser.add_argument("--policy", type=Path)
     parser.add_argument("--actuator", choices=["pd", "bam"], default="pd")
     parser.add_argument("--schedule", type=Path, help="Shared command sequence for policy evaluation")
     args = parser.parse_args()
     if args.steps < 1 or args.num_envs < 1:
         parser.error("steps and num-envs must be positive")
+    if min(args.video_width, args.video_height) < 2 or args.video_width % 2 or args.video_height % 2:
+        parser.error("Video dimensions must be positive even integers of at least 2 pixels")
     schedule = None
     if args.schedule:
         from .contracts import protocol
@@ -28,7 +32,8 @@ def main(mode="eval"):
         args.steps = len(schedule)
     args.output.mkdir(parents=True, exist_ok=False)
     report = {"status": "running", "scope": "Raw-asset PD diagnostic; not BAM locomotion or sim2sim",
-              "planned_ticks": args.steps, "recorded_ticks": 0, "mode": mode}
+              "planned_ticks": args.steps, "recorded_ticks": 0, "mode": mode,
+              "render_resolution": [args.video_width, args.video_height]}
     if args.actuator == "bam":
         report["scope"] = "Official BAM policy replay on converted asset; complete task/contact parity pending"
     env = writer = None
@@ -56,7 +61,7 @@ def main(mode="eval"):
             from isaaclab.sensors import CameraCfg
             from isaaclab.sim import PinholeCameraCfg
             from isaaclab_newton.renderers import NewtonWarpRendererCfg
-            cfg.scene.camera = CameraCfg(prim_path="{ENV_REGEX_NS}/Camera", width=320, height=240,
+            cfg.scene.camera = CameraCfg(prim_path="{ENV_REGEX_NS}/Camera", width=args.video_width, height=args.video_height,
                 data_types=["rgb"], update_period=0.0, update_latest_camera_pose=True, spawn=PinholeCameraCfg(clipping_range=(0.01, 10.0)),
                 renderer_cfg=NewtonWarpRendererCfg())
         with launch_simulation(cfg, {"headless": True}):

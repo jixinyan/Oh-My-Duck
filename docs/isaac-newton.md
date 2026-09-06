@@ -73,3 +73,7 @@ CUDA_VISIBLE_DEVICES='' .envs/isaac-newton/bin/python -m unittest discover -s tr
 ```
 
 These tests use actual installed Isaac packages, construct configs and verify rejection before simulator startup. They are separate from the lightweight root suite and do not establish GPU/physics/video correctness. With the optional SB3 extra installed, the suite also validates pre-reset observation capture and timeout bootstrapping. The source-only `isaaclab-physx` material shim and `isaaclab-contrib` scene-config imports are required by the pinned core; runtime physics remains explicitly Newton/MJWarp.
+
+## Video resolution
+
+Isaac headless `probe`/`eval` render at **1280×720** by default. Override with `--video-width 1920 --video-height 1080` (or lower dimensions for faster diagnostics). Both dimensions must be even for H.264. The actual resolution is recorded in `result.json`; `--video` saves `rollout.mp4`, and the first rendered frame is saved as `frame.png`.
