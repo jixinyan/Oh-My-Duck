@@ -1,0 +1,85 @@
+{
+  "schema_version": 1,
+  "name": "Oh My Duck",
+  "scope": "Agentic Microduck: training, skills, perception, voice and traceable experience",
+  "entry_point": "omd.py",
+  "components": {
+    "contracts": {
+      "module": "oh_my_duck.contracts",
+      "state": "implemented",
+      "role": "Identity, sensor validity, task and episode schemas"
+    },
+    "robot_backends": {
+      "module": "oh_my_duck.backends",
+      "state": "interface_only",
+      "role": "Online simulation/real robot execution"
+    },
+    "skills": {
+      "module": "oh_my_duck.skills",
+      "state": "interface_only",
+      "role": "Skill declarations and execution lifecycle"
+    },
+    "tools": {
+      "module": "oh_my_duck.tools",
+      "state": "registry_implemented",
+      "role": "Expose only registered tool handlers"
+    },
+    "harness": {
+      "module": "oh_my_duck.harness",
+      "state": "interface_only",
+      "role": "External harness bridge; deterministic mock is next"
+    },
+    "voice": {
+      "module": "oh_my_duck.voice",
+      "state": "interface_only",
+      "role": "ASR, voice profile, TTS and audio interfaces"
+    },
+    "recording": {
+      "module": "oh_my_duck.recording",
+      "state": "jsonl_implemented",
+      "role": "Persist episode evidence without memory/planning"
+    },
+    "training": {
+      "module": "oh_my_duck.training",
+      "state": "interface_and_initial_adapter",
+      "role": "Isolated offline training and evaluation"
+    },
+    "perception": {
+      "module": "oh_my_duck.perception",
+      "state": "interface_only",
+      "role": "Active observation and evidence-backed target records"
+    },
+    "policies": {
+      "module": "oh_my_duck.policies",
+      "state": "interface_only",
+      "role": "Distinct joint, velocity and action-sequence policy adapters"
+    },
+    "application": {
+      "module": "oh_my_duck.application",
+      "state": "composition_interface",
+      "role": "Explicit injection of services without starting models or an agent loop"
+    }
+  },
+  "training_backends": {
+    "mujoco": {
+      "state": "implementation_unvalidated",
+      "framework": "mjlab",
+      "physics": "MuJoCo-Warp",
+      "environment": ".envs/mujoco"
+    },
+    "isaac-newton": {
+      "state": "planned",
+      "framework": "Isaac Lab",
+      "physics": "Newton",
+      "solver": "MuJoCo-Warp",
+      "environment": ".envs/isaac-newton"
+    }
+  },
+  "execution": {
+    "hardware_available": false,
+    "harness": "external_with_planned_mock",
+    "server_jobs": "Alaya HTrain",
+    "headless": true,
+    "video": "offscreen"
+  }
+}

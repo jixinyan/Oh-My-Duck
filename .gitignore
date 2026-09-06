@@ -1,0 +1,41 @@
+# Environments, upstream research checkouts and downloaded models
+.envs/
+.venv/
+.cache/
+artifacts/
+outputs/
+logs/
+wandb/
+*.onnx
+*.pt
+*.pth
+*.ckpt
+*.mp4
+*.npz
+*.npy
+
+# Python and tooling
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.coverage*
+htmlcov/
+build/
+dist/
+
+# Local configuration and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+.vscode/
+.idea/
+.DS_Store
+
+# Scheduler logs
+*.log
+core
+core.*

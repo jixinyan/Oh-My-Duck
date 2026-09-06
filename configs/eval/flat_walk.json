@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "name": "flat_walk_v1",
+  "physics_dt": 0.005,
+  "decimation": 4,
+  "seed": 0,
+  "initial_trunk_height_m": 0.125,
+  "action_scale": 1.0,
+  "bam": {"vin": 7.4, "vin_drop_gain": 0.1, "kp_fw": 200.0},
+  "fall": {"min_trunk_height_m": 0.065, "max_tilt_rad": 1.0471975512},
+  "segments": [
+    {"name": "hold", "duration_s": 2.0, "twist": [0.0, 0.0, 0.0]},
+    {"name": "forward", "duration_s": 4.0, "twist": [0.1, 0.0, 0.0]},
+    {"name": "stop", "duration_s": 2.0, "twist": [0.0, 0.0, 0.0]},
+    {"name": "turn_left", "duration_s": 4.0, "twist": [0.0, 0.0, 0.5]},
+    {"name": "final_stop", "duration_s": 2.0, "twist": [0.0, 0.0, 0.0]}
+  ],
+  "video": {"width": 640, "height": 480, "fps": 25}
+}

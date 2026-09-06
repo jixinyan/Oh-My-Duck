@@ -1,0 +1,62 @@
+import asyncio
+import importlib
+import json
+from pathlib import Path
+import sys
+import tempfile
+import unittest
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+
+from oh_my_duck.contracts import EpisodeEvent, ExecutionDomain, Identity
+from oh_my_duck.recording import JsonlEpisodeRecorder
+from oh_my_duck.tools import ToolCatalog, ToolDefinition, ToolResult
+
+
+class FrameworkTests(unittest.TestCase):
+    def test_interfaces_import_without_simulators(self):
+        for name in ("application", "backends", "contracts", "harness", "perception", "policies", "recording", "skills", "tools", "training", "voice"):
+            importlib.import_module("oh_my_duck." + name)
+        for heavy in ("mujoco", "torch", "warp", "isaaclab"):
+            self.assertNotIn(heavy, sys.modules)
+
+    def test_newton_never_silently_falls_back(self):
+        from oh_my_duck.training.registry import BackendUnavailable, default_registry
+        with self.assertRaises(BackendUnavailable):
+            default_registry().get("isaac-newton", Path.cwd())
+
+    def test_unimplemented_tools_do_not_report_success(self):
+        catalog = ToolCatalog()
+        result = asyncio.run(catalog.invoke("run_skill", "request-1", {}))
+        self.assertEqual(result.status, "unsupported")
+        self.assertEqual(catalog.definitions(), ())
+
+    def test_tool_correlation_and_duplicate_registration(self):
+        catalog = ToolCatalog()
+        definition = ToolDefinition("state", "Read actual state", {"type": "object"})
+        async def mismatched(request_id, arguments):
+            return ToolResult("a-different-request", "ok", {})
+        catalog.register(definition, mismatched)
+        with self.assertRaises(ValueError):
+            catalog.register(definition, mismatched)
+        with self.assertRaises(ValueError):
+            asyncio.run(catalog.invoke("state", "request-1", {}))
+
+    def test_episode_domain_and_evidence_survive_recording(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "episode.jsonl"
+            recorder = JsonlEpisodeRecorder(path)
+            for i, domain in enumerate((ExecutionDomain.SIMULATION, ExecutionDomain.REAL)):
+                recorder.append(EpisodeEvent(
+                    1, f"event-{i}", f"episode-{i}", "session",
+                    Identity("persona", f"robot-{i}", domain),
+                    "task.finished", "2026-09-06T00:00:00Z", "host-utc",
+                    {"status": "cancelled"}, evidence_refs=(f"evidence-{i}",)))
+            events = [json.loads(line) for line in path.read_text().splitlines()]
+            self.assertEqual([e["identity"]["domain"] for e in events], ["simulation", "real"])
+            self.assertEqual(events[0]["payload"]["status"], "cancelled")
+            self.assertEqual(events[1]["evidence_refs"], ["evidence-1"])
+
+
+if __name__ == "__main__":
+    unittest.main()

@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "repositories": {
+    "microduck_rl": {
+      "url": "https://github.com/pollen-robotics/microduck_rl.git",
+      "branch": "develop",
+      "commit": "29e887ecfbf5d37144759e5a9f8a176dfb83d547"
+    },
+    "microduck": {
+      "url": "https://github.com/pollen-robotics/microduck.git",
+      "branch": "main",
+      "commit": "bc41fb5c9a9b39894669c1e022e375cf83800382"
+    }
+  },
+  "policy": {
+    "repo": "pollen-robotics/microduck-policies",
+    "revision": "088524a64e2557dc453256b6071dbb9d23888802",
+    "files": ["alpha_walking.onnx", "manifest.json", "README.md"]
+  },
+  "isaac_candidate": {
+    "url": "https://github.com/isaac-sim/IsaacLab.git",
+    "tag": "v3.0.0-beta2.patch1",
+    "physics": "newton",
+    "solver": "mujoco_warp",
+    "status": "pending_compatibility_validation"
+  }
+}
