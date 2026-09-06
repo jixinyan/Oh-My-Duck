@@ -15,6 +15,7 @@ def main():
     parser.add_argument("--policy", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--video", action="store_true")
+    parser.add_argument("--mujoco-renderer", choices=("egl", "osmesa"), default="egl")
     parser.add_argument("--seed", type=int, default=42)
     args = parser.parse_args()
     args.output.mkdir(parents=True, exist_ok=False)
@@ -30,6 +31,8 @@ def main():
             str((args.output / backend).resolve()),
             "--seed",
             str(args.seed),
+            "--mujoco-renderer",
+            args.mujoco_renderer,
         ]
         if args.video:
             arguments.append("--video")

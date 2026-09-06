@@ -29,11 +29,12 @@ checks and local schema-2 packaging using source `6303ca4`. Evidence:
 preserved; ordinary parity uses elementwise tolerance and extreme stress inputs
 use a reported per-action-vector infinity norm tolerance.
 
-MuJoCo EGL video remains intermittent, including CPU rehearsal. Complete replay,
+MuJoCo EGL pixel readback remains unreliable; explicit OSMesa rendering has
+completed Walking task and CPU/BAM replay with valid 720p video. Complete replay,
 sim2sim, learned behavior and queued Newton DDP acceptance remain open. These
 issues do not block the completed architecture merge.
 
-Pre-merge checks passed 24 lightweight tests and 64 task/SB3 tests. Earlier
+The latest rendering batch passed 27 lightweight tests and 66 task/SB3 tests. Earlier
 installed-runtime checks passed seven Isaac tests and two Newton binding tests.
 Local Markdown links and imports contain no obsolete source paths.
 
@@ -44,3 +45,5 @@ so observed throughput is not an isolated hardware benchmark.
 See [domain refactor evidence](reports/domain-refactor.md),
 [RL acceptance](rl-reproduction.md), [architecture](architecture.md), and
 [historical implementation log](reports/implementation-history.md).
+
+See [headless rendering evidence](reports/rendering-validation.md) for the explicit software renderer and preserved failed attempts.

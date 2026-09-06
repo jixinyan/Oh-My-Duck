@@ -67,3 +67,16 @@ See [architecture](architecture.md) for domain boundaries and [task extension](r
 for actors, rewards, new tasks, runtime factories, evaluation and packaging.
 Generated data remains under ignored `.cache/`, `.envs/`, `artifacts/`, `outputs/`,
 `logs/` and `wandb/`. Source, tests, locks, documentation and licenses are versioned.
+
+MuJoCo video can explicitly use software rasterization on hosts with unreliable
+EGL readback. Install the optional pinned local library on Ubuntu 22.04 amd64:
+
+```bash
+python omd.py setup --backend mujoco -- --software-renderer --skip-env
+python omd.py rehearsal -- --task Mjlab-Velocity-Flat-MicroDuck --policy /path/policy.onnx --output outputs/rehearsal-new --video --mujoco-renderer osmesa
+python omd.py compare -- --task Mjlab-Velocity-Flat-MicroDuck --policy /path/policy.onnx --output outputs/compare-new --video --mujoco-renderer osmesa
+```
+
+`--mujoco-renderer` also applies to task `eval`; Isaac still renders through
+Newton. See [rendering validation](reports/rendering-validation.md) for the
+host limitation, library provenance and video acceptance evidence.

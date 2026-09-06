@@ -1,0 +1,8 @@
+{
+  "osmesa_ubuntu_22_04_amd64": {
+    "version": "23.2.1-1ubuntu3.1~22.04.4",
+    "url": "https://archive.ubuntu.com/ubuntu/pool/main/m/mesa/libosmesa6_23.2.1-1ubuntu3.1~22.04.4_amd64.deb",
+    "sha256": "d961bee304d032b7a3f626239366bbe36c4481adb5699813389cdbd08d682269",
+    "system_dependencies": ["libc6>=2.34", "libdrm2", "libgcc-s1", "libglapi-mesa", "libllvm15", "libstdc++6", "libzstd1", "zlib1g"]
+  }
+}
