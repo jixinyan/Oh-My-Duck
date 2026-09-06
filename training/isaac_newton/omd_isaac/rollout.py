@@ -43,7 +43,7 @@ def main(mode="eval"):
             from isaaclab.sim import PinholeCameraCfg
             from isaaclab_newton.renderers import NewtonWarpRendererCfg
             cfg.scene.camera = CameraCfg(prim_path="{ENV_REGEX_NS}/Camera", width=320, height=240,
-                data_types=["rgb"], update_period=0.02, spawn=PinholeCameraCfg(clipping_range=(0.01, 10.0)),
+                data_types=["rgb"], update_period=0.0, update_latest_camera_pose=True, spawn=PinholeCameraCfg(clipping_range=(0.01, 10.0)),
                 renderer_cfg=NewtonWarpRendererCfg())
         with launch_simulation(cfg, {"headless": True}):
             env = DiagnosticEnv(cfg)
@@ -85,6 +85,9 @@ def main(mode="eval"):
                     eye = lookat + torch.tensor([0.6, 0.6, 0.35], device=env.device)
                     camera.set_world_poses_from_view(eye, lookat)
                     env.sim.render()
+                    camera.update(0.0, force_recompute=True)
+                    np.testing.assert_allclose(as_torch(camera.data.pos_w).cpu().numpy(),
+                        eye.cpu().numpy(), atol=1e-5, rtol=0)
                     frame = as_torch(camera.data.output["rgb"])[0, ..., :3].cpu().numpy()
                     if not np.isfinite(frame).all() or np.ptp(frame.astype(float)) < 1:
                         raise ValueError("Offscreen frame is empty or uniform")
