@@ -21,7 +21,13 @@ The Isaac backend must use Newton. A fallback to PhysX is a scope change, not a 
 
 Local `main` is initialized with `origin=https://github.com/jixinyan/Oh-My-Duck.git`. Remote inspection failed with the current credentials; no remote history is assumed and no force-push is allowed. When access becomes available, inspect/fetch remote history and reconcile it before pushing local commits.
 
-Use focused commits for scaffolding, behavior changes and validation evidence. Before committing, inspect staged files and ensure no ignored artifacts or credentials entered the index. Do not change the user's Git identity.
+Create a branch before an independent feature, fix or substantial investigation: `feat/<topic>`, `fix/<topic>` or `docs/<topic>`. Keep `main` at a reviewed baseline. A completed branch can be merged locally after its relevant checks pass; inspect remote history before any eventual push.
+
+Commit at coherent, reviewable checkpoints: interfaces/scaffolding, working behavior with its relevant checks, and measured validation evidence. Do not accumulate an entire feature into one final commit or make empty commits merely to increase frequency. Keep documentation describing a behavior in the same commit as that behavior. Record incomplete implementations explicitly rather than implying validation.
+
+Before committing, inspect the staged diff and ensure no ignored artifacts or credentials entered the index. After committing, check `git status` and `git log`, and report the branch, commit IDs and whether they are local or pushed. Do not change the user's Git identity.
+
+History at the start of the Isaac reference review: local `main` already contained `bca0a90` (whole-project framework). The reference review uses `docs/isaac-newton-reference-review`; no commits have been pushed. Local commits are visible through `git log --all --oneline --decorate`, independently of GitHub access.
 
 ## Progress
 
