@@ -17,7 +17,7 @@ Updated: 2026-09-06. Current priority: **complete the whole-project framework, t
 | Episode recording | JSONL implementation tested | Single process; payload storage/replay still pending |
 | Training backend registry | Implemented and tested | Unimplemented Newton cannot fall back to another engine |
 | Shared command schedule / joint contract | Implemented and tested | Exact 50 Hz boundaries and invalid input rejection |
-| Official MuJoCo training/export adapter | Implemented, worker validation pending | Isolated setup still downloading dependencies |
+| Official MuJoCo training/export adapter | Implemented, worker validation pending | Python 3.12.13 environment and key package metadata present; worker validation pending |
 | CPU MuJoCo/BAM headless evaluator | Initial implementation, unvalidated | Run fixed command sequence and save EGL video after setup |
 | Isaac Lab / Newton Microduck task | Reference review complete; implementation planned | [Pinned third-party source review](reports/isaac-newton-reference-review.md); compatibility, assets, BAM, joint mapping and export remain unvalidated |
 | Sim2sim comparison | Planned | Requires both actual backends and measured baselines |
@@ -40,3 +40,9 @@ See [framework validation](reports/framework-validation.md) and [architecture](a
 Reviewed `kabilankb/isaaclab-microduck` at `4310fe0` without running its simulator. Static comparison confirms the same HOME names/order/values as our contract; asset parity, runtime joint order, BAM, delayed observations, environment compatibility and video remain unvalidated. The reference uses explicit PD and has inconsistent locomotion status descriptions; its results are not our baseline. See the [review and implementation sequence](reports/isaac-newton-reference-review.md).
 
 Local history already contained framework commit `bca0a90`; this investigation uses `docs/isaac-newton-reference-review`. Subsequent features use focused branches and commits per [development conventions](development.md). No remote push has occurred.
+
+## Environment status correction (2026-09-06)
+
+The bootstrap/uv sync processes are no longer running. Reading installed metadata through `.envs/mujoco/bin/python` succeeds: Python 3.12.13, mjlab 1.3.0, torch 2.9.1, mujoco 3.10.0, mujoco-warp 3.8.1, warp-lang 1.12.0 and rsl-rl-lib 5.0.1. This supersedes the earlier downloading status. The installer exit result was not recovered in this check; package metadata presence is not a full dependency/import check or worker CUDA, physics, rendering, training or evaluation validation. No job results are available yet.
+
+Git inspection found 54 tracked project files and no modified or untracked entries in either workspace path (both resolve to the same directory). The three cached upstream repositories were also clean. Environments, downloaded models and caches remain intentionally ignored. An editor/user-side untracked-file report is awaiting the actual file paths for diagnosis.

@@ -26,7 +26,7 @@ tags:
 - **已确认**：`mujoco`（mjlab / MuJoCo-Warp）与 `isaac-newton` 是两个正式训练后端；Isaac 必须用 Newton。服务器通过 `submit` 跑 headless job，按需保存视频。允许单节点多 GPU，无额外任务数量或时长上限。
 - **已实现、验证进行中**：本地 Git 与 origin、图解 README / gitignore、统一 `omd.py` 入口、固定源码与模型版本、隔离环境安装、任务提交、公共命令序列、官方训练/导出适配、CPU MuJoCo/BAM headless 回放。
 - **第 01 步进行中**：关键路径与环境已核查；完整文件阅读覆盖和依赖审读仍需补全，不能将清单数量当作完整审计。
-- **第 02 步进行中**：环境安装已启动，尚未提交 worker 训练或回放；当前优先验收整体框架。实际通过状态随[实现进度与证据](implementation-status.md)同步。
+- **第 02 步进行中**：隔离环境已存在，主要依赖版本可读取，安装进程已结束；尚未验证完整依赖导入或 worker GPU/物理/渲染，也未提交训练或回放。整体框架已有轻量测试证据。实际通过状态随[实现进度与证据](implementation-status.md)同步。
 - **待实现**：Isaac/Newton Microduck 任务、BAM 迁移、跨后端评测，以及之后的工具与 Harness mock。
 - **延后**：当前没有真机；外部 Harness 未完成。硬件结果与真实 agent 闭环不作为本阶段已支持能力。
 
