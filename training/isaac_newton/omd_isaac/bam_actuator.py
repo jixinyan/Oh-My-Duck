@@ -48,7 +48,7 @@ class OfficialBamActuator(ActuatorBase):
         names = [model.joint(i).name for i in range(model.njnt)]
         joint_ids = []
         for name in self.joint_names:
-            matches = [i for i, full in enumerate(names) if full == name or full.endswith("/" + name)]
+            matches = [i for i, full in enumerate(names) if full == name or full.endswith("/" + name) or full.endswith("_" + name)]
             if len(matches) != 1:
                 raise ValueError(f"Cannot uniquely map servo {name} into Newton joints: {names}")
             joint_ids.append(matches[0])
