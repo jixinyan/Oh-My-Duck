@@ -30,11 +30,19 @@ class RewardAudit(BaseCallback):
         super().__init__()
         self.adapter = adapter
         self.ranges = {}
+        self.step_ranges = {}
+        self.step_min = self.step_max = None
         self.penalties = {name for name, term in adapter.env.cfg.rewards.items()
                           if term is not None and (term.weight < 0 or
                               getattr(term.func, "__name__", "").endswith(("_penalty", "_l1")))}
 
     def _on_step(self):
+        # Audit every active term even when the smoke is shorter than an episode.
+        # Keep reductions on GPU and transfer only at the rollout boundary.
+        values = self.adapter.env.reward_manager._step_reward.detach()
+        low, high = values.amin(dim=0), values.amax(dim=0)
+        self.step_min = low if self.step_min is None else torch.minimum(self.step_min, low)
+        self.step_max = high if self.step_max is None else torch.maximum(self.step_max, high)
         for name, value in self.adapter.last_log.items():
             if not name.startswith("Episode_Reward/"):
                 continue
@@ -47,6 +55,17 @@ class RewardAudit(BaseCallback):
             self.ranges[name] = [min(low, value), max(high, value)]
             self.logger.record(name, value)
         return True
+
+    def _on_rollout_end(self):
+        low, high = self.step_min.cpu().numpy(), self.step_max.cpu().numpy()
+        for i, name in enumerate(self.adapter.env.reward_manager.active_terms):
+            if not np.isfinite([low[i], high[i]]).all():
+                raise FloatingPointError(f"Non-finite weighted reward: {name}")
+            if name in self.penalties and high[i] > 1e-7:
+                raise ValueError(f"Positive weighted penalty: {name}={high[i]}")
+            self.step_ranges[name] = [float(low[i]), float(high[i])]
+            self.logger.record("Step_Reward/min/" + name, float(low[i]))
+            self.logger.record("Step_Reward/max/" + name, float(high[i]))
 
 
 def main():
@@ -122,7 +141,7 @@ def main():
             "resume": str(args.resume) if args.resume else None,
             "episode_length_s_override": args.episode_length_s,
             "terminal_snapshots": adapter.terminal_count, "timeouts": adapter.timeout_count,
-            "reward_ranges": callback.ranges, "reload_max_abs_error": float(np.max(np.abs(actual - expected))),
+            "reward_ranges": callback.ranges, "step_reward_ranges": callback.step_ranges, "reload_max_abs_error": float(np.max(np.abs(actual - expected))),
             "upstream": json.loads((ROOT / "configs/upstream.json").read_text())["repositories"],
             "project_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
             "official_agent": asdict(official_agent),
