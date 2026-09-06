@@ -15,7 +15,7 @@ from oh_my_duck.training.registry import BackendUnavailable, default_registry
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__, add_help=False)
-    parser.add_argument("action", choices=["probe", "train", "export", "eval"])
+    parser.add_argument("action", choices=["assets", "probe", "train", "export", "eval"])
     parser.add_argument("--backend", default="mujoco")
     args, extra = parser.parse_known_args()
     if extra and extra[0] == "--":

@@ -52,5 +52,6 @@ class MujocoTrainingBackend:
 def default_registry() -> TrainingBackendRegistry:
     registry = TrainingBackendRegistry()
     registry.register("mujoco", MujocoTrainingBackend)
-    registry.register("isaac-newton", None)
+    from .isaac_newton import IsaacNewtonTrainingBackend
+    registry.register("isaac-newton", IsaacNewtonTrainingBackend)
     return registry

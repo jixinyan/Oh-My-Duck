@@ -12,6 +12,7 @@ COMMANDS = {
     "status": (None, "Show component implementation status without initializing hardware"),
     "setup": ("bootstrap.py", "Fetch pinned sources/models and prepare a backend environment"),
     "submit": ("submit.py", "Submit a job with explicit resources and provenance"),
+    "assets": ("run.py", "Build source-pinned assets for the selected backend"),
     "probe": ("run.py", "Check allocated GPU, physics and headless rendering"),
     "train": ("run.py", "Train using an explicitly selected backend"),
     "export": ("run.py", "Export through the selected backend"),

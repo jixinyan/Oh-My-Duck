@@ -19,7 +19,7 @@ Updated: 2026-09-06. Current priority: **complete the whole-project framework, t
 | Shared command schedule / joint contract | Implemented and tested | Exact 50 Hz boundaries and invalid input rejection |
 | Official MuJoCo training/export adapter | Implemented, worker validation pending | Python 3.12.13 environment and key package metadata present; worker validation pending |
 | CPU MuJoCo/BAM headless evaluator | Initial implementation, unvalidated | Run fixed command sequence and save EGL video after setup |
-| Isaac Lab / Newton Microduck task | Reference review complete; implementation planned | [Pinned third-party source review](reports/isaac-newton-reference-review.md); compatibility, assets, BAM, joint mapping and export remain unvalidated |
+| Isaac Lab / Newton Microduck task | PD diagnostic integration implemented; runtime unvalidated | Independent locked environments, conversion, canonical mapping, finite probe/video and export; BAM locomotion remains pending. See [integration guide](isaac-newton.md) |
 | Sim2sim comparison | Planned | Requires both actual backends and measured baselines |
 | Hardware | Unavailable / deferred | No physical-robot tests |
 
@@ -46,3 +46,11 @@ Local history already contained framework commit `bca0a90`; this investigation u
 The bootstrap/uv sync processes are no longer running. Reading installed metadata through `.envs/mujoco/bin/python` succeeds: Python 3.12.13, mjlab 1.3.0, torch 2.9.1, mujoco 3.10.0, mujoco-warp 3.8.1, warp-lang 1.12.0 and rsl-rl-lib 5.0.1. This supersedes the earlier downloading status. The installer exit result was not recovered in this check; package metadata presence is not a full dependency/import check or worker CUDA, physics, rendering, training or evaluation validation. No job results are available yet.
 
 Git inspection found 54 tracked project files and no modified or untracked entries in either workspace path (both resolve to the same directory). The three cached upstream repositories were also clean. Environments, downloaded models and caches remain intentionally ignored. An editor/user-side untracked-file report is awaiting the actual file paths for diagnosis.
+
+## MuJoCo queue and Isaac implementation (2026-09-06)
+
+- MuJoCo probe `omd-probe-20260906-01`, queue ID `local-e0ea0a5e16cf`, was submitted for one GPU. Scheduler reports **Wait for project quota**; no worker results exist yet. This supersedes earlier statements that no job had been submitted.
+- CPU-only official ONNX structure and 16 synthetic-input checks passed, input `[1,61]`, output `[1,14]`, finite actions. SHA256 `e36332d383997d51401897734cd3e79cf5038406feddb18b4d57ecfb141daa6c`. Local evidence: `outputs/policy-contract-20260906-01/result.json`. No physics or locomotion inference follows from this check.
+- User authorized Isaac development while MuJoCo waits. Branch: `feat/isaac-newton-integration`; main includes the earlier framework/review history.
+- Two independent Isaac locks resolved, installation started. Diagnostic task/asset conversion/worker entry points are implemented and pending runtime checks. BAM and full locomotion task are not implemented.
+- **11 lightweight tests pass**: the original eight plus reordered/passive joint mapping, explicit diagnostic-backend boundaries, and rejection of stale/missing generated assets. Compilation and CLI help pass. These are not Isaac runtime tests.

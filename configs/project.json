@@ -68,11 +68,13 @@
       "environment": ".envs/mujoco"
     },
     "isaac-newton": {
-      "state": "planned",
+      "state": "diagnostic_integration_unvalidated",
       "framework": "Isaac Lab",
       "physics": "Newton",
       "solver": "MuJoCo-Warp",
-      "environment": ".envs/isaac-newton"
+      "environment": ".envs/isaac-newton",
+      "asset_environment": ".envs/isaac-assets",
+      "locomotion": "BAM_migration_pending"
     }
   },
   "execution": {

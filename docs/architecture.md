@@ -86,3 +86,7 @@ The interfaces are intentional scaffolding. They do not claim implemented sensor
 5. Add voice, perception, replay and hardware functionality by milestone.
 
 The original Project Design and Execution Plan remain the product and milestone authorities. Update them together with this architecture document when changing boundaries.
+
+## Isaac diagnostic implementation
+
+The offline backend now dispatches to the independently packaged `training/isaac_newton/omd_isaac/` code. Its conversion and training dependency environments are separate; the application core imports neither. The implemented task is explicitly PD diagnostic only; BAM locomotion remains pending. See [the integration guide](isaac-newton.md) for entry points, artifact integrity and extension boundaries.

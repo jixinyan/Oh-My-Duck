@@ -24,6 +24,8 @@ tags:
 
 **当前开发策略：先整体框架，后逐步填充功能。** 完整项目 scope 保持本文第 1–10 节的交互、工具、感知、声音、经验与训练设计。整体轻量框架已建立：契约、执行后端、技能、工具、感知、策略、Harness、语音、记录、训练及应用装配均有独立模块；接口占位与可运行实现明确区分。现有 MuJoCo 适配保留在框架内，隔离 Python 环境与主要依赖版本已可读取；完整环境、worker GPU/物理/渲染及训练/回放尚未验证。已建立本地 Git 与统一入口；远程 `https://github.com/jixinyan/Oh-My-Duck.git` 目前认证失败。详细状态与测试见 [implementation-status.md](implementation-status.md)。
 
+**最新进度（2026-09-06）**：MuJoCo probe 已提交（`omd-probe-20260906-01`），当前因 `agent` 项目配额排队；CPU ONNX结构与16组输入检查通过，尚无worker仿真结果。按用户最新授权，在等待时继续Isaac开发：已实现独立训练/资产转换环境锁、后端入口、官方资产转换、规范关节映射、Newton PD诊断任务及有限步视频/导出检查；11项轻量测试通过。安装和运行验证尚在进行，PD诊断不等于BAM行走迁移。详见[Isaac接入指南](isaac-newton.md)与[实时进度](implementation-status.md)。
+
 **Isaac 参考审读（2026-09-06）**：已静态审读 `kabilankb/isaaclab-microduck` 默认分支的固定版本 `4310fe0`，借鉴独立任务包、显式 Newton/MJWarp 配置、资产转换与行为评测方法。参考实现仍缺 BAM 与观测延迟，关节排列和最终 solver 参数需独立验证；它不替代官方 MuJoCo 基线，也不表示本项目 Isaac 已实现。第 03–07 步按环境 → 资产与映射 → BAM → 同策略 sim2sim → 训练导出逐步验收，详见[审读与迁移细化](reports/isaac-newton-reference-review.md)。独立功能使用分支，每个可检查阶段及时提交；完整项目 scope 保持不变。
 
 **框架验收（2026-09-06）**：8 项轻量测试通过，覆盖模块依赖隔离、工具注册/请求关联、事件域与证据保存、50 Hz 时序及 Newton 禁止静默降级；Python 语法编译通过。尚未提交 GPU 训练/回放 job，具体功能继续逐步实现。见[验证记录](reports/framework-validation.md)。
