@@ -16,6 +16,7 @@ def main():
     args.output.mkdir(parents=True, exist_ok=False)
     result = {"status": "running", "scope": "BAM actuator and noisy HOME settle; task migration not validated"}
     env = None
+    trace = []
     try:
         from isaaclab_tasks.utils import launch_simulation
         from .config import DiagnosticEnvCfg
@@ -28,12 +29,15 @@ def main():
         cfg.events.joints.params["position_range"] = (-0.015, 0.015)
         cfg.events.root.params["pose_range"] = {"roll": (-0.05, 0.05), "pitch": (-0.05, 0.05)}
         cfg.episode_length_s = 4.0
+        # Preserve the fallen state for measurement; automatic reset would hide it.
+        cfg.terminations.fallen = None
         with launch_simulation(cfg, {"headless": True}):
             env = DiagnosticEnv(cfg)
             obs, _ = env.reset()
             motor = env.scene["robot"].actuators["official_bam"]
             initial_calls = motor.physics_calls
-            trace = []
+            result["initial_height_m"] = as_torch(env.scene["robot"].data.root_pos_w)[:, 2].cpu().tolist()
+            result["initial_joint_pos"] = as_torch(env.scene["robot"].data.joint_pos).cpu().tolist()
             started = time.monotonic()
             for tick in range(150):
                 obs, rewards, terminated, truncated, _ = env.step(torch.zeros((args.num_envs, 14), device=env.device))
@@ -45,23 +49,36 @@ def main():
                 if not torch.isfinite(state).all() or not torch.isfinite(motor.applied_effort).all():
                     raise FloatingPointError("Non-finite BAM state")
                 if torch.any(terminated | truncated):
-                    raise RuntimeError(f"Noisy HOME settle terminated at tick {tick}")
+                    raise RuntimeError(f"Unexpected reset at tick {tick}")
             official = motor.official
             assert motor.physics_calls - initial_calls == 600, "BAM must run at physics substeps, not policy frequency"
-            result.update(status="passed", ticks=150, physics_calls=600, num_envs=args.num_envs,
+            final_ok = (height > .065) & (tilt < np.pi/3)
+            actual_effort = motor.official._data.qfrc_actuator[:, motor.dof_ids]
+            torch.testing.assert_close(actual_effort, motor.applied_effort, atol=1e-5, rtol=1e-5)
+            result.update(status="passed" if bool(torch.all(final_ok)) else "failed_equilibrium",
+                stable_samples=int(final_ok.sum()), ticks=150, physics_calls=600, num_envs=args.num_envs,
                 final_height_m=height.detach().cpu().tolist(), final_tilt_rad=tilt.detach().cpu().tolist(),
                 wall_time_s=time.monotonic() - started, solver=type(motor.solver).__name__,
                 actuator_type=type(official).__name__, delay_physics_steps=[official.cfg.delay_min_lag, official.cfg.delay_max_lag],
                 voltage_range=list(official.cfg.vin_range), force_limit=motor.force_limit)
-            np.savez_compressed(args.output / "trajectory.npz", height_tilt=np.asarray(trace))
+            mjm = motor.solver.mj_model
+            model_report = {"bodies": [{"name": mjm.body(i).name, "mass": float(mjm.body_mass[i])} for i in range(mjm.nbody)],
+                "geoms": [{"name": mjm.geom(i).name, "type": int(mjm.geom_type[i]), "condim": int(mjm.geom_condim[i]),
+                    "friction": mjm.geom_friction[i].tolist(), "contype": int(mjm.geom_contype[i]),
+                    "conaffinity": int(mjm.geom_conaffinity[i]), "size": mjm.geom_size[i].tolist()}
+                    for i in range(mjm.ngeom)]}
+            (args.output / "model.json").write_text(json.dumps(model_report, indent=2) + "\n")
     except Exception as error:
         result.update(status="failed", error=f"{type(error).__name__}: {error}")
         raise
     finally:
+        np.savez_compressed(args.output / "trajectory.npz", height_tilt=np.asarray(trace))
         if env is not None:
             env.close()
         (args.output / "result.json").write_text(json.dumps(result, indent=2) + "\n")
         print(json.dumps(result, indent=2))
+    if result["status"] != "passed":
+        raise SystemExit(2)
 
 
 if __name__ == "__main__":
