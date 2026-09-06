@@ -32,3 +32,7 @@ CPU-only raw MJCF extraction also ran successfully: 15 bodies, 14 joints, total 
 Both locked setup paths completed successfully through `python omd.py setup --backend isaac-newton`. Training has 156 installed packages and conversion has 166 (its 167-entry lock also includes the virtual project). Both pass `uv pip check`. Freeze files and setup provenance are under `artifacts/environments/isaac-newton/` and `artifacts/environments/isaac-assets/`; these are local ignored evidence.
 
 The asset CLI help also exits 0 through the actual conversion interpreter. Asset conversion was submitted as `omd-isaac-assets-20260906-01`, queue ID `local-d0faa6d27c42`, one GPU. At submission it was queued, with no worker/asset result. MuJoCo probe `omd-probe-20260906-01` remains queued for project quota. GPU asset, physics, rendering, training and sim2sim verification remain pending.
+
+## Worker result update
+
+Both jobs left the queue. MuJoCo probe succeeded (device availability, CPU stepping, EGL image only). Isaac conversion failed during Kit first-run EULA input with `EOF when reading a line`, before conversion or Newton simulation. No noninteractive license acceptance is configured. Task IDs and evidence are recorded in [implementation status](../implementation-status.md).

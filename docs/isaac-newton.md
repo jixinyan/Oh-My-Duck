@@ -56,7 +56,7 @@ Worker outputs include `result.json`, `trajectory.npz`, `frame.png`, and optiona
 
 ## Remaining migration work
 
-1. Run the queued conversion and then the probe when scheduler quota is available; installation and CPU configuration checks have passed.
+1. Resolve the first-run Omniverse Kit EULA prompt in the noninteractive conversion job, rerun conversion, then run the Newton probe. The first conversion job failed before producing assets; installation and CPU configuration checks have passed. See [worker results](implementation-status.md).
 2. Validate final solver contact/axis parameters and preserve official training overrides.
 3. Implement BAM m6 with verified world/DOF mapping, per-world friction/damping storage, voltage and action delays. Current solver field inspection performs **no BAM writes**.
 4. Add official delayed observations, encoder bias, commands, rewards and domain randomization; verify the shared contract on actual states.

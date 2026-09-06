@@ -59,6 +59,14 @@ Git inspection found 54 tracked project files and no modified or untracked entri
 
 Newton training environment installation completed. Dependency checks pass for 156 packages; task configuration, Newton camera configuration, runtime imports and actual training CLI help pass on CPU. There are now **11 lightweight framework tests plus 4 installed-Isaac CPU tests passing**. The asset-conversion environment is still installing at this checkpoint. No GPU simulation/training/video or BAM migration result is claimed. See [environment evidence and fixes](reports/isaac-environment-resolution.md).
 
-## Current checkpoint: both environments installed (2026-09-06)
+## Earlier checkpoint: both environments installed (2026-09-06)
 
 Both Isaac environment setups and dependency checks now pass; this supersedes the preceding conversion-installing status. The Isaac asset conversion job `omd-isaac-assets-20260906-01` (`local-d0faa6d27c42`) has been submitted for one GPU and is queued. MuJoCo probe remains queued for project quota. No GPU results exist yet. Remaining work starts with conversion/solver diagnostics, then BAM and official locomotion migration; see [the current integration guide](isaac-newton.md).
+
+## Current checkpoint: worker results (2026-09-06)
+
+This supersedes the queued status above.
+
+- MuJoCo probe `omd-probe-20260906-01` **succeeded**, task ID `8f5e9735-5fdc-4029-8801-8f41c416d836`. Worker evidence: one NVIDIA H200, CUDA/Warp device availability, finite CPU MuJoCo stepping and EGL image output. Evidence: `outputs/probe-20260906-01/environment.json`, `egl.png`, and `outputs/jobs/omd-probe-20260906-01/scheduler.log`. The probe does not execute MuJoCo-Warp GPU physics, a robot policy, or training.
+- Isaac conversion `omd-isaac-assets-20260906-01` **failed**, task ID `e9fdca75-aeb9-4133-8c82-79341865dd51`. Omniverse Kit requested first-run EULA acceptance in a noninteractive worker and exited with `Unable to bootstrap inner kit kernel: EOF when reading a line`. Evidence: `outputs/jobs/omd-isaac-assets-20260906-01/scheduler.log`. No completed asset manifest or Newton simulation result exists. License acceptance has not been configured by this project.
+- Next: address the conversion startup prompt, rerun conversion and Newton diagnostics; complete official MuJoCo policy replay and short training/export verification. BAM, full Isaac locomotion and sim2sim remain pending.

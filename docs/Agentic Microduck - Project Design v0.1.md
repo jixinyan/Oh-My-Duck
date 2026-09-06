@@ -22,9 +22,9 @@ tags:
 
 **当前执行条件**：服务器任务通过 Alaya HTrain `submit` 提交；训练与评测均 headless，离屏保存视频。可按实际需要使用单节点多 GPU，不添加人为的任务数量或运行时长上限。现阶段没有真机，只验收仿真；外部 Harness 后续先使用确定性 mock。
 
-**当前开发策略：先整体框架，后逐步填充功能。** 完整项目 scope 保持本文第 1–10 节的交互、工具、感知、声音、经验与训练设计。整体轻量框架已建立：契约、执行后端、技能、工具、感知、策略、Harness、语音、记录、训练及应用装配均有独立模块；接口占位与可运行实现明确区分。现有 MuJoCo 适配保留在框架内，隔离 Python 环境与主要依赖版本已可读取；完整环境、worker GPU/物理/渲染及训练/回放尚未验证。已建立本地 Git 与统一入口；远程 `https://github.com/jixinyan/Oh-My-Duck.git` 目前认证失败。详细状态与测试见 [implementation-status.md](implementation-status.md)。
+**当前开发策略：先整体框架，后逐步填充功能。** 完整项目 scope 保持本文第 1–10 节的交互、工具、感知、声音、经验与训练设计。整体轻量框架已建立：契约、执行后端、技能、工具、感知、策略、Harness、语音、记录、训练及应用装配均有独立模块；接口占位与可运行实现明确区分。现有 MuJoCo 适配保留在框架内，隔离 Python 环境与主要依赖版本已可读取；worker设备检查、CPU MuJoCo基础仿真与EGL渲染已通过，机器人训练/回放尚未验证。已建立本地 Git 与统一入口；远程 `https://github.com/jixinyan/Oh-My-Duck.git` 目前认证失败。详细状态与测试见 [implementation-status.md](implementation-status.md)。
 
-**最新进度（2026-09-06）**：MuJoCo probe 已提交（`omd-probe-20260906-01`），当前因 `agent` 项目配额排队；CPU ONNX结构与16组输入检查通过，尚无worker仿真结果。按用户最新授权，在等待时继续Isaac开发：已实现独立训练/资产转换环境锁、后端入口、官方资产转换、规范关节映射、Newton PD诊断任务及有限步视频/导出检查；Newton训练环境已安装，依赖一致性与真实配置导入/CLI帮助通过；11项轻量测试和4项Isaac包内CPU检查通过。资产转换环境也已安装并通过依赖检查，转换job（`omd-isaac-assets-20260906-01`）已排队，GPU结果尚待worker执行，PD诊断不等于BAM行走迁移。详见[Isaac接入指南](isaac-newton.md)与[实时进度](implementation-status.md)。
+**最新进度（2026-09-06）**：两个job均已结束。MuJoCo probe（`omd-probe-20260906-01`）成功：worker识别到1张H200，CUDA/Warp设备检查、CPU MuJoCo有限步仿真与EGL离屏图片生成通过；这不代表GPU物理、机器人策略回放或训练已通过。CPU ONNX结构与16组输入检查通过。Isaac两套隔离环境已安装，资产转换、规范关节映射、Newton PD诊断任务及有限步视频/导出入口已实现；11项轻量测试和4项Isaac包内CPU检查通过。资产转换job（`omd-isaac-assets-20260906-01`）失败于Omniverse Kit首次启动的EULA交互提示（`EOF when reading a line`），未完成资产转换或进入Newton物理验证。BAM行走迁移、训练、视频与sim2sim仍待完成。详见[Isaac接入指南](isaac-newton.md)与[实时进度](implementation-status.md)。
 
 **Isaac 参考审读（2026-09-06）**：已静态审读 `kabilankb/isaaclab-microduck` 默认分支的固定版本 `4310fe0`，借鉴独立任务包、显式 Newton/MJWarp 配置、资产转换与行为评测方法。参考实现仍缺 BAM 与观测延迟，关节排列和最终 solver 参数需独立验证；它不替代官方 MuJoCo 基线，也不表示本项目 Isaac 已实现。第 03–07 步按环境 → 资产与映射 → BAM → 同策略 sim2sim → 训练导出逐步验收，详见[审读与迁移细化](reports/isaac-newton-reference-review.md)。独立功能使用分支，每个可检查阶段及时提交；完整项目 scope 保持不变。
 
