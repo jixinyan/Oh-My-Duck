@@ -76,3 +76,7 @@ This supersedes the queued status above.
 Added explicit `assets -- --accept-eula`, which sets NVIDIA's supported `OMNI_KIT_ACCEPT_EULA=YES` only in the conversion child environment. Missing acceptance fails before importing Kit; an existing verified asset can still be reused. Two mocked regression tests cover rejection before child launch and process-scoped acceptance with failure propagation; no license is accepted by the tests.
 
 Automatic approval review rejected the attempted commit-and-submit command because explicit user agreement to the EULA was not provided. That command did not execute; no retry job was submitted and no license was accepted. Local implementation and documentation can proceed independently. Actual conversion retry requires explicit user agreement to the NVIDIA Omniverse EULA.
+
+## License approved and conversion retried (2026-09-06)
+
+The user explicitly agreed to the NVIDIA Omniverse EULA. Submitted `omd-isaac-assets-20260906-02` with `--accept-eula`, one GPU, source commit `430e8ae`, queue ID `local-d87e23d96653`. The dispatcher is reconciling the submission; no worker result is available at this checkpoint. This supersedes the approval blocker above. The local regression suite now has **13 passing tests**; the two new tests use mocked subprocesses.
