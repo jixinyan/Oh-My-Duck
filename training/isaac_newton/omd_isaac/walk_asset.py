@@ -21,21 +21,44 @@ def align_collision_groups(*_event_args):
     from isaaclab_newton.physics.newton_manager import NewtonManager
     builder = NewtonManager._builder
     groups = defaultdict(lambda: {1: [], 2: []})
-    ground = defaultdict(list)
+    ground = []
     for i, label in enumerate(builder.shape_label):
         if not (builder.shape_flags[i] & ShapeFlags.COLLIDE_SHAPES):
             continue
         if "/ground/" in label:
-            ground[builder.shape_world[i]].append(i)
+            ground.append(i)
         else:
             groups[builder.shape_world[i]][collider_group(label)].append(i)
-    if not groups or set(ground) != set(groups) or any(len(v) != 1 for v in ground.values()):
-        raise ValueError("Walk collision adapter requires one fixed plane per robot world")
+    if len(ground) != 1 or not groups:
+        raise ValueError("Walk collision adapter requires one plane and replicated walk robots")
+    # SolverMuJoCo cannot encode arbitrary filters against world-attached
+    # planes through body exclusions. Its supported explicit-contact-pair API
+    # preserves the plane and exactly the two official foot-ground contacts.
+    from .official import bam_cfg
+    bam_cfg()
+    from mjlab_microduck.robot.microduck_constants import MICRODUCK_WALK_ROBOT_CFG
+    reference = MICRODUCK_WALK_ROBOT_CFG.build().compile()
+    builder.shape_collision_group[ground[0]] = 0
     for world, group in groups.items():
         if len(group[1]) != 2 or len(group[2]) != 3:
             raise ValueError(f"World {world}: expected 2 foot and 3 self-only meshes, got {group}")
+        for foot in group[1]:
+            name = "left_foot_collision" if "/left_foot_collision/" in builder.shape_label[foot] else "right_foot_collision"
+            geom = reference.geom(name).id
+            friction = reference.geom_friction[geom]
+            builder.add_custom_values(**{
+                "mujoco:pair_world": world,
+                "mujoco:pair_geom1": foot,
+                "mujoco:pair_geom2": ground[0],
+                "mujoco:pair_condim": int(reference.geom_condim[geom]),
+                "mujoco:pair_friction": [friction[0], friction[0], friction[1], friction[2], friction[2]],
+                "mujoco:pair_solref": reference.geom_solref[geom].tolist(),
+                "mujoco:pair_solimp": reference.geom_solimp[geom].tolist(),
+                "mujoco:pair_margin": float(reference.geom_margin[geom]),
+                "mujoco:pair_gap": float(reference.geom_gap[geom]),
+            })
         for self_only in group[2]:
-            for other in ground[world] + group[1]:
+            for other in ground + group[1]:
                 builder.add_shape_collision_filter_pair(self_only, other)
 
 
@@ -80,30 +103,5 @@ def spawn_official_walk(prim_path, cfg, translation=None, orientation=None, **kw
     return root
 
 
-@clone
-def spawn_walk_ground(prim_path, cfg, translation=None, orientation=None, **kwargs):
-    """Fixed per-world body lets SolverMuJoCo preserve exact ground exclusions."""
-    from pxr import UsdPhysics
-    root = spawn_from_usd.__wrapped__(prim_path, cfg, translation, orientation, **kwargs)
-    collision = root.GetChild("Collision")
-    body = UsdPhysics.RigidBodyAPI.Apply(collision)
-    body.CreateRigidBodyEnabledAttr(True)
-    body.CreateKinematicEnabledAttr(True)
-    # Explicit world joint gives the imported rigid object a named articulation
-    # and keeps it immovable in both Newton state and SolverMuJoCo.
-    joint = UsdPhysics.FixedJoint.Define(root.GetStage(), str(root.GetPath()) + "/WorldFixedJoint")
-    joint.CreateBody1Rel().SetTargets([collision.GetPath()])
-    return root
-
-
 def configure_walk_scene(scene_cfg):
-    from pathlib import Path
-    from isaaclab.assets import AssetBaseCfg
-    from isaaclab.sim import UsdFileCfg
-    # Global Newton worlds cannot hold bodies. Replicate the immovable plane
-    # alongside each robot so body exclusions survive solver translation.
-    scene_cfg.terrain = None
-    scene_cfg.ground = AssetBaseCfg(prim_path="{ENV_REGEX_NS}/ground",
-        spawn=UsdFileCfg(usd_path=str(Path(__file__).parent / "resources/ground_plane.usda"),
-                         func=spawn_walk_ground))
     scene_cfg.robot.spawn.func = spawn_official_walk

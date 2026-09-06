@@ -60,6 +60,7 @@ def check_walk_collisions(env):
         checks.append({'mesh': key, 'support_max_abs_error_m': error})
     if seen != set(reference_geoms):
         raise AssertionError(f'Missing official collision geoms: {set(reference_geoms)-seen}')
+    explicit_pairs = {tuple(sorted((int(a), int(b)))) for a, b in zip(actual.pair_geom1, actual.pair_geom2)}
     pairs = 0
     excluded = set(map(int, actual.exclude_signature))
     for i in range(actual.ngeom):
@@ -69,9 +70,22 @@ def check_walk_collisions(env):
             body_a, body_b = sorted((int(actual.geom_bodyid[i]), int(actual.geom_bodyid[j])))
             if (body_a << 16) + body_b in excluded:
                 enabled = False
+            if (i, j) in explicit_pairs:
+                enabled = True
             expected = collider_group(labels[i]) == collider_group(labels[j])
             if enabled != expected:
                 raise AssertionError(f'Collision mask differs: {labels[i]} / {labels[j]}')
             pairs += 1
-    return {'status': 'passed', 'hulls': checks, 'pairs_checked': pairs,
+    if len(explicit_pairs) != 2:
+        raise AssertionError(f'Expected exactly two explicit foot-ground contacts: {explicit_pairs}')
+    for pair in range(actual.npair):
+        foot = next(g for g in (int(actual.pair_geom1[pair]), int(actual.pair_geom2[pair])) if '/ground/' not in labels[g])
+        ref = reference_geoms[_key(labels[foot])]
+        f = reference.geom_friction[ref]
+        np.testing.assert_allclose(actual.pair_friction[pair], [f[0], f[0], f[1], f[2], f[2]], atol=1e-7)
+        np.testing.assert_allclose(actual.pair_solref[pair], reference.geom_solref[ref], atol=1e-7)
+        np.testing.assert_allclose(actual.pair_solimp[pair], reference.geom_solimp[ref], atol=1e-7)
+        if actual.pair_dim[pair] != reference.geom_condim[ref]:
+            raise AssertionError('Explicit foot-ground contact dimension differs')
+    return {'status': 'passed', 'explicit_foot_ground_pairs': len(explicit_pairs), 'hulls': checks, 'pairs_checked': pairs,
             'contact_dimension': True, 'priority': True, 'friction': True}
