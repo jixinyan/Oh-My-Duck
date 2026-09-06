@@ -11,20 +11,29 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "src"))
 from oh_my_duck.training.registry import BackendUnavailable, default_registry
+from oh_my_duck.training.frameworks import default_framework_registry
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__, add_help=False)
-    parser.add_argument("action", choices=["probe", "train", "export", "eval"])
+    parser.add_argument("action", choices=["assets", "probe", "train", "export", "eval"])
     parser.add_argument("--backend", default="mujoco")
+    parser.add_argument("--rl-framework", default=None)
     args, extra = parser.parse_known_args()
     if extra and extra[0] == "--":
         extra = extra[1:]
     try:
-        backend = default_registry().get(args.backend, ROOT)
-        command = backend.command(args.action, extra)
+        if args.action in {"train", "export"}:
+            framework = args.rl_framework or "rsl-rl"
+            command = default_framework_registry().command(framework, args.backend, ROOT, args.action, extra)
+        else:
+            if args.rl_framework is not None:
+                raise BackendUnavailable("--rl-framework applies to train/export; assets, probe and ONNX eval are framework-independent")
+            command = default_registry().get(args.backend, ROOT).command(args.action, extra)
     except BackendUnavailable as error:
         parser.error(str(error))
+    if args.action in {"train", "export"}:
+        print("RL framework:", framework, flush=True)
     env = {**os.environ, **command.environment}
     print("Backend:", args.backend, "Action:", args.action, flush=True)
     return subprocess.call(command.argv, cwd=command.cwd, env=env)

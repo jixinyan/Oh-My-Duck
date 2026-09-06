@@ -22,11 +22,17 @@ tags:
 
 **当前执行条件**：服务器任务通过 Alaya HTrain `submit` 提交；训练与评测均 headless，离屏保存视频。可按实际需要使用单节点多 GPU，不添加人为的任务数量或运行时长上限。现阶段没有真机，只验收仿真；外部 Harness 后续先使用确定性 mock。
 
-**当前开发策略：先整体框架，后逐步填充功能。** 完整项目 scope 保持本文第 1–10 节的交互、工具、感知、声音、经验与训练设计。整体轻量框架已建立：契约、执行后端、技能、工具、感知、策略、Harness、语音、记录、训练及应用装配均有独立模块；接口占位与可运行实现明确区分。现有 MuJoCo 适配保留在框架内，隔离 Python 环境与主要依赖版本已可读取；完整环境、worker GPU/物理/渲染及训练/回放尚未验证。已建立本地 Git 与统一入口；远程 `https://github.com/jixinyan/Oh-My-Duck.git` 目前认证失败。详细状态与测试见 [implementation-status.md](implementation-status.md)。
+**当前开发策略：先整体框架，后逐步填充功能。** 完整项目 scope 保持本文第 1–10 节的交互、工具、感知、声音、经验与训练设计。整体轻量框架已建立：契约、执行后端、技能、工具、感知、策略、Harness、语音、记录、训练及应用装配均有独立模块；接口占位与可运行实现明确区分。现有 MuJoCo 适配保留在框架内，隔离 Python 环境与主要依赖版本已可读取；worker设备检查、CPU MuJoCo基础仿真与EGL渲染已通过，官方平地 walking 已完成 64 环境、5 轮训练和官方 ONNX 导出；回放命令跟踪仍待解决。已建立本地 Git 与统一入口；远程 `https://github.com/jixinyan/Oh-My-Duck.git` 目前认证失败。详细状态与测试见 [implementation-status.md](implementation-status.md)。
+
+**RL框架扩展（2026-09-06）**：当前训练环境服务于RL，仿真后端（MuJoCo / Isaac-Newton）与RL框架（首批RSL-RL / Stable-Baselines3）独立选择。新增 `--rl-framework` 与兼容矩阵入口 `omd frameworks`；不同框架共用任务、观测/动作和评测契约，各自适配VecEnv、算法配置、checkpoint、normalizer与导出。Isaac/Newton上的RSL-RL与SB3 PPO均已通过短训练，SB3额外验证192次超时重置；RSL-RL归一化ONNX导出数值检查通过；MuJoCo SB3 已完成官方 walking 的 64 环境/5 轮训练和恢复训练，并验证 768 次超时；MuJoCo SB3 已通过官方 runner 扩展导出及 32 组输入数值检查；Isaac SB3 恢复/导出仍待实现，不将所有组合标为已支持。后续框架通过注册扩展，详见[RL框架接入](rl-frameworks.md)。
+
+**官方兼容性补审（2026-09-06）**：已全文审读官方 `AGENTS.md`，官方 CPU 回归测试 199 通过、1 跳过。MuJoCo 官方 flat walking 64 环境/5 轮训练及官方导出成功。官方预训练策略的 CPU BAM 回放完成 14 秒并生成视频，但前进/转向跟踪不足，不能标记 walking 验证通过。此前 Isaac PD 诊断不等同于官方 BAM 任务迁移。所有新增组合均须通过官方约定的 settle、smoke、归一化导出、回放和 schema-2 格式检查；不因时间目标简化物理/任务契约。见[兼容性审计与证据](reports/official-rl-compliance.md)。
+
+**最新进度（2026-09-06）**：MuJoCo基础设备/CPU仿真/EGL检查通过。用户明确同意EULA后，Isaac资产转换重试成功；Newton诊断在2个环境完成100步，实际solver为 `SolverMuJoCo`、设备 `cuda:0`，原始资产质量/惯量/质心/关节范围/armature及动作顺序检查通过。相机位姿刷新和本地地面资产修复后，视频重跑通过并完成人工检查。RSL-RL与SB3各完成16环境、5轮短训练；RSL-RL导出与Torch的16组输入比较通过（最大误差约3.6e-7）。17项轻量测试与7项安装环境CPU测试通过。BAM、完整行走训练和sim2sim仍未完成。详见[实时进度](implementation-status.md)。
 
 **Isaac 参考审读（2026-09-06）**：已静态审读 `kabilankb/isaaclab-microduck` 默认分支的固定版本 `4310fe0`，借鉴独立任务包、显式 Newton/MJWarp 配置、资产转换与行为评测方法。参考实现仍缺 BAM 与观测延迟，关节排列和最终 solver 参数需独立验证；它不替代官方 MuJoCo 基线，也不表示本项目 Isaac 已实现。第 03–07 步按环境 → 资产与映射 → BAM → 同策略 sim2sim → 训练导出逐步验收，详见[审读与迁移细化](reports/isaac-newton-reference-review.md)。独立功能使用分支，每个可检查阶段及时提交；完整项目 scope 保持不变。
 
-**框架验收（2026-09-06）**：8 项轻量测试通过，覆盖模块依赖隔离、工具注册/请求关联、事件域与证据保存、50 Hz 时序及 Newton 禁止静默降级；Python 语法编译通过。尚未提交 GPU 训练/回放 job，具体功能继续逐步实现。见[验证记录](reports/framework-validation.md)。
+**框架验收（2026-09-06）**：8 项轻量测试通过，覆盖模块依赖隔离、工具注册/请求关联、事件域与证据保存、50 Hz 时序及 Newton 禁止静默降级；Python 语法编译通过。此处为早期框架验收记录；后续 GPU 训练/回放结果见最新进度。见[验证记录](reports/framework-validation.md)。
 
 原始想法文档 `Agentic Microduck.md` 未随本次两份设计材料导入；当前完整范围以本文为准。
 
@@ -693,3 +699,7 @@ recording:
 - **[S14]** [执行器配置](https://github.com/pollen-robotics/microduck_rl/blob/main/src/mjlab_microduck/robot/microduck_constants.py)与[摩擦 / 齿隙适配](https://github.com/pollen-robotics/microduck_rl/blob/main/src/mjlab_microduck/actuator/friction_dr_bam.py)：BAM 迁移依据。
 - **[S15]** [官方 ONNX 导出](https://github.com/pollen-robotics/microduck_rl/blob/main/scripts/export.py)：归一化与元数据。
 - **[S16]** [官方 policy manifest](https://github.com/pollen-robotics/microduck/blob/main/docs/policy-manifest.md)：策略包语义与部署字段。
+
+### 2026-09-06：官方 BAM 与视频验证补充
+
+官方 RSL-RL 和 MuJoCo SB3 的 walking smoke/导出已通过，SB3 原生恢复与 768 次 timeout 边界验证通过。Newton 直接调用官方 BAM，64 环境完成 600 次物理子步，电机力矩映射检查通过；官方 alpha 策略在两端完成相同 14 秒命令序列，但均未充分跟踪前进/转向。HOME 保持测试在官方 CPU BAM 和 Newton 均倒下，不能把 HOME 参考角度当作已验证平衡目标。Newton 的 5 个碰撞凸包、15 组碰撞关系和脚底接触参数已通过官方编译模型对照；通过显式接触对保留静态平面与官方脚底接触规则。修正后 700 步/14 秒 720p 回放通过，但完整任务迁移/训练和有效命令跟踪仍未完成。用户要求提高 Isaac 视频分辨率，现默认 1280×720，可配置宽高；720p/25fps worker 视频已验证。持续证据见 [official-rl-compliance](reports/official-rl-compliance.md)。

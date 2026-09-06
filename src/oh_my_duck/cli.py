@@ -9,9 +9,11 @@ from pathlib import Path
 import sys
 
 COMMANDS = {
+    "frameworks": (None, "List RL frameworks, backend compatibility and validation status"),
     "status": (None, "Show component implementation status without initializing hardware"),
     "setup": ("bootstrap.py", "Fetch pinned sources/models and prepare a backend environment"),
     "submit": ("submit.py", "Submit a job with explicit resources and provenance"),
+    "assets": ("run.py", "Build source-pinned assets for the selected backend"),
     "probe": ("run.py", "Check allocated GPU, physics and headless rendering"),
     "train": ("run.py", "Train using an explicitly selected backend"),
     "export": ("run.py", "Export through the selected backend"),
@@ -40,6 +42,11 @@ def main():
         print(f"Unknown command {command!r}. Use --help.", file=sys.stderr)
         return 2
     root = project_root()
+    if command == "frameworks":
+        argparse.ArgumentParser(description=COMMANDS[command][1]).parse_args(sys.argv[2:])
+        from .training.frameworks import default_framework_registry
+        print(json.dumps(default_framework_registry().describe(), indent=2))
+        return 0
     if command == "status":
         parser = argparse.ArgumentParser(description="Show declared component maturity, not robot capabilities.")
         parser.parse_args(sys.argv[2:])

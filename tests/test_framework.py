@@ -23,7 +23,7 @@ class FrameworkTests(unittest.TestCase):
     def test_newton_never_silently_falls_back(self):
         from oh_my_duck.training.registry import BackendUnavailable, default_registry
         with self.assertRaises(BackendUnavailable):
-            default_registry().get("isaac-newton", Path.cwd())
+            default_registry().get("isaac-newton", Path.cwd()).command("train", [])
 
     def test_unimplemented_tools_do_not_report_success(self):
         catalog = ToolCatalog()

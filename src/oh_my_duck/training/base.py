@@ -14,6 +14,7 @@ class TrainingRequest:
     config_path: Path
     output_dir: Path
     seed: int
+    rl_framework: str = "rsl-rl"
 
 
 @dataclass(frozen=True)
@@ -22,6 +23,7 @@ class PolicyArtifact:
     manifest_path: Path
     training_backend: TrainingBackendName
     validation: Literal["unvalidated", "sim_validated", "hardware_validated"]
+    rl_framework: str = "rsl-rl"
 
 
 @dataclass(frozen=True)

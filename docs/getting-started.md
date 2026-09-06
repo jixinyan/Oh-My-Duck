@@ -9,7 +9,7 @@ python omd.py --help
 python omd.py setup
 ```
 
-Setup pins upstream source revisions and downloads the official walking model. It creates Python 3.12 at `.envs/mujoco` without changing the system interpreter. The first download is several GB. ISAAC/Newton is a separate environment and remains pending migration.
+Setup pins upstream source revisions and downloads the official walking model. It creates Python 3.12 at `.envs/mujoco` without changing the system interpreter. The first download is several GB. Isaac/Newton has separate training and asset-conversion environments; see [Isaac integration](isaac-newton.md) for its diagnostic-only implementation and remaining migration work.
 
 ## Run server jobs
 

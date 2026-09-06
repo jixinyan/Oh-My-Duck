@@ -9,6 +9,7 @@ import os
 from pathlib import Path
 import shutil
 import subprocess
+import sys
 import urllib.request
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -22,7 +23,12 @@ def run(argv, **kwargs):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--skip-env", action="store_true")
+    parser.add_argument("--backend", choices=["mujoco", "isaac-newton"], default="mujoco")
+    parser.add_argument("--rl-framework", choices=["rsl-rl", "sb3"], default="rsl-rl")
     args = parser.parse_args()
+    if args.backend == "isaac-newton":
+        run([sys.executable, ROOT / "training/isaac_newton/bootstrap_env.py", "--rl-framework", args.rl_framework, *(["--skip-env"] if args.skip_env else [])])
+        return
     lock = json.loads((ROOT / "configs/upstream.json").read_text())
     upstream = ROOT / ".cache/upstream"
     upstream.mkdir(parents=True, exist_ok=True)
@@ -51,10 +57,11 @@ def main():
     (dest / "provenance.json").write_text(json.dumps({**policy, "sha256": hashes}, indent=2) + "\n")
     if not args.skip_env:
         env = os.environ.copy()
-        env.update(UV_PROJECT_ENVIRONMENT=str(ROOT / ".envs/mujoco"),
+        env.update(UV_PROJECT_ENVIRONMENT=str(ROOT / (".envs/mujoco-sb3" if args.rl_framework == "sb3" else ".envs/mujoco")),
                    UV_CACHE_DIR=str(ROOT / ".cache/uv"),
                    UV_PYTHON_INSTALL_DIR=str(ROOT / ".cache/python"), UV_HTTP_TIMEOUT="600")
-        run(["uv", "sync", "--project", upstream / "microduck_rl", "--locked", "--python", "3.12"], env=env)
+        project = ROOT / "training/mujoco" if args.rl_framework == "sb3" else upstream / "microduck_rl"
+        run(["uv", "sync", "--project", project, "--locked", "--python", "3.12"], env=env)
     print("Bootstrap complete. GPU validation must run through the scheduler.")
 
 

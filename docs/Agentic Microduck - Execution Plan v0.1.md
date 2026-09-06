@@ -26,15 +26,21 @@ tags:
 - **已确认**：`mujoco`（mjlab / MuJoCo-Warp）与 `isaac-newton` 是两个正式训练后端；Isaac 必须用 Newton。服务器通过 `submit` 跑 headless job，按需保存视频。允许单节点多 GPU，无额外任务数量或时长上限。
 - **已实现、验证进行中**：本地 Git 与 origin、图解 README / gitignore、统一 `omd.py` 入口、固定源码与模型版本、隔离环境安装、任务提交、公共命令序列、官方训练/导出适配、CPU MuJoCo/BAM headless 回放。
 - **第 01 步进行中**：关键路径与环境已核查；完整文件阅读覆盖和依赖审读仍需补全，不能将清单数量当作完整审计。
-- **第 02 步进行中**：隔离环境已存在，主要依赖版本可读取，安装进程已结束；尚未验证完整依赖导入或 worker GPU/物理/渲染，也未提交训练或回放。整体框架已有轻量测试证据。实际通过状态随[实现进度与证据](implementation-status.md)同步。
-- **待实现**：Isaac/Newton Microduck 任务、BAM 迁移、跨后端评测，以及之后的工具与 Harness mock。
+- **第 02 步进行中**：隔离环境已安装，worker设备检查、CPU MuJoCo基础仿真与EGL渲染已通过；官方平地 walking 已完成 64 环境、5 轮训练和官方 ONNX 导出；回放命令跟踪仍待解决。整体框架已有轻量测试证据。实际通过状态随[实现进度与证据](implementation-status.md)同步。
+- **待实现**：Isaac/Newton Microduck 完整行走任务、BAM 迁移、跨后端评测，以及之后的工具与 Harness mock。
 - **延后**：当前没有真机；外部 Harness 未完成。硬件结果与真实 agent 闭环不作为本阶段已支持能力。
 
 每次完成可验证结果，同步本节、设计文档和 `implementation-status.md`；测试失败保留 job 和日志记录。首轮细化见[Headless 执行计划](Headless%20Simulation%20-%20First%20Execution%20Plan.md)。
 
+**RL框架扩展（2026-09-06）**：当前训练环境服务于RL，仿真后端（MuJoCo / Isaac-Newton）与RL框架（首批RSL-RL / Stable-Baselines3）独立选择。新增 `--rl-framework` 与兼容矩阵入口 `omd frameworks`；不同框架共用任务、观测/动作和评测契约，各自适配VecEnv、算法配置、checkpoint、normalizer与导出。Isaac/Newton上的RSL-RL与SB3 PPO均已通过短训练，SB3额外验证192次超时重置；RSL-RL归一化ONNX导出数值检查通过；MuJoCo SB3 已完成官方 walking 的 64 环境/5 轮训练和恢复训练，并验证 768 次超时；MuJoCo SB3 已通过官方 runner 扩展导出及 32 组输入数值检查；Isaac SB3 恢复/导出仍待实现，不将所有组合标为已支持。后续框架通过注册扩展，详见[RL框架接入](rl-frameworks.md)。
+
+**官方兼容性补审（2026-09-06）**：已全文审读官方 `AGENTS.md`，官方 CPU 回归测试 199 通过、1 跳过。MuJoCo 官方 flat walking 64 环境/5 轮训练及官方导出成功。官方预训练策略的 CPU BAM 回放完成 14 秒并生成视频，但前进/转向跟踪不足，不能标记 walking 验证通过。此前 Isaac PD 诊断不等同于官方 BAM 任务迁移。所有新增组合均须通过官方约定的 settle、smoke、归一化导出、回放和 schema-2 格式检查；不因时间目标简化物理/任务契约。见[兼容性审计与证据](reports/official-rl-compliance.md)。
+
+**最新进度（2026-09-06）**：MuJoCo基础设备/CPU仿真/EGL检查通过。用户明确同意EULA后，Isaac资产转换重试成功；Newton诊断在2个环境完成100步，实际solver为 `SolverMuJoCo`、设备 `cuda:0`，原始资产质量/惯量/质心/关节范围/armature及动作顺序检查通过。相机位姿刷新和本地地面资产修复后，视频重跑通过并完成人工检查。RSL-RL与SB3各完成16环境、5轮短训练；RSL-RL导出与Torch的16组输入比较通过（最大误差约3.6e-7）。17项轻量测试与7项安装环境CPU测试通过。BAM、完整行走训练和sim2sim仍未完成。详见[实时进度](implementation-status.md)。
+
 **Isaac 参考审读（2026-09-06）**：已静态审读 `kabilankb/isaaclab-microduck` 默认分支的固定版本 `4310fe0`，借鉴独立任务包、显式 Newton/MJWarp 配置、资产转换与行为评测方法。参考实现仍缺 BAM 与观测延迟，关节排列和最终 solver 参数需独立验证；它不替代官方 MuJoCo 基线，也不表示本项目 Isaac 已实现。第 03–07 步按环境 → 资产与映射 → BAM → 同策略 sim2sim → 训练导出逐步验收，详见[审读与迁移细化](reports/isaac-newton-reference-review.md)。独立功能使用分支，每个可检查阶段及时提交；完整项目 scope 保持不变。
 
-**框架验收（2026-09-06）**：8 项轻量测试通过，覆盖模块依赖隔离、工具注册/请求关联、事件域与证据保存、50 Hz 时序及 Newton 禁止静默降级；Python 语法编译通过。尚未提交 GPU 训练/回放 job，具体功能继续逐步实现。见[验证记录](reports/framework-validation.md)。
+**框架验收（2026-09-06）**：8 项轻量测试通过，覆盖模块依赖隔离、工具注册/请求关联、事件域与证据保存、50 Hz 时序及 Newton 禁止静默降级；Python 语法编译通过。此处为早期框架验收记录；后续 GPU 训练/回放结果见最新进度。见[验证记录](reports/framework-validation.md)。
 
 ## 1. 总览：按什么顺序做
 
@@ -387,3 +393,7 @@ tags:
 5. 第 02 步在目标 Linux 主机上的具体复现操作清单。
 
 当前先完成官方后端的可重复证据，再开始 Isaac/Newton 任务迁移。完整审读中尚未覆盖的部分继续标为待审读；不宣称 M0 已完成。暂不同时开启语音、视觉导航和自研 Harness 实现。
+
+### 2026-09-06：官方 BAM 与视频验证补充
+
+官方 RSL-RL 和 MuJoCo SB3 的 walking smoke/导出已通过，SB3 原生恢复与 768 次 timeout 边界验证通过。Newton 直接调用官方 BAM，64 环境完成 600 次物理子步，电机力矩映射检查通过；官方 alpha 策略在两端完成相同 14 秒命令序列，但均未充分跟踪前进/转向。HOME 保持测试在官方 CPU BAM 和 Newton 均倒下，不能把 HOME 参考角度当作已验证平衡目标。Newton 的 5 个碰撞凸包、15 组碰撞关系和脚底接触参数已通过官方编译模型对照；通过显式接触对保留静态平面与官方脚底接触规则。修正后 700 步/14 秒 720p 回放通过，但完整任务迁移/训练和有效命令跟踪仍未完成。用户要求提高 Isaac 视频分辨率，现默认 1280×720，可配置宽高；720p/25fps worker 视频已验证。持续证据见 [official-rl-compliance](reports/official-rl-compliance.md)。

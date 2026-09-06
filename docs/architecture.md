@@ -7,7 +7,7 @@ This is the implementation framework for the full Project Design, not just the c
 ```mermaid
 flowchart TB
   CLI["Application / CLI / future interaction UI"] --> Bridge["Harness bridge"]
-  CLI --> Train["Training adapters"]
+  CLI --> Train["RL framework registry × simulation backend registry"]
   Bridge --> Tools["Tool catalog"]
   Tools --> Skills["Skill runner"]
   Skills --> Backend["Robot execution backend"]
@@ -42,7 +42,7 @@ Only concrete adapters import MuJoCo, Isaac, model SDKs or transport libraries. 
 | `training/` inside package | Typed offline requests/artifacts, process protocol and extensible backend registry | Backend-specific process commands |
 | Top-level `training/common/` | 14-joint contract and exact command schedule | Shared comparisons and policy compatibility checks |
 | Top-level `training/mujoco/` | Initial worker probe and official BAM headless evaluator | Worker validation, training/export validation |
-| Planned `training/isaac_newton/` | Reserved responsibility, not an implemented capability | Newton assets, BAM, task and export adapter |
+| `training/isaac_newton/` | Newton asset conversion and PD diagnostic; RSL-RL and optional SB3 launchers | BAM locomotion, framework-specific lifecycle validation |
 
 Online `RobotBackend` and offline `TrainingBackend` are different interfaces. A simulation execution adapter exposes sensors and commands; a training adapter launches experiments and exports artifacts. Keep that distinction when adding the two simulators.
 
@@ -71,6 +71,8 @@ Current contracts are Python interface proposals, not a frozen external wire pro
 
 **A training backend:** keep simulator dependencies in its own environment. Produce commands/artifacts through the offline adapter interface, reuse the same evaluation timing/units and record versions. Isaac is specifically Newton; do not silently fall back to PhysX.
 
+**An RL framework:** register supported backend/operation bindings in `training/frameworks.py`, keep native VecEnv and checkpoint logic in isolated runtime adapters, and preserve the shared task contract. See [RL framework extension](rl-frameworks.md).
+
 ## Current framework limits
 
 The interfaces are intentional scaffolding. They do not claim implemented sensor acquisition, cancellation, TTS, real-robot transport, autonomous behavior or Isaac training. Tool handlers must validate their declared schemas; automatic JSON Schema validation is not yet implemented. The JSONL recorder supports a single process with threads, not cross-process locking or a database durability contract.
@@ -86,3 +88,7 @@ The interfaces are intentional scaffolding. They do not claim implemented sensor
 5. Add voice, perception, replay and hardware functionality by milestone.
 
 The original Project Design and Execution Plan remain the product and milestone authorities. Update them together with this architecture document when changing boundaries.
+
+## Isaac diagnostic implementation
+
+The offline backend now dispatches to the independently packaged `training/isaac_newton/omd_isaac/` code. Its conversion and training dependency environments are separate; the application core imports neither. The implemented task is explicitly PD diagnostic only; BAM locomotion remains pending. See [the integration guide](isaac-newton.md) for entry points, artifact integrity and extension boundaries.
