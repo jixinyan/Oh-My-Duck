@@ -25,8 +25,8 @@ def main():
         from .bam_actuator import OfficialBamActuatorCfg
         cfg = DiagnosticEnvCfg()
         cfg.scene.num_envs = args.num_envs
-        from .walk_asset import spawn_official_walk
-        cfg.scene.robot.spawn.func = spawn_official_walk
+        from .walk_asset import configure_walk_scene
+        configure_walk_scene(cfg.scene)
         cfg.scene.robot.actuators = {"official_bam": OfficialBamActuatorCfg(joint_names_expr=list(JOINT_NAMES))}
         cfg.events.joints.params["position_range"] = (-0.015, 0.015)
         cfg.events.root.params["pose_range"] = {"roll": (-0.05, 0.05), "pitch": (-0.05, 0.05)}
