@@ -74,7 +74,8 @@ class NewtonBuiltinSensor(BuiltinSensor):
         spec = reference.sensor(name)
         self.kind = int(spec.type[0])
         obj = int(spec.objid[0])
-        if self.kind in (1,2,3):
+        self.frame_is_site = int(spec.objtype[0]) == mujoco.mjtObj.mjOBJ_SITE
+        if self.kind in (1,2,3) or (self.kind == 27 and self.frame_is_site):
             self.site = robot.site_names.index(reference.site(obj).name.removeprefix('robot/'))
         elif self.kind in (27,37):
             self.body = robot.body_names.index(reference.body(obj).name.removeprefix('robot/'))
@@ -84,7 +85,7 @@ class NewtonBuiltinSensor(BuiltinSensor):
     def _compute_data(self):
         robot, sim = self.robot, self.simulation
         if self.kind == 27:
-            return robot.data.body_link_quat_w[:, self.body]
+            return robot.data.site_pose_w[:,self.site,3:] if self.frame_is_site else robot.data.body_link_quat_w[:, self.body]
         if self.kind == 37:
             return sim.data.subtree_angmom[:, robot.indexing.body_ids[self.body]]
         pose = robot.data.site_pose_w[:, self.site]

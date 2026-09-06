@@ -1,11 +1,11 @@
 # Environments, upstream research checkouts and downloaded models
-.envs/
-.venv/
-.cache/
-artifacts/
-outputs/
-logs/
-wandb/
+/.envs/
+/.venv/
+/.cache/
+/artifacts/
+/outputs/
+/logs/
+/wandb/
 *.onnx
 *.pt
 *.pth

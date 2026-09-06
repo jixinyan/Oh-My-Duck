@@ -31,7 +31,7 @@ class NewtonEntityData(EntityData):
     @property
     def site_vel_w(self):
         ids = self.indexing.body_ids[self.site_parent_ids]
-        return compute_velocity_from_cvel(self.site_pos_w, self.data.subtree_com[:, self.entity.simulation.mj_model.body_rootid[ids.cpu().numpy()]], self.data.cvel[:, ids])
+        return compute_velocity_from_cvel(self.site_pos_w, self.data.subtree_com[:, self.site_root_ids], self.data.cvel[:, ids])
 
     @property
     def actuator_force(self):
@@ -115,6 +115,7 @@ class NewtonEntity(Entity):
         self._data.entity = self
         sites = [reference.site(name).id for name in self.site_names]
         self._data.site_parent_ids = tensor([self.body_names.index(reference.body(int(reference.site_bodyid[i])).name) for i in sites])
+        self._data.site_root_ids = tensor(model.body_rootid[np.array(bodies)[self._data.site_parent_ids.cpu().numpy()]])
         self._data.site_local_pos = torch.tensor(reference.site_pos[sites],device=device,dtype=torch.float32).unsqueeze(0)
         self._data.site_local_quat = torch.tensor(reference.site_quat[sites],device=device,dtype=torch.float32).unsqueeze(0)
         actuator = native.actuators['official_bam']
