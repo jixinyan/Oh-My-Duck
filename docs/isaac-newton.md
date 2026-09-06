@@ -1,6 +1,6 @@
 # Isaac Lab / Newton integration
 
-This backend is in development. The code currently implements **asset conversion and a PD diagnostic task**, not the official BAM walking recipe. The training environment is installed and its four CPU configuration tests pass. The conversion environment is still installing; no Isaac GPU run has passed yet. Keep the full product scope in the [Project Design](Agentic%20Microduck%20-%20Project%20Design%20v0.1.md).
+This backend is in development. The code currently implements **asset conversion and a PD diagnostic task**, not the official BAM walking recipe. The training environment is installed and its four CPU configuration tests pass. The conversion environment is also installed and dependency-checked; no Isaac GPU run has passed yet. Keep the full product scope in the [Project Design](Agentic%20Microduck%20-%20Project%20Design%20v0.1.md).
 
 ## Environments and source versions
 
@@ -56,7 +56,7 @@ Worker outputs include `result.json`, `trajectory.npz`, `frame.png`, and optiona
 
 ## Remaining migration work
 
-1. Complete installation/import checks and run conversion/probe when scheduler quota is available.
+1. Run the queued conversion and then the probe when scheduler quota is available; installation and CPU configuration checks have passed.
 2. Validate final solver contact/axis parameters and preserve official training overrides.
 3. Implement BAM m6 with verified world/DOF mapping, per-world friction/damping storage, voltage and action delays. Current solver field inspection performs **no BAM writes**.
 4. Add official delayed observations, encoder bias, commands, rewards and domain randomization; verify the shared contract on actual states.

@@ -26,3 +26,9 @@ The official trainer's help parser inspects a task before invoking `external_cal
 Validation: 11 standard-library framework tests plus 4 tests against the installed Isaac packages passed. The latter construct and validate task/camera configs and reject incompatible physics, timing and order without starting simulation. They run with `CUDA_VISIBLE_DEVICES=''`; Warp emits a no-CUDA diagnostic during import, which is expected in this deliberately CPU-only check and is not GPU validation.
 
 CPU-only raw MJCF extraction also ran successfully: 15 bodies, 14 joints, total mass 0.73724318 kg. Evidence: `outputs/isaac-asset-reference-20260906-01/reference.json`. No USD conversion or physics rollout is implied by this extraction. The separate asset environment is still installing at this checkpoint, and worker validation is still waiting for scheduler quota.
+
+## Installation complete and conversion queued
+
+Both locked setup paths completed successfully through `python omd.py setup --backend isaac-newton`. Training has 156 installed packages and conversion has 166 (its 167-entry lock also includes the virtual project). Both pass `uv pip check`. Freeze files and setup provenance are under `artifacts/environments/isaac-newton/` and `artifacts/environments/isaac-assets/`; these are local ignored evidence.
+
+The asset CLI help also exits 0 through the actual conversion interpreter. Asset conversion was submitted as `omd-isaac-assets-20260906-01`, queue ID `local-d0faa6d27c42`, one GPU. At submission it was queued, with no worker/asset result. MuJoCo probe `omd-probe-20260906-01` remains queued for project quota. GPU asset, physics, rendering, training and sim2sim verification remain pending.

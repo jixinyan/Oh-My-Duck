@@ -74,7 +74,9 @@
       "solver": "MuJoCo-Warp",
       "environment": ".envs/isaac-newton",
       "asset_environment": ".envs/isaac-assets",
-      "locomotion": "BAM_migration_pending"
+      "locomotion": "BAM_migration_pending",
+      "environment_state": "installed_cpu_configuration_checked",
+      "asset_environment_state": "installed_conversion_queued"
     }
   },
   "execution": {
