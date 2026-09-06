@@ -5,6 +5,14 @@ and reset behavior. The constructor intentionally replaces only physics and scen
 creation from mjlab; no MuJoCo simulation environment is instantiated here.
 """
 import torch
+from isaaclab.utils.configclass import configclass
+
+
+@configclass
+class PhysicsOnlyTerms:
+    """A truthy, empty native manager configuration (an empty dict skips setup)."""
+    pass
+
 from mjlab.envs import ManagerBasedRlEnv
 from oh_my_duck.rl.backends.isaac_newton.task_binding.simulation import NewtonSimulation
 from oh_my_duck.rl.backends.isaac_newton.task_binding.scene import NewtonScene
@@ -31,7 +39,7 @@ class NewtonTaskEnvironment(ManagerBasedRlEnv):
         scene_cfg.robot.spawn.usd_path=str(require_asset(task.model))
         configure_scene(scene_cfg,task.model)
         scene_cfg.robot.actuators={'official_bam':OfficialBamActuatorCfg(joint_names_expr=list(JOINT_NAMES))}
-        native_cfg=ManagerBasedEnvCfg(scene=scene_cfg,decimation=1,actions={},observations={},events={},seed=cfg.seed,
+        native_cfg=ManagerBasedEnvCfg(scene=scene_cfg,decimation=1,actions=PhysicsOnlyTerms(),observations=PhysicsOnlyTerms(),events=PhysicsOnlyTerms(),seed=cfg.seed,
             sim=SimulationCfg(device=device,dt=cfg.sim.mujoco.timestep,render_interval=cfg.decimation,
                 physics=NewtonCfg(solver_cfg=MJWarpSolverCfg(iterations=cfg.sim.mujoco.iterations,
                     ls_iterations=cfg.sim.mujoco.ls_iterations, njmax=cfg.sim.njmax, nconmax=cfg.sim.nconmax,

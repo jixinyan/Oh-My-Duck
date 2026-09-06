@@ -39,24 +39,24 @@ class NewtonEntityData(EntityData):
 
     def write_root_pose(self, pose, env_ids=None):
         indices = self.entity.env_ids(env_ids)
-        self.entity.native.write_root_link_pose_to_sim_index(pose[:, [0,1,2,4,5,6,3]], env_ids=indices)
+        self.entity.native.write_root_link_pose_to_sim_index(root_pose=pose[:, [0,1,2,4,5,6,3]], env_ids=indices)
         super().write_root_pose(pose, indices)
 
     def write_root_velocity(self, velocity, env_ids=None):
         indices = self.entity.env_ids(env_ids)
-        self.entity.native.write_root_link_velocity_to_sim_index(velocity, env_ids=indices)
+        self.entity.native.write_root_link_velocity_to_sim_index(root_velocity=velocity, env_ids=indices)
         super().write_root_velocity(velocity, indices)
 
     def write_joint_position(self, position, joint_ids=None, env_ids=None):
         indices = self.entity.env_ids(env_ids)
         joint_ids = slice(None) if joint_ids is None else joint_ids
-        self.entity.native.write_joint_position_to_sim_index(position, joint_ids=self.entity.native_joint_ids[joint_ids], env_ids=indices)
+        self.entity.native.write_joint_position_to_sim_index(position=position, joint_ids=self.entity.native_joint_ids[joint_ids], env_ids=indices)
         super().write_joint_position(position, joint_ids, indices)
 
     def write_joint_velocity(self, velocity, joint_ids=None, env_ids=None):
         indices = self.entity.env_ids(env_ids)
         joint_ids = slice(None) if joint_ids is None else joint_ids
-        self.entity.native.write_joint_velocity_to_sim_index(velocity, joint_ids=self.entity.native_joint_ids[joint_ids], env_ids=indices)
+        self.entity.native.write_joint_velocity_to_sim_index(velocity=velocity, joint_ids=self.entity.native_joint_ids[joint_ids], env_ids=indices)
         super().write_joint_velocity(velocity, joint_ids, indices)
 
 
@@ -132,9 +132,9 @@ class NewtonEntity(Entity):
         self.native.reset(self.env_ids(env_ids))
 
     def write_data_to_sim(self):
-        self.native.set_joint_position_target(self.data.joint_pos_target, joint_ids=self.native_joint_ids)
-        self.native.set_joint_velocity_target(self.data.joint_vel_target, joint_ids=self.native_joint_ids)
-        self.native.set_joint_effort_target(self.data.joint_effort_target, joint_ids=self.native_joint_ids)
+        self.native.set_joint_position_target_index(target=self.data.joint_pos_target, joint_ids=self.native_joint_ids)
+        self.native.set_joint_velocity_target_index(target=self.data.joint_vel_target, joint_ids=self.native_joint_ids)
+        self.native.set_joint_effort_target_index(target=self.data.joint_effort_target, joint_ids=self.native_joint_ids)
 
     def update(self, dt):
         # Native scene/actuator lifecycle handles the physics substep.

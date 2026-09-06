@@ -34,7 +34,7 @@ class NewtonContactSensor(ContactSensor):
             zeros = lambda: torch.zeros(simulation.num_envs, width, device=self._device)
             self._air_time_state = _AirTimeState(zeros(),zeros(),zeros(),zeros(),torch.zeros(simulation.num_envs,device=self._device))
         self._force_wp = wp.zeros(simulation.wp_data.naconmax, dtype=wp.spatial_vector, device=self._device)
-        self._contact_ids_wp = wp.array(torch.arange(simulation.wp_data.naconmax,device=self._device,dtype=torch.int32),dtype=int,device=self._device)
+        self._contact_ids_wp = wp.from_torch(torch.arange(simulation.wp_data.naconmax,device=self._device,dtype=torch.int32))
 
     def _extract_sensor_data(self):
         sim = self.simulation
