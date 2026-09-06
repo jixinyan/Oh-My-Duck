@@ -32,7 +32,9 @@ tags:
 
 每次完成可验证结果，同步本节、设计文档和 `implementation-status.md`；测试失败保留 job 和日志记录。首轮细化见[Headless 执行计划](Headless%20Simulation%20-%20First%20Execution%20Plan.md)。
 
-**最新进度（2026-09-06）**：两个job均已结束。MuJoCo probe（`omd-probe-20260906-01`）成功：worker识别到1张H200，CUDA/Warp设备检查、CPU MuJoCo有限步仿真与EGL离屏图片生成通过；这不代表GPU物理、机器人策略回放或训练已通过。CPU ONNX结构与16组输入检查通过。Isaac两套隔离环境已安装，资产转换、规范关节映射、Newton PD诊断任务及有限步视频/导出入口已实现；11项轻量测试和4项Isaac包内CPU检查通过。资产转换job（`omd-isaac-assets-20260906-01`）失败于Omniverse Kit首次启动的EULA交互提示（`EOF when reading a line`），未完成资产转换或进入Newton物理验证。BAM行走迁移、训练、视频与sim2sim仍待完成。启动修复已加入显式 `--accept-eula` 和无交互预检查；用户已明确同意 NVIDIA Omniverse EULA，转换重试 `omd-isaac-assets-20260906-02` 已提交，等待worker结果。详见[Isaac接入指南](isaac-newton.md)与[实时进度](implementation-status.md)。
+**RL框架扩展（2026-09-06）**：当前训练环境服务于RL，仿真后端（MuJoCo / Isaac-Newton）与RL框架（首批RSL-RL / Stable-Baselines3）独立选择。新增 `--rl-framework` 与兼容矩阵入口 `omd frameworks`；不同框架共用任务、观测/动作和评测契约，各自适配VecEnv、算法配置、checkpoint、normalizer与导出。Isaac SB3 PPO入口已接入、待训练验证；MuJoCo SB3和SB3恢复/导出仍待实现，不将所有组合标为已支持。后续框架通过注册扩展，详见[RL框架接入](rl-frameworks.md)。
+
+**最新进度（2026-09-06）**：MuJoCo基础设备/CPU仿真/EGL检查通过。用户明确同意EULA后，Isaac资产转换重试成功；Newton诊断在2个环境完成100步，实际solver为 `SolverMuJoCo`、设备 `cuda:0`，原始资产质量/惯量/质心/关节范围/armature及动作顺序检查通过。视频已生成，但人工发现相机位姿未刷新，修复已提交、待重跑。BAM、完整行走训练和sim2sim仍未完成。详见[实时进度](implementation-status.md)。
 
 **Isaac 参考审读（2026-09-06）**：已静态审读 `kabilankb/isaaclab-microduck` 默认分支的固定版本 `4310fe0`，借鉴独立任务包、显式 Newton/MJWarp 配置、资产转换与行为评测方法。参考实现仍缺 BAM 与观测延迟，关节排列和最终 solver 参数需独立验证；它不替代官方 MuJoCo 基线，也不表示本项目 Isaac 已实现。第 03–07 步按环境 → 资产与映射 → BAM → 同策略 sim2sim → 训练导出逐步验收，详见[审读与迁移细化](reports/isaac-newton-reference-review.md)。独立功能使用分支，每个可检查阶段及时提交；完整项目 scope 保持不变。
 

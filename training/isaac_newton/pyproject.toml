@@ -15,6 +15,9 @@ dependencies = [
   "onnxruntime", "imageio[ffmpeg]",
 ]
 
+[project.optional-dependencies]
+sb3 = ["isaaclab-rl[sb3]", "stable-baselines3==2.7.1"]
+
 [tool.setuptools.packages.find]
 include = ["omd_isaac*"]
 

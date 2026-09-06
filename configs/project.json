@@ -42,7 +42,7 @@
     "training": {
       "module": "oh_my_duck.training",
       "state": "interface_and_initial_adapter",
-      "role": "Isolated offline training and evaluation"
+      "role": "Independent simulation-backend and RL-framework selection, offline training and evaluation"
     },
     "perception": {
       "module": "oh_my_duck.perception",
@@ -63,20 +63,20 @@
   "training_backends": {
     "mujoco": {
       "state": "implementation_unvalidated",
-      "framework": "mjlab",
       "physics": "MuJoCo-Warp",
-      "environment": ".envs/mujoco"
+      "environment": ".envs/mujoco",
+      "environment_framework": "mjlab"
     },
     "isaac-newton": {
-      "state": "diagnostic_integration_unvalidated",
-      "framework": "Isaac Lab",
+      "state": "pd_physics_probe_passed_training_pending",
       "physics": "Newton",
       "solver": "MuJoCo-Warp",
       "environment": ".envs/isaac-newton",
       "asset_environment": ".envs/isaac-assets",
       "locomotion": "BAM_migration_pending",
       "environment_state": "installed_cpu_configuration_checked",
-      "asset_environment_state": "installed_conversion_queued"
+      "asset_environment_state": "conversion_worker_verified",
+      "environment_framework": "Isaac Lab"
     }
   },
   "execution": {
@@ -85,5 +85,6 @@
     "server_jobs": "Alaya HTrain",
     "headless": true,
     "video": "offscreen"
-  }
+  },
+  "rl_framework_registry": "oh_my_duck.training.frameworks:default_framework_registry"
 }

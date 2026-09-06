@@ -24,10 +24,13 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--skip-env", action="store_true")
     parser.add_argument("--backend", choices=["mujoco", "isaac-newton"], default="mujoco")
+    parser.add_argument("--rl-framework", choices=["rsl-rl", "sb3"], default="rsl-rl")
     args = parser.parse_args()
     if args.backend == "isaac-newton":
-        run([sys.executable, ROOT / "training/isaac_newton/bootstrap_env.py", *(["--skip-env"] if args.skip_env else [])])
+        run([sys.executable, ROOT / "training/isaac_newton/bootstrap_env.py", "--rl-framework", args.rl_framework, *(["--skip-env"] if args.skip_env else [])])
         return
+    if args.rl_framework != "rsl-rl":
+        parser.error("MuJoCo SB3 integration is planned; use omd frameworks for supported combinations")
     lock = json.loads((ROOT / "configs/upstream.json").read_text())
     upstream = ROOT / ".cache/upstream"
     upstream.mkdir(parents=True, exist_ok=True)

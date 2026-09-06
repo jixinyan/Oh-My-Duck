@@ -14,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[2]
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--skip-env", action="store_true")
+    parser.add_argument("--rl-framework", choices=["rsl-rl", "sb3"], default="rsl-rl")
     args = parser.parse_args()
     lock = json.loads((ROOT / "configs/upstream.json").read_text())
     spec = lock["isaac_candidate"]
@@ -32,13 +33,14 @@ def main():
     for name, project in (("isaac-newton", ROOT / "training/isaac_newton"),
                           ("isaac-assets", ROOT / "training/isaac_newton/asset_converter")):
         env = {**shared, "UV_PROJECT_ENVIRONMENT": str(ROOT / ".envs" / name)}
-        subprocess.run(["uv", "sync", "--project", str(project), "--locked", "--python", "3.12"], env=env, check=True)
+        extras = ["--extra", "sb3"] if name == "isaac-newton" and args.rl_framework == "sb3" else []
+        subprocess.run(["uv", "sync", "--project", str(project), "--locked", "--python", "3.12", *extras], env=env, check=True)
         result = subprocess.check_output(["uv", "pip", "freeze", "--python", str(ROOT / ".envs" / name / "bin/python")], env=env, text=True)
         out = ROOT / "artifacts/environments" / name
         out.mkdir(parents=True, exist_ok=True)
         (out / "installed.txt").write_text(result)
         (out / "setup.json").write_text(json.dumps({"completed_at": datetime.now(timezone.utc).isoformat(),
-            "isaaclab": spec, "status": "installed_not_worker_validated"}, indent=2) + "\n")
+            "isaaclab": spec, "rl_framework": args.rl_framework if name == "isaac-newton" else None, "status": "installed_not_worker_validated"}, indent=2) + "\n")
     print("Isaac/Newton installed. Run asset conversion and validation through server jobs.")
     return 0
 

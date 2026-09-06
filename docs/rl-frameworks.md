@@ -1,0 +1,60 @@
+# RL framework integration
+
+Simulation backends and RL frameworks are independent choices. The current focus is RL: the simulation environment owns physics, task dynamics, observation/action semantics and episode boundaries; the framework adapter owns the vector-environment interface, algorithm configuration, learning loop and native checkpoints. Shared evaluation consumes compatible policies without depending on the training framework.
+
+```mermaid
+flowchart LR
+  Task[Task and policy contract] --> Env[Simulation environment]
+  MJ[mjlab / MuJoCo-Warp] --> Env
+  Newton[Isaac Lab / Newton] --> Env
+  Env --> Adapter[Framework-specific VecEnv adapter]
+  Adapter --> RSL[RSL-RL]
+  Adapter --> SB3[Stable-Baselines3]
+  Adapter -. extension .-> More[Additional RL frameworks]
+  RSL --> Artifact[Policy + normalizer + provenance]
+  SB3 --> Artifact
+  Artifact --> Eval[Shared simulation evaluation]
+```
+
+## Selection and current boundaries
+
+Run `python omd.py frameworks` for the registered compatibility matrix. `--backend` selects simulation; `--rl-framework` selects RL and applies to `train`/`export`. Omitted framework means `rsl-rl` for compatibility. Put framework/backend selectors before `--`, and framework-native arguments after it. Unsupported combinations fail before launch; there is no automatic change of framework or physics.
+
+| Combination | Implemented entry points | Validation / remaining work |
+|---|---|---|
+| MuJoCo + RSL-RL | Official train/export | Robot training/export worker verification pending |
+| Isaac/Newton + RSL-RL | PD diagnostic train/export | Configuration checked; training/export worker verification pending |
+| Isaac/Newton + SB3 | PD diagnostic PPO train | Optional install and real launcher help checked; training worker verification pending |
+| MuJoCo + SB3 | Planned | mjlab vector-environment bridge required |
+
+SB3 does not yet implement native checkpoint resume or ONNX export in this project. Resume is explicitly rejected until matching normalization state is restored and verified. Training saves the upstream native `model.zip` and `model_vecnormalize.pkl`; retain both. A checkpoint from one framework cannot be resumed by another; a shared ONNX inference contract is a separate compatibility milestone. SB3 currently uses its upstream CPU NumPy VecEnv boundary around GPU simulation; do not assume the throughput or distributed capabilities of RSL-RL.
+
+## Isaac diagnostic commands
+
+```bash
+python omd.py setup --backend isaac-newton --rl-framework sb3
+python omd.py train --backend isaac-newton --rl-framework sb3 -- \
+  --task Omd-Microduck-PD-Diagnostic-v0 --help
+
+python omd.py submit --name omd-sb3-smoke-001 --gpus 1 -- \
+  python omd.py train --backend isaac-newton --rl-framework sb3 -- \
+  --task Omd-Microduck-PD-Diagnostic-v0 --num_envs 16 --max_iterations 5
+
+python omd.py submit --name omd-rsl-smoke-001 --gpus 1 -- \
+  python omd.py train --backend isaac-newton --rl-framework rsl-rl -- \
+  --task Omd-Microduck-PD-Diagnostic-v0 --num_envs 16 --max_iterations 5
+```
+
+SB3 is an optional locked extra (`stable-baselines3==2.7.1`); it is not a dependency of the root application or asset converter. Setup with `--rl-framework sb3` retains RSL-RL too. A later setup without the SB3 option synchronizes only default dependencies and may remove optional packages; rerun with the option to retain them.
+
+Both diagnostics use the same Newton task, 61 observations, 14 canonical joint actions, HOME offsets and 50 Hz control. Framework-specific hyperparameters live in `agent.py` and `sb3_agent.py`. PPO smoke runs validate integration, not learning quality, BAM locomotion equivalence or framework performance rankings.
+
+## Adding another framework
+
+1. Register a `FrameworkBinding` factory per supported simulation backend in `src/oh_my_duck/training/frameworks.py`. Declare supported operations and validation state. New names do not require editing the CLI parser.
+2. Keep imports and optional dependencies inside isolated runtime packages. Reuse a maintained upstream adapter where its semantics match; do not copy a trainer into the application core.
+3. Verify observation/action order, shapes, units, device conversion, action clipping, rewards, seeds and reset behavior. In particular, distinguish termination from truncation and preserve the terminal observation when the simulator automatically resets.
+4. Save native optimizer/checkpoint state, normalization statistics, framework identity, task/physics/source versions and policy contract. Implement explicit export with normalization and numerical output checks.
+5. Validate short headless learning, save/load continuation, inference parity and video before marking a combination supported for production experiments. Add framework-native algorithms incrementally; selecting SB3 currently selects its pinned PPO integration only.
+
+The [SB3 VecEnv contract](https://stable-baselines3.readthedocs.io/en/master/guide/vec_envs.html) differs from Gymnasium's reset/step API. Adapter boundary tests are required; matching method names alone is insufficient. The pinned Isaac Lab implementation is in `scripts/reinforcement_learning/sb3/train_sb3.py` and `source/isaaclab_rl/isaaclab_rl/sb3.py`.

@@ -7,7 +7,7 @@ This is the implementation framework for the full Project Design, not just the c
 ```mermaid
 flowchart TB
   CLI["Application / CLI / future interaction UI"] --> Bridge["Harness bridge"]
-  CLI --> Train["Training adapters"]
+  CLI --> Train["RL framework registry × simulation backend registry"]
   Bridge --> Tools["Tool catalog"]
   Tools --> Skills["Skill runner"]
   Skills --> Backend["Robot execution backend"]
@@ -42,7 +42,7 @@ Only concrete adapters import MuJoCo, Isaac, model SDKs or transport libraries. 
 | `training/` inside package | Typed offline requests/artifacts, process protocol and extensible backend registry | Backend-specific process commands |
 | Top-level `training/common/` | 14-joint contract and exact command schedule | Shared comparisons and policy compatibility checks |
 | Top-level `training/mujoco/` | Initial worker probe and official BAM headless evaluator | Worker validation, training/export validation |
-| Planned `training/isaac_newton/` | Reserved responsibility, not an implemented capability | Newton assets, BAM, task and export adapter |
+| `training/isaac_newton/` | Newton asset conversion and PD diagnostic; RSL-RL and optional SB3 launchers | BAM locomotion, framework-specific lifecycle validation |
 
 Online `RobotBackend` and offline `TrainingBackend` are different interfaces. A simulation execution adapter exposes sensors and commands; a training adapter launches experiments and exports artifacts. Keep that distinction when adding the two simulators.
 
@@ -70,6 +70,8 @@ Current contracts are Python interface proposals, not a frozen external wire pro
 **A voice adapter:** implement the model/audio protocol. Persist user-confirmed reference audio and immutable voice revision independently from a process-local model cache. A microphone interruption does not by itself cancel robot motion.
 
 **A training backend:** keep simulator dependencies in its own environment. Produce commands/artifacts through the offline adapter interface, reuse the same evaluation timing/units and record versions. Isaac is specifically Newton; do not silently fall back to PhysX.
+
+**An RL framework:** register supported backend/operation bindings in `training/frameworks.py`, keep native VecEnv and checkpoint logic in isolated runtime adapters, and preserve the shared task contract. See [RL framework extension](rl-frameworks.md).
 
 ## Current framework limits
 

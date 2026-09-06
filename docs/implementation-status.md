@@ -80,3 +80,10 @@ Automatic approval review rejected the attempted commit-and-submit command becau
 ## License approved and conversion retried (2026-09-06)
 
 The user explicitly agreed to the NVIDIA Omniverse EULA. Submitted `omd-isaac-assets-20260906-02` with `--accept-eula`, one GPU, source commit `430e8ae`, queue ID `local-d87e23d96653`. The dispatcher is reconciling the submission; no worker result is available at this checkpoint. This supersedes the approval blocker above. The local regression suite now has **13 passing tests**; the two new tests use mocked subprocesses.
+
+## Newton worker diagnostics and RL framework extension (2026-09-06)
+
+- Conversion retry `omd-isaac-assets-20260906-02` succeeded, task `e9ec42f9-1680-4831-86bf-48719990a2ce`; verified asset fingerprint `e158fea3b1b7edc26738ff877ef7bd1660ae56ac333c27c0c2fd8b5b3c694c3a`. EULA startup is resolved.
+- Probe `omd-isaac-probe-20260906-01` failed at argument parsing because the submitted separator was misplaced; no simulation occurred. Corrected probe `omd-isaac-probe-20260906-02`, task `f525ac94-c18b-4fb7-aa85-425e448f46ed`, succeeded: 2 environments, 100 control ticks, Newton `SolverMuJoCo` on `cuda:0`, canonical joint/action mapping and raw asset checks passed. Evidence: `outputs/isaac-probe-20260906-02/`.
+- Manual inspection found the initial video's camera pose was stale despite nonuniform frames. `69c3329` enables live camera pose updates and asserts rendered camera position; repeat validation pending. Existing physical checks remain valid, but that video is not accepted as a useful visual diagnostic. USD physics-material binding warnings, contact parity and BAM remain open.
+- Per user steering, branch `feat/rl-framework-selection` introduces independent RL-framework selection. RSL-RL routes preserve the existing launch commands; SB3 PPO delegates to pinned Isaac Lab with an optional dependency extra. Actual SB3 install and task-aware CLI help pass; GPU learning and framework-native checkpoint lifecycle verification remain pending. Root suite: 17 passing tests. See [RL framework scope and boundaries](rl-frameworks.md).
