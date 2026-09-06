@@ -31,11 +31,11 @@ class NewtonEntityData(EntityData):
     @property
     def site_vel_w(self):
         ids = self.indexing.body_ids[self.site_parent_ids]
-        return compute_velocity_from_cvel(self.site_pos_w, self.data.subtree_com[:, ids], self.data.cvel[:, ids])
+        return compute_velocity_from_cvel(self.site_pos_w, self.data.subtree_com[:, self.entity.simulation.mj_model.body_rootid[ids.cpu().numpy()]], self.data.cvel[:, ids])
 
     @property
     def actuator_force(self):
-        return self.joint_torques
+        return self.qfrc_actuator
 
     def write_root_pose(self, pose, env_ids=None):
         indices = self.entity.env_ids(env_ids)
@@ -99,7 +99,8 @@ class NewtonEntity(Entity):
         limits = simulation.model.jnt_range[:, joints].clone()
         midpoint = limits.mean(-1)
         radius = (limits[...,1]-limits[...,0])*cfg.articulation.soft_joint_pos_limit_factor/2
-        default_pos = torch.tensor(resolve_expr(cfg.init_state.joint_pos, self.joint_names, 0.),device=device).repeat(count,1)
+        initial_joints = reference.key(0).qpos[7:] if cfg.init_state.joint_pos is None else resolve_expr(cfg.init_state.joint_pos, self.joint_names, 0.)
+        default_pos = torch.tensor(initial_joints,device=device,dtype=torch.float32).repeat(count,1)
         default_vel = torch.tensor(resolve_expr(cfg.init_state.joint_vel, self.joint_names, 0.),device=device).repeat(count,1)
         initial = cfg.init_state
         default_root = torch.tensor((*initial.pos,*initial.rot,*initial.lin_vel,*initial.ang_vel),device=device).repeat(count,1)
