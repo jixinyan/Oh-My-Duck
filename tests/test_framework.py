@@ -8,20 +8,20 @@ import unittest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
-from oh_my_duck.contracts import EpisodeEvent, ExecutionDomain, Identity
-from oh_my_duck.recording import JsonlEpisodeRecorder
-from oh_my_duck.tools import ToolCatalog, ToolDefinition, ToolResult
+from oh_my_duck.core.contracts import EpisodeEvent, ExecutionDomain, Identity
+from oh_my_duck.experience import JsonlEpisodeRecorder
+from oh_my_duck.agentic.tools import ToolCatalog, ToolDefinition, ToolResult
 
 
 class FrameworkTests(unittest.TestCase):
     def test_interfaces_import_without_simulators(self):
-        for name in ("application", "backends", "contracts", "harness", "perception", "policies", "recording", "skills", "tools", "training", "voice"):
+        for name in ("agentic.application", "robotics.backends", "core.contracts", "agentic.harness", "perception", "robotics.policies", "experience", "agentic.skills", "agentic.tools", "rl.training", "voice"):
             importlib.import_module("oh_my_duck." + name)
         for heavy in ("mujoco", "torch", "warp", "isaaclab"):
             self.assertNotIn(heavy, sys.modules)
 
     def test_newton_never_silently_falls_back(self):
-        from oh_my_duck.training.registry import BackendUnavailable, default_registry
+        from oh_my_duck.rl.training.registry import BackendUnavailable, default_registry
         with self.assertRaises(BackendUnavailable):
             default_registry().get("isaac-newton", Path.cwd()).command("train", [])
 

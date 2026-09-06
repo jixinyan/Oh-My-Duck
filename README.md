@@ -67,9 +67,9 @@ RL frameworks are a separate extension axis: RSL-RL and Stable-Baselines3 are th
 
 Both training backends are part of the project scope. The official backend remains available after the Isaac migration. **Isaac uses Newton**, initially targeting its MuJoCo-Warp solver; a PhysX substitution is not an equivalent backend.
 
-The first task is flat-ground velocity tracking. BAM actuator behavior, joint mapping, observation/action timing and normalization must match before comparing learning results. Compatible joint policies follow the official **61-observation / 14-action, 50 Hz** contract. Vision/navigation policies need their own adapters; an arbitrary VLA cannot be deployed by simply renaming its output.
+Representative RL tasks are flat-ground Walking and StandUp. Task recipes, MDP functions, robot assets and actor/critic settings are maintained in the [RL and robotics modules](docs/architecture.md#source-organization); both backends build on this owned source. BAM actuator behavior, joint mapping, observation/action timing and normalization must match before comparing learning results. Compatible joint policies follow the official **61-observation / 14-action, 50 Hz** contract. Vision/navigation policies need their own adapters; an arbitrary VLA cannot be deployed by simply renaming its output.
 
-Training and evaluation run headlessly. Optional offscreen video supports visual inspection alongside numerical metrics. Server jobs may use one or multiple GPUs as the experiment requires.
+Training and evaluation run headlessly. Optional offscreen video supports visual inspection alongside numerical metrics. Single-GPU development, validation and training run directly on the host; multi-GPU experiments use submitted jobs. W&B records runs offline.
 
 ## A voice and history that persist
 
@@ -95,10 +95,26 @@ The first scope is one robot, one external host and one active task. Complex who
 |---|---|
 | [Project Design](docs/Agentic%20Microduck%20-%20Project%20Design%20v0.1.md) | Full product scope, decisions, module boundaries and interfaces |
 | [Execution Plan](docs/Agentic%20Microduck%20-%20Execution%20Plan%20v0.1.md) | Milestones, dependencies and acceptance criteria |
-| [Getting started](docs/getting-started.md) | Current setup, server jobs, training and headless video evaluation |
+| [Getting started](docs/getting-started.md) | Setup, local training, multi-GPU jobs and headless video evaluation |
 | [Architecture and extension guide](docs/architecture.md) | Full framework, module contracts, dependency direction and adapter extension points |
 | [Development guide](docs/development.md) | Module layout, source pins, environments, Git and file management |
 | [Implementation status](docs/implementation-status.md) | Current progress, measured evidence and remaining work |
+
+All first-party code lives in `src/oh_my_duck`, grouped by project capability: `rl`, `agentic`, `robotics`, `perception`, `voice`, and `experience`, with shared `core` and `infrastructure` modules. Dependency locks live in `environments/`.
+
+```text
+src/oh_my_duck/
+├── rl/              tasks, rewards, simulators, PPO, export and evaluation
+├── agentic/         external Harness, tools, skills and application assembly
+├── robotics/        robot models, motors, execution and policy interfaces
+├── perception/      perception interfaces
+├── voice/           audio and voice interfaces
+├── experience/      episode records
+├── core/            shared contracts
+├── infrastructure/  environments, jobs and tracking
+└── cli/             public commands
+```
+
 
 The public development entry point is `python omd.py --help`. Backend dependencies are isolated. Voice, tools and hardware packages will be added as those milestones are implemented.
 

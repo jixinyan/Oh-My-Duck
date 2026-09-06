@@ -5,27 +5,27 @@
   "entry_point": "omd.py",
   "components": {
     "contracts": {
-      "module": "oh_my_duck.contracts",
+      "module": "oh_my_duck.core.contracts",
       "state": "implemented",
       "role": "Identity, sensor validity, task and episode schemas"
     },
     "robot_backends": {
-      "module": "oh_my_duck.backends",
+      "module": "oh_my_duck.robotics.backends",
       "state": "interface_only",
       "role": "Online simulation/real robot execution"
     },
     "skills": {
-      "module": "oh_my_duck.skills",
+      "module": "oh_my_duck.agentic.skills",
       "state": "interface_only",
       "role": "Skill declarations and execution lifecycle"
     },
     "tools": {
-      "module": "oh_my_duck.tools",
+      "module": "oh_my_duck.agentic.tools",
       "state": "registry_implemented",
       "role": "Expose only registered tool handlers"
     },
     "harness": {
-      "module": "oh_my_duck.harness",
+      "module": "oh_my_duck.agentic.harness",
       "state": "interface_only",
       "role": "External harness bridge; deterministic mock is next"
     },
@@ -35,13 +35,13 @@
       "role": "ASR, voice profile, TTS and audio interfaces"
     },
     "recording": {
-      "module": "oh_my_duck.recording",
+      "module": "oh_my_duck.experience",
       "state": "jsonl_implemented",
       "role": "Persist episode evidence without memory/planning"
     },
     "training": {
-      "module": "oh_my_duck.training",
-      "state": "interface_and_initial_adapter",
+      "module": "oh_my_duck.rl.training",
+      "state": "representative_native_smoke_resume_export_verified_behavior_pending",
       "role": "Independent simulation-backend and RL-framework selection, offline training and evaluation"
     },
     "perception": {
@@ -50,31 +50,31 @@
       "role": "Active observation and evidence-backed target records"
     },
     "policies": {
-      "module": "oh_my_duck.policies",
+      "module": "oh_my_duck.robotics.policies",
       "state": "interface_only",
       "role": "Distinct joint, velocity and action-sequence policy adapters"
     },
     "application": {
-      "module": "oh_my_duck.application",
+      "module": "oh_my_duck.agentic.application",
       "state": "composition_interface",
       "role": "Explicit injection of services without starting models or an agent loop"
     }
   },
   "training_backends": {
     "mujoco": {
-      "state": "official_walking_train_export_and_sb3_resume_verified",
+      "state": "owned_tasks_native_smoke_resume_export_passed",
       "physics": "MuJoCo-Warp",
       "environment": ".envs/mujoco",
       "environment_framework": "mjlab"
     },
     "isaac-newton": {
-      "state": "pd_physics_video_and_rl_smoke_passed",
+      "state": "owned_tasks_native_smoke_resume_export_passed",
       "physics": "Newton",
       "solver": "MuJoCo-Warp",
       "environment": ".envs/isaac-newton",
       "asset_environment": ".envs/isaac-assets",
-      "locomotion": "official_BAM_replay_exercised_collision_and_task_migration_in_progress",
-      "environment_state": "installed_cpu_configuration_checked",
+      "locomotion": "physics_audited_behavior_unvalidated",
+      "environment_state": "locked_installed_runtime_exercised",
       "asset_environment_state": "conversion_worker_verified",
       "environment_framework": "Isaac Lab"
     }
@@ -82,9 +82,21 @@
   "execution": {
     "hardware_available": false,
     "harness": "external_with_planned_mock",
-    "server_jobs": "Alaya HTrain",
+    "server_jobs": "Alaya HTrain for multi-GPU only",
     "headless": true,
-    "video": "offscreen"
+    "video": "offscreen_1280x720",
+    "single_gpu": "direct_development_host"
   },
-  "rl_framework_registry": "oh_my_duck.training.frameworks:default_framework_registry"
+  "rl_framework_registry": "oh_my_duck.rl.training.frameworks:default_framework_registry",
+  "rl_acceptance": {
+    "state": "validation_in_progress",
+    "smoke_and_resume": "8_of_8_passed_at_5971dca",
+    "open_items": [
+      "RSL extreme-input export parity revalidation",
+      "MuJoCo EGL video and CPU rehearsal",
+      "consolidated sim2sim",
+      "Newton multi-GPU execution queued",
+      "learned behavior validation"
+    ]
+  }
 }

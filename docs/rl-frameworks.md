@@ -53,7 +53,7 @@ Both diagnostics use the same Newton task, 61 observations, 14 canonical joint a
 
 ## Adding another framework
 
-1. Register a `FrameworkBinding` factory per supported simulation backend in `src/oh_my_duck/training/frameworks.py`. Declare supported operations and validation state. New names do not require editing the CLI parser.
+1. Register a `FrameworkBinding` factory per supported simulation backend in `src/oh_my_duck/rl/training/frameworks.py`. Declare supported operations and validation state. New names do not require editing the CLI parser.
 2. Keep imports and optional dependencies inside isolated runtime packages. Reuse a maintained upstream adapter where its semantics match; do not copy a trainer into the application core.
 3. Verify observation/action order, shapes, units, device conversion, action clipping, rewards, seeds and reset behavior. In particular, distinguish termination from truncation and preserve the terminal observation when the simulator automatically resets.
 4. Save native optimizer/checkpoint state, normalization statistics, framework identity, task/physics/source versions and policy contract. Implement explicit export with normalization and numerical output checks.
@@ -74,6 +74,9 @@ python omd.py submit --name omd-mj-sb3-smoke --gpus 1 -- \
 
 Resume adds `--resume outputs/my-sb3-run` and uses a new output directory. PPO remains framework-specific: SB3 uses actor observations for its critic, VecNormalize statistics, and constant learning rate with target-KL stopping. These differences are saved in `run.json`; do not call the algorithm identical to official RSL-RL. Both native files are required (`model.zip`, `vecnormalize.pkl`). The pre-reset recorder copies delay/history state and preserves the Torch RNG so collecting terminal observations does not advance the live sensor history. CPU regression tests exercise the actual pinned mjlab observation manager.
 
-Local policy packaging for an official RSL-RL walking export uses `training/mujoco/package_policy.py`. It invokes the official publisher dry-run and validates schema 2, records project/upstream provenance, and labels smoke artifacts unvalidated. It has no upload mode.
+Local policy packaging for an official RSL-RL walking export uses `src/oh_my_duck/rl/artifacts/package_policy.py`. It invokes the official publisher dry-run and validates schema 2, records project/upstream provenance, and labels smoke artifacts unvalidated. It has no upload mode.
 
 SB3 export uses a registered inference runner extension with the original native SB3 policy and VecNormalize statistics. It inherits `OnPolicyRunner.export_policy_to_onnx` and calls official `mjlab_microduck.export.run_export`; task construction and metadata remain official. Run `python omd.py export --backend mujoco --rl-framework sb3 -- --run outputs/my-sb3-run --output outputs/my-sb3-export` inside a submitted job. `export.json` records graph parity including normalization-clipping outliers. No tensor remapping into an RSL-RL checkpoint is performed.
+
+
+Current acceptance scope and native parallelism: [representative reproduction](rl-reproduction.md). W&B is now the default training logger, strictly offline; online account credentials are not used for training uploads. MuJoCo SB3 export accepts any registered official task and applies its numerical gate per export; acceptance evidence currently remains limited to the previously verified walking task.

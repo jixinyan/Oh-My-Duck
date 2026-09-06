@@ -3,7 +3,7 @@ import json
 from pathlib import Path
 import unittest
 
-from training.common.protocol import compile_schedule
+from oh_my_duck.robotics.microduck.protocol import compile_schedule
 
 
 class ScheduleTests(unittest.TestCase):

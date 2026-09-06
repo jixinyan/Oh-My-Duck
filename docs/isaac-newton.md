@@ -1,79 +1,62 @@
 # Isaac Lab / Newton integration
 
-This backend is in development. The code currently implements **asset conversion and a PD diagnostic task**, not the official BAM walking recipe. Asset conversion and Newton finite physics/video probes have passed on a GPU worker. RSL-RL and optional Stable-Baselines3 have completed short PD training runs; 7 installed-runtime CPU checks pass with SB3 enabled. See [worker evidence](reports/isaac-rl-validation.md) and [RL framework selection](rl-frameworks.md). Keep the full product scope in the [Project Design](Agentic%20Microduck%20-%20Project%20Design%20v0.1.md).
+The backend runs maintained Walking and StandUp recipes with native Isaac Lab,
+Newton's MuJoCo-Warp solver and the official BAM M6 motor model. Both native
+RSL-RL and SB3 PPO use the same task runtime. Check [current measured status](reports/domain-refactor.md)
+for the distinction between pipeline validation and learned behavior.
 
-## Environments and source versions
+## Setup and local execution
 
 ```bash
-python omd.py setup --backend isaac-newton
+python omd.py setup --backend isaac-newton --rl-framework sb3
+python omd.py assets --backend isaac-newton -- --model walk --accept-eula
+python omd.py assets --backend isaac-newton -- --model groundcontact --accept-eula
+python omd.py train --backend isaac-newton --rl-framework rsl-rl -- Mjlab-Velocity-Flat-MicroDuck --env.scene.num-envs 64 --agent.max-iterations 5 --agent.run-name walk_smoke
+python omd.py train --backend isaac-newton --rl-framework sb3 -- Mjlab-StandUp-Flat-MicroDuck --num-envs 64 --iterations 5 --output outputs/stand_smoke
+python omd.py export --backend isaac-newton --rl-framework sb3 -- --run outputs/stand_smoke --output outputs/stand_export
+python omd.py eval --backend isaac-newton -- --task Mjlab-StandUp-Flat-MicroDuck --policy outputs/stand_export/policy.onnx --output outputs/stand_replay --video
 ```
 
-This verifies the fixed Isaac Lab source commit, prepares the official Microduck sources, and installs two independent, locked Python 3.12 environments:
+Run single-GPU commands directly on the development host. Set `CUDA_VISIBLE_DEVICES`
+explicitly when choosing a device. Output directories must be new. Use the
+scheduler only for multi-GPU experiments, for example native RSL-RL with
+`--gpu-ids all` inside a two-GPU allocation. W&B stays offline on every rank.
 
-| Directory | Purpose |
+The conversion command accepts the NVIDIA EULA for that process. The two commands build
+walk and groundcontact assets with content hashes under `artifacts/isaac-newton/`.
+Generated assets are ignored; owned MJCF/mesh source remains in `robotics/microduck`.
+
+## Runtime and dependency boundaries
+
+| Source / environment | Responsibility |
 |---|---|
-| `.envs/isaac-newton` | Isaac Lab, Newton MJWarp, RSL-RL and Newton Warp renderer |
-| `.envs/isaac-assets` | Isaac Sim MJCF-to-USD converter only |
-| `.envs/mujoco` | Existing official baseline; also produces raw MJCF reference properties on CPU |
+| `rl/backends/isaac_newton/task_binding/` | Native physics lifecycle, canonical state, sensors, collision tables, DR and audit |
+| `rl/tasks/`, `rl/mdp/` | Maintained official recipes, reward and observation logic |
+| `rl/learners/{rsl_rl,sb3}/` | Shared native PPO orchestration and artifacts |
+| `rl/evaluation/task.py` | Task-specific metrics, explicit resets and native 1280×720 video |
+| `.envs/isaac-newton` | Isaac Lab/Newton simulation and native learners |
+| `.envs/isaac-assets` | Isolated Isaac Sim MJCF-to-USD conversion |
+| `.envs/mujoco`, `.envs/mujoco-sb3` | Official metadata reference and normalized runner export |
 
-The conversion environment resolves Isaac Sim's dependencies independently because its published Torch/torchvision requirements conflict with the selected Isaac Lab training versions. No physics dependency overrides or alternate-engine fallback are used. The [resolution report](reports/isaac-environment-resolution.md) records the failures and final separation.
+Microduck code is owned source; only generic Isaac/Newton/mjlab/PPO dependencies
+come from pinned external packages. Newton's graph-coloring approximation is
+replaced with exact official static contact tables at the native manager's
+solver-construction extension point, before graph capture. Actual compiled tables,
+collision hulls, contact force signs, non-accumulating randomization and four BAM
+calls per action are audited. The physics timestep remains 5 ms and policy rate 50 Hz.
 
-## Server job sequence
+Exports load the native checkpoint and normalization. They explicitly build the
+MuJoCo reference for deployment metadata in its compatible environment; provenance
+records the training backend separately. This does not switch the training physics.
+Isaac's Torch/Warp pins remain separate; W&B/Tyro match the versions verified with
+RSL 5.0.1. Fresh locked sync reproduces that dependency choice.
 
-Run these stages in order after setup finishes. Each job/output name must be unique; inspect its result before starting the next stage. These are commands to execute, not evidence of completed runs.
+## Diagnostics and extension
 
-```bash
-python omd.py submit --name omd-isaac-assets-001 --gpus 1 --   python omd.py assets --backend isaac-newton -- --accept-eula
+`Omd-Microduck-PD-Diagnostic-v0` remains an explicit small diagnostic. Its old
+probe/train/export paths are retained for asset and dependency debugging. A PD
+checkpoint cannot certify a BAM task. Tasks absent from the Newton registry fail
+explicitly. See [adding tasks and models](rl-task-extension.md).
 
-python omd.py submit --name omd-isaac-probe-001 --gpus 1 --   python omd.py probe --backend isaac-newton --output outputs/isaac-probe-001
-
-python omd.py submit --name omd-isaac-pd-train-001 --gpus 1 --   python omd.py train --backend isaac-newton --   --task Omd-Microduck-PD-Diagnostic-v0 --num_envs 16 --max_iterations 5
-
-python omd.py submit --name omd-isaac-pd-export-001 --gpus 1 --   python omd.py export --backend isaac-newton   --checkpoint /absolute/path/to/model_4.pt --output outputs/isaac-export-001
-
-python omd.py submit --name omd-isaac-pd-video-001 --gpus 1 --   python omd.py eval --backend isaac-newton --output outputs/isaac-video-001   --num-envs 1 --steps 100 --video
-```
-
-The conversion command's `--accept-eula` explicitly accepts the NVIDIA Omniverse EULA for that child process; omit it only if acceptance is already provided through `OMNI_KIT_ACCEPT_EULA=YES` or Kit's prior-acceptance marker. The project does not enable acceptance globally. Without acceptance, conversion exits with an actionable message before importing Kit. See [NVIDIA's headless installation instructions](https://docs.isaacsim.omniverse.nvidia.com/6.0.0/installation/install_python.html).
-
-The diagnostic ground is a local USD with explicit collision and friction; it requires no remote grid asset. Moving cameras refresh their actual pose before frame capture.
-
-Train registers our task before running the unchanged pinned Isaac Lab RSL-RL script, retaining its callback and headless flag. Early registration also makes upstream task-aware help work. Checkpoints are under `logs/rsl_rl/omd_isaac_pd_diagnostic/`. Training without an explicit diagnostic task fails because BAM locomotion is not implemented. The diagnostic task has a small posture reward, zero commands, a compact network and explicit PD actuation. Its checkpoints are not walking-policy candidates and are labeled accordingly when exported.
-
-Probe checks the actual Newton `SolverMuJoCo`, canonical joint/action mapping, raw asset mass/COM/principal inertia/limits/armature, finite stepping and a non-uniform offscreen image. Eval supports bounded zero-action PD holding and optional 61D ONNX replay, but this is still a PD diagnostic, not a BAM sim2sim comparison. It stops on termination rather than treating automatic resets as successful continuation. Export includes the actor's normalizer and compares Torch/ONNX outputs on 16 identical synthetic inputs; these are numerical checks, not behavior certification.
-
-## Modules and artifacts
-
-| Module | Responsibility |
-|---|---|
-| `src/oh_my_duck/training/isaac_newton.py` | Lightweight process dispatch and explicit availability boundaries |
-| `training/isaac_newton/bootstrap_env.py` | Pinned source acquisition and isolated installation |
-| `omd_isaac/paths.py`, `contracts.py` | Asset provenance and canonical joint mapping without simulator imports |
-| `omd_isaac/assets.py`, `convert_asset.py`, `asset_reference.py` | Isolated conversion, source reference dump and generated-file integrity |
-| `omd_isaac/config.py`, `mdp.py`, `environment.py`, `agent.py` | Explicit diagnostic scene, observations, runtime guards and PPO config |
-| `omd_isaac/physics.py` | Actual solver inspection and raw-asset comparison; private access stays here |
-| `omd_isaac/rollout.py`, `probe.py`, `eval.py`, `export.py` | Finite evidence-producing workers and numerical export validation |
-
-Converted USD and its payloads live under `artifacts/isaac-newton/walk/<fingerprint>/`. The fingerprint includes official source content, upstream pins, converter implementation and its dependency lock. `build.json` hashes generated files; it is written only after conversion succeeds. Parent-process artifact verification prevents a Kit teardown exit code from falsely reporting success. The nested-body transform correction is attributed in [third-party notices](../THIRD_PARTY_NOTICES.md).
-
-Worker outputs include `result.json`, `trajectory.npz`, `frame.png`, and optionally `rollout.mp4`; exports include `policy.onnx` and `export.json`. Reports distinguish raw-asset checks from the still-pending training collision overrides, contacts, joint axes and BAM dynamics.
-
-## Remaining migration work
-
-1. Asset conversion, Newton PD physics/video and both short RL training paths are verified. Complete checkpoint/export lifecycle checks and then progress to BAM locomotion; see [worker results](reports/isaac-rl-validation.md).
-2. Validate final solver contact/axis parameters and preserve official training overrides.
-3. Implement BAM m6 with verified world/DOF mapping, per-world friction/damping storage, voltage and action delays. Current solver field inspection performs **no BAM writes**.
-4. Add official delayed observations, encoder bias, commands, rewards and domain randomization; verify the shared contract on actual states.
-5. Replay the same official policy in both validated backends; then train, resume, export and measure locomotion. Keep diagnostic results separate from this milestone.
-
-## CPU configuration checks
-
-```bash
-CUDA_VISIBLE_DEVICES='' .envs/isaac-newton/bin/python -m unittest discover -s training/isaac_newton/tests -v
-```
-
-These tests use actual installed Isaac packages, construct configs and verify rejection before simulator startup. They are separate from the lightweight root suite and do not establish GPU/physics/video correctness. With the optional SB3 extra installed, the suite also validates pre-reset observation capture and timeout bootstrapping. The source-only `isaaclab-physx` material shim and `isaaclab-contrib` scene-config imports are required by the pinned core; runtime physics remains explicitly Newton/MJWarp.
-
-## Video resolution
-
-Isaac headless `probe`/`eval` render at **1280×720** by default. Override with `--video-width 1920 --video-height 1080` (or lower dimensions for faster diagnostics). Both dimensions must be even for H.264. The actual resolution is recorded in `result.json`; `--video` saves `rollout.mp4`, and the first rendered frame is saved as `frame.png`.
+Learned gait/recovery quality and sim2sim transfer require their own measured
+acceptance. No physical robot has been tested and no policy has been uploaded.

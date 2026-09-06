@@ -1,67 +1,69 @@
 # Getting started
 
-These are the current development commands. For the whole product, start with the root README and Project Design. For actual results, see [implementation-status.md](implementation-status.md).
+The [README](../README.md) describes the whole project; [implementation status](implementation-status.md)
+records measured progress. All first-party code is under `src/oh_my_duck`.
 
-## Prepare the official backend
+## Prepare isolated dependencies
 
 ```bash
 python omd.py --help
-python omd.py setup
+python omd.py setup --backend mujoco --rl-framework sb3
+python omd.py setup --backend isaac-newton --rl-framework sb3
+python omd.py assets --backend isaac-newton -- --model walk --accept-eula
+python omd.py assets --backend isaac-newton -- --model groundcontact --accept-eula
+python omd.py tasks
+python omd.py frameworks
 ```
 
-Setup pins upstream source revisions and downloads the official walking model. It creates Python 3.12 at `.envs/mujoco` without changing the system interpreter. The first download is several GB. Isaac/Newton has separate training and asset-conversion environments; see [Isaac integration](isaac-newton.md) for its diagnostic-only implementation and remaining migration work.
+Setup installs the maintained package with locked generic dependencies. It does not
+change system Python. MuJoCo, Isaac/Newton and Isaac Sim conversion use separate
+environments. See [Newton details](isaac-newton.md) for dependency and physics gates.
 
-## Run server jobs
+## Run locally, submit multi-GPU experiments
 
-On this server GPU work must use Alaya HTrain:
+Single-GPU development, training and evaluation run directly on this host. Select a
+GPU explicitly with `CUDA_VISIBLE_DEVICES` when needed. Every output directory and
+run name must be new; W&B stays offline.
 
 ```bash
-python omd.py submit --name omd-probe-001 --gpus 1 -- \
-  python omd.py probe --backend mujoco --output outputs/probe-001
-
-python omd.py submit --name omd-smoke-001 --gpus 1 -- \
-  python omd.py train --backend mujoco -- \
-  Mjlab-Velocity-Flat-MicroDuck --env.scene.num-envs 64 \
-  --agent.max-iterations 5 --agent.logger tensorboard
-
-python omd.py submit --name omd-eval-001 --gpus 1 -- \
-  python omd.py eval --backend mujoco --output outputs/eval-001 --video
+CUDA_VISIBLE_DEVICES=0 python omd.py train --backend mujoco --rl-framework rsl-rl -- Mjlab-Velocity-Flat-MicroDuck --env.scene.num-envs 64 --agent.max-iterations 5 --agent.run-name walk_smoke
+CUDA_VISIBLE_DEVICES=0 python omd.py train --backend isaac-newton --rl-framework sb3 -- Mjlab-StandUp-Flat-MicroDuck --num-envs 64 --iterations 5 --output outputs/stand_smoke
+python omd.py export --backend isaac-newton --rl-framework sb3 -- --run outputs/stand_smoke --output outputs/stand_export
+python omd.py eval --backend isaac-newton -- --task Mjlab-StandUp-Flat-MicroDuck --policy outputs/stand_export/policy.onnx --output outputs/stand_eval --video
 ```
 
-Use unique job names and output directories. Add `--dry-run` before the command separator to inspect a submission. Use `submit --status <job>`, `submit --logs <job>` and `squeue` to inspect work.
+Use the scheduler only for multi-GPU experiments. Commit the source first; jobs run
+from an immutable Git worktree and explicitly share environments and artifacts.
 
-The wrapper requests one node and an explicit GPU count (1, 2, 4 or 8). Multi-GPU training additionally needs the backend's distributed flags; the official trainer accepts `--gpu-ids all`. Per-process environment counts affect total parallelism. No artificial task-count or runtime cap is added.
-
-On a personal GPU machine, run `python omd.py train ...` / `eval ...` directly. Keep GPU work inside jobs on this shared server.
-
-## Evaluation artifacts
-
-The shared `configs/eval/flat_walk.json` protocol defines 14 seconds of hold → forward → stop → turn left → stop at 50 Hz. Commands use simulation ticks rather than wall-clock timing.
-
-| File | Contents |
-|---|---|
-| `config.json` | Actual commands, timing, initial state, BAM parameters and fall definition |
-| `result.json` | Completion/failure, velocity RMSE, contact-foot speed and provenance |
-| `trajectory.npz` | Actual inference inputs, actions, targets, joint state and contacts |
-| `rollout.mp4` | Optional EGL offscreen video |
-
-A fall returns code 2 and preserves the failure report. The current CPU rehearsal runs the walking policy alone, without recovery, extra action filtering or added delay. Its collision model is the official CPU scene, not an assertion of training-scene identity.
-
-A five-iteration checkpoint only validates training plumbing. Official pretrained weights are used for the initial motion baseline. Numeric ONNX consistency and cross-simulator task performance are separate checks.
-
-## Entry points and modules
-
-```text
-omd.py                         public command entry point
-scripts/bootstrap.py           fixed sources/models and isolated installation
-scripts/run.py                 process dispatch into backend environments
-scripts/submit.py              scheduler submission and provenance
-training/common/protocol.py    shared timing and joint contract
-training/mujoco/probe.py        worker GPU / EGL check
-training/mujoco/eval.py         official ONNX + BAM headless replay
-configs/                       source pins and evaluation protocols
-tests/                         meaningful contract and behavior checks
-docs/                          design, execution, audit and measured results
+```bash
+python omd.py submit --name omd-walk-ddp-001 --gpus 2 -- python omd.py train --backend mujoco --rl-framework rsl-rl -- Mjlab-Velocity-Flat-MicroDuck --env.scene.num-envs 64 --agent.max-iterations 5 --agent.run-name walk_ddp --gpu-ids all
 ```
 
-Large files stay under ignored `.cache/`, `.envs/`, `artifacts/`, `outputs/` and `logs/`. Backend modules and future voice/tools packages are added when implemented, not as empty capability claims.
+RSL environment counts are per rank. SB3 has native vector environments and
+independent runs, not distributed gradient updates. Measure before scaling.
+
+## Rehearse, compare and package
+
+```bash
+python omd.py rehearsal -- --task Mjlab-StandUp-Flat-MicroDuck --policy outputs/stand_export/policy.onnx --output outputs/stand_cpu --video
+python omd.py compare -- --task Mjlab-StandUp-Flat-MicroDuck --policy outputs/stand_export/policy.onnx --output outputs/stand_sim2sim --video
+python omd.py package -- --onnx outputs/stand_export/policy.onnx --checkpoint outputs/stand_smoke/model.zip --output outputs/stand_package
+```
+
+These commands use task-registered evaluation/deployment profiles. Comparison runs
+the same frozen policy and battery on both backends. CPU rehearsal uses the official
+full groundcontact deployment scene and BAM. Local packaging checks that the ONNX
+actually belongs to the supplied native checkpoint and uses official schema 2;
+it has no upload mode.
+
+Each evaluation records `result.json`, per-scenario trajectories and optional
+1280×720 videos. A valid execution with failed behavior returns code 2; an
+implementation/runtime error returns code 1. Automatic task resets are disabled.
+Five iterations validate the pipeline, not a learned gait or recovery skill.
+
+## Extend the source
+
+See [architecture](architecture.md) for domain boundaries and [task extension](rl-task-extension.md)
+for actors, rewards, new tasks, runtime factories, evaluation and packaging.
+Generated data remains under ignored `.cache/`, `.envs/`, `artifacts/`, `outputs/`,
+`logs/` and `wandb/`. Source, tests, locks, documentation and licenses are versioned.

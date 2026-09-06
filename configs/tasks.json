@@ -1,0 +1,1003 @@
+{
+  "schema_version": 1,
+  "tasks": [
+    {
+      "id": "Mjlab-Velocity-Flat-MicroDuck",
+      "model": "walk",
+      "bindings": {
+        "mujoco": {
+          "environment": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_env_cfg:make_microduck_velocity_env_cfg",
+            "kwargs": {}
+          },
+          "rsl_config": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_env_cfg:MicroduckRlCfg"
+          },
+          "runner": {
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
+          }
+        },
+        "isaac-newton": {
+          "environment": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_env_cfg:make_microduck_velocity_env_cfg",
+            "kwargs": {}
+          },
+          "rsl_config": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_env_cfg:MicroduckRlCfg"
+          },
+          "runner": {
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.isaac_newton.task_binding.environment:NewtonTaskEnvironment"
+          }
+        }
+      },
+      "representative": true,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      },
+      "evaluation": {
+        "symbol": "oh_my_duck.rl.evaluation.protocols:walking"
+      },
+      "policy_package": {
+        "symbol": "oh_my_duck.rl.artifacts.profiles:walking"
+      }
+    },
+    {
+      "id": "Mjlab-Velocity-Rough-MicroDuck",
+      "model": "walk",
+      "bindings": {
+        "mujoco": {
+          "environment": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_env_cfg:make_microduck_velocity_env_cfg",
+            "kwargs": {
+              "rough": true
+            }
+          },
+          "rsl_config": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_env_cfg:MicroduckRlCfg"
+          },
+          "runner": {
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
+          }
+        }
+      },
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
+    },
+    {
+      "id": "Mjlab-VelStand-Flat-MicroDuck",
+      "model": "groundcontact",
+      "bindings": {
+        "mujoco": {
+          "environment": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_velstand_env_cfg:make_microduck_velstand_env_cfg",
+            "kwargs": {}
+          },
+          "rsl_config": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_velstand_env_cfg:MicroduckVelStandRlCfg"
+          },
+          "runner": {
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
+          }
+        }
+      },
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
+    },
+    {
+      "id": "Mjlab-VelStand-Rough-MicroDuck",
+      "model": "groundcontact",
+      "bindings": {
+        "mujoco": {
+          "environment": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_velstand_env_cfg:make_microduck_velstand_env_cfg",
+            "kwargs": {
+              "rough": true
+            }
+          },
+          "rsl_config": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_velstand_env_cfg:MicroduckVelStandRlCfg"
+          },
+          "runner": {
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
+          }
+        }
+      },
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
+    },
+    {
+      "id": "Mjlab-StandUp-Flat-MicroDuck",
+      "model": "groundcontact",
+      "bindings": {
+        "mujoco": {
+          "environment": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_standup_env_cfg:make_microduck_standup_env_cfg",
+            "kwargs": {}
+          },
+          "rsl_config": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_standup_env_cfg:MicroduckStandUpRlCfg"
+          },
+          "runner": {
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
+          }
+        },
+        "isaac-newton": {
+          "environment": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_standup_env_cfg:make_microduck_standup_env_cfg",
+            "kwargs": {}
+          },
+          "rsl_config": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_standup_env_cfg:MicroduckStandUpRlCfg"
+          },
+          "runner": {
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.isaac_newton.task_binding.environment:NewtonTaskEnvironment"
+          }
+        }
+      },
+      "representative": true,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      },
+      "evaluation": {
+        "symbol": "oh_my_duck.rl.evaluation.protocols:standup"
+      },
+      "policy_package": {
+        "symbol": "oh_my_duck.rl.artifacts.profiles:standup"
+      }
+    },
+    {
+      "id": "Mjlab-StandUp-Rough-MicroDuck",
+      "model": "groundcontact",
+      "bindings": {
+        "mujoco": {
+          "environment": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_standup_env_cfg:make_microduck_standup_env_cfg",
+            "kwargs": {
+              "rough": true
+            }
+          },
+          "rsl_config": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_standup_env_cfg:MicroduckStandUpRlCfg"
+          },
+          "runner": {
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
+          }
+        }
+      },
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
+    },
+    {
+      "id": "Mjlab-SitStand-Flat-MicroDuck",
+      "model": "groundcontact",
+      "bindings": {
+        "mujoco": {
+          "environment": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_sitstand_env_cfg:make_microduck_sitstand_env_cfg",
+            "kwargs": {}
+          },
+          "rsl_config": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_sitstand_env_cfg:MicroduckSitStandRlCfg"
+          },
+          "runner": {
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
+          }
+        }
+      },
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
+    },
+    {
+      "id": "Mjlab-SitStand-Rough-MicroDuck",
+      "model": "groundcontact",
+      "bindings": {
+        "mujoco": {
+          "environment": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_sitstand_env_cfg:make_microduck_sitstand_env_cfg",
+            "kwargs": {
+              "rough": true
+            }
+          },
+          "rsl_config": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_sitstand_env_cfg:MicroduckSitStandRlCfg"
+          },
+          "runner": {
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
+          }
+        }
+      },
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
+    },
+    {
+      "id": "Mjlab-GroundPick-Flat-MicroDuck",
+      "model": "groundcontact",
+      "bindings": {
+        "mujoco": {
+          "environment": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_ground_pick_env_cfg:make_microduck_ground_pick_env_cfg",
+            "kwargs": {}
+          },
+          "rsl_config": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_ground_pick_env_cfg:MicroduckGroundPickRlCfg"
+          },
+          "runner": {
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
+          }
+        }
+      },
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
+    },
+    {
+      "id": "Mjlab-BallKick-Flat-MicroDuck",
+      "model": "groundcontact",
+      "bindings": {
+        "mujoco": {
+          "environment": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_ball_kick_env_cfg:make_microduck_ball_kick_env_cfg",
+            "kwargs": {}
+          },
+          "rsl_config": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_ball_kick_env_cfg:MicroduckBallKickRlCfg"
+          },
+          "runner": {
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
+          }
+        }
+      },
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
+    },
+    {
+      "id": "Mjlab-GroundPick-Rough-MicroDuck",
+      "model": "groundcontact",
+      "bindings": {
+        "mujoco": {
+          "environment": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_ground_pick_env_cfg:make_microduck_ground_pick_env_cfg",
+            "kwargs": {
+              "rough": true
+            }
+          },
+          "rsl_config": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_ground_pick_env_cfg:MicroduckGroundPickRlCfg"
+          },
+          "runner": {
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
+          }
+        }
+      },
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
+    },
+    {
+      "id": "Mjlab-Velocity-Flat-MicroDuck-Rollers",
+      "model": "groundcontact_rollers",
+      "bindings": {
+        "mujoco": {
+          "environment": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_rollers_env_cfg:make_microduck_velocity_rollers_env_cfg",
+            "kwargs": {}
+          },
+          "rsl_config": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_rollers_env_cfg:MicroduckRollersRlCfg"
+          },
+          "runner": {
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
+          }
+        }
+      },
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
+    },
+    {
+      "id": "Mjlab-Velocity-Swizzle-MicroDuck",
+      "model": "groundcontact_rollers",
+      "bindings": {
+        "mujoco": {
+          "environment": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_swizzle_env_cfg:make_microduck_velocity_swizzle_env_cfg",
+            "kwargs": {}
+          },
+          "rsl_config": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_swizzle_env_cfg:MicroduckSwizzleRlCfg"
+          },
+          "runner": {
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
+          }
+        }
+      },
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
+    },
+    {
+      "id": "Mjlab-RollerCrouch-Flat-MicroDuck",
+      "model": "groundcontact_rollers",
+      "bindings": {
+        "mujoco": {
+          "environment": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_roller_crouch_env_cfg:make_microduck_roller_crouch_env_cfg",
+            "kwargs": {}
+          },
+          "rsl_config": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_roller_crouch_env_cfg:MicroduckRollerCrouchRlCfg"
+          },
+          "runner": {
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
+          }
+        }
+      },
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
+    },
+    {
+      "id": "Mjlab-RollerSlope-Flat-MicroDuck",
+      "model": "groundcontact_rollers",
+      "bindings": {
+        "mujoco": {
+          "environment": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_roller_slope_env_cfg:make_microduck_roller_slope_env_cfg",
+            "kwargs": {}
+          },
+          "rsl_config": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_roller_slope_env_cfg:MicroduckRollerSlopeRlCfg"
+          },
+          "runner": {
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
+          }
+        }
+      },
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
+    },
+    {
+      "id": "Mjlab-RollerStandUp-Flat-MicroDuck",
+      "model": "groundcontact_rollers",
+      "bindings": {
+        "mujoco": {
+          "environment": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_roller_standup_env_cfg:make_microduck_roller_standup_env_cfg",
+            "kwargs": {}
+          },
+          "rsl_config": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_roller_standup_env_cfg:MicroduckRollerStandUpRlCfg"
+          },
+          "runner": {
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
+          }
+        }
+      },
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
+    },
+    {
+      "id": "Mjlab-Spin-Flat-MicroDuck",
+      "model": "groundcontact_rollers",
+      "bindings": {
+        "mujoco": {
+          "environment": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_spin_env_cfg:make_microduck_spin_env_cfg",
+            "kwargs": {}
+          },
+          "rsl_config": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_spin_env_cfg:MicroduckSpinRlCfg"
+          },
+          "runner": {
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
+          }
+        }
+      },
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
+    },
+    {
+      "id": "Mjlab-Roulade-Flat-MicroDuck",
+      "model": "groundcontact",
+      "bindings": {
+        "mujoco": {
+          "environment": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_roulade_env_cfg:make_microduck_roulade_env_cfg",
+            "kwargs": {}
+          },
+          "rsl_config": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_roulade_env_cfg:MicroduckRouladeRlCfg"
+          },
+          "runner": {
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
+          }
+        }
+      },
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
+    },
+    {
+      "id": "Mjlab-Velocity-Flat-Backlash-MicroDuck",
+      "model": "walk_backlash",
+      "bindings": {
+        "mujoco": {
+          "environment": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_env_cfg:make_microduck_velocity_env_cfg",
+            "kwargs": {}
+          },
+          "rsl_config": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_env_cfg:MicroduckRlCfg"
+          },
+          "runner": {
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "robot_variant": {
+            "symbol": "oh_my_duck.robotics.microduck.microduck_constants:MICRODUCK_WALK_BACKLASH_ROBOT_CFG"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
+          }
+        }
+      },
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
+    },
+    {
+      "id": "Mjlab-Velocity-Rough-Backlash-MicroDuck",
+      "model": "walk_backlash",
+      "bindings": {
+        "mujoco": {
+          "environment": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_env_cfg:make_microduck_velocity_env_cfg",
+            "kwargs": {
+              "rough": true
+            }
+          },
+          "rsl_config": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_env_cfg:MicroduckRlCfg"
+          },
+          "runner": {
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "robot_variant": {
+            "symbol": "oh_my_duck.robotics.microduck.microduck_constants:MICRODUCK_WALK_BACKLASH_ROBOT_CFG"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
+          }
+        }
+      },
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
+    },
+    {
+      "id": "Mjlab-VelStand-Flat-Backlash-MicroDuck",
+      "model": "groundcontact_backlash",
+      "bindings": {
+        "mujoco": {
+          "environment": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_velstand_env_cfg:make_microduck_velstand_env_cfg",
+            "kwargs": {}
+          },
+          "rsl_config": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_velstand_env_cfg:MicroduckVelStandRlCfg"
+          },
+          "runner": {
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "robot_variant": {
+            "symbol": "oh_my_duck.robotics.microduck.microduck_constants:MICRODUCK_BACKLASH_ROBOT_CFG"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
+          }
+        }
+      },
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
+    },
+    {
+      "id": "Mjlab-VelStand-Rough-Backlash-MicroDuck",
+      "model": "groundcontact_backlash",
+      "bindings": {
+        "mujoco": {
+          "environment": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_velstand_env_cfg:make_microduck_velstand_env_cfg",
+            "kwargs": {
+              "rough": true
+            }
+          },
+          "rsl_config": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_velstand_env_cfg:MicroduckVelStandRlCfg"
+          },
+          "runner": {
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "robot_variant": {
+            "symbol": "oh_my_duck.robotics.microduck.microduck_constants:MICRODUCK_BACKLASH_ROBOT_CFG"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
+          }
+        }
+      },
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
+    },
+    {
+      "id": "Mjlab-StandUp-Flat-Backlash-MicroDuck",
+      "model": "groundcontact_backlash",
+      "bindings": {
+        "mujoco": {
+          "environment": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_standup_env_cfg:make_microduck_standup_env_cfg",
+            "kwargs": {}
+          },
+          "rsl_config": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_standup_env_cfg:MicroduckStandUpRlCfg"
+          },
+          "runner": {
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "robot_variant": {
+            "symbol": "oh_my_duck.robotics.microduck.microduck_constants:MICRODUCK_BACKLASH_ROBOT_CFG"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
+          }
+        }
+      },
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
+    },
+    {
+      "id": "Mjlab-StandUp-Rough-Backlash-MicroDuck",
+      "model": "groundcontact_backlash",
+      "bindings": {
+        "mujoco": {
+          "environment": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_standup_env_cfg:make_microduck_standup_env_cfg",
+            "kwargs": {
+              "rough": true
+            }
+          },
+          "rsl_config": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_standup_env_cfg:MicroduckStandUpRlCfg"
+          },
+          "runner": {
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "robot_variant": {
+            "symbol": "oh_my_duck.robotics.microduck.microduck_constants:MICRODUCK_BACKLASH_ROBOT_CFG"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
+          }
+        }
+      },
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
+    },
+    {
+      "id": "Mjlab-SitStand-Flat-Backlash-MicroDuck",
+      "model": "groundcontact_backlash",
+      "bindings": {
+        "mujoco": {
+          "environment": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_sitstand_env_cfg:make_microduck_sitstand_env_cfg",
+            "kwargs": {}
+          },
+          "rsl_config": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_sitstand_env_cfg:MicroduckSitStandRlCfg"
+          },
+          "runner": {
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "robot_variant": {
+            "symbol": "oh_my_duck.robotics.microduck.microduck_constants:MICRODUCK_BACKLASH_ROBOT_CFG"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
+          }
+        }
+      },
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
+    },
+    {
+      "id": "Mjlab-SitStand-Rough-Backlash-MicroDuck",
+      "model": "groundcontact_backlash",
+      "bindings": {
+        "mujoco": {
+          "environment": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_sitstand_env_cfg:make_microduck_sitstand_env_cfg",
+            "kwargs": {
+              "rough": true
+            }
+          },
+          "rsl_config": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_sitstand_env_cfg:MicroduckSitStandRlCfg"
+          },
+          "runner": {
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "robot_variant": {
+            "symbol": "oh_my_duck.robotics.microduck.microduck_constants:MICRODUCK_BACKLASH_ROBOT_CFG"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
+          }
+        }
+      },
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
+    },
+    {
+      "id": "Mjlab-GroundPick-Flat-Backlash-MicroDuck",
+      "model": "groundcontact_backlash",
+      "bindings": {
+        "mujoco": {
+          "environment": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_ground_pick_env_cfg:make_microduck_ground_pick_env_cfg",
+            "kwargs": {}
+          },
+          "rsl_config": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_ground_pick_env_cfg:MicroduckGroundPickRlCfg"
+          },
+          "runner": {
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "robot_variant": {
+            "symbol": "oh_my_duck.robotics.microduck.microduck_constants:MICRODUCK_BACKLASH_ROBOT_CFG"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
+          }
+        }
+      },
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
+    },
+    {
+      "id": "Mjlab-GroundPick-Rough-Backlash-MicroDuck",
+      "model": "groundcontact_backlash",
+      "bindings": {
+        "mujoco": {
+          "environment": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_ground_pick_env_cfg:make_microduck_ground_pick_env_cfg",
+            "kwargs": {
+              "rough": true
+            }
+          },
+          "rsl_config": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_ground_pick_env_cfg:MicroduckGroundPickRlCfg"
+          },
+          "runner": {
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "robot_variant": {
+            "symbol": "oh_my_duck.robotics.microduck.microduck_constants:MICRODUCK_BACKLASH_ROBOT_CFG"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
+          }
+        }
+      },
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
+    },
+    {
+      "id": "Mjlab-BallKick-Flat-Backlash-MicroDuck",
+      "model": "groundcontact_backlash",
+      "bindings": {
+        "mujoco": {
+          "environment": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_ball_kick_env_cfg:make_microduck_ball_kick_env_cfg",
+            "kwargs": {}
+          },
+          "rsl_config": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_ball_kick_env_cfg:MicroduckBallKickRlCfg"
+          },
+          "runner": {
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "robot_variant": {
+            "symbol": "oh_my_duck.robotics.microduck.microduck_constants:MICRODUCK_BACKLASH_ROBOT_CFG"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
+          }
+        }
+      },
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
+    },
+    {
+      "id": "Mjlab-Velocity-Flat-Backlash-MicroDuck-Rollers",
+      "model": "groundcontact_rollers_backlash",
+      "bindings": {
+        "mujoco": {
+          "environment": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_rollers_env_cfg:make_microduck_velocity_rollers_env_cfg",
+            "kwargs": {}
+          },
+          "rsl_config": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_rollers_env_cfg:MicroduckRollersRlCfg"
+          },
+          "runner": {
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "robot_variant": {
+            "symbol": "oh_my_duck.robotics.microduck.microduck_constants:MICRODUCK_ROLLERS_BACKLASH_ROBOT_CFG"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
+          }
+        }
+      },
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
+    },
+    {
+      "id": "Mjlab-Velocity-Swizzle-Backlash-MicroDuck",
+      "model": "groundcontact_rollers_backlash",
+      "bindings": {
+        "mujoco": {
+          "environment": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_swizzle_env_cfg:make_microduck_velocity_swizzle_env_cfg",
+            "kwargs": {}
+          },
+          "rsl_config": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_swizzle_env_cfg:MicroduckSwizzleRlCfg"
+          },
+          "runner": {
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "robot_variant": {
+            "symbol": "oh_my_duck.robotics.microduck.microduck_constants:MICRODUCK_ROLLERS_BACKLASH_ROBOT_CFG"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
+          }
+        }
+      },
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
+    },
+    {
+      "id": "Mjlab-RollerCrouch-Flat-Backlash-MicroDuck",
+      "model": "groundcontact_rollers_backlash",
+      "bindings": {
+        "mujoco": {
+          "environment": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_roller_crouch_env_cfg:make_microduck_roller_crouch_env_cfg",
+            "kwargs": {}
+          },
+          "rsl_config": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_roller_crouch_env_cfg:MicroduckRollerCrouchRlCfg"
+          },
+          "runner": {
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "robot_variant": {
+            "symbol": "oh_my_duck.robotics.microduck.microduck_constants:MICRODUCK_ROLLERS_BACKLASH_ROBOT_CFG"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
+          }
+        }
+      },
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
+    },
+    {
+      "id": "Mjlab-RollerSlope-Flat-Backlash-MicroDuck",
+      "model": "groundcontact_rollers_backlash",
+      "bindings": {
+        "mujoco": {
+          "environment": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_roller_slope_env_cfg:make_microduck_roller_slope_env_cfg",
+            "kwargs": {}
+          },
+          "rsl_config": {
+            "symbol": "oh_my_duck.rl.tasks.microduck_roller_slope_env_cfg:MicroduckRollerSlopeRlCfg"
+          },
+          "runner": {
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "robot_variant": {
+            "symbol": "oh_my_duck.robotics.microduck.microduck_constants:MICRODUCK_ROLLERS_BACKLASH_ROBOT_CFG"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
+          }
+        }
+      },
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
+    }
+  ]
+}

@@ -1,4 +1,5 @@
 ---
+
 title: Agentic Microduck — 分步执行计划
 version: 0.2
 status: In progress
@@ -9,6 +10,8 @@ tags:
   - implementation-plan
   - sim-to-real
 ---
+
+> 当前实现状态（2026-09-06）：源码按 `src/oh_my_duck/{rl,agentic,robotics,core,perception,voice,experience,infrastructure,cli}` 分域，旧 `training/` 包已移除。两个代表任务、两个仿真后端与两个原生 PPO 已有 smoke/恢复/导出证据；行为、sim2sim 和最终统一验收单独记录。单卡本机运行，多卡才提交 job；W&B 离线。采用“模块成批实现 → 静态/CPU 检查 → 必要物理门槛 → 统一端到端验收”的开发节奏。结构重构先合入本地 main，验证另开分支：8/8 短训练与恢复通过；极端输入导出门槛、MuJoCo EGL 视频及完整行为验收仍待完成。详见 [当前状态](implementation-status.md) 与 [证据](reports/domain-refactor.md)。
 
 # Agentic Microduck · 分步执行计划 v0.2
 
@@ -121,7 +124,7 @@ tags:
 
 工作内容：
 
-- 扩展第 01–02 步已建立的代码仓库：公共契约与评测位于 `training/common/`，官方后端位于 `training/mujoco/`，迁移新增 `training/isaac_newton/`。统一入口显式选择后端，其他包随实际功能添加。
+- 扩展第 01–02 步已建立的代码仓库：公共契约位于 `src/oh_my_duck/core/`，评测位于 `rl/evaluation/`，两个仿真后端位于 `rl/backends/{mujoco,isaac_newton}/`。任务、MDP 与原生 PPO 分别位于 `rl/tasks/`、`rl/mdp/`、`rl/learners/`；其他领域按整体项目 scope 逐步实现。
 - 根据官方支持情况选择并固定 Isaac Lab、Newton 与 MuJoCo-Warp 的兼容组合；将选择理由和限制写入版本记录。
 - 运行选定后端的最小物理示例，确认 GPU 物理步骤可执行。
 - 导入 Microduck 资产，核对几何、关节、质量惯量、碰撞、坐标轴、足部和默认姿态；需要转换时保留可重现的转换过程。
@@ -397,3 +400,32 @@ tags:
 ### 2026-09-06：官方 BAM 与视频验证补充
 
 官方 RSL-RL 和 MuJoCo SB3 的 walking smoke/导出已通过，SB3 原生恢复与 768 次 timeout 边界验证通过。Newton 直接调用官方 BAM，64 环境完成 600 次物理子步，电机力矩映射检查通过；官方 alpha 策略在两端完成相同 14 秒命令序列，但均未充分跟踪前进/转向。HOME 保持测试在官方 CPU BAM 和 Newton 均倒下，不能把 HOME 参考角度当作已验证平衡目标。Newton 的 5 个碰撞凸包、15 组碰撞关系和脚底接触参数已通过官方编译模型对照；通过显式接触对保留静态平面与官方脚底接触规则。修正后 700 步/14 秒 720p 回放通过，但完整任务迁移/训练和有效命令跟踪仍未完成。用户要求提高 Isaac 视频分辨率，现默认 1280×720，可配置宽高；720p/25fps worker 视频已验证。持续证据见 [official-rl-compliance](reports/official-rl-compliance.md)。
+
+
+## Representative RL reproduction scope (2026-09-06)
+
+用户收敛验收范围为官方 Flat Walking 与 Flat StandUp，覆盖 MuJoCo/mjlab 与 Isaac Lab/Newton、RSL-RL 与 SB3，共 8 个组合。完整 33 项官方任务仅作扩展清单，不能把注册当作复现通过。各框架保留原生 PPO：RSL-RL 使用原生多 GPU 分布式学习，SB3 使用向量环境与跨 GPU 独立任务并行，不引入异步 actor–learner。吞吐通过实际测量决定 GPU/环境数量。W&B 为标配但只用 offline，现有线上账号不是用户账号，禁止上传或同步。当前已验证结果保持原有范围，新增组合仍需 smoke、恢复、导出、有效行为与 sim2sim 验收。任务选择和日志默认值集中在 `configs/training.json`，详细矩阵见 [RL reproduction](rl-reproduction.md)。本地 main 已合并，新开发分支为 `feat/rl-task-reproduction`。
+
+
+## 2026-09-06：任务源码归属调整
+
+根据用户要求，Microduck 的 task/MDP、actor/critic 配置、机器人模型、BAM 扩展、runner、导出与 CPU 回放迁入 `src/oh_my_duck`，成为项目内可编辑源码。`UPSTREAM.json` 与 Apache-2.0 许可证保留官方来源；缓存仓库只作对照，不再提供 Microduck 运行时任务。MuJoCo 两种框架与 Isaac 的共享机器人/BAM 引用已切换；通用 mjlab、Isaac Lab、Newton 和原生 PPO 仍作为依赖。初始 33 项配置清单在命名空间变更之外与官方基线一致，验收仍只覆盖 Walking/StandUp。
+
+这是源码归属迁移，不等于完整 Isaac 任务接入或有效策略训练完成。迁移后 GPU smoke、恢复、导出和 Isaac 新指纹资产重建仍待验证；此前训练结果属于旧入口。扩展入口及下一步见 [Microduck package](rl-task-extension.md) 与 [迁移交接](reports/owned-task-migration.md)。
+
+
+### 2026-09-06：框架重构进行中
+
+用户进一步明确：源码接管不足以完成集成，需要重构为框架能力。现新增核心层 `oh_my_duck.rl.training.tasks` 和唯一任务注册源 `configs/tasks.json`，CLI、SB3 和原生 mjlab 注册均从该源读取；支持不含 MicroDuck 的自定义任务 ID，后端绑定缺失时明确拒绝。原 7,000 余行 MDP 已拆为 commands、observations、events、curricula、terminations、state 与 reward families，兼容修补移入后端模块；226 个有效函数/类保持原定义逻辑，仅增加显式模块依赖。完整 Newton 任务绑定、GPU 重新验收和有效策略训练继续进行，不视为已完成。usage 限制按用户最新指令取消。
+
+## 2026-09-06 — approved domain architecture refactor
+
+业务实现统一进入 `src/oh_my_duck`，按 RL、agentic、robotics、perception、voice、experience、core 和 infrastructure 分层。训练依赖锁独立保存在 `environments/`；任务、MDP、机器人和策略配置均为项目源码。外部 harness 保持规划/记忆职责，尚未实现的适配器不声明可用。详见 [architecture.md](architecture.md)。
+
+迁移后轻量测试 21 项、MuJoCo/SB3/官方 MDP 与 manifest 测试 53 项通过；新训练入口和 Newton 任务适配仍需 GPU 验证。双任务 × 双后端 × 双框架的训练、恢复、导出与回放验收尚未全部完成。旧代码清理在对应验证通过后执行。
+
+**目录重构验证更新**：MuJoCo 两个代表任务 × 两种原生 PPO 的短训练、恢复与归一化导出已通过。Newton 的完整任务桥接仍处于物理/MDP gate，尚未开放任务注册；不能据此声明双后端行为验收完成。源码快照、失败记录和细节见 [domain-refactor.md](reports/domain-refactor.md)。
+
+**执行方式更新（2026-09-06，用户最新指示）**：单 GPU 开发、验证和训练直接在开发机 headless 运行；涉及多 GPU 的实验再提交 job。此前已提交任务保留其独立证据记录。
+
+**Newton 任务接入更新（2026-09-06）**：Walking/StandUp 已通过实际物理与 MDP 门槛并注册共用运行时；StandUp 使用项目内 Isaac manager 在 graph 捕获前精确编译官方接触规则。两个原生 PPO 共用任务入口，恢复、导出及行为验收继续按独立门槛记录。导出的官方 MuJoCo 元数据参考与策略训练后端分别标注。详见 `docs/reports/domain-refactor.md`。
