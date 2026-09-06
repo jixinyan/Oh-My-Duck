@@ -32,7 +32,8 @@ def main():
             'reward_terms':env.reward_manager.active_terms,'sensors':list(env.scene.sensors),'status':'physics_mdp_smoke_only'}
         (args.output/'result.json').write_text(json.dumps(report,indent=2)+'\n')
     except Exception as error:
-        (args.output/'failure.json').write_text(json.dumps({'error':repr(error)},indent=2)+'\n');raise
+        import traceback
+        (args.output/'failure.json').write_text(json.dumps({'error':repr(error),'traceback':traceback.format_exc()},indent=2)+'\n');raise
     finally:
         if env is not None:env.close()
 

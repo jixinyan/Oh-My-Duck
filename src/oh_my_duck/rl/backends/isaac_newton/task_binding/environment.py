@@ -38,9 +38,7 @@ class NewtonTaskEnvironment(ManagerBasedRlEnv):
                     integrator=cfg.sim.mujoco.integrator, solver=cfg.sim.mujoco.solver,
                     impratio=cfg.sim.mujoco.impratio, cone=cfg.sim.mujoco.cone, tolerance=cfg.sim.mujoco.tolerance,
                     ccd_iterations=cfg.sim.mujoco.ccd_iterations, ls_parallel=cfg.sim.ls_parallel),num_substeps=1)))
-        class PhysicsEnvironment(ManagerBasedEnv):
-            def load_managers(self):
-                pass
+        PhysicsEnvironment = ManagerBasedEnv
         self._launch = launch_simulation(native_cfg,{'headless':True})
         self._launch.__enter__()
         self.native = None
@@ -59,8 +57,11 @@ class NewtonTaskEnvironment(ManagerBasedRlEnv):
             self.load_managers()
             self.sim.sync_model()
             self.setup_manager_visualizers()
-        except BaseException:
-            self.close()
+        except BaseException as error:
+            try:
+                self.close()
+            except Exception as cleanup_error:
+                error.add_note(f"Cleanup also failed: {cleanup_error!r}")
             raise
 
     def close(self):
