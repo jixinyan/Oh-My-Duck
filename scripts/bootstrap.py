@@ -9,6 +9,7 @@ import os
 from pathlib import Path
 import shutil
 import subprocess
+import sys
 import urllib.request
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -22,7 +23,11 @@ def run(argv, **kwargs):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--skip-env", action="store_true")
+    parser.add_argument("--backend", choices=["mujoco", "isaac-newton"], default="mujoco")
     args = parser.parse_args()
+    if args.backend == "isaac-newton":
+        run([sys.executable, ROOT / "training/isaac_newton/bootstrap_env.py", *(["--skip-env"] if args.skip_env else [])])
+        return
     lock = json.loads((ROOT / "configs/upstream.json").read_text())
     upstream = ROOT / ".cache/upstream"
     upstream.mkdir(parents=True, exist_ok=True)

@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "oh-my-duck-isaac-newton"
+version = "0.1.0"
+description = "Isolated Isaac Lab and Newton integration for Oh My Duck"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "isaaclab", "isaaclab-assets", "isaaclab-newton[all]",
+  "isaaclab-ov", "isaaclab-rl[rsl-rl]", "isaaclab-tasks", "isaaclab-visualizers",
+  "torch==2.10.0", "torchvision==0.25.0", "newton[sim]==1.2.1",
+  "warp-lang==1.13.0", "mujoco-warp==3.8.0.3", "mujoco==3.8.0",
+  "onnxruntime", "imageio[ffmpeg]",
+]
+
+[tool.setuptools.packages.find]
+include = ["omd_isaac*"]
+
+[tool.uv]
+index-strategy = "unsafe-best-match"
+prerelease = "allow"
+environments = ["sys_platform == 'linux' and platform_machine == 'x86_64'"]
+
+[[tool.uv.index]]
+url = "https://pypi.nvidia.com"
+
+[tool.uv.sources]
+isaaclab = { path = "../../.cache/upstream/IsaacLab/source/isaaclab", editable = true }
+isaaclab-assets = { path = "../../.cache/upstream/IsaacLab/source/isaaclab_assets", editable = true }
+isaaclab-newton = { path = "../../.cache/upstream/IsaacLab/source/isaaclab_newton", editable = true }
+isaaclab-ov = { path = "../../.cache/upstream/IsaacLab/source/isaaclab_ov", editable = true }
+isaaclab-rl = { path = "../../.cache/upstream/IsaacLab/source/isaaclab_rl", editable = true }
+isaaclab-tasks = { path = "../../.cache/upstream/IsaacLab/source/isaaclab_tasks", editable = true }
+isaaclab-visualizers = { path = "../../.cache/upstream/IsaacLab/source/isaaclab_visualizers", editable = true }

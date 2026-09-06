@@ -26,7 +26,8 @@
     "tag": "v3.0.0-beta2.patch1",
     "physics": "newton",
     "solver": "mujoco_warp",
-    "status": "pending_compatibility_validation"
+    "status": "integration_in_progress_runtime_unvalidated",
+    "commit": "ffff603eafc6b74264a5261cc0183d6a65390d78"
   },
   "reference_repositories": {
     "isaaclab_microduck": {
