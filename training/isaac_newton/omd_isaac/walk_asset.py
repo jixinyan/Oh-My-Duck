@@ -85,24 +85,25 @@ def spawn_walk_ground(prim_path, cfg, translation=None, orientation=None, **kwar
     """Fixed per-world body lets SolverMuJoCo preserve exact ground exclusions."""
     from pxr import UsdPhysics
     root = spawn_from_usd.__wrapped__(prim_path, cfg, translation, orientation, **kwargs)
-    body = UsdPhysics.RigidBodyAPI.Apply(root)
+    collision = root.GetChild("Collision")
+    body = UsdPhysics.RigidBodyAPI.Apply(collision)
     body.CreateRigidBodyEnabledAttr(True)
     body.CreateKinematicEnabledAttr(True)
     # Explicit world joint gives the imported rigid object a named articulation
     # and keeps it immovable in both Newton state and SolverMuJoCo.
     joint = UsdPhysics.FixedJoint.Define(root.GetStage(), str(root.GetPath()) + "/WorldFixedJoint")
-    joint.CreateBody1Rel().SetTargets([root.GetPath()])
+    joint.CreateBody1Rel().SetTargets([collision.GetPath()])
     return root
 
 
 def configure_walk_scene(scene_cfg):
     from pathlib import Path
-    from isaaclab.assets import RigidObjectCfg
+    from isaaclab.assets import AssetBaseCfg
     from isaaclab.sim import UsdFileCfg
     # Global Newton worlds cannot hold bodies. Replicate the immovable plane
     # alongside each robot so body exclusions survive solver translation.
     scene_cfg.terrain = None
-    scene_cfg.ground = RigidObjectCfg(prim_path="{ENV_REGEX_NS}/ground",
+    scene_cfg.ground = AssetBaseCfg(prim_path="{ENV_REGEX_NS}/ground",
         spawn=UsdFileCfg(usd_path=str(Path(__file__).parent / "resources/ground_plane.usda"),
                          func=spawn_walk_ground))
     scene_cfg.robot.spawn.func = spawn_official_walk
