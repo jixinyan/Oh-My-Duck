@@ -2,6 +2,8 @@
 from pathlib import Path
 import sys
 import tempfile
+import json
+from dataclasses import replace
 import unittest
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -16,11 +18,14 @@ class FrameworkTests(unittest.TestCase):
     def test_rsl_route_preserves_existing_command(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
+            (root / "configs").mkdir()
+            (root / "configs/training.json").write_text((ROOT / "configs/training.json").read_text())
             interpreter = root / '.envs/mujoco/bin/python'
             interpreter.parent.mkdir(parents=True)
             interpreter.touch()
             args = ['Mjlab-Velocity-Flat-MicroDuck', '--agent.max-iterations', '5']
-            expected = default_registry().get('mujoco', root).command('train', args)
+            expected = default_registry().get('mujoco', root).command('train', args + ['--agent.logger', 'wandb', '--agent.wandb-project', 'oh-my-duck'])
+            expected = replace(expected, environment={**expected.environment, 'WANDB_MODE': 'offline'})
             actual = default_framework_registry().command('rsl-rl', 'mujoco', root, 'train', args)
             self.assertEqual(actual, expected)
 
@@ -35,6 +40,8 @@ class FrameworkTests(unittest.TestCase):
     def test_sb3_uses_same_environment_with_explicit_diagnostic_guard(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
+            (root / "configs").mkdir()
+            (root / "configs/training.json").write_text((ROOT / "configs/training.json").read_text())
             interpreter = root / '.envs/isaac-newton/bin/python'
             interpreter.parent.mkdir(parents=True)
             interpreter.touch()
@@ -45,7 +52,7 @@ class FrameworkTests(unittest.TestCase):
             sb3 = registry.command('sb3', 'isaac-newton', root, 'train', args)
             rsl = registry.command('rsl-rl', 'isaac-newton', root, 'train', args)
             self.assertEqual(sb3.argv[:3], (str(interpreter), '-m', 'omd_isaac.sb3_train'))
-            self.assertEqual(sb3.environment, rsl.environment)
+            self.assertEqual({**sb3.environment, 'WANDB_MODE': 'offline'}, rsl.environment)
             self.assertEqual(sb3.cwd, rsl.cwd)
             self.assertNotIn('stable_baselines3', sys.modules)
 

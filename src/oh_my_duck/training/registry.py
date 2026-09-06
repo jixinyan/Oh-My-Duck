@@ -38,7 +38,7 @@ class MujocoTrainingBackend:
             raise BackendUnavailable("Run python omd.py setup first")
         upstream = self.root / ".cache/upstream/microduck_rl"
         if operation == "train":
-            entry = ("-m", "mjlab.scripts.train")
+            entry = (str(self.root / "training/mujoco/rsl_train.py"),)
         elif operation == "export":
             entry = (str(upstream / "scripts/export.py"),)
         elif operation in ("probe", "eval"):

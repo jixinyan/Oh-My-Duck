@@ -6,6 +6,7 @@ import json
 from pathlib import Path
 import subprocess
 import sys
+import time
 
 import numpy as np
 import torch
@@ -20,6 +21,8 @@ from mjlab.utils.torch import configure_torch_backends
 from sb3_env import MjlabSb3VecEnv, TerminalObservationRecorder
 
 ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT / "training"))
+from common.tracking import start_run
 
 
 class RewardAudit(BaseCallback):
@@ -67,8 +70,13 @@ def main():
         cfg.episode_length_s = args.episode_length_s
     cfg.recorders["sb3_terminal"] = RecorderTermCfg(func=TerminalObservationRecorder)
     args.output.mkdir(parents=True, exist_ok=False)
-    adapter = None
+    adapter = tracking = None
+    started = time.monotonic()
     try:
+        tracking = start_run(backend="mujoco", framework="sb3", task=args.task, directory=args.output,
+            config={"num_envs": args.num_envs, "iterations": args.iterations, "seed": args.seed,
+                    "resume_source": str(args.resume) if args.resume else None,
+                    "official_agent": asdict(official_agent)})
         adapter = MjlabSb3VecEnv(ManagerBasedRlEnv(cfg, device=args.device))
         if args.resume:
             previous = json.loads((args.resume / "run.json").read_text())
@@ -87,7 +95,8 @@ def main():
                 max_grad_norm=algorithm.max_grad_norm, target_kl=algorithm.desired_kl,
                 policy_kwargs={"activation_fn": torch.nn.ELU,
                     "net_arch": dict(pi=list(official_agent.actor.hidden_dims), vf=list(official_agent.critic.hidden_dims))},
-                device=args.device, seed=args.seed, verbose=1)
+                device=args.device, seed=args.seed, verbose=1, tensorboard_log=str(args.output / "tensorboard"))
+        model.tensorboard_log = str(args.output / "tensorboard")
         normalized.training = True
         callback = RewardAudit(adapter)
         before = model.num_timesteps
@@ -122,18 +131,26 @@ def main():
                 "SB3 VecNormalize running statistics and clipping (100); reward normalization disabled",
                 "Finite float32 action-space bounds, no additional action filter",
                 "Terminal observation sampled before reset from copied delay/history buffers"],
-            "policy_status": "training_smoke_only; official-compatible ONNX export pending"}
+            "policy_status": "trained; behavior_unvalidated; export_requires_separate_gate",
+            "wall_time_s": time.monotonic() - started,
+            "wandb": {"id": tracking.id, "url": tracking.url, "mode": tracking.settings.mode}}
         report["files"] = {name: hashlib.sha256((args.output / name).read_bytes()).hexdigest()
                            for name in ("model.zip", "vecnormalize.pkl")}
         (args.output / "run.json").write_text(json.dumps(report, indent=2) + "\n")
+        tracking.summary.update({"terminal_snapshots": adapter.terminal_count, "timeouts": adapter.timeout_count,
+            "reload_max_abs_error": report["reload_max_abs_error"], "status": "passed"})
         print(json.dumps(report, indent=2))
     except Exception as error:
+        if tracking is not None:
+            tracking.summary["status"] = "failed"
         (args.output / "failure.json").write_text(json.dumps({"status": "failed",
             "error": f"{type(error).__name__}: {error}"}, indent=2) + "\n")
         raise
     finally:
         if adapter is not None:
             adapter.close()
+        if tracking is not None:
+            tracking.finish(exit_code=1 if (args.output / "failure.json").exists() else 0)
 
 
 if __name__ == "__main__":

@@ -30,10 +30,18 @@ def main():
     from .sb3_env import DiagnosticSb3VecEnvWrapper
     original = sb3.Sb3VecEnvWrapper
     sb3.Sb3VecEnvWrapper = DiagnosticSb3VecEnvWrapper
+    tracking = None
     try:
+        if not any(a in {"-h", "--help"} for a in args):
+            sys.path.insert(0, str(project_root() / "training"))
+            from common.tracking import start_run
+            tracking = start_run(backend="isaac-newton", framework="sb3", task=TASK_ID,
+                                 config={"native_arguments": args})
         module.run([*args, "--headless", "--visualizer", "none"])
     finally:
         sb3.Sb3VecEnvWrapper = original
+        if tracking is not None:
+            tracking.finish(exit_code=1 if sys.exc_info()[0] is not None else 0)
 
 
 if __name__ == "__main__":

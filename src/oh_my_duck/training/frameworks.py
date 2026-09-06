@@ -1,5 +1,7 @@
 """RL framework selection independent of physics; safe to import without ML packages."""
 from dataclasses import dataclass, replace
+import json
+import os
 from pathlib import Path
 from typing import Callable, Sequence
 from .base import BackendCommand
@@ -48,7 +50,20 @@ class RLFrameworkRegistry:
 
 def _rsl_rl(backend, root, operation, arguments):
     # Preserve the official backend-specific RSL-RL launch/export integrations.
-    return default_registry().get(backend, root).command(operation, arguments)
+    arguments = list(arguments)
+    if operation == "train":
+        defaults = json.loads((root / "configs/training.json").read_text())["logger"]
+        options = {a.split("=", 1)[0] for a in arguments}
+        logger_key, project_key = (("--agent.logger", "--agent.wandb-project") if backend == "mujoco"
+                                   else ("--logger", "--log_project_name"))
+        if logger_key not in options:
+            arguments += [logger_key, "wandb"]
+        if project_key not in options:
+            arguments += [project_key, os.environ.get("WANDB_PROJECT", defaults["project"])]
+    command = default_registry().get(backend, root).command(operation, arguments)
+    if operation == "train":
+        command = replace(command, environment={**command.environment, "WANDB_MODE": defaults["mode"]})
+    return command
 
 
 def _sb3(backend, root, operation, arguments):
