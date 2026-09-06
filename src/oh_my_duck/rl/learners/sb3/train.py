@@ -21,7 +21,8 @@ from oh_my_duck.rl.backends.mujoco.registration import register_tasks
 register_tasks()
 from mjlab.utils.torch import configure_torch_backends
 from oh_my_duck.rl.training.tasks import project_tasks
-from oh_my_duck.rl.models.sb3 import make_policy_cfg
+from oh_my_duck.rl.training.runtime import create_environment
+from oh_my_duck.rl.tasks.recipes import build_environment
 from oh_my_duck.rl.learners.sb3.environment import MjlabSb3VecEnv, TerminalObservationRecorder
 
 from oh_my_duck.core.paths import project_root
@@ -75,6 +76,7 @@ class RewardAudit(BaseCallback):
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("task", choices=[t.id for t in project_tasks().list("mujoco")])
+    parser.add_argument("--backend", default="mujoco")
     parser.add_argument("--num-envs", type=int, default=64)
     parser.add_argument("--iterations", type=int, default=5)
     parser.add_argument("--seed", type=int, default=42)
@@ -86,7 +88,9 @@ def main():
     if args.num_envs < 1 or args.iterations < 1:
         parser.error("num-envs and iterations must be positive")
     configure_torch_backends()
-    cfg, official_agent = load_env_cfg(args.task), load_rl_cfg(args.task)
+    task = project_tasks().get(args.task)
+    binding = task.binding(args.backend)
+    cfg, official_agent = build_environment(binding), binding.rsl_config.build()
     cfg.scene.num_envs = args.num_envs
     cfg.seed = args.seed
     if args.episode_length_s is not None:
@@ -96,21 +100,21 @@ def main():
     adapter = tracking = None
     started = time.monotonic()
     try:
-        tracking = start_run(backend="mujoco", framework="sb3", task=args.task, directory=args.output,
+        tracking = start_run(backend=args.backend, framework="sb3", task=args.task, directory=args.output,
             config={"num_envs": args.num_envs, "iterations": args.iterations, "seed": args.seed,
                     "resume_source": str(args.resume) if args.resume else None,
                     "official_agent": asdict(official_agent)})
-        adapter = MjlabSb3VecEnv(ManagerBasedRlEnv(cfg, device=args.device))
+        adapter = MjlabSb3VecEnv(create_environment(task,cfg,backend=args.backend,device=args.device))
         if args.resume:
             previous = json.loads((args.resume / "run.json").read_text())
-            if previous["task"] != args.task or previous["upstream"] != json.loads((ROOT / "configs/upstream.json").read_text())["repositories"]:
+            if previous["backend"] != args.backend or previous["task"] != args.task or previous["upstream"] != json.loads((ROOT / "configs/upstream.json").read_text())["repositories"]:
                 raise ValueError("Resume task or upstream pin differs")
             normalized = VecNormalize.load(args.resume / "vecnormalize.pkl", adapter)
             model = PPO.load(args.resume / "model.zip", env=normalized, device=args.device)
         else:
             normalized = VecNormalize(adapter, norm_obs=True, norm_reward=False, clip_obs=100.0)
             algorithm = official_agent.algorithm
-            policy_cfg = make_policy_cfg(args.task, official_agent)
+            policy_cfg = task.policy_configs["sb3"].build(task_id=args.task,agent_cfg=official_agent)
             model = PPO(policy_cfg.policy, normalized, n_steps=official_agent.num_steps_per_env,
                 batch_size=args.num_envs * official_agent.num_steps_per_env // algorithm.num_mini_batches,
                 n_epochs=algorithm.num_learning_epochs, learning_rate=algorithm.learning_rate,
@@ -139,7 +143,7 @@ def main():
         loaded = PPO.load(args.output / "model.zip", device="cpu")
         actual, _ = loaded.predict(loaded_norm.normalize_obs(batch.copy()), deterministic=True)
         np.testing.assert_allclose(actual, expected, atol=1e-5, rtol=1e-5)
-        report = {"framework": "sb3", "backend": "mujoco", "task": args.task,
+        report = {"framework": "sb3", "backend": args.backend, "task": args.task,
             "num_envs": args.num_envs, "iterations": args.iterations,
             "timesteps_before": before, "timesteps_after": model.num_timesteps,
             "resume": str(args.resume) if args.resume else None,

@@ -15,10 +15,18 @@
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
           }
         }
       },
-      "representative": true
+      "representative": true,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
     },
     {
       "id": "Mjlab-Velocity-Rough-MicroDuck",
@@ -36,10 +44,18 @@
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
           }
         }
       },
-      "representative": false
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
     },
     {
       "id": "Mjlab-VelStand-Flat-MicroDuck",
@@ -55,10 +71,18 @@
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
           }
         }
       },
-      "representative": false
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
     },
     {
       "id": "Mjlab-VelStand-Rough-MicroDuck",
@@ -76,10 +100,18 @@
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
           }
         }
       },
-      "representative": false
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
     },
     {
       "id": "Mjlab-StandUp-Flat-MicroDuck",
@@ -95,10 +127,18 @@
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
           }
         }
       },
-      "representative": true
+      "representative": true,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
     },
     {
       "id": "Mjlab-StandUp-Rough-MicroDuck",
@@ -116,10 +156,18 @@
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
           }
         }
       },
-      "representative": false
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
     },
     {
       "id": "Mjlab-SitStand-Flat-MicroDuck",
@@ -135,10 +183,18 @@
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
           }
         }
       },
-      "representative": false
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
     },
     {
       "id": "Mjlab-SitStand-Rough-MicroDuck",
@@ -156,10 +212,18 @@
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
           }
         }
       },
-      "representative": false
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
     },
     {
       "id": "Mjlab-GroundPick-Flat-MicroDuck",
@@ -175,10 +239,18 @@
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
           }
         }
       },
-      "representative": false
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
     },
     {
       "id": "Mjlab-BallKick-Flat-MicroDuck",
@@ -194,10 +266,18 @@
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
           }
         }
       },
-      "representative": false
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
     },
     {
       "id": "Mjlab-GroundPick-Rough-MicroDuck",
@@ -215,10 +295,18 @@
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
           }
         }
       },
-      "representative": false
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
     },
     {
       "id": "Mjlab-Velocity-Flat-MicroDuck-Rollers",
@@ -234,10 +322,18 @@
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
           }
         }
       },
-      "representative": false
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
     },
     {
       "id": "Mjlab-Velocity-Swizzle-MicroDuck",
@@ -253,10 +349,18 @@
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
           }
         }
       },
-      "representative": false
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
     },
     {
       "id": "Mjlab-RollerCrouch-Flat-MicroDuck",
@@ -272,10 +376,18 @@
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
           }
         }
       },
-      "representative": false
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
     },
     {
       "id": "Mjlab-RollerSlope-Flat-MicroDuck",
@@ -291,10 +403,18 @@
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
           }
         }
       },
-      "representative": false
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
     },
     {
       "id": "Mjlab-RollerStandUp-Flat-MicroDuck",
@@ -310,10 +430,18 @@
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
           }
         }
       },
-      "representative": false
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
     },
     {
       "id": "Mjlab-Spin-Flat-MicroDuck",
@@ -329,10 +457,18 @@
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
           }
         }
       },
-      "representative": false
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
     },
     {
       "id": "Mjlab-Roulade-Flat-MicroDuck",
@@ -348,10 +484,18 @@
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
           }
         }
       },
-      "representative": false
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
     },
     {
       "id": "Mjlab-Velocity-Flat-Backlash-MicroDuck",
@@ -370,10 +514,18 @@
           },
           "robot_variant": {
             "symbol": "oh_my_duck.robotics.microduck.microduck_constants:MICRODUCK_WALK_BACKLASH_ROBOT_CFG"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
           }
         }
       },
-      "representative": false
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
     },
     {
       "id": "Mjlab-Velocity-Rough-Backlash-MicroDuck",
@@ -394,10 +546,18 @@
           },
           "robot_variant": {
             "symbol": "oh_my_duck.robotics.microduck.microduck_constants:MICRODUCK_WALK_BACKLASH_ROBOT_CFG"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
           }
         }
       },
-      "representative": false
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
     },
     {
       "id": "Mjlab-VelStand-Flat-Backlash-MicroDuck",
@@ -416,10 +576,18 @@
           },
           "robot_variant": {
             "symbol": "oh_my_duck.robotics.microduck.microduck_constants:MICRODUCK_BACKLASH_ROBOT_CFG"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
           }
         }
       },
-      "representative": false
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
     },
     {
       "id": "Mjlab-VelStand-Rough-Backlash-MicroDuck",
@@ -440,10 +608,18 @@
           },
           "robot_variant": {
             "symbol": "oh_my_duck.robotics.microduck.microduck_constants:MICRODUCK_BACKLASH_ROBOT_CFG"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
           }
         }
       },
-      "representative": false
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
     },
     {
       "id": "Mjlab-StandUp-Flat-Backlash-MicroDuck",
@@ -462,10 +638,18 @@
           },
           "robot_variant": {
             "symbol": "oh_my_duck.robotics.microduck.microduck_constants:MICRODUCK_BACKLASH_ROBOT_CFG"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
           }
         }
       },
-      "representative": false
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
     },
     {
       "id": "Mjlab-StandUp-Rough-Backlash-MicroDuck",
@@ -486,10 +670,18 @@
           },
           "robot_variant": {
             "symbol": "oh_my_duck.robotics.microduck.microduck_constants:MICRODUCK_BACKLASH_ROBOT_CFG"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
           }
         }
       },
-      "representative": false
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
     },
     {
       "id": "Mjlab-SitStand-Flat-Backlash-MicroDuck",
@@ -508,10 +700,18 @@
           },
           "robot_variant": {
             "symbol": "oh_my_duck.robotics.microduck.microduck_constants:MICRODUCK_BACKLASH_ROBOT_CFG"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
           }
         }
       },
-      "representative": false
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
     },
     {
       "id": "Mjlab-SitStand-Rough-Backlash-MicroDuck",
@@ -532,10 +732,18 @@
           },
           "robot_variant": {
             "symbol": "oh_my_duck.robotics.microduck.microduck_constants:MICRODUCK_BACKLASH_ROBOT_CFG"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
           }
         }
       },
-      "representative": false
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
     },
     {
       "id": "Mjlab-GroundPick-Flat-Backlash-MicroDuck",
@@ -554,10 +762,18 @@
           },
           "robot_variant": {
             "symbol": "oh_my_duck.robotics.microduck.microduck_constants:MICRODUCK_BACKLASH_ROBOT_CFG"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
           }
         }
       },
-      "representative": false
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
     },
     {
       "id": "Mjlab-GroundPick-Rough-Backlash-MicroDuck",
@@ -578,10 +794,18 @@
           },
           "robot_variant": {
             "symbol": "oh_my_duck.robotics.microduck.microduck_constants:MICRODUCK_BACKLASH_ROBOT_CFG"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
           }
         }
       },
-      "representative": false
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
     },
     {
       "id": "Mjlab-BallKick-Flat-Backlash-MicroDuck",
@@ -600,10 +824,18 @@
           },
           "robot_variant": {
             "symbol": "oh_my_duck.robotics.microduck.microduck_constants:MICRODUCK_BACKLASH_ROBOT_CFG"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
           }
         }
       },
-      "representative": false
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
     },
     {
       "id": "Mjlab-Velocity-Flat-Backlash-MicroDuck-Rollers",
@@ -622,10 +854,18 @@
           },
           "robot_variant": {
             "symbol": "oh_my_duck.robotics.microduck.microduck_constants:MICRODUCK_ROLLERS_BACKLASH_ROBOT_CFG"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
           }
         }
       },
-      "representative": false
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
     },
     {
       "id": "Mjlab-Velocity-Swizzle-Backlash-MicroDuck",
@@ -644,10 +884,18 @@
           },
           "robot_variant": {
             "symbol": "oh_my_duck.robotics.microduck.microduck_constants:MICRODUCK_ROLLERS_BACKLASH_ROBOT_CFG"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
           }
         }
       },
-      "representative": false
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
     },
     {
       "id": "Mjlab-RollerCrouch-Flat-Backlash-MicroDuck",
@@ -666,10 +914,18 @@
           },
           "robot_variant": {
             "symbol": "oh_my_duck.robotics.microduck.microduck_constants:MICRODUCK_ROLLERS_BACKLASH_ROBOT_CFG"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
           }
         }
       },
-      "representative": false
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
     },
     {
       "id": "Mjlab-RollerSlope-Flat-Backlash-MicroDuck",
@@ -688,10 +944,18 @@
           },
           "robot_variant": {
             "symbol": "oh_my_duck.robotics.microduck.microduck_constants:MICRODUCK_ROLLERS_BACKLASH_ROBOT_CFG"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
           }
         }
       },
-      "representative": false
+      "representative": false,
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
     }
   ]
 }

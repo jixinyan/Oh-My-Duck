@@ -41,6 +41,7 @@ class TaskBinding:
     rsl_config: ConfigRef
     runner: ConfigRef
     robot_variant: ConfigRef | None = None
+    runtime: ConfigRef | None = None
 
 
 @dataclass(frozen=True)
@@ -49,6 +50,7 @@ class TaskSpec:
     model: str
     bindings: dict[str, TaskBinding]
     representative: bool = False
+    policy_configs: dict[str, ConfigRef] = field(default_factory=dict)
 
     def binding(self, backend: str) -> TaskBinding:
         try:
@@ -83,9 +85,10 @@ class TaskRegistry:
             raise ValueError("Unsupported task registry schema")
         registry = cls()
         for task in config["tasks"]:
-            bindings = {name: TaskBinding(**{key: ConfigRef(**value) for key, value in values.items()})
+            bindings = {name: TaskBinding(**{key: ConfigRef(**value) if value is not None else None for key, value in values.items()})
                         for name, values in task["bindings"].items()}
-            registry.register(TaskSpec(**{**task, "bindings": bindings}))
+            policies = {name: ConfigRef(**value) for name, value in task.get("policy_configs", {}).items()}
+            registry.register(TaskSpec(**{**task, "bindings": bindings, "policy_configs": policies}))
         return registry
 
 

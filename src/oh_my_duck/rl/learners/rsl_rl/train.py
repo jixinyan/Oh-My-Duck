@@ -45,14 +45,8 @@ def run_train(task_id, cfg, log_dir):
     task = project_tasks(ROOT).get(task_id)
     binding = task.binding(cfg.backend)
     print(f'[INFO] Training task={task_id} backend={cfg.backend} device={device} seed={cfg.agent.seed} rank={rank}', flush=True)
-    if cfg.backend == 'mujoco':
-        from mjlab.envs import ManagerBasedRlEnv
-        env = ManagerBasedRlEnv(cfg.env, device=device)
-    elif cfg.backend == 'isaac-newton':
-        from oh_my_duck.rl.backends.isaac_newton.task_binding.environment import NewtonTaskEnvironment
-        env = NewtonTaskEnvironment(cfg.env, task=task, device=device)
-    else:
-        raise ValueError(f'Unsupported physics backend: {cfg.backend}')
+    from oh_my_duck.rl.training.runtime import create_environment
+    env = create_environment(task,cfg.env,backend=cfg.backend,device=device)
     try:
         native_env = RslRlVecEnvWrapper(env, clip_actions=cfg.agent.clip_actions)
         agent_cfg = asdict(cfg.agent)
@@ -93,7 +87,8 @@ def main():
     import mjlab
     from mjlab.utils.gpu import select_gpus
     from oh_my_duck.rl.training.tasks import project_tasks
-    from oh_my_duck.rl.backends.mujoco.registration import register_tasks, build_environment
+    from oh_my_duck.rl.backends.mujoco.registration import register_tasks
+    from oh_my_duck.rl.tasks.recipes import build_environment
     register_tasks()
     tasks = project_tasks(ROOT)
     task_id, remaining = tyro.cli(tyro.extras.literal_type_from_choices([t.id for t in tasks.list()]),

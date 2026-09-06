@@ -81,7 +81,7 @@ class NewtonEntity(Entity):
         if len(free_joints) != 1:
             raise ValueError('Expected one floating Microduck articulation per world')
         free = free_joints[0]
-        tensor = lambda values: torch.tensor(values, device=device, dtype=torch.long)
+        tensor = lambda values: torch.tensor(values, device=device, dtype=torch.int32)
         empty = tensor([])
         # Only compiled collision geometry is present in Newton. Selectors refer
         # to named task geoms (the feet); unavailable visual geoms fail on use.

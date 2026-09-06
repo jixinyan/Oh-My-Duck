@@ -3,12 +3,7 @@ from oh_my_duck.rl.training.tasks import project_tasks
 from mjlab.tasks.registry import register_mjlab_task
 
 
-def build_environment(binding, *, play=False):
-    cfg = binding.environment.build(play=play)
-    if binding.robot_variant is not None:
-        from oh_my_duck.rl.tasks.backlash import make_backlash_variant
-        cfg = make_backlash_variant(cfg, binding.robot_variant.build())
-    return cfg
+from oh_my_duck.rl.tasks.recipes import build_environment
 
 
 _registered = False

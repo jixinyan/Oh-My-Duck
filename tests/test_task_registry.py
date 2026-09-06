@@ -44,3 +44,19 @@ class TaskRegistryTests(unittest.TestCase):
         task = registry.list()[0]
         task.bindings.clear()
         self.assertIn('mujoco', registry.get(task.id).bindings)
+
+
+def _runtime_fixture(cfg, *, task, device, render_mode, label):
+    return (cfg, task.id, device, render_mode, label)
+
+
+class RuntimeExtensionTests(unittest.TestCase):
+    def test_runtime_factory_is_selected_by_binding_and_receives_parameters(self):
+        from oh_my_duck.rl.training.runtime import create_environment
+        reference = ConfigRef('test_task_registry:_runtime_fixture', {'label': 'custom'})
+        binding = TaskBinding(reference, reference, reference, runtime=reference)
+        task = TaskSpec('Balance-v0', 'custom', {'custom-sim': binding})
+        self.assertEqual(create_environment(task, {'seed': 2}, backend='custom-sim', device='cpu'),
+                         ({'seed': 2}, 'Balance-v0', 'cpu', None, 'custom'))
+        with self.assertRaises(ValueError):
+            create_environment(task, {}, backend='mujoco', device='cpu')
