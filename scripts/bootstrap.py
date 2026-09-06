@@ -29,8 +29,6 @@ def main():
     if args.backend == "isaac-newton":
         run([sys.executable, ROOT / "training/isaac_newton/bootstrap_env.py", "--rl-framework", args.rl_framework, *(["--skip-env"] if args.skip_env else [])])
         return
-    if args.rl_framework != "rsl-rl":
-        parser.error("MuJoCo SB3 integration is planned; use omd frameworks for supported combinations")
     lock = json.loads((ROOT / "configs/upstream.json").read_text())
     upstream = ROOT / ".cache/upstream"
     upstream.mkdir(parents=True, exist_ok=True)
@@ -59,10 +57,11 @@ def main():
     (dest / "provenance.json").write_text(json.dumps({**policy, "sha256": hashes}, indent=2) + "\n")
     if not args.skip_env:
         env = os.environ.copy()
-        env.update(UV_PROJECT_ENVIRONMENT=str(ROOT / ".envs/mujoco"),
+        env.update(UV_PROJECT_ENVIRONMENT=str(ROOT / (".envs/mujoco-sb3" if args.rl_framework == "sb3" else ".envs/mujoco")),
                    UV_CACHE_DIR=str(ROOT / ".cache/uv"),
                    UV_PYTHON_INSTALL_DIR=str(ROOT / ".cache/python"), UV_HTTP_TIMEOUT="600")
-        run(["uv", "sync", "--project", upstream / "microduck_rl", "--locked", "--python", "3.12"], env=env)
+        project = ROOT / "training/mujoco" if args.rl_framework == "sb3" else upstream / "microduck_rl"
+        run(["uv", "sync", "--project", project, "--locked", "--python", "3.12"], env=env)
     print("Bootstrap complete. GPU validation must run through the scheduler.")
 
 

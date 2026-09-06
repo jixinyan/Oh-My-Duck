@@ -52,6 +52,12 @@ def _rsl_rl(backend, root, operation, arguments):
 
 
 def _sb3(backend, root, operation, arguments):
+    if backend == "mujoco":
+        interpreter = root / ".envs/mujoco-sb3/bin/python"
+        if not interpreter.exists():
+            raise BackendUnavailable("Run python omd.py setup --backend mujoco --rl-framework sb3 first")
+        return BackendCommand((str(interpreter), str(root / "training/mujoco/sb3_train.py"), *arguments),
+                              root, {"MUJOCO_GL": "egl", "MPLBACKEND": "Agg", "PYTHONUNBUFFERED": "1"})
     command = default_registry().get(backend, root).command(operation, arguments)
     return replace(command, argv=(command.argv[0], "-m", "omd_isaac.sb3_train", *arguments))
 
@@ -64,7 +70,7 @@ def default_framework_registry():
                          "Explicit PD diagnostic task only; BAM locomotion pending"),
     ])
     registry.register("sb3", "Stable-Baselines3", [
-        FrameworkBinding("mujoco", (), "planned", None, "mjlab VecEnv adapter pending"),
+        FrameworkBinding("mujoco", ("train",), "official_task_adapter_unvalidated", _sb3, "Official mjlab tasks; SB3 PPO and native resume; ONNX export pending"),
         FrameworkBinding("isaac-newton", ("train",), "diagnostic_train_and_timeouts_passed", _sb3,
                          "Optional SB3 install; PD PPO only; native checkpoint resume and ONNX export pending"),
     ])
