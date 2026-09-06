@@ -17,8 +17,8 @@ Updated: 2026-09-06. Current priority: **complete the whole-project framework, t
 | Episode recording | JSONL implementation tested | Single process; payload storage/replay still pending |
 | Training backend registry | Implemented and tested | Unimplemented Newton cannot fall back to another engine |
 | Shared command schedule / joint contract | Implemented and tested | Exact 50 Hz boundaries and invalid input rejection |
-| Official MuJoCo training/export adapter | Implemented, worker validation pending | Python 3.12.13 environment and key package metadata present; worker validation pending |
-| CPU MuJoCo/BAM headless evaluator | Initial implementation, unvalidated | Run fixed command sequence and save EGL video after setup |
+| Official MuJoCo training/export adapter | Walking smoke and official export passed | 64 environments / 5 iterations; finite scalar and penalty-sign audit, local official schema-2 packaging passed |
+| CPU MuJoCo/BAM headless evaluator | Replay and video work; behavior gate fails | Official alpha policy completes 14 s without falling but barely tracks forward/yaw commands |
 | Isaac Lab / Newton Microduck task | PD physics/video and short training verified | Raw asset checks, RSL-RL/SB3 smoke training, RSL-RL numerical export pass; BAM locomotion remains pending. See [worker report](reports/isaac-rl-validation.md) |
 | Sim2sim comparison | Planned | Requires both actual backends and measured baselines |
 | Hardware | Unavailable / deferred | No physical-robot tests |
@@ -95,3 +95,7 @@ This supersedes the previous camera/queue/training/export-pending checkpoints. E
 The application now independently selects simulation with `--backend` and learning with `--rl-framework`; `omd frameworks` lists actual combination/operation status. 17 lightweight tests and 7 installed-runtime CPU checks pass. Focused commits are on `feat/rl-framework-selection`; source, docs and local ground asset are tracked, runtime outputs/environments remain ignored. Full evidence, task IDs, failures and artifact paths: [Isaac/RL validation](reports/isaac-rl-validation.md).
 
 Still pending: MuJoCo robot training/export verification and SB3 adapter; SB3 native resume/ONNX export; RSL-RL resume/policy replay; BAM locomotion, sim2sim and upper-level functionality. A PD smoke run is not a trained walking policy.
+
+## Official-task verification and SB3 continuation (2026-09-06)
+
+Full official AGENTS.md read; 199 official CPU regressions passed, 1 skipped. Official MuJoCo walking 64-env / 5-iteration train, official normalized ONNX export, finite reward/penalty audit, and schema-2 publisher dry-run passed. CPU alpha-policy replay saves video but command tracking is inadequate. MuJoCo SB3 now reuses the official task with independent locked dependencies: 64-env / 5-rollout smoke passed, and native resume continued from 7,680 to 15,360 steps with 768 timeout snapshots. Two CPU tests cover the real mjlab observation-manager cache/delay boundary. Newton BAM bridge is implemented but worker validation and full task migration remain pending. See [official compliance evidence](reports/official-rl-compliance.md).

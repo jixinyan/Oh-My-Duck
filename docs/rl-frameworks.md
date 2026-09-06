@@ -25,11 +25,11 @@ Run `python omd.py frameworks` for the registered compatibility matrix. `--backe
 | MuJoCo + RSL-RL | Official train/export | Official flat walking 64-env / 5-iteration train and official ONNX export passed; gait quality not validated |
 | Isaac/Newton + RSL-RL | PD diagnostic train/export | 5-iteration GPU train, native checkpoint inspection and normalized ONNX numerical export passed |
 | Isaac/Newton + SB3 | PD diagnostic PPO train | 5-rollout GPU train passed, including 192 timeout snapshots; checkpoint + normalizer saved |
-| MuJoCo + SB3 | Planned | mjlab vector-environment bridge required |
+| MuJoCo + SB3 | Official-task PPO train / native resume | 64-env / 5-rollout training and FP32 checkpoint reload passed; resume/timeout job running; deployment export pending |
 
 The pinned upstream SB3 wrapper is subclassed locally to substitute exact pre-reset observations for automatic-reset terminal states. The same diagnostic environment supplies snapshots; no upstream files are modified. See [validation evidence](reports/isaac-rl-validation.md).
 
-SB3 does not yet implement native checkpoint resume or ONNX export in this project. Resume is explicitly rejected until matching normalization state is restored and verified. Training saves the upstream native `model.zip` and `model_vecnormalize.pkl`; retain both. A checkpoint from one framework cannot be resumed by another; a shared ONNX inference contract is a separate compatibility milestone. SB3 currently uses its upstream CPU NumPy VecEnv boundary around GPU simulation; do not assume the throughput or distributed capabilities of RSL-RL.
+Isaac SB3 does not yet implement native checkpoint resume or ONNX export. Its resume is explicitly rejected until matching normalization state is restored and verified. MuJoCo SB3 implements paired model/VecNormalize save and resume; its ONNX export remains pending. Training saves the upstream native `model.zip` and `model_vecnormalize.pkl`; retain both. A checkpoint from one framework cannot be resumed by another; a shared ONNX inference contract is a separate compatibility milestone. SB3 currently uses its upstream CPU NumPy VecEnv boundary around GPU simulation; do not assume the throughput or distributed capabilities of RSL-RL.
 
 ## Isaac diagnostic commands
 
@@ -60,3 +60,18 @@ Both diagnostics use the same Newton task, 61 observations, 14 canonical joint a
 5. Validate short headless learning, save/load continuation, inference parity and video before marking a combination supported for production experiments. Add framework-native algorithms incrementally; selecting SB3 currently selects its pinned PPO integration only.
 
 The [SB3 VecEnv contract](https://stable-baselines3.readthedocs.io/en/master/guide/vec_envs.html) differs from Gymnasium's reset/step API. Adapter boundary tests are required; matching method names alone is insufficient. The pinned Isaac Lab implementation is in `scripts/reinforcement_learning/sb3/train_sb3.py` and `source/isaaclab_rl/isaaclab_rl/sb3.py`.
+
+## MuJoCo SB3 commands
+
+The optional environment `.envs/mujoco-sb3` keeps every version in the pinned official lock, adding SB3 and its dependencies. The official RSL-RL environment stays separate. Tasks are loaded from the official registry, including their BAM, commands, DR, observation delays and reward curricula.
+
+```bash
+python omd.py setup --backend mujoco --rl-framework sb3
+python omd.py submit --name omd-mj-sb3-smoke --gpus 1 -- \
+  python omd.py train --backend mujoco --rl-framework sb3 -- \
+  Mjlab-Velocity-Flat-MicroDuck --num-envs 64 --iterations 5 --output outputs/my-sb3-run
+```
+
+Resume adds `--resume outputs/my-sb3-run` and uses a new output directory. PPO remains framework-specific: SB3 uses actor observations for its critic, VecNormalize statistics, and constant learning rate with target-KL stopping. These differences are saved in `run.json`; do not call the algorithm identical to official RSL-RL. Both native files are required (`model.zip`, `vecnormalize.pkl`). The pre-reset recorder copies delay/history state and preserves the Torch RNG so collecting terminal observations does not advance the live sensor history. CPU regression tests exercise the actual pinned mjlab observation manager.
+
+Local policy packaging for an official RSL-RL walking export uses `training/mujoco/package_policy.py`. It invokes the official publisher dry-run and validates schema 2, records project/upstream provenance, and labels smoke artifacts unvalidated. It has no upload mode.
