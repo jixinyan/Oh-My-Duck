@@ -9,6 +9,7 @@ from pathlib import Path
 import sys
 
 COMMANDS = {
+    "tasks": (None, "List official task inventory and the representative reproduction scope"),
     "frameworks": (None, "List RL frameworks, backend compatibility and validation status"),
     "status": (None, "Show component implementation status without initializing hardware"),
     "setup": ("bootstrap.py", "Fetch pinned sources/models and prepare a backend environment"),
@@ -42,6 +43,17 @@ def main():
         print(f"Unknown command {command!r}. Use --help.", file=sys.stderr)
         return 2
     root = project_root()
+    if command == "tasks":
+        parser = argparse.ArgumentParser(description=COMMANDS[command][1])
+        parser.add_argument("--all", action="store_true", help="Include tasks outside the representative validation scope")
+        args = parser.parse_args(sys.argv[2:])
+        catalog = json.loads((root / "configs/official_tasks.json").read_text())
+        selected = json.loads((root / "configs/training.json").read_text())["representative_tasks"]
+        for task in catalog["tasks"]:
+            if args.all or task["id"] in selected:
+                print(task["id"], "[representative]" if task["id"] in selected else "[inventory only]")
+        print("Task registration does not imply training or behavior validation. See docs/rl-reproduction.md.")
+        return 0
     if command == "frameworks":
         argparse.ArgumentParser(description=COMMANDS[command][1]).parse_args(sys.argv[2:])
         from .training.frameworks import default_framework_registry

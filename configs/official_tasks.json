@@ -1,0 +1,5361 @@
+{
+  "schema_version": 1,
+  "source": {
+    "url": "https://github.com/pollen-robotics/microduck_rl.git",
+    "branch": "develop",
+    "commit": "29e887ecfbf5d37144759e5a9f8a176dfb83d547"
+  },
+  "tasks": [
+    {
+      "id": "Mjlab-BallKick-Flat-Backlash-MicroDuck",
+      "backlash": true,
+      "rough": false,
+      "physics_dt": 0.005,
+      "decimation": 4,
+      "num_steps_per_env": 24,
+      "official_max_iterations": 10000,
+      "model": {
+        "nq": 35,
+        "nv": 34,
+        "bodies": 16,
+        "passive_joints": [
+          "passive_left_hip_yaw_backlash",
+          "passive_left_hip_roll_backlash",
+          "passive_left_hip_pitch_backlash",
+          "passive_left_knee_backlash",
+          "passive_left_ankle_backlash",
+          "passive_neck_pitch_backlash",
+          "passive_head_pitch_backlash",
+          "passive_head_yaw_backlash",
+          "passive_head_roll_backlash",
+          "passive_right_hip_yaw_backlash",
+          "passive_right_hip_roll_backlash",
+          "passive_right_hip_pitch_backlash",
+          "passive_right_knee_backlash",
+          "passive_right_ankle_backlash"
+        ]
+      },
+      "observations": {
+        "actor": [
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "head_command",
+          "body_command"
+        ],
+        "critic": [
+          "base_lin_vel",
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "foot_air_time",
+          "foot_contact",
+          "foot_contact_forces",
+          "head_command",
+          "body_command",
+          "ball_position",
+          "ball_velocity"
+        ]
+      },
+      "commands": {
+        "twist": "mjlab_microduck.tasks.mdp.VelocityCommandCommandOnlyCfg"
+      },
+      "rewards": {
+        "upright": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.upright",
+          "weight": 2.0
+        },
+        "body_ang_vel": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.body_angular_velocity_penalty",
+          "weight": -0.05
+        },
+        "angular_momentum": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.angular_momentum_penalty",
+          "weight": -0.02
+        },
+        "dof_pos_limits": {
+          "function": "mjlab.envs.mdp.rewards.joint_pos_limits",
+          "weight": -1.0
+        },
+        "action_rate_l2": {
+          "function": "mjlab.envs.mdp.rewards.action_rate_l2",
+          "weight": -0.1
+        },
+        "ball_forward_velocity": {
+          "function": "mjlab_microduck.tasks.mdp.ball_forward_velocity",
+          "weight": 12.0
+        },
+        "ball_speed_overshoot": {
+          "function": "mjlab_microduck.tasks.mdp.ball_speed_overshoot_penalty",
+          "weight": -4.0
+        },
+        "support_foot_grounded": {
+          "function": "mjlab_microduck.tasks.mdp.single_foot_grounded_reward",
+          "weight": 2.0
+        },
+        "pose_stand_legs": {
+          "function": "mjlab_microduck.tasks.mdp.pose_target_match",
+          "weight": 2.0
+        },
+        "pose_stand_neck": {
+          "function": "mjlab_microduck.tasks.mdp.pose_target_match",
+          "weight": 1.0
+        },
+        "height_stand": {
+          "function": "mjlab_microduck.tasks.mdp.height_target_gaussian",
+          "weight": 1.0
+        },
+        "self_collisions": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.self_collision_cost",
+          "weight": -1.0
+        }
+      },
+      "events": [
+        "reset_base",
+        "reset_robot_joints",
+        "push_robot",
+        "foot_friction",
+        "encoder_bias",
+        "base_com",
+        "expand_bam_friction_fields",
+        "reset_action_history",
+        "set_ground_state",
+        "reset_ball",
+        "randomize_com",
+        "randomize_head_com",
+        "randomize_armature",
+        "randomize_mass_inertia",
+        "randomize_joint_friction"
+      ],
+      "terminations": [
+        "time_out",
+        "fell_over",
+        "out_of_terrain_bounds",
+        "nan_state"
+      ],
+      "curriculum": [
+        "action_rate_weight",
+        "com_range",
+        "head_com_range",
+        "push_magnitude"
+      ],
+      "sensors": [
+        "mjlab.sensor.contact_sensor.ContactSensorCfg",
+        "mjlab.sensor.contact_sensor.ContactSensorCfg",
+        "mjlab.sensor.contact_sensor.ContactSensorCfg"
+      ]
+    },
+    {
+      "id": "Mjlab-BallKick-Flat-MicroDuck",
+      "backlash": false,
+      "rough": false,
+      "physics_dt": 0.005,
+      "decimation": 4,
+      "num_steps_per_env": 24,
+      "official_max_iterations": 10000,
+      "model": {
+        "nq": 21,
+        "nv": 20,
+        "bodies": 16,
+        "passive_joints": []
+      },
+      "observations": {
+        "actor": [
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "head_command",
+          "body_command"
+        ],
+        "critic": [
+          "base_lin_vel",
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "foot_air_time",
+          "foot_contact",
+          "foot_contact_forces",
+          "head_command",
+          "body_command",
+          "ball_position",
+          "ball_velocity"
+        ]
+      },
+      "commands": {
+        "twist": "mjlab_microduck.tasks.mdp.VelocityCommandCommandOnlyCfg"
+      },
+      "rewards": {
+        "upright": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.upright",
+          "weight": 2.0
+        },
+        "body_ang_vel": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.body_angular_velocity_penalty",
+          "weight": -0.05
+        },
+        "angular_momentum": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.angular_momentum_penalty",
+          "weight": -0.02
+        },
+        "dof_pos_limits": {
+          "function": "mjlab.envs.mdp.rewards.joint_pos_limits",
+          "weight": -1.0
+        },
+        "action_rate_l2": {
+          "function": "mjlab.envs.mdp.rewards.action_rate_l2",
+          "weight": -0.1
+        },
+        "ball_forward_velocity": {
+          "function": "mjlab_microduck.tasks.mdp.ball_forward_velocity",
+          "weight": 12.0
+        },
+        "ball_speed_overshoot": {
+          "function": "mjlab_microduck.tasks.mdp.ball_speed_overshoot_penalty",
+          "weight": -4.0
+        },
+        "support_foot_grounded": {
+          "function": "mjlab_microduck.tasks.mdp.single_foot_grounded_reward",
+          "weight": 2.0
+        },
+        "pose_stand_legs": {
+          "function": "mjlab_microduck.tasks.mdp.pose_target_match",
+          "weight": 2.0
+        },
+        "pose_stand_neck": {
+          "function": "mjlab_microduck.tasks.mdp.pose_target_match",
+          "weight": 1.0
+        },
+        "height_stand": {
+          "function": "mjlab_microduck.tasks.mdp.height_target_gaussian",
+          "weight": 1.0
+        },
+        "self_collisions": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.self_collision_cost",
+          "weight": -1.0
+        }
+      },
+      "events": [
+        "reset_base",
+        "reset_robot_joints",
+        "push_robot",
+        "foot_friction",
+        "encoder_bias",
+        "base_com",
+        "expand_bam_friction_fields",
+        "reset_action_history",
+        "set_ground_state",
+        "reset_ball",
+        "randomize_com",
+        "randomize_head_com",
+        "randomize_armature",
+        "randomize_mass_inertia",
+        "randomize_joint_friction"
+      ],
+      "terminations": [
+        "time_out",
+        "fell_over",
+        "out_of_terrain_bounds",
+        "nan_state"
+      ],
+      "curriculum": [
+        "action_rate_weight",
+        "com_range",
+        "head_com_range",
+        "push_magnitude"
+      ],
+      "sensors": [
+        "mjlab.sensor.contact_sensor.ContactSensorCfg",
+        "mjlab.sensor.contact_sensor.ContactSensorCfg",
+        "mjlab.sensor.contact_sensor.ContactSensorCfg"
+      ]
+    },
+    {
+      "id": "Mjlab-GroundPick-Flat-Backlash-MicroDuck",
+      "backlash": true,
+      "rough": false,
+      "physics_dt": 0.005,
+      "decimation": 4,
+      "num_steps_per_env": 24,
+      "official_max_iterations": 20000,
+      "model": {
+        "nq": 35,
+        "nv": 34,
+        "bodies": 16,
+        "passive_joints": [
+          "passive_left_hip_yaw_backlash",
+          "passive_left_hip_roll_backlash",
+          "passive_left_hip_pitch_backlash",
+          "passive_left_knee_backlash",
+          "passive_left_ankle_backlash",
+          "passive_neck_pitch_backlash",
+          "passive_head_pitch_backlash",
+          "passive_head_yaw_backlash",
+          "passive_head_roll_backlash",
+          "passive_right_hip_yaw_backlash",
+          "passive_right_hip_roll_backlash",
+          "passive_right_hip_pitch_backlash",
+          "passive_right_knee_backlash",
+          "passive_right_ankle_backlash"
+        ]
+      },
+      "observations": {
+        "actor": [
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "head_command",
+          "body_command"
+        ],
+        "critic": [
+          "base_lin_vel",
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "foot_air_time",
+          "foot_contact",
+          "foot_contact_forces",
+          "head_command",
+          "body_command"
+        ]
+      },
+      "commands": {
+        "twist": "mjlab_microduck.tasks.mdp.GroundPickPhaseCommandCfg"
+      },
+      "rewards": {
+        "upright": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.upright",
+          "weight": 0.2
+        },
+        "body_ang_vel": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.body_angular_velocity_penalty",
+          "weight": -0.05
+        },
+        "angular_momentum": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.angular_momentum_penalty",
+          "weight": -0.02
+        },
+        "dof_pos_limits": {
+          "function": "mjlab.envs.mdp.rewards.joint_pos_limits",
+          "weight": -1.0
+        },
+        "action_rate_l2": {
+          "function": "mjlab.envs.mdp.rewards.action_rate_l2",
+          "weight": -2.0
+        },
+        "soft_landing": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.soft_landing",
+          "weight": -1e-05
+        },
+        "mouth_ground_proximity": {
+          "function": "mjlab_microduck.tasks.mdp.mouth_ground_proximity_phased",
+          "weight": 3.0
+        },
+        "mouth_perpendicular_to_ground": {
+          "function": "mjlab_microduck.tasks.mdp.mouth_perpendicular_phased",
+          "weight": 2.0
+        },
+        "ground_pick_return_pose_legs": {
+          "function": "mjlab_microduck.tasks.mdp.ground_pick_return_pose_phased",
+          "weight": 6.0
+        },
+        "ground_pick_return_pose_neck": {
+          "function": "mjlab_microduck.tasks.mdp.ground_pick_return_pose_phased",
+          "weight": 6.0
+        },
+        "return_upright": {
+          "function": "mjlab_microduck.tasks.mdp.ground_pick_return_upright_phased",
+          "weight": 4.0
+        },
+        "neck_vel_descent": {
+          "function": "mjlab_microduck.tasks.mdp.neck_vel_descent_penalty",
+          "weight": -0.1
+        },
+        "mouth_payload_force": {
+          "function": "mjlab_microduck.tasks.mdp.apply_mouth_payload_force",
+          "weight": 0.0
+        },
+        "feet_grounded": {
+          "function": "mjlab_microduck.tasks.mdp.feet_grounded_reward",
+          "weight": 3.0
+        },
+        "feet_flat": {
+          "function": "mjlab_microduck.tasks.mdp.feet_flat_penalty",
+          "weight": -2.0
+        },
+        "neck_action_rate_l2": {
+          "function": "mjlab_microduck.tasks.mdp.neck_action_rate_l2",
+          "weight": -1.0
+        },
+        "joint_torques_l2": {
+          "function": "mjlab_microduck.tasks.mdp.joint_torques_l2",
+          "weight": -0.005
+        },
+        "self_collisions": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.self_collision_cost",
+          "weight": -1.0
+        },
+        "head_impact_penalty": {
+          "function": "mjlab_microduck.tasks.mdp.body_impact_cost",
+          "weight": -2.0
+        }
+      },
+      "events": [
+        "reset_base",
+        "reset_robot_joints",
+        "push_robot",
+        "foot_friction",
+        "encoder_bias",
+        "base_com",
+        "expand_bam_friction_fields",
+        "reset_action_history",
+        "sample_mouth_payload",
+        "randomize_com",
+        "randomize_head_com",
+        "randomize_mass_inertia",
+        "randomize_joint_friction",
+        "randomize_armature"
+      ],
+      "terminations": [
+        "time_out",
+        "fell_over",
+        "out_of_terrain_bounds",
+        "nan_state"
+      ],
+      "curriculum": [
+        "action_rate_weight",
+        "com_range",
+        "head_com_range"
+      ],
+      "sensors": [
+        "mjlab.sensor.contact_sensor.ContactSensorCfg",
+        "mjlab.sensor.contact_sensor.ContactSensorCfg",
+        "mjlab.sensor.contact_sensor.ContactSensorCfg"
+      ]
+    },
+    {
+      "id": "Mjlab-GroundPick-Flat-MicroDuck",
+      "backlash": false,
+      "rough": false,
+      "physics_dt": 0.005,
+      "decimation": 4,
+      "num_steps_per_env": 24,
+      "official_max_iterations": 20000,
+      "model": {
+        "nq": 21,
+        "nv": 20,
+        "bodies": 16,
+        "passive_joints": []
+      },
+      "observations": {
+        "actor": [
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "head_command",
+          "body_command"
+        ],
+        "critic": [
+          "base_lin_vel",
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "foot_air_time",
+          "foot_contact",
+          "foot_contact_forces",
+          "head_command",
+          "body_command"
+        ]
+      },
+      "commands": {
+        "twist": "mjlab_microduck.tasks.mdp.GroundPickPhaseCommandCfg"
+      },
+      "rewards": {
+        "upright": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.upright",
+          "weight": 0.2
+        },
+        "body_ang_vel": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.body_angular_velocity_penalty",
+          "weight": -0.05
+        },
+        "angular_momentum": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.angular_momentum_penalty",
+          "weight": -0.02
+        },
+        "dof_pos_limits": {
+          "function": "mjlab.envs.mdp.rewards.joint_pos_limits",
+          "weight": -1.0
+        },
+        "action_rate_l2": {
+          "function": "mjlab.envs.mdp.rewards.action_rate_l2",
+          "weight": -2.0
+        },
+        "soft_landing": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.soft_landing",
+          "weight": -1e-05
+        },
+        "mouth_ground_proximity": {
+          "function": "mjlab_microduck.tasks.mdp.mouth_ground_proximity_phased",
+          "weight": 3.0
+        },
+        "mouth_perpendicular_to_ground": {
+          "function": "mjlab_microduck.tasks.mdp.mouth_perpendicular_phased",
+          "weight": 2.0
+        },
+        "ground_pick_return_pose_legs": {
+          "function": "mjlab_microduck.tasks.mdp.ground_pick_return_pose_phased",
+          "weight": 6.0
+        },
+        "ground_pick_return_pose_neck": {
+          "function": "mjlab_microduck.tasks.mdp.ground_pick_return_pose_phased",
+          "weight": 6.0
+        },
+        "return_upright": {
+          "function": "mjlab_microduck.tasks.mdp.ground_pick_return_upright_phased",
+          "weight": 4.0
+        },
+        "neck_vel_descent": {
+          "function": "mjlab_microduck.tasks.mdp.neck_vel_descent_penalty",
+          "weight": -0.1
+        },
+        "mouth_payload_force": {
+          "function": "mjlab_microduck.tasks.mdp.apply_mouth_payload_force",
+          "weight": 0.0
+        },
+        "feet_grounded": {
+          "function": "mjlab_microduck.tasks.mdp.feet_grounded_reward",
+          "weight": 3.0
+        },
+        "feet_flat": {
+          "function": "mjlab_microduck.tasks.mdp.feet_flat_penalty",
+          "weight": -2.0
+        },
+        "neck_action_rate_l2": {
+          "function": "mjlab_microduck.tasks.mdp.neck_action_rate_l2",
+          "weight": -1.0
+        },
+        "joint_torques_l2": {
+          "function": "mjlab_microduck.tasks.mdp.joint_torques_l2",
+          "weight": -0.005
+        },
+        "self_collisions": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.self_collision_cost",
+          "weight": -1.0
+        },
+        "head_impact_penalty": {
+          "function": "mjlab_microduck.tasks.mdp.body_impact_cost",
+          "weight": -2.0
+        }
+      },
+      "events": [
+        "reset_base",
+        "reset_robot_joints",
+        "push_robot",
+        "foot_friction",
+        "encoder_bias",
+        "base_com",
+        "expand_bam_friction_fields",
+        "reset_action_history",
+        "sample_mouth_payload",
+        "randomize_com",
+        "randomize_head_com",
+        "randomize_mass_inertia",
+        "randomize_joint_friction",
+        "randomize_armature"
+      ],
+      "terminations": [
+        "time_out",
+        "fell_over",
+        "out_of_terrain_bounds",
+        "nan_state"
+      ],
+      "curriculum": [
+        "action_rate_weight",
+        "com_range",
+        "head_com_range"
+      ],
+      "sensors": [
+        "mjlab.sensor.contact_sensor.ContactSensorCfg",
+        "mjlab.sensor.contact_sensor.ContactSensorCfg",
+        "mjlab.sensor.contact_sensor.ContactSensorCfg"
+      ]
+    },
+    {
+      "id": "Mjlab-GroundPick-Rough-Backlash-MicroDuck",
+      "backlash": true,
+      "rough": true,
+      "physics_dt": 0.005,
+      "decimation": 4,
+      "num_steps_per_env": 24,
+      "official_max_iterations": 20000,
+      "model": {
+        "nq": 35,
+        "nv": 34,
+        "bodies": 16,
+        "passive_joints": [
+          "passive_left_hip_yaw_backlash",
+          "passive_left_hip_roll_backlash",
+          "passive_left_hip_pitch_backlash",
+          "passive_left_knee_backlash",
+          "passive_left_ankle_backlash",
+          "passive_neck_pitch_backlash",
+          "passive_head_pitch_backlash",
+          "passive_head_yaw_backlash",
+          "passive_head_roll_backlash",
+          "passive_right_hip_yaw_backlash",
+          "passive_right_hip_roll_backlash",
+          "passive_right_hip_pitch_backlash",
+          "passive_right_knee_backlash",
+          "passive_right_ankle_backlash"
+        ]
+      },
+      "observations": {
+        "actor": [
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "head_command",
+          "body_command"
+        ],
+        "critic": [
+          "base_lin_vel",
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "foot_air_time",
+          "foot_contact",
+          "foot_contact_forces",
+          "head_command",
+          "body_command"
+        ]
+      },
+      "commands": {
+        "twist": "mjlab_microduck.tasks.mdp.GroundPickPhaseCommandCfg"
+      },
+      "rewards": {
+        "upright": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.upright",
+          "weight": 0.2
+        },
+        "body_ang_vel": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.body_angular_velocity_penalty",
+          "weight": -0.05
+        },
+        "angular_momentum": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.angular_momentum_penalty",
+          "weight": -0.02
+        },
+        "dof_pos_limits": {
+          "function": "mjlab.envs.mdp.rewards.joint_pos_limits",
+          "weight": -1.0
+        },
+        "action_rate_l2": {
+          "function": "mjlab.envs.mdp.rewards.action_rate_l2",
+          "weight": -2.0
+        },
+        "soft_landing": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.soft_landing",
+          "weight": -1e-05
+        },
+        "mouth_ground_proximity": {
+          "function": "mjlab_microduck.tasks.mdp.mouth_ground_proximity_phased",
+          "weight": 3.0
+        },
+        "mouth_perpendicular_to_ground": {
+          "function": "mjlab_microduck.tasks.mdp.mouth_perpendicular_phased",
+          "weight": 2.0
+        },
+        "ground_pick_return_pose_legs": {
+          "function": "mjlab_microduck.tasks.mdp.ground_pick_return_pose_phased",
+          "weight": 6.0
+        },
+        "ground_pick_return_pose_neck": {
+          "function": "mjlab_microduck.tasks.mdp.ground_pick_return_pose_phased",
+          "weight": 6.0
+        },
+        "return_upright": {
+          "function": "mjlab_microduck.tasks.mdp.ground_pick_return_upright_phased",
+          "weight": 4.0
+        },
+        "neck_vel_descent": {
+          "function": "mjlab_microduck.tasks.mdp.neck_vel_descent_penalty",
+          "weight": -0.1
+        },
+        "mouth_payload_force": {
+          "function": "mjlab_microduck.tasks.mdp.apply_mouth_payload_force",
+          "weight": 0.0
+        },
+        "feet_grounded": {
+          "function": "mjlab_microduck.tasks.mdp.feet_grounded_reward",
+          "weight": 3.0
+        },
+        "feet_flat": {
+          "function": "mjlab_microduck.tasks.mdp.feet_flat_penalty",
+          "weight": -2.0
+        },
+        "neck_action_rate_l2": {
+          "function": "mjlab_microduck.tasks.mdp.neck_action_rate_l2",
+          "weight": -1.0
+        },
+        "joint_torques_l2": {
+          "function": "mjlab_microduck.tasks.mdp.joint_torques_l2",
+          "weight": -0.005
+        },
+        "self_collisions": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.self_collision_cost",
+          "weight": -1.0
+        },
+        "head_impact_penalty": {
+          "function": "mjlab_microduck.tasks.mdp.body_impact_cost",
+          "weight": -2.0
+        }
+      },
+      "events": [
+        "reset_base",
+        "reset_robot_joints",
+        "push_robot",
+        "foot_friction",
+        "encoder_bias",
+        "base_com",
+        "expand_bam_friction_fields",
+        "reset_action_history",
+        "sample_mouth_payload",
+        "randomize_com",
+        "randomize_head_com",
+        "randomize_mass_inertia",
+        "randomize_joint_friction",
+        "randomize_armature"
+      ],
+      "terminations": [
+        "time_out",
+        "fell_over",
+        "out_of_terrain_bounds",
+        "nan_state"
+      ],
+      "curriculum": [
+        "terrain_levels",
+        "action_rate_weight",
+        "com_range",
+        "head_com_range"
+      ],
+      "sensors": [
+        "mjlab.sensor.contact_sensor.ContactSensorCfg",
+        "mjlab.sensor.contact_sensor.ContactSensorCfg",
+        "mjlab.sensor.contact_sensor.ContactSensorCfg"
+      ]
+    },
+    {
+      "id": "Mjlab-GroundPick-Rough-MicroDuck",
+      "backlash": false,
+      "rough": true,
+      "physics_dt": 0.005,
+      "decimation": 4,
+      "num_steps_per_env": 24,
+      "official_max_iterations": 20000,
+      "model": {
+        "nq": 21,
+        "nv": 20,
+        "bodies": 16,
+        "passive_joints": []
+      },
+      "observations": {
+        "actor": [
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "head_command",
+          "body_command"
+        ],
+        "critic": [
+          "base_lin_vel",
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "foot_air_time",
+          "foot_contact",
+          "foot_contact_forces",
+          "head_command",
+          "body_command"
+        ]
+      },
+      "commands": {
+        "twist": "mjlab_microduck.tasks.mdp.GroundPickPhaseCommandCfg"
+      },
+      "rewards": {
+        "upright": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.upright",
+          "weight": 0.2
+        },
+        "body_ang_vel": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.body_angular_velocity_penalty",
+          "weight": -0.05
+        },
+        "angular_momentum": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.angular_momentum_penalty",
+          "weight": -0.02
+        },
+        "dof_pos_limits": {
+          "function": "mjlab.envs.mdp.rewards.joint_pos_limits",
+          "weight": -1.0
+        },
+        "action_rate_l2": {
+          "function": "mjlab.envs.mdp.rewards.action_rate_l2",
+          "weight": -2.0
+        },
+        "soft_landing": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.soft_landing",
+          "weight": -1e-05
+        },
+        "mouth_ground_proximity": {
+          "function": "mjlab_microduck.tasks.mdp.mouth_ground_proximity_phased",
+          "weight": 3.0
+        },
+        "mouth_perpendicular_to_ground": {
+          "function": "mjlab_microduck.tasks.mdp.mouth_perpendicular_phased",
+          "weight": 2.0
+        },
+        "ground_pick_return_pose_legs": {
+          "function": "mjlab_microduck.tasks.mdp.ground_pick_return_pose_phased",
+          "weight": 6.0
+        },
+        "ground_pick_return_pose_neck": {
+          "function": "mjlab_microduck.tasks.mdp.ground_pick_return_pose_phased",
+          "weight": 6.0
+        },
+        "return_upright": {
+          "function": "mjlab_microduck.tasks.mdp.ground_pick_return_upright_phased",
+          "weight": 4.0
+        },
+        "neck_vel_descent": {
+          "function": "mjlab_microduck.tasks.mdp.neck_vel_descent_penalty",
+          "weight": -0.1
+        },
+        "mouth_payload_force": {
+          "function": "mjlab_microduck.tasks.mdp.apply_mouth_payload_force",
+          "weight": 0.0
+        },
+        "feet_grounded": {
+          "function": "mjlab_microduck.tasks.mdp.feet_grounded_reward",
+          "weight": 3.0
+        },
+        "feet_flat": {
+          "function": "mjlab_microduck.tasks.mdp.feet_flat_penalty",
+          "weight": -2.0
+        },
+        "neck_action_rate_l2": {
+          "function": "mjlab_microduck.tasks.mdp.neck_action_rate_l2",
+          "weight": -1.0
+        },
+        "joint_torques_l2": {
+          "function": "mjlab_microduck.tasks.mdp.joint_torques_l2",
+          "weight": -0.005
+        },
+        "self_collisions": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.self_collision_cost",
+          "weight": -1.0
+        },
+        "head_impact_penalty": {
+          "function": "mjlab_microduck.tasks.mdp.body_impact_cost",
+          "weight": -2.0
+        }
+      },
+      "events": [
+        "reset_base",
+        "reset_robot_joints",
+        "push_robot",
+        "foot_friction",
+        "encoder_bias",
+        "base_com",
+        "expand_bam_friction_fields",
+        "reset_action_history",
+        "sample_mouth_payload",
+        "randomize_com",
+        "randomize_head_com",
+        "randomize_mass_inertia",
+        "randomize_joint_friction",
+        "randomize_armature"
+      ],
+      "terminations": [
+        "time_out",
+        "fell_over",
+        "out_of_terrain_bounds",
+        "nan_state"
+      ],
+      "curriculum": [
+        "terrain_levels",
+        "action_rate_weight",
+        "com_range",
+        "head_com_range"
+      ],
+      "sensors": [
+        "mjlab.sensor.contact_sensor.ContactSensorCfg",
+        "mjlab.sensor.contact_sensor.ContactSensorCfg",
+        "mjlab.sensor.contact_sensor.ContactSensorCfg"
+      ]
+    },
+    {
+      "id": "Mjlab-RollerCrouch-Flat-Backlash-MicroDuck",
+      "backlash": true,
+      "rough": false,
+      "physics_dt": 0.005,
+      "decimation": 4,
+      "num_steps_per_env": 24,
+      "official_max_iterations": 8000,
+      "model": {
+        "nq": 39,
+        "nv": 38,
+        "bodies": 20,
+        "passive_joints": [
+          "passive_left_hip_yaw_backlash",
+          "passive_left_hip_roll_backlash",
+          "passive_left_hip_pitch_backlash",
+          "passive_left_knee_backlash",
+          "passive_left_ankle_backlash",
+          "passive_LF_wheel",
+          "passive_LR_wheel",
+          "passive_neck_pitch_backlash",
+          "passive_head_pitch_backlash",
+          "passive_head_yaw_backlash",
+          "passive_head_roll_backlash",
+          "passive_right_hip_yaw_backlash",
+          "passive_right_hip_roll_backlash",
+          "passive_right_hip_pitch_backlash",
+          "passive_right_knee_backlash",
+          "passive_right_ankle_backlash",
+          "passive_RF_wheel",
+          "passive_RR_wheel"
+        ]
+      },
+      "observations": {
+        "actor": [
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "head_command",
+          "body_command"
+        ],
+        "critic": [
+          "base_lin_vel",
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "foot_air_time",
+          "foot_contact",
+          "foot_contact_forces",
+          "wheel_vel",
+          "head_command",
+          "body_command"
+        ]
+      },
+      "commands": {
+        "twist": "mjlab_microduck.tasks.mdp.GroundPickPhaseCommandCfg"
+      },
+      "rewards": {
+        "upright": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.upright",
+          "weight": 2.0
+        },
+        "body_ang_vel": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.body_angular_velocity_penalty",
+          "weight": -0.05
+        },
+        "angular_momentum": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.angular_momentum_penalty",
+          "weight": -0.02
+        },
+        "action_rate_l2": {
+          "function": "mjlab.envs.mdp.rewards.action_rate_l2",
+          "weight": -1.0
+        },
+        "crouch_glide_pose": {
+          "function": "mjlab_microduck.tasks.mdp.crouch_glide_pose_by_phase",
+          "weight": 6.0
+        },
+        "crouch_glide_pose_l1": {
+          "function": "mjlab_microduck.tasks.mdp.crouch_glide_pose_l1",
+          "weight": 2.0
+        },
+        "forward_speed": {
+          "function": "mjlab_microduck.tasks.mdp.forward_speed_reward",
+          "weight": 1.0
+        },
+        "crouch_forward_lean": {
+          "function": "mjlab_microduck.tasks.mdp.crouch_forward_lean",
+          "weight": 1.0
+        },
+        "feet_flat": {
+          "function": "mjlab_microduck.tasks.mdp.feet_flat_penalty",
+          "weight": -2.0
+        },
+        "self_collisions": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.self_collision_cost",
+          "weight": -1.0
+        },
+        "neck_action_rate_l2": {
+          "function": "mjlab_microduck.tasks.mdp.neck_action_rate_l2",
+          "weight": -0.5
+        },
+        "joint_torques_l2": {
+          "function": "mjlab_microduck.tasks.mdp.joint_torques_l2",
+          "weight": -0.001
+        }
+      },
+      "events": [
+        "reset_base",
+        "reset_robot_joints",
+        "push_robot",
+        "encoder_bias",
+        "base_com",
+        "reset_action_history",
+        "randomize_wheel_friction",
+        "randomize_com",
+        "randomize_head_com",
+        "randomize_mass_inertia",
+        "randomize_joint_friction",
+        "randomize_armature"
+      ],
+      "terminations": [
+        "time_out",
+        "fell_over",
+        "out_of_terrain_bounds",
+        "nan_state"
+      ],
+      "curriculum": [
+        "action_rate_weight",
+        "com_range",
+        "head_com_range"
+      ],
+      "sensors": [
+        "mjlab.sensor.contact_sensor.ContactSensorCfg",
+        "mjlab.sensor.contact_sensor.ContactSensorCfg"
+      ]
+    },
+    {
+      "id": "Mjlab-RollerCrouch-Flat-MicroDuck",
+      "backlash": false,
+      "rough": false,
+      "physics_dt": 0.005,
+      "decimation": 4,
+      "num_steps_per_env": 24,
+      "official_max_iterations": 8000,
+      "model": {
+        "nq": 25,
+        "nv": 24,
+        "bodies": 20,
+        "passive_joints": [
+          "passive_LF_wheel",
+          "passive_LR_wheel",
+          "passive_RF_wheel",
+          "passive_RR_wheel"
+        ]
+      },
+      "observations": {
+        "actor": [
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "head_command",
+          "body_command"
+        ],
+        "critic": [
+          "base_lin_vel",
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "foot_air_time",
+          "foot_contact",
+          "foot_contact_forces",
+          "wheel_vel",
+          "head_command",
+          "body_command"
+        ]
+      },
+      "commands": {
+        "twist": "mjlab_microduck.tasks.mdp.GroundPickPhaseCommandCfg"
+      },
+      "rewards": {
+        "upright": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.upright",
+          "weight": 2.0
+        },
+        "body_ang_vel": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.body_angular_velocity_penalty",
+          "weight": -0.05
+        },
+        "angular_momentum": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.angular_momentum_penalty",
+          "weight": -0.02
+        },
+        "action_rate_l2": {
+          "function": "mjlab.envs.mdp.rewards.action_rate_l2",
+          "weight": -1.0
+        },
+        "crouch_glide_pose": {
+          "function": "mjlab_microduck.tasks.mdp.crouch_glide_pose_by_phase",
+          "weight": 6.0
+        },
+        "crouch_glide_pose_l1": {
+          "function": "mjlab_microduck.tasks.mdp.crouch_glide_pose_l1",
+          "weight": 2.0
+        },
+        "forward_speed": {
+          "function": "mjlab_microduck.tasks.mdp.forward_speed_reward",
+          "weight": 1.0
+        },
+        "crouch_forward_lean": {
+          "function": "mjlab_microduck.tasks.mdp.crouch_forward_lean",
+          "weight": 1.0
+        },
+        "feet_flat": {
+          "function": "mjlab_microduck.tasks.mdp.feet_flat_penalty",
+          "weight": -2.0
+        },
+        "self_collisions": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.self_collision_cost",
+          "weight": -1.0
+        },
+        "neck_action_rate_l2": {
+          "function": "mjlab_microduck.tasks.mdp.neck_action_rate_l2",
+          "weight": -0.5
+        },
+        "joint_torques_l2": {
+          "function": "mjlab_microduck.tasks.mdp.joint_torques_l2",
+          "weight": -0.001
+        }
+      },
+      "events": [
+        "reset_base",
+        "reset_robot_joints",
+        "push_robot",
+        "encoder_bias",
+        "base_com",
+        "reset_action_history",
+        "randomize_wheel_friction",
+        "randomize_com",
+        "randomize_head_com",
+        "randomize_mass_inertia",
+        "randomize_joint_friction",
+        "randomize_armature"
+      ],
+      "terminations": [
+        "time_out",
+        "fell_over",
+        "out_of_terrain_bounds",
+        "nan_state"
+      ],
+      "curriculum": [
+        "action_rate_weight",
+        "com_range",
+        "head_com_range"
+      ],
+      "sensors": [
+        "mjlab.sensor.contact_sensor.ContactSensorCfg",
+        "mjlab.sensor.contact_sensor.ContactSensorCfg"
+      ]
+    },
+    {
+      "id": "Mjlab-RollerSlope-Flat-Backlash-MicroDuck",
+      "backlash": true,
+      "rough": false,
+      "physics_dt": 0.005,
+      "decimation": 4,
+      "num_steps_per_env": 24,
+      "official_max_iterations": 8000,
+      "model": {
+        "nq": 39,
+        "nv": 38,
+        "bodies": 20,
+        "passive_joints": [
+          "passive_left_hip_yaw_backlash",
+          "passive_left_hip_roll_backlash",
+          "passive_left_hip_pitch_backlash",
+          "passive_left_knee_backlash",
+          "passive_left_ankle_backlash",
+          "passive_LF_wheel",
+          "passive_LR_wheel",
+          "passive_neck_pitch_backlash",
+          "passive_head_pitch_backlash",
+          "passive_head_yaw_backlash",
+          "passive_head_roll_backlash",
+          "passive_right_hip_yaw_backlash",
+          "passive_right_hip_roll_backlash",
+          "passive_right_hip_pitch_backlash",
+          "passive_right_knee_backlash",
+          "passive_right_ankle_backlash",
+          "passive_RF_wheel",
+          "passive_RR_wheel"
+        ]
+      },
+      "observations": {
+        "actor": [
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "head_command",
+          "body_command"
+        ],
+        "critic": [
+          "base_lin_vel",
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "foot_air_time",
+          "foot_contact",
+          "foot_contact_forces",
+          "wheel_vel",
+          "head_command",
+          "body_command"
+        ]
+      },
+      "commands": {
+        "twist": "mjlab_microduck.tasks.mdp.RelativeHeadingVelocityCommandCfg"
+      },
+      "rewards": {
+        "action_rate_l2": {
+          "function": "mjlab.envs.mdp.rewards.action_rate_l2",
+          "weight": -1.0
+        },
+        "upright": {
+          "function": "mjlab_microduck.tasks.mdp.body_upright_gaussian",
+          "weight": 3.0
+        },
+        "alive": {
+          "function": "mjlab_microduck.tasks.mdp.is_alive",
+          "weight": 1.0
+        },
+        "wheel_glide": {
+          "function": "mjlab_microduck.tasks.mdp.wheel_glide_reward",
+          "weight": 2.0
+        },
+        "heading_hold": {
+          "function": "mjlab_microduck.tasks.mdp.heading_hold_reward",
+          "weight": 1.5
+        },
+        "feet_flat": {
+          "function": "mjlab_microduck.tasks.mdp.feet_flat_penalty",
+          "weight": -2.0
+        },
+        "neck_action_rate_l2": {
+          "function": "mjlab_microduck.tasks.mdp.neck_action_rate_l2",
+          "weight": -0.5
+        },
+        "neck_joint_pos_l2": {
+          "function": "mjlab_microduck.tasks.mdp.neck_joint_pos_l2",
+          "weight": -0.75
+        },
+        "joint_torques_l2": {
+          "function": "mjlab_microduck.tasks.mdp.joint_torques_l2",
+          "weight": -0.001
+        }
+      },
+      "events": [
+        "reset_base",
+        "reset_robot_joints",
+        "push_robot",
+        "encoder_bias",
+        "base_com",
+        "expand_bam_friction_fields",
+        "reset_action_history",
+        "randomize_wheel_friction",
+        "randomize_com",
+        "randomize_head_com",
+        "randomize_mass_inertia",
+        "randomize_joint_friction",
+        "randomize_armature",
+        "reset_rolling_entry"
+      ],
+      "terminations": [
+        "time_out",
+        "fell_over",
+        "nan_state",
+        "fell_into_void"
+      ],
+      "curriculum": [
+        "terrain_levels"
+      ],
+      "sensors": [
+        "mjlab.sensor.contact_sensor.ContactSensorCfg",
+        "mjlab.sensor.contact_sensor.ContactSensorCfg"
+      ]
+    },
+    {
+      "id": "Mjlab-RollerSlope-Flat-MicroDuck",
+      "backlash": false,
+      "rough": false,
+      "physics_dt": 0.005,
+      "decimation": 4,
+      "num_steps_per_env": 24,
+      "official_max_iterations": 8000,
+      "model": {
+        "nq": 25,
+        "nv": 24,
+        "bodies": 20,
+        "passive_joints": [
+          "passive_LF_wheel",
+          "passive_LR_wheel",
+          "passive_RF_wheel",
+          "passive_RR_wheel"
+        ]
+      },
+      "observations": {
+        "actor": [
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "head_command",
+          "body_command"
+        ],
+        "critic": [
+          "base_lin_vel",
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "foot_air_time",
+          "foot_contact",
+          "foot_contact_forces",
+          "wheel_vel",
+          "head_command",
+          "body_command"
+        ]
+      },
+      "commands": {
+        "twist": "mjlab_microduck.tasks.mdp.RelativeHeadingVelocityCommandCfg"
+      },
+      "rewards": {
+        "action_rate_l2": {
+          "function": "mjlab.envs.mdp.rewards.action_rate_l2",
+          "weight": -1.0
+        },
+        "upright": {
+          "function": "mjlab_microduck.tasks.mdp.body_upright_gaussian",
+          "weight": 3.0
+        },
+        "alive": {
+          "function": "mjlab_microduck.tasks.mdp.is_alive",
+          "weight": 1.0
+        },
+        "wheel_glide": {
+          "function": "mjlab_microduck.tasks.mdp.wheel_glide_reward",
+          "weight": 2.0
+        },
+        "heading_hold": {
+          "function": "mjlab_microduck.tasks.mdp.heading_hold_reward",
+          "weight": 1.5
+        },
+        "feet_flat": {
+          "function": "mjlab_microduck.tasks.mdp.feet_flat_penalty",
+          "weight": -2.0
+        },
+        "neck_action_rate_l2": {
+          "function": "mjlab_microduck.tasks.mdp.neck_action_rate_l2",
+          "weight": -0.5
+        },
+        "neck_joint_pos_l2": {
+          "function": "mjlab_microduck.tasks.mdp.neck_joint_pos_l2",
+          "weight": -0.75
+        },
+        "joint_torques_l2": {
+          "function": "mjlab_microduck.tasks.mdp.joint_torques_l2",
+          "weight": -0.001
+        }
+      },
+      "events": [
+        "reset_base",
+        "reset_robot_joints",
+        "push_robot",
+        "encoder_bias",
+        "base_com",
+        "expand_bam_friction_fields",
+        "reset_action_history",
+        "randomize_wheel_friction",
+        "randomize_com",
+        "randomize_head_com",
+        "randomize_mass_inertia",
+        "randomize_joint_friction",
+        "randomize_armature",
+        "reset_rolling_entry"
+      ],
+      "terminations": [
+        "time_out",
+        "fell_over",
+        "nan_state",
+        "fell_into_void"
+      ],
+      "curriculum": [
+        "terrain_levels"
+      ],
+      "sensors": [
+        "mjlab.sensor.contact_sensor.ContactSensorCfg",
+        "mjlab.sensor.contact_sensor.ContactSensorCfg"
+      ]
+    },
+    {
+      "id": "Mjlab-RollerStandUp-Flat-MicroDuck",
+      "backlash": false,
+      "rough": false,
+      "physics_dt": 0.005,
+      "decimation": 4,
+      "num_steps_per_env": 24,
+      "official_max_iterations": 15000,
+      "model": {
+        "nq": 25,
+        "nv": 24,
+        "bodies": 20,
+        "passive_joints": [
+          "passive_LF_wheel",
+          "passive_LR_wheel",
+          "passive_RF_wheel",
+          "passive_RR_wheel"
+        ]
+      },
+      "observations": {
+        "actor": [
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "head_command",
+          "body_command"
+        ],
+        "critic": [
+          "base_lin_vel",
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "foot_air_time",
+          "foot_contact",
+          "foot_contact_forces",
+          "wheel_vel",
+          "head_command",
+          "body_command"
+        ]
+      },
+      "commands": {
+        "twist": "mjlab_microduck.tasks.mdp.VelocityCommandCommandOnlyCfg"
+      },
+      "rewards": {
+        "body_ang_vel": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.body_angular_velocity_penalty",
+          "weight": -0.05
+        },
+        "angular_momentum": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.angular_momentum_penalty",
+          "weight": -0.02
+        },
+        "action_rate_l2": {
+          "function": "mjlab.envs.mdp.rewards.action_rate_l2",
+          "weight": -0.6
+        },
+        "self_collisions": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.self_collision_cost",
+          "weight": -1.0
+        },
+        "neck_action_rate_l2": {
+          "function": "mjlab_microduck.tasks.mdp.neck_action_rate_l2",
+          "weight": -0.5
+        },
+        "neck_joint_pos_l2": {
+          "function": "mjlab_microduck.tasks.mdp.neck_joint_pos_l2",
+          "weight": -0.5
+        },
+        "joint_torques_l2": {
+          "function": "mjlab_microduck.tasks.mdp.joint_torques_l2",
+          "weight": -0.001
+        },
+        "action_over_limit": {
+          "function": "mjlab_microduck.tasks.mdp.action_over_limit_penalty",
+          "weight": -0.5
+        },
+        "pose_stand_legs": {
+          "function": "mjlab_microduck.tasks.mdp.pose_target_match",
+          "weight": 8.0
+        },
+        "pose_stand_l1": {
+          "function": "mjlab_microduck.tasks.mdp.pose_l1_penalty",
+          "weight": 5.0
+        },
+        "height_stand": {
+          "function": "mjlab_microduck.tasks.mdp.height_target_gaussian",
+          "weight": 4.0
+        },
+        "height_stand_sharp": {
+          "function": "mjlab_microduck.tasks.mdp.height_target_gaussian",
+          "weight": 4.0
+        },
+        "height_stand_l1": {
+          "function": "mjlab_microduck.tasks.mdp.height_l1_penalty",
+          "weight": 30.0
+        },
+        "com_upward_velocity": {
+          "function": "mjlab_microduck.tasks.mdp.com_upward_velocity",
+          "weight": 3.0
+        },
+        "gentle_rise": {
+          "function": "mjlab_microduck.tasks.mdp.trunk_vertical_accel_penalty",
+          "weight": 0.02
+        },
+        "upright_linear": {
+          "function": "mjlab_microduck.tasks.mdp.body_upright_linear",
+          "weight": 6.0
+        },
+        "upright_sharp": {
+          "function": "mjlab_microduck.tasks.mdp.upright_gaussian_at_height",
+          "weight": 6.0
+        },
+        "standing_composite": {
+          "function": "mjlab_microduck.tasks.mdp.standing_composite_score",
+          "weight": 15.0
+        },
+        "joint_torque_rate_l2": {
+          "function": "mjlab_microduck.tasks.mdp.joint_torque_rate_l2",
+          "weight": -0.2
+        }
+      },
+      "events": [
+        "reset_base",
+        "reset_robot_joints",
+        "push_robot",
+        "encoder_bias",
+        "base_com",
+        "expand_bam_friction_fields",
+        "reset_action_history",
+        "randomize_wheel_friction",
+        "randomize_com",
+        "randomize_head_com",
+        "randomize_mass_inertia",
+        "randomize_joint_friction",
+        "randomize_armature",
+        "set_ground_state"
+      ],
+      "terminations": [
+        "time_out",
+        "out_of_terrain_bounds",
+        "nan_state"
+      ],
+      "curriculum": [
+        "action_rate_weight",
+        "wheel_friction",
+        "com_range",
+        "head_com_range",
+        "ground_state_mix",
+        "push_magnitude"
+      ],
+      "sensors": [
+        "mjlab.sensor.contact_sensor.ContactSensorCfg",
+        "mjlab.sensor.contact_sensor.ContactSensorCfg"
+      ]
+    },
+    {
+      "id": "Mjlab-Roulade-Flat-MicroDuck",
+      "backlash": false,
+      "rough": false,
+      "physics_dt": 0.005,
+      "decimation": 4,
+      "num_steps_per_env": 24,
+      "official_max_iterations": 10000,
+      "model": {
+        "nq": 21,
+        "nv": 20,
+        "bodies": 16,
+        "passive_joints": []
+      },
+      "observations": {
+        "actor": [
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "head_command",
+          "body_command"
+        ],
+        "critic": [
+          "base_lin_vel",
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "foot_air_time",
+          "foot_contact",
+          "foot_contact_forces",
+          "head_command",
+          "body_command"
+        ]
+      },
+      "commands": {
+        "twist": "mjlab_microduck.tasks.mdp.VelocityCommandCommandOnlyCfg"
+      },
+      "rewards": {
+        "body_ang_vel": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.body_angular_velocity_penalty",
+          "weight": -0.002
+        },
+        "angular_momentum": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.angular_momentum_penalty",
+          "weight": -0.001
+        },
+        "dof_pos_limits": {
+          "function": "mjlab.envs.mdp.rewards.joint_pos_limits",
+          "weight": -1.0
+        },
+        "action_rate_l2": {
+          "function": "mjlab.envs.mdp.rewards.action_rate_l2",
+          "weight": -0.1
+        },
+        "roulade_progress": {
+          "function": "mjlab_microduck.tasks.mdp.roulade_progress",
+          "weight": 8.0
+        },
+        "roulade_overspeed": {
+          "function": "mjlab_microduck.tasks.mdp.roulade_overspeed_penalty",
+          "weight": -0.1
+        },
+        "roulade_head_pivot": {
+          "function": "mjlab_microduck.tasks.mdp.roulade_head_pivot",
+          "weight": 0.5
+        },
+        "roulade_landing_composite": {
+          "function": "mjlab_microduck.tasks.mdp.roulade_landing_composite",
+          "weight": 4.0
+        },
+        "roulade_upright_after_roll": {
+          "function": "mjlab_microduck.tasks.mdp.roulade_upright_after_roll",
+          "weight": 1.5
+        },
+        "roulade_height_after_roll": {
+          "function": "mjlab_microduck.tasks.mdp.roulade_height_after_roll",
+          "weight": 1.0
+        },
+        "roulade_landing_sharp": {
+          "function": "mjlab_microduck.tasks.mdp.roulade_landing_sharp",
+          "weight": 2.0
+        },
+        "roulade_stand_tax": {
+          "function": "mjlab_microduck.tasks.mdp.roulade_stand_tax",
+          "weight": 5.0
+        },
+        "roulade_rise_velocity": {
+          "function": "mjlab_microduck.tasks.mdp.roulade_rise_velocity",
+          "weight": 0.75
+        },
+        "roulade_sagittal": {
+          "function": "mjlab_microduck.tasks.mdp.roulade_sagittal_penalty",
+          "weight": -0.1
+        },
+        "roulade_lateral_vel": {
+          "function": "mjlab_microduck.tasks.mdp.roulade_lateral_velocity_penalty",
+          "weight": -0.5
+        },
+        "roulade_flatness": {
+          "function": "mjlab_microduck.tasks.mdp.roulade_flatness_penalty",
+          "weight": -0.5
+        },
+        "joint_torque_rate_l2": {
+          "function": "mjlab_microduck.tasks.mdp.joint_torque_rate_l2",
+          "weight": 0.0
+        },
+        "arrival_damping": {
+          "function": "mjlab_microduck.tasks.mdp.body_ang_vel_at_height",
+          "weight": 0.0
+        },
+        "gentle_landing": {
+          "function": "mjlab_microduck.tasks.mdp.trunk_vertical_accel_penalty",
+          "weight": 0.002
+        },
+        "self_collisions": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.self_collision_cost",
+          "weight": -0.1
+        }
+      },
+      "events": [
+        "reset_base",
+        "reset_robot_joints",
+        "foot_friction",
+        "encoder_bias",
+        "base_com",
+        "expand_bam_friction_fields",
+        "reset_action_history",
+        "set_roulade_state",
+        "randomize_com",
+        "randomize_head_com",
+        "randomize_armature",
+        "randomize_mass_inertia",
+        "randomize_joint_friction"
+      ],
+      "terminations": [
+        "time_out",
+        "out_of_terrain_bounds",
+        "nan_state"
+      ],
+      "curriculum": [
+        "roulade_spawn_mix",
+        "com_range",
+        "head_com_range",
+        "action_rate_weight",
+        "arrival_damping_weight",
+        "torque_rate_weight",
+        "gentle_landing_weight"
+      ],
+      "sensors": [
+        "mjlab.sensor.contact_sensor.ContactSensorCfg",
+        "mjlab.sensor.contact_sensor.ContactSensorCfg",
+        "mjlab.sensor.contact_sensor.ContactSensorCfg",
+        "mjlab.sensor.contact_sensor.ContactSensorCfg"
+      ]
+    },
+    {
+      "id": "Mjlab-SitStand-Flat-Backlash-MicroDuck",
+      "backlash": true,
+      "rough": false,
+      "physics_dt": 0.005,
+      "decimation": 4,
+      "num_steps_per_env": 24,
+      "official_max_iterations": 15000,
+      "model": {
+        "nq": 35,
+        "nv": 34,
+        "bodies": 16,
+        "passive_joints": [
+          "passive_left_hip_yaw_backlash",
+          "passive_left_hip_roll_backlash",
+          "passive_left_hip_pitch_backlash",
+          "passive_left_knee_backlash",
+          "passive_left_ankle_backlash",
+          "passive_neck_pitch_backlash",
+          "passive_head_pitch_backlash",
+          "passive_head_yaw_backlash",
+          "passive_head_roll_backlash",
+          "passive_right_hip_yaw_backlash",
+          "passive_right_hip_roll_backlash",
+          "passive_right_hip_pitch_backlash",
+          "passive_right_knee_backlash",
+          "passive_right_ankle_backlash"
+        ]
+      },
+      "observations": {
+        "actor": [
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "head_command",
+          "body_command"
+        ],
+        "critic": [
+          "base_lin_vel",
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "foot_air_time",
+          "foot_contact",
+          "foot_contact_forces",
+          "head_command",
+          "body_command"
+        ]
+      },
+      "commands": {
+        "twist": "mjlab_microduck.tasks.mdp.SitStandCommandCfg",
+        "head_pose": "mjlab_microduck.tasks.mdp.UniformPoseCommandCfg"
+      },
+      "rewards": {
+        "body_ang_vel": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.body_angular_velocity_penalty",
+          "weight": -0.05
+        },
+        "angular_momentum": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.angular_momentum_penalty",
+          "weight": -0.02
+        },
+        "dof_pos_limits": {
+          "function": "mjlab.envs.mdp.rewards.joint_pos_limits",
+          "weight": -1.0
+        },
+        "action_rate_l2": {
+          "function": "mjlab.envs.mdp.rewards.action_rate_l2",
+          "weight": -0.1
+        },
+        "posture_pose_legs": {
+          "function": "mjlab_microduck.tasks.mdp.posture_pose_match",
+          "weight": 4.0
+        },
+        "head_pose_tracking": {
+          "function": "mjlab_microduck.tasks.mdp.head_pose_tracking",
+          "weight": 0.75
+        },
+        "posture_pose_l1": {
+          "function": "mjlab_microduck.tasks.mdp.posture_pose_l1",
+          "weight": 1.0
+        },
+        "posture_height": {
+          "function": "mjlab_microduck.tasks.mdp.posture_height_gaussian",
+          "weight": 1.0
+        },
+        "posture_height_sharp": {
+          "function": "mjlab_microduck.tasks.mdp.posture_height_gaussian",
+          "weight": 1.0
+        },
+        "posture_height_l1": {
+          "function": "mjlab_microduck.tasks.mdp.posture_height_l1",
+          "weight": 6.0
+        },
+        "rise_bootstrap": {
+          "function": "mjlab_microduck.tasks.mdp.posture_rise_bootstrap",
+          "weight": 0.75
+        },
+        "descent_speed": {
+          "function": "mjlab_microduck.tasks.mdp.trunk_downward_velocity_penalty",
+          "weight": 10.0
+        },
+        "rise_speed": {
+          "function": "mjlab_microduck.tasks.mdp.trunk_upward_velocity_penalty",
+          "weight": 0.0
+        },
+        "gentle_motion": {
+          "function": "mjlab_microduck.tasks.mdp.trunk_vertical_accel_penalty",
+          "weight": 0.05
+        },
+        "upright_linear": {
+          "function": "mjlab_microduck.tasks.mdp.body_upright_linear",
+          "weight": 2.5
+        },
+        "upright_while_tall": {
+          "function": "mjlab_microduck.tasks.mdp.upright_while_tall",
+          "weight": 1.5
+        },
+        "posture_stillness": {
+          "function": "mjlab_microduck.tasks.mdp.posture_stillness",
+          "weight": 2.0
+        },
+        "posture_composite": {
+          "function": "mjlab_microduck.tasks.mdp.posture_composite",
+          "weight": 3.0
+        },
+        "joint_torque_rate_l2": {
+          "function": "mjlab_microduck.tasks.mdp.joint_torque_rate_l2",
+          "weight": 0.0
+        },
+        "self_collisions": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.self_collision_cost",
+          "weight": -1.0
+        }
+      },
+      "events": [
+        "reset_base",
+        "reset_robot_joints",
+        "push_robot",
+        "foot_friction",
+        "encoder_bias",
+        "base_com",
+        "expand_bam_friction_fields",
+        "reset_action_history",
+        "set_ground_state",
+        "randomize_com",
+        "randomize_head_com",
+        "randomize_armature",
+        "randomize_mass_inertia",
+        "randomize_joint_friction"
+      ],
+      "terminations": [
+        "time_out",
+        "out_of_terrain_bounds",
+        "nan_state"
+      ],
+      "curriculum": [
+        "head_pose_range",
+        "com_range",
+        "head_com_range",
+        "push_magnitude",
+        "action_rate_weight",
+        "descent_speed_weight",
+        "rise_speed_weight",
+        "torque_rate_weight"
+      ],
+      "sensors": [
+        "mjlab.sensor.contact_sensor.ContactSensorCfg",
+        "mjlab.sensor.contact_sensor.ContactSensorCfg"
+      ]
+    },
+    {
+      "id": "Mjlab-SitStand-Flat-MicroDuck",
+      "backlash": false,
+      "rough": false,
+      "physics_dt": 0.005,
+      "decimation": 4,
+      "num_steps_per_env": 24,
+      "official_max_iterations": 15000,
+      "model": {
+        "nq": 21,
+        "nv": 20,
+        "bodies": 16,
+        "passive_joints": []
+      },
+      "observations": {
+        "actor": [
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "head_command",
+          "body_command"
+        ],
+        "critic": [
+          "base_lin_vel",
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "foot_air_time",
+          "foot_contact",
+          "foot_contact_forces",
+          "head_command",
+          "body_command"
+        ]
+      },
+      "commands": {
+        "twist": "mjlab_microduck.tasks.mdp.SitStandCommandCfg",
+        "head_pose": "mjlab_microduck.tasks.mdp.UniformPoseCommandCfg"
+      },
+      "rewards": {
+        "body_ang_vel": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.body_angular_velocity_penalty",
+          "weight": -0.05
+        },
+        "angular_momentum": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.angular_momentum_penalty",
+          "weight": -0.02
+        },
+        "dof_pos_limits": {
+          "function": "mjlab.envs.mdp.rewards.joint_pos_limits",
+          "weight": -1.0
+        },
+        "action_rate_l2": {
+          "function": "mjlab.envs.mdp.rewards.action_rate_l2",
+          "weight": -0.1
+        },
+        "posture_pose_legs": {
+          "function": "mjlab_microduck.tasks.mdp.posture_pose_match",
+          "weight": 4.0
+        },
+        "head_pose_tracking": {
+          "function": "mjlab_microduck.tasks.mdp.head_pose_tracking",
+          "weight": 0.75
+        },
+        "posture_pose_l1": {
+          "function": "mjlab_microduck.tasks.mdp.posture_pose_l1",
+          "weight": 1.0
+        },
+        "posture_height": {
+          "function": "mjlab_microduck.tasks.mdp.posture_height_gaussian",
+          "weight": 1.0
+        },
+        "posture_height_sharp": {
+          "function": "mjlab_microduck.tasks.mdp.posture_height_gaussian",
+          "weight": 1.0
+        },
+        "posture_height_l1": {
+          "function": "mjlab_microduck.tasks.mdp.posture_height_l1",
+          "weight": 6.0
+        },
+        "rise_bootstrap": {
+          "function": "mjlab_microduck.tasks.mdp.posture_rise_bootstrap",
+          "weight": 0.75
+        },
+        "descent_speed": {
+          "function": "mjlab_microduck.tasks.mdp.trunk_downward_velocity_penalty",
+          "weight": 10.0
+        },
+        "rise_speed": {
+          "function": "mjlab_microduck.tasks.mdp.trunk_upward_velocity_penalty",
+          "weight": 0.0
+        },
+        "gentle_motion": {
+          "function": "mjlab_microduck.tasks.mdp.trunk_vertical_accel_penalty",
+          "weight": 0.05
+        },
+        "upright_linear": {
+          "function": "mjlab_microduck.tasks.mdp.body_upright_linear",
+          "weight": 2.5
+        },
+        "upright_while_tall": {
+          "function": "mjlab_microduck.tasks.mdp.upright_while_tall",
+          "weight": 1.5
+        },
+        "posture_stillness": {
+          "function": "mjlab_microduck.tasks.mdp.posture_stillness",
+          "weight": 2.0
+        },
+        "posture_composite": {
+          "function": "mjlab_microduck.tasks.mdp.posture_composite",
+          "weight": 3.0
+        },
+        "joint_torque_rate_l2": {
+          "function": "mjlab_microduck.tasks.mdp.joint_torque_rate_l2",
+          "weight": 0.0
+        },
+        "self_collisions": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.self_collision_cost",
+          "weight": -1.0
+        }
+      },
+      "events": [
+        "reset_base",
+        "reset_robot_joints",
+        "push_robot",
+        "foot_friction",
+        "encoder_bias",
+        "base_com",
+        "expand_bam_friction_fields",
+        "reset_action_history",
+        "set_ground_state",
+        "randomize_com",
+        "randomize_head_com",
+        "randomize_armature",
+        "randomize_mass_inertia",
+        "randomize_joint_friction"
+      ],
+      "terminations": [
+        "time_out",
+        "out_of_terrain_bounds",
+        "nan_state"
+      ],
+      "curriculum": [
+        "head_pose_range",
+        "com_range",
+        "head_com_range",
+        "push_magnitude",
+        "action_rate_weight",
+        "descent_speed_weight",
+        "rise_speed_weight",
+        "torque_rate_weight"
+      ],
+      "sensors": [
+        "mjlab.sensor.contact_sensor.ContactSensorCfg",
+        "mjlab.sensor.contact_sensor.ContactSensorCfg"
+      ]
+    },
+    {
+      "id": "Mjlab-SitStand-Rough-Backlash-MicroDuck",
+      "backlash": true,
+      "rough": true,
+      "physics_dt": 0.005,
+      "decimation": 4,
+      "num_steps_per_env": 24,
+      "official_max_iterations": 15000,
+      "model": {
+        "nq": 35,
+        "nv": 34,
+        "bodies": 16,
+        "passive_joints": [
+          "passive_left_hip_yaw_backlash",
+          "passive_left_hip_roll_backlash",
+          "passive_left_hip_pitch_backlash",
+          "passive_left_knee_backlash",
+          "passive_left_ankle_backlash",
+          "passive_neck_pitch_backlash",
+          "passive_head_pitch_backlash",
+          "passive_head_yaw_backlash",
+          "passive_head_roll_backlash",
+          "passive_right_hip_yaw_backlash",
+          "passive_right_hip_roll_backlash",
+          "passive_right_hip_pitch_backlash",
+          "passive_right_knee_backlash",
+          "passive_right_ankle_backlash"
+        ]
+      },
+      "observations": {
+        "actor": [
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "head_command",
+          "body_command"
+        ],
+        "critic": [
+          "base_lin_vel",
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "foot_air_time",
+          "foot_contact",
+          "foot_contact_forces",
+          "head_command",
+          "body_command"
+        ]
+      },
+      "commands": {
+        "twist": "mjlab_microduck.tasks.mdp.SitStandCommandCfg",
+        "head_pose": "mjlab_microduck.tasks.mdp.UniformPoseCommandCfg"
+      },
+      "rewards": {
+        "body_ang_vel": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.body_angular_velocity_penalty",
+          "weight": -0.05
+        },
+        "angular_momentum": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.angular_momentum_penalty",
+          "weight": -0.02
+        },
+        "dof_pos_limits": {
+          "function": "mjlab.envs.mdp.rewards.joint_pos_limits",
+          "weight": -1.0
+        },
+        "action_rate_l2": {
+          "function": "mjlab.envs.mdp.rewards.action_rate_l2",
+          "weight": -0.1
+        },
+        "posture_pose_legs": {
+          "function": "mjlab_microduck.tasks.mdp.posture_pose_match",
+          "weight": 4.0
+        },
+        "head_pose_tracking": {
+          "function": "mjlab_microduck.tasks.mdp.head_pose_tracking",
+          "weight": 0.75
+        },
+        "posture_pose_l1": {
+          "function": "mjlab_microduck.tasks.mdp.posture_pose_l1",
+          "weight": 1.0
+        },
+        "posture_height": {
+          "function": "mjlab_microduck.tasks.mdp.posture_height_gaussian",
+          "weight": 1.0
+        },
+        "posture_height_sharp": {
+          "function": "mjlab_microduck.tasks.mdp.posture_height_gaussian",
+          "weight": 1.0
+        },
+        "posture_height_l1": {
+          "function": "mjlab_microduck.tasks.mdp.posture_height_l1",
+          "weight": 6.0
+        },
+        "rise_bootstrap": {
+          "function": "mjlab_microduck.tasks.mdp.posture_rise_bootstrap",
+          "weight": 0.75
+        },
+        "descent_speed": {
+          "function": "mjlab_microduck.tasks.mdp.trunk_downward_velocity_penalty",
+          "weight": 10.0
+        },
+        "rise_speed": {
+          "function": "mjlab_microduck.tasks.mdp.trunk_upward_velocity_penalty",
+          "weight": 0.0
+        },
+        "gentle_motion": {
+          "function": "mjlab_microduck.tasks.mdp.trunk_vertical_accel_penalty",
+          "weight": 0.05
+        },
+        "upright_linear": {
+          "function": "mjlab_microduck.tasks.mdp.body_upright_linear",
+          "weight": 2.5
+        },
+        "upright_while_tall": {
+          "function": "mjlab_microduck.tasks.mdp.upright_while_tall",
+          "weight": 1.5
+        },
+        "posture_stillness": {
+          "function": "mjlab_microduck.tasks.mdp.posture_stillness",
+          "weight": 2.0
+        },
+        "posture_composite": {
+          "function": "mjlab_microduck.tasks.mdp.posture_composite",
+          "weight": 3.0
+        },
+        "joint_torque_rate_l2": {
+          "function": "mjlab_microduck.tasks.mdp.joint_torque_rate_l2",
+          "weight": 0.0
+        },
+        "self_collisions": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.self_collision_cost",
+          "weight": -1.0
+        }
+      },
+      "events": [
+        "reset_base",
+        "reset_robot_joints",
+        "push_robot",
+        "foot_friction",
+        "encoder_bias",
+        "base_com",
+        "expand_bam_friction_fields",
+        "reset_action_history",
+        "set_ground_state",
+        "randomize_com",
+        "randomize_head_com",
+        "randomize_armature",
+        "randomize_mass_inertia",
+        "randomize_joint_friction"
+      ],
+      "terminations": [
+        "time_out",
+        "out_of_terrain_bounds",
+        "nan_state"
+      ],
+      "curriculum": [
+        "terrain_levels",
+        "head_pose_range",
+        "com_range",
+        "head_com_range",
+        "push_magnitude",
+        "action_rate_weight",
+        "descent_speed_weight",
+        "rise_speed_weight",
+        "torque_rate_weight"
+      ],
+      "sensors": [
+        "mjlab.sensor.contact_sensor.ContactSensorCfg",
+        "mjlab.sensor.contact_sensor.ContactSensorCfg"
+      ]
+    },
+    {
+      "id": "Mjlab-SitStand-Rough-MicroDuck",
+      "backlash": false,
+      "rough": true,
+      "physics_dt": 0.005,
+      "decimation": 4,
+      "num_steps_per_env": 24,
+      "official_max_iterations": 15000,
+      "model": {
+        "nq": 21,
+        "nv": 20,
+        "bodies": 16,
+        "passive_joints": []
+      },
+      "observations": {
+        "actor": [
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "head_command",
+          "body_command"
+        ],
+        "critic": [
+          "base_lin_vel",
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "foot_air_time",
+          "foot_contact",
+          "foot_contact_forces",
+          "head_command",
+          "body_command"
+        ]
+      },
+      "commands": {
+        "twist": "mjlab_microduck.tasks.mdp.SitStandCommandCfg",
+        "head_pose": "mjlab_microduck.tasks.mdp.UniformPoseCommandCfg"
+      },
+      "rewards": {
+        "body_ang_vel": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.body_angular_velocity_penalty",
+          "weight": -0.05
+        },
+        "angular_momentum": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.angular_momentum_penalty",
+          "weight": -0.02
+        },
+        "dof_pos_limits": {
+          "function": "mjlab.envs.mdp.rewards.joint_pos_limits",
+          "weight": -1.0
+        },
+        "action_rate_l2": {
+          "function": "mjlab.envs.mdp.rewards.action_rate_l2",
+          "weight": -0.1
+        },
+        "posture_pose_legs": {
+          "function": "mjlab_microduck.tasks.mdp.posture_pose_match",
+          "weight": 4.0
+        },
+        "head_pose_tracking": {
+          "function": "mjlab_microduck.tasks.mdp.head_pose_tracking",
+          "weight": 0.75
+        },
+        "posture_pose_l1": {
+          "function": "mjlab_microduck.tasks.mdp.posture_pose_l1",
+          "weight": 1.0
+        },
+        "posture_height": {
+          "function": "mjlab_microduck.tasks.mdp.posture_height_gaussian",
+          "weight": 1.0
+        },
+        "posture_height_sharp": {
+          "function": "mjlab_microduck.tasks.mdp.posture_height_gaussian",
+          "weight": 1.0
+        },
+        "posture_height_l1": {
+          "function": "mjlab_microduck.tasks.mdp.posture_height_l1",
+          "weight": 6.0
+        },
+        "rise_bootstrap": {
+          "function": "mjlab_microduck.tasks.mdp.posture_rise_bootstrap",
+          "weight": 0.75
+        },
+        "descent_speed": {
+          "function": "mjlab_microduck.tasks.mdp.trunk_downward_velocity_penalty",
+          "weight": 10.0
+        },
+        "rise_speed": {
+          "function": "mjlab_microduck.tasks.mdp.trunk_upward_velocity_penalty",
+          "weight": 0.0
+        },
+        "gentle_motion": {
+          "function": "mjlab_microduck.tasks.mdp.trunk_vertical_accel_penalty",
+          "weight": 0.05
+        },
+        "upright_linear": {
+          "function": "mjlab_microduck.tasks.mdp.body_upright_linear",
+          "weight": 2.5
+        },
+        "upright_while_tall": {
+          "function": "mjlab_microduck.tasks.mdp.upright_while_tall",
+          "weight": 1.5
+        },
+        "posture_stillness": {
+          "function": "mjlab_microduck.tasks.mdp.posture_stillness",
+          "weight": 2.0
+        },
+        "posture_composite": {
+          "function": "mjlab_microduck.tasks.mdp.posture_composite",
+          "weight": 3.0
+        },
+        "joint_torque_rate_l2": {
+          "function": "mjlab_microduck.tasks.mdp.joint_torque_rate_l2",
+          "weight": 0.0
+        },
+        "self_collisions": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.self_collision_cost",
+          "weight": -1.0
+        }
+      },
+      "events": [
+        "reset_base",
+        "reset_robot_joints",
+        "push_robot",
+        "foot_friction",
+        "encoder_bias",
+        "base_com",
+        "expand_bam_friction_fields",
+        "reset_action_history",
+        "set_ground_state",
+        "randomize_com",
+        "randomize_head_com",
+        "randomize_armature",
+        "randomize_mass_inertia",
+        "randomize_joint_friction"
+      ],
+      "terminations": [
+        "time_out",
+        "out_of_terrain_bounds",
+        "nan_state"
+      ],
+      "curriculum": [
+        "terrain_levels",
+        "head_pose_range",
+        "com_range",
+        "head_com_range",
+        "push_magnitude",
+        "action_rate_weight",
+        "descent_speed_weight",
+        "rise_speed_weight",
+        "torque_rate_weight"
+      ],
+      "sensors": [
+        "mjlab.sensor.contact_sensor.ContactSensorCfg",
+        "mjlab.sensor.contact_sensor.ContactSensorCfg"
+      ]
+    },
+    {
+      "id": "Mjlab-Spin-Flat-MicroDuck",
+      "backlash": false,
+      "rough": false,
+      "physics_dt": 0.005,
+      "decimation": 4,
+      "num_steps_per_env": 24,
+      "official_max_iterations": 8000,
+      "model": {
+        "nq": 25,
+        "nv": 24,
+        "bodies": 20,
+        "passive_joints": [
+          "passive_LF_wheel",
+          "passive_LR_wheel",
+          "passive_RF_wheel",
+          "passive_RR_wheel"
+        ]
+      },
+      "observations": {
+        "actor": [
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "head_command",
+          "body_command"
+        ],
+        "critic": [
+          "base_lin_vel",
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "foot_air_time",
+          "foot_contact",
+          "foot_contact_forces",
+          "wheel_vel",
+          "head_command",
+          "body_command"
+        ]
+      },
+      "commands": {
+        "twist": "mjlab_microduck.tasks.mdp.GroundPickPhaseCommandCfg"
+      },
+      "rewards": {
+        "upright": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.upright",
+          "weight": 2.0
+        },
+        "body_ang_vel": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.body_angular_velocity_penalty",
+          "weight": -0.05
+        },
+        "action_rate_l2": {
+          "function": "mjlab.envs.mdp.rewards.action_rate_l2",
+          "weight": -1.0
+        },
+        "spin_rate_track": {
+          "function": "mjlab_microduck.tasks.mdp.spin_rate_track",
+          "weight": 6.0
+        },
+        "spin_rate_l1": {
+          "function": "mjlab_microduck.tasks.mdp.spin_rate_l1",
+          "weight": 0.5
+        },
+        "spin_stay_in_place": {
+          "function": "mjlab_microduck.tasks.mdp.spin_stay_in_place",
+          "weight": -3.0
+        },
+        "spin_wheel_differential": {
+          "function": "mjlab_microduck.tasks.mdp.spin_wheel_differential",
+          "weight": 1.0
+        },
+        "leg_antisymmetry": {
+          "function": "mjlab_microduck.tasks.mdp.leg_antisymmetry",
+          "weight": 1.0
+        },
+        "spin_grounded": {
+          "function": "mjlab_microduck.tasks.mdp.spin_grounded",
+          "weight": 0.5
+        },
+        "feet_flat": {
+          "function": "mjlab_microduck.tasks.mdp.feet_flat_penalty",
+          "weight": -2.0
+        },
+        "self_collisions": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.self_collision_cost",
+          "weight": -1.0
+        },
+        "neck_action_rate_l2": {
+          "function": "mjlab_microduck.tasks.mdp.neck_action_rate_l2",
+          "weight": -0.5
+        },
+        "neck_joint_pos_l2": {
+          "function": "mjlab_microduck.tasks.mdp.neck_joint_pos_l2",
+          "weight": -0.2
+        },
+        "joint_torques_l2": {
+          "function": "mjlab_microduck.tasks.mdp.joint_torques_l2",
+          "weight": -0.001
+        }
+      },
+      "events": [
+        "reset_base",
+        "reset_robot_joints",
+        "push_robot",
+        "encoder_bias",
+        "base_com",
+        "reset_action_history",
+        "randomize_wheel_friction",
+        "randomize_com",
+        "randomize_head_com",
+        "randomize_mass_inertia",
+        "randomize_joint_friction",
+        "randomize_armature"
+      ],
+      "terminations": [
+        "time_out",
+        "fell_over",
+        "out_of_terrain_bounds",
+        "nan_state"
+      ],
+      "curriculum": [
+        "action_rate_weight",
+        "leg_antisym_weight",
+        "com_range",
+        "head_com_range"
+      ],
+      "sensors": [
+        "mjlab.sensor.contact_sensor.ContactSensorCfg",
+        "mjlab.sensor.contact_sensor.ContactSensorCfg"
+      ]
+    },
+    {
+      "id": "Mjlab-StandUp-Flat-Backlash-MicroDuck",
+      "backlash": true,
+      "rough": false,
+      "physics_dt": 0.005,
+      "decimation": 4,
+      "num_steps_per_env": 24,
+      "official_max_iterations": 15000,
+      "model": {
+        "nq": 35,
+        "nv": 34,
+        "bodies": 16,
+        "passive_joints": [
+          "passive_left_hip_yaw_backlash",
+          "passive_left_hip_roll_backlash",
+          "passive_left_hip_pitch_backlash",
+          "passive_left_knee_backlash",
+          "passive_left_ankle_backlash",
+          "passive_neck_pitch_backlash",
+          "passive_head_pitch_backlash",
+          "passive_head_yaw_backlash",
+          "passive_head_roll_backlash",
+          "passive_right_hip_yaw_backlash",
+          "passive_right_hip_roll_backlash",
+          "passive_right_hip_pitch_backlash",
+          "passive_right_knee_backlash",
+          "passive_right_ankle_backlash"
+        ]
+      },
+      "observations": {
+        "actor": [
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "head_command",
+          "body_command"
+        ],
+        "critic": [
+          "base_lin_vel",
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "foot_air_time",
+          "foot_contact",
+          "foot_contact_forces",
+          "head_command",
+          "body_command"
+        ]
+      },
+      "commands": {
+        "twist": "mjlab_microduck.tasks.mdp.VelocityCommandCommandOnlyCfg",
+        "head_pose": "mjlab_microduck.tasks.mdp.UniformPoseCommandCfg",
+        "body_pose": "mjlab_microduck.tasks.mdp.UniformPoseCommandCfg"
+      },
+      "rewards": {
+        "body_ang_vel": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.body_angular_velocity_penalty",
+          "weight": -0.05
+        },
+        "angular_momentum": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.angular_momentum_penalty",
+          "weight": -0.02
+        },
+        "dof_pos_limits": {
+          "function": "mjlab.envs.mdp.rewards.joint_pos_limits",
+          "weight": -1.0
+        },
+        "action_rate_l2": {
+          "function": "mjlab.envs.mdp.rewards.action_rate_l2",
+          "weight": -0.1
+        },
+        "pose_stand_legs": {
+          "function": "mjlab_microduck.tasks.mdp.pose_target_match",
+          "weight": 2.0
+        },
+        "head_pose_tracking": {
+          "function": "mjlab_microduck.tasks.mdp.head_pose_tracking",
+          "weight": 0.75
+        },
+        "head_pose_bias": {
+          "function": "mjlab_microduck.tasks.mdp.head_pose_bias_penalty",
+          "weight": 0.0
+        },
+        "pose_stand_l1": {
+          "function": "mjlab_microduck.tasks.mdp.pose_l1_penalty",
+          "weight": 1.25
+        },
+        "height_stand": {
+          "function": "mjlab_microduck.tasks.mdp.height_target_gaussian",
+          "weight": 1.0
+        },
+        "height_stand_sharp": {
+          "function": "mjlab_microduck.tasks.mdp.height_target_gaussian",
+          "weight": 1.0
+        },
+        "height_stand_l1": {
+          "function": "mjlab_microduck.tasks.mdp.height_l1_penalty",
+          "weight": 7.5
+        },
+        "com_upward_velocity": {
+          "function": "mjlab_microduck.tasks.mdp.com_upward_velocity",
+          "weight": 0.75
+        },
+        "gentle_rise": {
+          "function": "mjlab_microduck.tasks.mdp.trunk_vertical_accel_penalty",
+          "weight": 0.005
+        },
+        "arrival_damping": {
+          "function": "mjlab_microduck.tasks.mdp.body_ang_vel_at_height",
+          "weight": 0.0
+        },
+        "upright_linear": {
+          "function": "mjlab_microduck.tasks.mdp.body_upright_linear",
+          "weight": 1.5
+        },
+        "upright_sharp": {
+          "function": "mjlab_microduck.tasks.mdp.upright_gaussian_at_height",
+          "weight": 1.5
+        },
+        "standing_composite": {
+          "function": "mjlab_microduck.tasks.mdp.standing_composite_score",
+          "weight": 3.75
+        },
+        "body_pose_tracking": {
+          "function": "mjlab_microduck.tasks.mdp.body_pose_tracking_locomotion",
+          "weight": 0.0
+        },
+        "joint_torque_rate_l2": {
+          "function": "mjlab_microduck.tasks.mdp.joint_torque_rate_l2",
+          "weight": 0.0
+        },
+        "self_collisions": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.self_collision_cost",
+          "weight": -1.0
+        }
+      },
+      "events": [
+        "reset_base",
+        "reset_robot_joints",
+        "push_robot",
+        "foot_friction",
+        "encoder_bias",
+        "base_com",
+        "expand_bam_friction_fields",
+        "reset_action_history",
+        "set_ground_state",
+        "randomize_com",
+        "randomize_head_com",
+        "randomize_armature",
+        "randomize_mass_inertia",
+        "randomize_joint_friction"
+      ],
+      "terminations": [
+        "time_out",
+        "out_of_terrain_bounds",
+        "nan_state"
+      ],
+      "curriculum": [
+        "ground_state_mix",
+        "head_pose_range",
+        "com_range",
+        "head_com_range",
+        "push_magnitude",
+        "action_rate_weight",
+        "arrival_damping_weight",
+        "head_pose_bias_weight",
+        "torque_rate_weight",
+        "body_pose_tracking_weight",
+        "body_pose_range",
+        "height_stand_sharp_weight",
+        "upright_sharp_weight",
+        "standing_composite_weight"
+      ],
+      "sensors": [
+        "mjlab.sensor.contact_sensor.ContactSensorCfg",
+        "mjlab.sensor.contact_sensor.ContactSensorCfg"
+      ]
+    },
+    {
+      "id": "Mjlab-StandUp-Flat-MicroDuck",
+      "backlash": false,
+      "rough": false,
+      "physics_dt": 0.005,
+      "decimation": 4,
+      "num_steps_per_env": 24,
+      "official_max_iterations": 15000,
+      "model": {
+        "nq": 21,
+        "nv": 20,
+        "bodies": 16,
+        "passive_joints": []
+      },
+      "observations": {
+        "actor": [
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "head_command",
+          "body_command"
+        ],
+        "critic": [
+          "base_lin_vel",
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "foot_air_time",
+          "foot_contact",
+          "foot_contact_forces",
+          "head_command",
+          "body_command"
+        ]
+      },
+      "commands": {
+        "twist": "mjlab_microduck.tasks.mdp.VelocityCommandCommandOnlyCfg",
+        "head_pose": "mjlab_microduck.tasks.mdp.UniformPoseCommandCfg",
+        "body_pose": "mjlab_microduck.tasks.mdp.UniformPoseCommandCfg"
+      },
+      "rewards": {
+        "body_ang_vel": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.body_angular_velocity_penalty",
+          "weight": -0.05
+        },
+        "angular_momentum": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.angular_momentum_penalty",
+          "weight": -0.02
+        },
+        "dof_pos_limits": {
+          "function": "mjlab.envs.mdp.rewards.joint_pos_limits",
+          "weight": -1.0
+        },
+        "action_rate_l2": {
+          "function": "mjlab.envs.mdp.rewards.action_rate_l2",
+          "weight": -0.1
+        },
+        "pose_stand_legs": {
+          "function": "mjlab_microduck.tasks.mdp.pose_target_match",
+          "weight": 2.0
+        },
+        "head_pose_tracking": {
+          "function": "mjlab_microduck.tasks.mdp.head_pose_tracking",
+          "weight": 0.75
+        },
+        "head_pose_bias": {
+          "function": "mjlab_microduck.tasks.mdp.head_pose_bias_penalty",
+          "weight": 0.0
+        },
+        "pose_stand_l1": {
+          "function": "mjlab_microduck.tasks.mdp.pose_l1_penalty",
+          "weight": 1.25
+        },
+        "height_stand": {
+          "function": "mjlab_microduck.tasks.mdp.height_target_gaussian",
+          "weight": 1.0
+        },
+        "height_stand_sharp": {
+          "function": "mjlab_microduck.tasks.mdp.height_target_gaussian",
+          "weight": 1.0
+        },
+        "height_stand_l1": {
+          "function": "mjlab_microduck.tasks.mdp.height_l1_penalty",
+          "weight": 7.5
+        },
+        "com_upward_velocity": {
+          "function": "mjlab_microduck.tasks.mdp.com_upward_velocity",
+          "weight": 0.75
+        },
+        "gentle_rise": {
+          "function": "mjlab_microduck.tasks.mdp.trunk_vertical_accel_penalty",
+          "weight": 0.005
+        },
+        "arrival_damping": {
+          "function": "mjlab_microduck.tasks.mdp.body_ang_vel_at_height",
+          "weight": 0.0
+        },
+        "upright_linear": {
+          "function": "mjlab_microduck.tasks.mdp.body_upright_linear",
+          "weight": 1.5
+        },
+        "upright_sharp": {
+          "function": "mjlab_microduck.tasks.mdp.upright_gaussian_at_height",
+          "weight": 1.5
+        },
+        "standing_composite": {
+          "function": "mjlab_microduck.tasks.mdp.standing_composite_score",
+          "weight": 3.75
+        },
+        "body_pose_tracking": {
+          "function": "mjlab_microduck.tasks.mdp.body_pose_tracking_locomotion",
+          "weight": 0.0
+        },
+        "joint_torque_rate_l2": {
+          "function": "mjlab_microduck.tasks.mdp.joint_torque_rate_l2",
+          "weight": 0.0
+        },
+        "self_collisions": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.self_collision_cost",
+          "weight": -1.0
+        }
+      },
+      "events": [
+        "reset_base",
+        "reset_robot_joints",
+        "push_robot",
+        "foot_friction",
+        "encoder_bias",
+        "base_com",
+        "expand_bam_friction_fields",
+        "reset_action_history",
+        "set_ground_state",
+        "randomize_com",
+        "randomize_head_com",
+        "randomize_armature",
+        "randomize_mass_inertia",
+        "randomize_joint_friction"
+      ],
+      "terminations": [
+        "time_out",
+        "out_of_terrain_bounds",
+        "nan_state"
+      ],
+      "curriculum": [
+        "ground_state_mix",
+        "head_pose_range",
+        "com_range",
+        "head_com_range",
+        "push_magnitude",
+        "action_rate_weight",
+        "arrival_damping_weight",
+        "head_pose_bias_weight",
+        "torque_rate_weight",
+        "body_pose_tracking_weight",
+        "body_pose_range",
+        "height_stand_sharp_weight",
+        "upright_sharp_weight",
+        "standing_composite_weight"
+      ],
+      "sensors": [
+        "mjlab.sensor.contact_sensor.ContactSensorCfg",
+        "mjlab.sensor.contact_sensor.ContactSensorCfg"
+      ]
+    },
+    {
+      "id": "Mjlab-StandUp-Rough-Backlash-MicroDuck",
+      "backlash": true,
+      "rough": true,
+      "physics_dt": 0.005,
+      "decimation": 4,
+      "num_steps_per_env": 24,
+      "official_max_iterations": 15000,
+      "model": {
+        "nq": 35,
+        "nv": 34,
+        "bodies": 16,
+        "passive_joints": [
+          "passive_left_hip_yaw_backlash",
+          "passive_left_hip_roll_backlash",
+          "passive_left_hip_pitch_backlash",
+          "passive_left_knee_backlash",
+          "passive_left_ankle_backlash",
+          "passive_neck_pitch_backlash",
+          "passive_head_pitch_backlash",
+          "passive_head_yaw_backlash",
+          "passive_head_roll_backlash",
+          "passive_right_hip_yaw_backlash",
+          "passive_right_hip_roll_backlash",
+          "passive_right_hip_pitch_backlash",
+          "passive_right_knee_backlash",
+          "passive_right_ankle_backlash"
+        ]
+      },
+      "observations": {
+        "actor": [
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "head_command",
+          "body_command"
+        ],
+        "critic": [
+          "base_lin_vel",
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "foot_air_time",
+          "foot_contact",
+          "foot_contact_forces",
+          "head_command",
+          "body_command"
+        ]
+      },
+      "commands": {
+        "twist": "mjlab_microduck.tasks.mdp.VelocityCommandCommandOnlyCfg",
+        "head_pose": "mjlab_microduck.tasks.mdp.UniformPoseCommandCfg",
+        "body_pose": "mjlab_microduck.tasks.mdp.UniformPoseCommandCfg"
+      },
+      "rewards": {
+        "body_ang_vel": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.body_angular_velocity_penalty",
+          "weight": -0.05
+        },
+        "angular_momentum": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.angular_momentum_penalty",
+          "weight": -0.02
+        },
+        "dof_pos_limits": {
+          "function": "mjlab.envs.mdp.rewards.joint_pos_limits",
+          "weight": -1.0
+        },
+        "action_rate_l2": {
+          "function": "mjlab.envs.mdp.rewards.action_rate_l2",
+          "weight": -0.1
+        },
+        "pose_stand_legs": {
+          "function": "mjlab_microduck.tasks.mdp.pose_target_match",
+          "weight": 2.0
+        },
+        "head_pose_tracking": {
+          "function": "mjlab_microduck.tasks.mdp.head_pose_tracking",
+          "weight": 0.75
+        },
+        "head_pose_bias": {
+          "function": "mjlab_microduck.tasks.mdp.head_pose_bias_penalty",
+          "weight": 0.0
+        },
+        "pose_stand_l1": {
+          "function": "mjlab_microduck.tasks.mdp.pose_l1_penalty",
+          "weight": 1.25
+        },
+        "height_stand": {
+          "function": "mjlab_microduck.tasks.mdp.height_target_gaussian",
+          "weight": 1.0
+        },
+        "height_stand_sharp": {
+          "function": "mjlab_microduck.tasks.mdp.height_target_gaussian",
+          "weight": 1.0
+        },
+        "height_stand_l1": {
+          "function": "mjlab_microduck.tasks.mdp.height_l1_penalty",
+          "weight": 7.5
+        },
+        "com_upward_velocity": {
+          "function": "mjlab_microduck.tasks.mdp.com_upward_velocity",
+          "weight": 0.75
+        },
+        "gentle_rise": {
+          "function": "mjlab_microduck.tasks.mdp.trunk_vertical_accel_penalty",
+          "weight": 0.005
+        },
+        "arrival_damping": {
+          "function": "mjlab_microduck.tasks.mdp.body_ang_vel_at_height",
+          "weight": 0.0
+        },
+        "upright_linear": {
+          "function": "mjlab_microduck.tasks.mdp.body_upright_linear",
+          "weight": 1.5
+        },
+        "upright_sharp": {
+          "function": "mjlab_microduck.tasks.mdp.upright_gaussian_at_height",
+          "weight": 1.5
+        },
+        "standing_composite": {
+          "function": "mjlab_microduck.tasks.mdp.standing_composite_score",
+          "weight": 3.75
+        },
+        "body_pose_tracking": {
+          "function": "mjlab_microduck.tasks.mdp.body_pose_tracking_locomotion",
+          "weight": 0.0
+        },
+        "joint_torque_rate_l2": {
+          "function": "mjlab_microduck.tasks.mdp.joint_torque_rate_l2",
+          "weight": 0.0
+        },
+        "self_collisions": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.self_collision_cost",
+          "weight": -1.0
+        }
+      },
+      "events": [
+        "reset_base",
+        "reset_robot_joints",
+        "push_robot",
+        "foot_friction",
+        "encoder_bias",
+        "base_com",
+        "expand_bam_friction_fields",
+        "reset_action_history",
+        "set_ground_state",
+        "randomize_com",
+        "randomize_head_com",
+        "randomize_armature",
+        "randomize_mass_inertia",
+        "randomize_joint_friction"
+      ],
+      "terminations": [
+        "time_out",
+        "out_of_terrain_bounds",
+        "nan_state"
+      ],
+      "curriculum": [
+        "terrain_levels",
+        "ground_state_mix",
+        "head_pose_range",
+        "com_range",
+        "head_com_range",
+        "push_magnitude",
+        "action_rate_weight",
+        "arrival_damping_weight",
+        "head_pose_bias_weight",
+        "torque_rate_weight",
+        "body_pose_tracking_weight",
+        "body_pose_range",
+        "height_stand_sharp_weight",
+        "upright_sharp_weight",
+        "standing_composite_weight"
+      ],
+      "sensors": [
+        "mjlab.sensor.contact_sensor.ContactSensorCfg",
+        "mjlab.sensor.contact_sensor.ContactSensorCfg"
+      ]
+    },
+    {
+      "id": "Mjlab-StandUp-Rough-MicroDuck",
+      "backlash": false,
+      "rough": true,
+      "physics_dt": 0.005,
+      "decimation": 4,
+      "num_steps_per_env": 24,
+      "official_max_iterations": 15000,
+      "model": {
+        "nq": 21,
+        "nv": 20,
+        "bodies": 16,
+        "passive_joints": []
+      },
+      "observations": {
+        "actor": [
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "head_command",
+          "body_command"
+        ],
+        "critic": [
+          "base_lin_vel",
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "foot_air_time",
+          "foot_contact",
+          "foot_contact_forces",
+          "head_command",
+          "body_command"
+        ]
+      },
+      "commands": {
+        "twist": "mjlab_microduck.tasks.mdp.VelocityCommandCommandOnlyCfg",
+        "head_pose": "mjlab_microduck.tasks.mdp.UniformPoseCommandCfg",
+        "body_pose": "mjlab_microduck.tasks.mdp.UniformPoseCommandCfg"
+      },
+      "rewards": {
+        "body_ang_vel": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.body_angular_velocity_penalty",
+          "weight": -0.05
+        },
+        "angular_momentum": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.angular_momentum_penalty",
+          "weight": -0.02
+        },
+        "dof_pos_limits": {
+          "function": "mjlab.envs.mdp.rewards.joint_pos_limits",
+          "weight": -1.0
+        },
+        "action_rate_l2": {
+          "function": "mjlab.envs.mdp.rewards.action_rate_l2",
+          "weight": -0.1
+        },
+        "pose_stand_legs": {
+          "function": "mjlab_microduck.tasks.mdp.pose_target_match",
+          "weight": 2.0
+        },
+        "head_pose_tracking": {
+          "function": "mjlab_microduck.tasks.mdp.head_pose_tracking",
+          "weight": 0.75
+        },
+        "head_pose_bias": {
+          "function": "mjlab_microduck.tasks.mdp.head_pose_bias_penalty",
+          "weight": 0.0
+        },
+        "pose_stand_l1": {
+          "function": "mjlab_microduck.tasks.mdp.pose_l1_penalty",
+          "weight": 1.25
+        },
+        "height_stand": {
+          "function": "mjlab_microduck.tasks.mdp.height_target_gaussian",
+          "weight": 1.0
+        },
+        "height_stand_sharp": {
+          "function": "mjlab_microduck.tasks.mdp.height_target_gaussian",
+          "weight": 1.0
+        },
+        "height_stand_l1": {
+          "function": "mjlab_microduck.tasks.mdp.height_l1_penalty",
+          "weight": 7.5
+        },
+        "com_upward_velocity": {
+          "function": "mjlab_microduck.tasks.mdp.com_upward_velocity",
+          "weight": 0.75
+        },
+        "gentle_rise": {
+          "function": "mjlab_microduck.tasks.mdp.trunk_vertical_accel_penalty",
+          "weight": 0.005
+        },
+        "arrival_damping": {
+          "function": "mjlab_microduck.tasks.mdp.body_ang_vel_at_height",
+          "weight": 0.0
+        },
+        "upright_linear": {
+          "function": "mjlab_microduck.tasks.mdp.body_upright_linear",
+          "weight": 1.5
+        },
+        "upright_sharp": {
+          "function": "mjlab_microduck.tasks.mdp.upright_gaussian_at_height",
+          "weight": 1.5
+        },
+        "standing_composite": {
+          "function": "mjlab_microduck.tasks.mdp.standing_composite_score",
+          "weight": 3.75
+        },
+        "body_pose_tracking": {
+          "function": "mjlab_microduck.tasks.mdp.body_pose_tracking_locomotion",
+          "weight": 0.0
+        },
+        "joint_torque_rate_l2": {
+          "function": "mjlab_microduck.tasks.mdp.joint_torque_rate_l2",
+          "weight": 0.0
+        },
+        "self_collisions": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.self_collision_cost",
+          "weight": -1.0
+        }
+      },
+      "events": [
+        "reset_base",
+        "reset_robot_joints",
+        "push_robot",
+        "foot_friction",
+        "encoder_bias",
+        "base_com",
+        "expand_bam_friction_fields",
+        "reset_action_history",
+        "set_ground_state",
+        "randomize_com",
+        "randomize_head_com",
+        "randomize_armature",
+        "randomize_mass_inertia",
+        "randomize_joint_friction"
+      ],
+      "terminations": [
+        "time_out",
+        "out_of_terrain_bounds",
+        "nan_state"
+      ],
+      "curriculum": [
+        "terrain_levels",
+        "ground_state_mix",
+        "head_pose_range",
+        "com_range",
+        "head_com_range",
+        "push_magnitude",
+        "action_rate_weight",
+        "arrival_damping_weight",
+        "head_pose_bias_weight",
+        "torque_rate_weight",
+        "body_pose_tracking_weight",
+        "body_pose_range",
+        "height_stand_sharp_weight",
+        "upright_sharp_weight",
+        "standing_composite_weight"
+      ],
+      "sensors": [
+        "mjlab.sensor.contact_sensor.ContactSensorCfg",
+        "mjlab.sensor.contact_sensor.ContactSensorCfg"
+      ]
+    },
+    {
+      "id": "Mjlab-VelStand-Flat-Backlash-MicroDuck",
+      "backlash": true,
+      "rough": false,
+      "physics_dt": 0.005,
+      "decimation": 4,
+      "num_steps_per_env": 24,
+      "official_max_iterations": 20000,
+      "model": {
+        "nq": 35,
+        "nv": 34,
+        "bodies": 16,
+        "passive_joints": [
+          "passive_left_hip_yaw_backlash",
+          "passive_left_hip_roll_backlash",
+          "passive_left_hip_pitch_backlash",
+          "passive_left_knee_backlash",
+          "passive_left_ankle_backlash",
+          "passive_neck_pitch_backlash",
+          "passive_head_pitch_backlash",
+          "passive_head_yaw_backlash",
+          "passive_head_roll_backlash",
+          "passive_right_hip_yaw_backlash",
+          "passive_right_hip_roll_backlash",
+          "passive_right_hip_pitch_backlash",
+          "passive_right_knee_backlash",
+          "passive_right_ankle_backlash"
+        ]
+      },
+      "observations": {
+        "actor": [
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "head_command",
+          "body_command"
+        ],
+        "critic": [
+          "base_lin_vel",
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "foot_height",
+          "foot_air_time",
+          "foot_contact",
+          "foot_contact_forces",
+          "head_command",
+          "body_command"
+        ]
+      },
+      "commands": {
+        "twist": "mjlab_microduck.tasks.mdp.VelocityCommandCommandOnlyCfg",
+        "head_pose": "mjlab_microduck.tasks.mdp.UniformPoseCommandCfg",
+        "body_pose": "mjlab_microduck.tasks.mdp.UniformPoseCommandCfg"
+      },
+      "rewards": {
+        "track_linear_velocity": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.track_linear_velocity",
+          "weight": 2.0
+        },
+        "track_angular_velocity": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.track_angular_velocity",
+          "weight": 2.0
+        },
+        "upright": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.upright",
+          "weight": 2.0
+        },
+        "pose": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.variable_posture",
+          "weight": 1.0
+        },
+        "body_ang_vel": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.body_angular_velocity_penalty",
+          "weight": -0.05
+        },
+        "angular_momentum": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.angular_momentum_penalty",
+          "weight": -0.02
+        },
+        "dof_pos_limits": {
+          "function": "mjlab.envs.mdp.rewards.joint_pos_limits",
+          "weight": -1.0
+        },
+        "action_rate_l2": {
+          "function": "mjlab.envs.mdp.rewards.action_rate_l2",
+          "weight": -0.1
+        },
+        "air_time": {
+          "function": "mjlab_microduck.tasks.mdp.feet_air_time_upright",
+          "weight": 3.0
+        },
+        "foot_clearance": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.feet_clearance",
+          "weight": -2.0
+        },
+        "foot_swing_height": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.feet_swing_height",
+          "weight": -0.25
+        },
+        "foot_slip": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.feet_slip",
+          "weight": -0.1
+        },
+        "self_collisions": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.self_collision_cost",
+          "weight": -1.0
+        },
+        "head_pose_tracking": {
+          "function": "mjlab_microduck.tasks.mdp.head_pose_tracking",
+          "weight": 2.0
+        },
+        "body_pose_tracking": {
+          "function": "mjlab_microduck.tasks.mdp.body_pose_tracking_6d",
+          "weight": 0.0
+        },
+        "head_pose_bias": {
+          "function": "mjlab_microduck.tasks.mdp.head_pose_bias_penalty",
+          "weight": 0.0
+        },
+        "upright_progress": {
+          "function": "mjlab_microduck.tasks.mdp.upright_progress",
+          "weight": 5.0
+        },
+        "height_progress": {
+          "function": "mjlab_microduck.tasks.mdp.height_progress",
+          "weight": 30.0
+        },
+        "com_upward_velocity": {
+          "function": "mjlab_microduck.tasks.mdp.com_upward_velocity",
+          "weight": 0.0
+        },
+        "joint_torque_rate_l2": {
+          "function": "mjlab_microduck.tasks.mdp.joint_torque_rate_l2",
+          "weight": -0.002
+        },
+        "fallen_tax": {
+          "function": "mjlab_microduck.tasks.mdp.fallen_state_penalty",
+          "weight": 0.0
+        },
+        "recovery_success": {
+          "function": "mjlab_microduck.tasks.mdp.recovery_success",
+          "weight": 0.0
+        }
+      },
+      "events": [
+        "reset_base",
+        "reset_robot_joints",
+        "push_robot",
+        "foot_friction",
+        "encoder_bias",
+        "base_com",
+        "expand_bam_friction_fields",
+        "reset_action_history",
+        "randomize_com",
+        "randomize_head_com",
+        "randomize_mass_inertia",
+        "randomize_joint_friction",
+        "randomize_armature",
+        "random_prone_init"
+      ],
+      "terminations": [
+        "time_out",
+        "fell_over",
+        "out_of_terrain_bounds",
+        "nan_state",
+        "fallen_too_long"
+      ],
+      "curriculum": [
+        "action_rate_weight",
+        "standing_envs",
+        "head_pose_range",
+        "body_pose_range",
+        "com_range",
+        "head_com_range",
+        "head_pose_bias_weight",
+        "fell_over_disable",
+        "prone_init_prob",
+        "fallen_tax_weight",
+        "recovery_success_weight",
+        "com_upward_weight"
+      ],
+      "sensors": [
+        "mjlab.sensor.contact_sensor.ContactSensorCfg",
+        "mjlab.sensor.contact_sensor.ContactSensorCfg",
+        "mjlab.sensor.terrain_height_sensor.TerrainHeightSensorCfg"
+      ]
+    },
+    {
+      "id": "Mjlab-VelStand-Flat-MicroDuck",
+      "backlash": false,
+      "rough": false,
+      "physics_dt": 0.005,
+      "decimation": 4,
+      "num_steps_per_env": 24,
+      "official_max_iterations": 20000,
+      "model": {
+        "nq": 21,
+        "nv": 20,
+        "bodies": 16,
+        "passive_joints": []
+      },
+      "observations": {
+        "actor": [
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "head_command",
+          "body_command"
+        ],
+        "critic": [
+          "base_lin_vel",
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "foot_height",
+          "foot_air_time",
+          "foot_contact",
+          "foot_contact_forces",
+          "head_command",
+          "body_command"
+        ]
+      },
+      "commands": {
+        "twist": "mjlab_microduck.tasks.mdp.VelocityCommandCommandOnlyCfg",
+        "head_pose": "mjlab_microduck.tasks.mdp.UniformPoseCommandCfg",
+        "body_pose": "mjlab_microduck.tasks.mdp.UniformPoseCommandCfg"
+      },
+      "rewards": {
+        "track_linear_velocity": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.track_linear_velocity",
+          "weight": 2.0
+        },
+        "track_angular_velocity": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.track_angular_velocity",
+          "weight": 2.0
+        },
+        "upright": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.upright",
+          "weight": 2.0
+        },
+        "pose": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.variable_posture",
+          "weight": 1.0
+        },
+        "body_ang_vel": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.body_angular_velocity_penalty",
+          "weight": -0.05
+        },
+        "angular_momentum": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.angular_momentum_penalty",
+          "weight": -0.02
+        },
+        "dof_pos_limits": {
+          "function": "mjlab.envs.mdp.rewards.joint_pos_limits",
+          "weight": -1.0
+        },
+        "action_rate_l2": {
+          "function": "mjlab.envs.mdp.rewards.action_rate_l2",
+          "weight": -0.1
+        },
+        "air_time": {
+          "function": "mjlab_microduck.tasks.mdp.feet_air_time_upright",
+          "weight": 3.0
+        },
+        "foot_clearance": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.feet_clearance",
+          "weight": -2.0
+        },
+        "foot_swing_height": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.feet_swing_height",
+          "weight": -0.25
+        },
+        "foot_slip": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.feet_slip",
+          "weight": -0.1
+        },
+        "self_collisions": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.self_collision_cost",
+          "weight": -1.0
+        },
+        "head_pose_tracking": {
+          "function": "mjlab_microduck.tasks.mdp.head_pose_tracking",
+          "weight": 2.0
+        },
+        "body_pose_tracking": {
+          "function": "mjlab_microduck.tasks.mdp.body_pose_tracking_6d",
+          "weight": 0.0
+        },
+        "head_pose_bias": {
+          "function": "mjlab_microduck.tasks.mdp.head_pose_bias_penalty",
+          "weight": 0.0
+        },
+        "upright_progress": {
+          "function": "mjlab_microduck.tasks.mdp.upright_progress",
+          "weight": 5.0
+        },
+        "height_progress": {
+          "function": "mjlab_microduck.tasks.mdp.height_progress",
+          "weight": 30.0
+        },
+        "com_upward_velocity": {
+          "function": "mjlab_microduck.tasks.mdp.com_upward_velocity",
+          "weight": 0.0
+        },
+        "joint_torque_rate_l2": {
+          "function": "mjlab_microduck.tasks.mdp.joint_torque_rate_l2",
+          "weight": -0.002
+        },
+        "fallen_tax": {
+          "function": "mjlab_microduck.tasks.mdp.fallen_state_penalty",
+          "weight": 0.0
+        },
+        "recovery_success": {
+          "function": "mjlab_microduck.tasks.mdp.recovery_success",
+          "weight": 0.0
+        }
+      },
+      "events": [
+        "reset_base",
+        "reset_robot_joints",
+        "push_robot",
+        "foot_friction",
+        "encoder_bias",
+        "base_com",
+        "expand_bam_friction_fields",
+        "reset_action_history",
+        "randomize_com",
+        "randomize_head_com",
+        "randomize_mass_inertia",
+        "randomize_joint_friction",
+        "randomize_armature",
+        "random_prone_init"
+      ],
+      "terminations": [
+        "time_out",
+        "fell_over",
+        "out_of_terrain_bounds",
+        "nan_state",
+        "fallen_too_long"
+      ],
+      "curriculum": [
+        "action_rate_weight",
+        "standing_envs",
+        "head_pose_range",
+        "body_pose_range",
+        "com_range",
+        "head_com_range",
+        "head_pose_bias_weight",
+        "fell_over_disable",
+        "prone_init_prob",
+        "fallen_tax_weight",
+        "recovery_success_weight",
+        "com_upward_weight"
+      ],
+      "sensors": [
+        "mjlab.sensor.contact_sensor.ContactSensorCfg",
+        "mjlab.sensor.contact_sensor.ContactSensorCfg",
+        "mjlab.sensor.terrain_height_sensor.TerrainHeightSensorCfg"
+      ]
+    },
+    {
+      "id": "Mjlab-VelStand-Rough-Backlash-MicroDuck",
+      "backlash": true,
+      "rough": true,
+      "physics_dt": 0.005,
+      "decimation": 4,
+      "num_steps_per_env": 24,
+      "official_max_iterations": 20000,
+      "model": {
+        "nq": 35,
+        "nv": 34,
+        "bodies": 16,
+        "passive_joints": [
+          "passive_left_hip_yaw_backlash",
+          "passive_left_hip_roll_backlash",
+          "passive_left_hip_pitch_backlash",
+          "passive_left_knee_backlash",
+          "passive_left_ankle_backlash",
+          "passive_neck_pitch_backlash",
+          "passive_head_pitch_backlash",
+          "passive_head_yaw_backlash",
+          "passive_head_roll_backlash",
+          "passive_right_hip_yaw_backlash",
+          "passive_right_hip_roll_backlash",
+          "passive_right_hip_pitch_backlash",
+          "passive_right_knee_backlash",
+          "passive_right_ankle_backlash"
+        ]
+      },
+      "observations": {
+        "actor": [
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "head_command",
+          "body_command"
+        ],
+        "critic": [
+          "base_lin_vel",
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "foot_height",
+          "foot_air_time",
+          "foot_contact",
+          "foot_contact_forces",
+          "head_command",
+          "body_command"
+        ]
+      },
+      "commands": {
+        "twist": "mjlab_microduck.tasks.mdp.VelocityCommandCommandOnlyCfg",
+        "head_pose": "mjlab_microduck.tasks.mdp.UniformPoseCommandCfg",
+        "body_pose": "mjlab_microduck.tasks.mdp.UniformPoseCommandCfg"
+      },
+      "rewards": {
+        "track_linear_velocity": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.track_linear_velocity",
+          "weight": 2.0
+        },
+        "track_angular_velocity": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.track_angular_velocity",
+          "weight": 2.0
+        },
+        "upright": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.upright",
+          "weight": 2.0
+        },
+        "pose": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.variable_posture",
+          "weight": 1.0
+        },
+        "body_ang_vel": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.body_angular_velocity_penalty",
+          "weight": -0.05
+        },
+        "angular_momentum": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.angular_momentum_penalty",
+          "weight": -0.02
+        },
+        "dof_pos_limits": {
+          "function": "mjlab.envs.mdp.rewards.joint_pos_limits",
+          "weight": -1.0
+        },
+        "action_rate_l2": {
+          "function": "mjlab.envs.mdp.rewards.action_rate_l2",
+          "weight": -0.1
+        },
+        "air_time": {
+          "function": "mjlab_microduck.tasks.mdp.feet_air_time_upright",
+          "weight": 3.0
+        },
+        "foot_clearance": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.feet_clearance",
+          "weight": -2.0
+        },
+        "foot_swing_height": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.feet_swing_height",
+          "weight": -0.25
+        },
+        "foot_slip": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.feet_slip",
+          "weight": -0.1
+        },
+        "self_collisions": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.self_collision_cost",
+          "weight": -1.0
+        },
+        "head_pose_tracking": {
+          "function": "mjlab_microduck.tasks.mdp.head_pose_tracking",
+          "weight": 2.0
+        },
+        "body_pose_tracking": {
+          "function": "mjlab_microduck.tasks.mdp.body_pose_tracking_6d",
+          "weight": 0.0
+        },
+        "head_pose_bias": {
+          "function": "mjlab_microduck.tasks.mdp.head_pose_bias_penalty",
+          "weight": 0.0
+        },
+        "upright_progress": {
+          "function": "mjlab_microduck.tasks.mdp.upright_progress",
+          "weight": 5.0
+        },
+        "height_progress": {
+          "function": "mjlab_microduck.tasks.mdp.height_progress",
+          "weight": 30.0
+        },
+        "com_upward_velocity": {
+          "function": "mjlab_microduck.tasks.mdp.com_upward_velocity",
+          "weight": 0.0
+        },
+        "joint_torque_rate_l2": {
+          "function": "mjlab_microduck.tasks.mdp.joint_torque_rate_l2",
+          "weight": -0.002
+        },
+        "fallen_tax": {
+          "function": "mjlab_microduck.tasks.mdp.fallen_state_penalty",
+          "weight": 0.0
+        },
+        "recovery_success": {
+          "function": "mjlab_microduck.tasks.mdp.recovery_success",
+          "weight": 0.0
+        }
+      },
+      "events": [
+        "reset_base",
+        "reset_robot_joints",
+        "push_robot",
+        "foot_friction",
+        "encoder_bias",
+        "base_com",
+        "expand_bam_friction_fields",
+        "reset_action_history",
+        "randomize_com",
+        "randomize_head_com",
+        "randomize_mass_inertia",
+        "randomize_joint_friction",
+        "randomize_armature",
+        "random_prone_init"
+      ],
+      "terminations": [
+        "time_out",
+        "fell_over",
+        "out_of_terrain_bounds",
+        "nan_state",
+        "fallen_too_long"
+      ],
+      "curriculum": [
+        "terrain_levels",
+        "action_rate_weight",
+        "standing_envs",
+        "head_pose_range",
+        "body_pose_range",
+        "com_range",
+        "head_com_range",
+        "head_pose_bias_weight",
+        "fell_over_disable",
+        "prone_init_prob",
+        "fallen_tax_weight",
+        "recovery_success_weight",
+        "com_upward_weight"
+      ],
+      "sensors": [
+        "mjlab.sensor.contact_sensor.ContactSensorCfg",
+        "mjlab.sensor.contact_sensor.ContactSensorCfg",
+        "mjlab.sensor.terrain_height_sensor.TerrainHeightSensorCfg"
+      ]
+    },
+    {
+      "id": "Mjlab-VelStand-Rough-MicroDuck",
+      "backlash": false,
+      "rough": true,
+      "physics_dt": 0.005,
+      "decimation": 4,
+      "num_steps_per_env": 24,
+      "official_max_iterations": 20000,
+      "model": {
+        "nq": 21,
+        "nv": 20,
+        "bodies": 16,
+        "passive_joints": []
+      },
+      "observations": {
+        "actor": [
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "head_command",
+          "body_command"
+        ],
+        "critic": [
+          "base_lin_vel",
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "foot_height",
+          "foot_air_time",
+          "foot_contact",
+          "foot_contact_forces",
+          "head_command",
+          "body_command"
+        ]
+      },
+      "commands": {
+        "twist": "mjlab_microduck.tasks.mdp.VelocityCommandCommandOnlyCfg",
+        "head_pose": "mjlab_microduck.tasks.mdp.UniformPoseCommandCfg",
+        "body_pose": "mjlab_microduck.tasks.mdp.UniformPoseCommandCfg"
+      },
+      "rewards": {
+        "track_linear_velocity": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.track_linear_velocity",
+          "weight": 2.0
+        },
+        "track_angular_velocity": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.track_angular_velocity",
+          "weight": 2.0
+        },
+        "upright": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.upright",
+          "weight": 2.0
+        },
+        "pose": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.variable_posture",
+          "weight": 1.0
+        },
+        "body_ang_vel": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.body_angular_velocity_penalty",
+          "weight": -0.05
+        },
+        "angular_momentum": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.angular_momentum_penalty",
+          "weight": -0.02
+        },
+        "dof_pos_limits": {
+          "function": "mjlab.envs.mdp.rewards.joint_pos_limits",
+          "weight": -1.0
+        },
+        "action_rate_l2": {
+          "function": "mjlab.envs.mdp.rewards.action_rate_l2",
+          "weight": -0.1
+        },
+        "air_time": {
+          "function": "mjlab_microduck.tasks.mdp.feet_air_time_upright",
+          "weight": 3.0
+        },
+        "foot_clearance": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.feet_clearance",
+          "weight": -2.0
+        },
+        "foot_swing_height": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.feet_swing_height",
+          "weight": -0.25
+        },
+        "foot_slip": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.feet_slip",
+          "weight": -0.1
+        },
+        "self_collisions": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.self_collision_cost",
+          "weight": -1.0
+        },
+        "head_pose_tracking": {
+          "function": "mjlab_microduck.tasks.mdp.head_pose_tracking",
+          "weight": 2.0
+        },
+        "body_pose_tracking": {
+          "function": "mjlab_microduck.tasks.mdp.body_pose_tracking_6d",
+          "weight": 0.0
+        },
+        "head_pose_bias": {
+          "function": "mjlab_microduck.tasks.mdp.head_pose_bias_penalty",
+          "weight": 0.0
+        },
+        "upright_progress": {
+          "function": "mjlab_microduck.tasks.mdp.upright_progress",
+          "weight": 5.0
+        },
+        "height_progress": {
+          "function": "mjlab_microduck.tasks.mdp.height_progress",
+          "weight": 30.0
+        },
+        "com_upward_velocity": {
+          "function": "mjlab_microduck.tasks.mdp.com_upward_velocity",
+          "weight": 0.0
+        },
+        "joint_torque_rate_l2": {
+          "function": "mjlab_microduck.tasks.mdp.joint_torque_rate_l2",
+          "weight": -0.002
+        },
+        "fallen_tax": {
+          "function": "mjlab_microduck.tasks.mdp.fallen_state_penalty",
+          "weight": 0.0
+        },
+        "recovery_success": {
+          "function": "mjlab_microduck.tasks.mdp.recovery_success",
+          "weight": 0.0
+        }
+      },
+      "events": [
+        "reset_base",
+        "reset_robot_joints",
+        "push_robot",
+        "foot_friction",
+        "encoder_bias",
+        "base_com",
+        "expand_bam_friction_fields",
+        "reset_action_history",
+        "randomize_com",
+        "randomize_head_com",
+        "randomize_mass_inertia",
+        "randomize_joint_friction",
+        "randomize_armature",
+        "random_prone_init"
+      ],
+      "terminations": [
+        "time_out",
+        "fell_over",
+        "out_of_terrain_bounds",
+        "nan_state",
+        "fallen_too_long"
+      ],
+      "curriculum": [
+        "terrain_levels",
+        "action_rate_weight",
+        "standing_envs",
+        "head_pose_range",
+        "body_pose_range",
+        "com_range",
+        "head_com_range",
+        "head_pose_bias_weight",
+        "fell_over_disable",
+        "prone_init_prob",
+        "fallen_tax_weight",
+        "recovery_success_weight",
+        "com_upward_weight"
+      ],
+      "sensors": [
+        "mjlab.sensor.contact_sensor.ContactSensorCfg",
+        "mjlab.sensor.contact_sensor.ContactSensorCfg",
+        "mjlab.sensor.terrain_height_sensor.TerrainHeightSensorCfg"
+      ]
+    },
+    {
+      "id": "Mjlab-Velocity-Flat-Backlash-MicroDuck",
+      "backlash": true,
+      "rough": false,
+      "physics_dt": 0.005,
+      "decimation": 4,
+      "num_steps_per_env": 24,
+      "official_max_iterations": 50000,
+      "model": {
+        "nq": 35,
+        "nv": 34,
+        "bodies": 16,
+        "passive_joints": [
+          "passive_left_hip_yaw_backlash",
+          "passive_left_hip_roll_backlash",
+          "passive_left_hip_pitch_backlash",
+          "passive_left_knee_backlash",
+          "passive_left_ankle_backlash",
+          "passive_neck_pitch_backlash",
+          "passive_head_pitch_backlash",
+          "passive_head_yaw_backlash",
+          "passive_head_roll_backlash",
+          "passive_right_hip_yaw_backlash",
+          "passive_right_hip_roll_backlash",
+          "passive_right_hip_pitch_backlash",
+          "passive_right_knee_backlash",
+          "passive_right_ankle_backlash"
+        ]
+      },
+      "observations": {
+        "actor": [
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "head_command",
+          "body_command"
+        ],
+        "critic": [
+          "base_lin_vel",
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "foot_height",
+          "foot_air_time",
+          "foot_contact",
+          "foot_contact_forces",
+          "head_command",
+          "body_command"
+        ]
+      },
+      "commands": {
+        "twist": "mjlab_microduck.tasks.mdp.VelocityCommandCommandOnlyCfg",
+        "head_pose": "mjlab_microduck.tasks.mdp.UniformPoseCommandCfg",
+        "body_pose": "mjlab_microduck.tasks.mdp.UniformPoseCommandCfg"
+      },
+      "rewards": {
+        "track_linear_velocity": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.track_linear_velocity",
+          "weight": 2.0
+        },
+        "track_angular_velocity": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.track_angular_velocity",
+          "weight": 2.0
+        },
+        "upright": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.upright",
+          "weight": 2.0
+        },
+        "pose": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.variable_posture",
+          "weight": 1.0
+        },
+        "body_ang_vel": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.body_angular_velocity_penalty",
+          "weight": -0.05
+        },
+        "angular_momentum": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.angular_momentum_penalty",
+          "weight": -0.02
+        },
+        "dof_pos_limits": {
+          "function": "mjlab.envs.mdp.rewards.joint_pos_limits",
+          "weight": -1.0
+        },
+        "action_rate_l2": {
+          "function": "mjlab.envs.mdp.rewards.action_rate_l2",
+          "weight": -0.1
+        },
+        "air_time": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.feet_air_time",
+          "weight": 3.0
+        },
+        "foot_clearance": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.feet_clearance",
+          "weight": -2.0
+        },
+        "foot_swing_height": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.feet_swing_height",
+          "weight": -0.25
+        },
+        "foot_slip": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.feet_slip",
+          "weight": -0.1
+        },
+        "self_collisions": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.self_collision_cost",
+          "weight": -1.0
+        },
+        "head_pose_tracking": {
+          "function": "mjlab_microduck.tasks.mdp.head_pose_tracking",
+          "weight": 2.0
+        },
+        "body_pose_tracking": {
+          "function": "mjlab_microduck.tasks.mdp.body_pose_tracking_6d",
+          "weight": 0.0
+        },
+        "head_pose_bias": {
+          "function": "mjlab_microduck.tasks.mdp.head_pose_bias_penalty",
+          "weight": 0.0
+        }
+      },
+      "events": [
+        "reset_base",
+        "reset_robot_joints",
+        "push_robot",
+        "foot_friction",
+        "encoder_bias",
+        "base_com",
+        "expand_bam_friction_fields",
+        "reset_action_history",
+        "randomize_com",
+        "randomize_head_com",
+        "randomize_mass_inertia",
+        "randomize_joint_friction",
+        "randomize_armature"
+      ],
+      "terminations": [
+        "time_out",
+        "fell_over",
+        "out_of_terrain_bounds",
+        "nan_state"
+      ],
+      "curriculum": [
+        "action_rate_weight",
+        "standing_envs",
+        "head_pose_range",
+        "body_pose_range",
+        "com_range",
+        "head_com_range",
+        "head_pose_bias_weight"
+      ],
+      "sensors": [
+        "mjlab.sensor.contact_sensor.ContactSensorCfg",
+        "mjlab.sensor.contact_sensor.ContactSensorCfg",
+        "mjlab.sensor.terrain_height_sensor.TerrainHeightSensorCfg"
+      ]
+    },
+    {
+      "id": "Mjlab-Velocity-Flat-Backlash-MicroDuck-Rollers",
+      "backlash": true,
+      "rough": false,
+      "physics_dt": 0.005,
+      "decimation": 4,
+      "num_steps_per_env": 24,
+      "official_max_iterations": 50000,
+      "model": {
+        "nq": 39,
+        "nv": 38,
+        "bodies": 20,
+        "passive_joints": [
+          "passive_left_hip_yaw_backlash",
+          "passive_left_hip_roll_backlash",
+          "passive_left_hip_pitch_backlash",
+          "passive_left_knee_backlash",
+          "passive_left_ankle_backlash",
+          "passive_LF_wheel",
+          "passive_LR_wheel",
+          "passive_neck_pitch_backlash",
+          "passive_head_pitch_backlash",
+          "passive_head_yaw_backlash",
+          "passive_head_roll_backlash",
+          "passive_right_hip_yaw_backlash",
+          "passive_right_hip_roll_backlash",
+          "passive_right_hip_pitch_backlash",
+          "passive_right_knee_backlash",
+          "passive_right_ankle_backlash",
+          "passive_RF_wheel",
+          "passive_RR_wheel"
+        ]
+      },
+      "observations": {
+        "actor": [
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "head_command",
+          "body_command"
+        ],
+        "critic": [
+          "base_lin_vel",
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "foot_air_time",
+          "foot_contact",
+          "foot_contact_forces",
+          "wheel_vel",
+          "head_command",
+          "body_command"
+        ]
+      },
+      "commands": {
+        "twist": "mjlab_microduck.tasks.mdp.RelativeHeadingVelocityCommandCfg"
+      },
+      "rewards": {
+        "upright": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.upright",
+          "weight": 2.0
+        },
+        "pose": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.variable_posture",
+          "weight": 2.0
+        },
+        "body_ang_vel": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.body_angular_velocity_penalty",
+          "weight": -0.05
+        },
+        "angular_momentum": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.angular_momentum_penalty",
+          "weight": -0.02
+        },
+        "action_rate_l2": {
+          "function": "mjlab.envs.mdp.rewards.action_rate_l2",
+          "weight": -1.0
+        },
+        "com_height_target": {
+          "function": "mjlab_microduck.tasks.mdp.com_height_target",
+          "weight": 2.0
+        },
+        "self_collisions": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.self_collision_cost",
+          "weight": -1.0
+        },
+        "feet_flat": {
+          "function": "mjlab_microduck.tasks.mdp.feet_flat_penalty",
+          "weight": -2.0
+        },
+        "neck_action_rate_l2": {
+          "function": "mjlab_microduck.tasks.mdp.neck_action_rate_l2",
+          "weight": -0.5
+        },
+        "neck_joint_pos_l2": {
+          "function": "mjlab_microduck.tasks.mdp.neck_joint_pos_l2",
+          "weight": -0.5
+        },
+        "joint_torques_l2": {
+          "function": "mjlab_microduck.tasks.mdp.joint_torques_l2",
+          "weight": -0.001
+        },
+        "action_over_limit": {
+          "function": "mjlab_microduck.tasks.mdp.action_over_limit_penalty",
+          "weight": -0.5
+        },
+        "hip_roll_neutral": {
+          "function": "mjlab_microduck.tasks.mdp.joint_deviation_l1",
+          "weight": -2.0
+        },
+        "wheel_speed": {
+          "function": "mjlab_microduck.tasks.mdp.wheel_speed_reward",
+          "weight": 10.0
+        },
+        "braking": {
+          "function": "mjlab_microduck.tasks.mdp.braking_reward",
+          "weight": 1.0
+        },
+        "skating_air_time": {
+          "function": "mjlab_microduck.tasks.mdp.skating_air_time_reward",
+          "weight": 1.5
+        },
+        "glide": {
+          "function": "mjlab_microduck.tasks.mdp.glide_reward",
+          "weight": 4.0
+        },
+        "single_support": {
+          "function": "mjlab_microduck.tasks.mdp.single_support_reward",
+          "weight": 3.0
+        },
+        "gait_symmetry": {
+          "function": "mjlab_microduck.tasks.mdp.gait_symmetry_penalty",
+          "weight": -1.0
+        },
+        "forward_lean": {
+          "function": "mjlab_microduck.tasks.mdp.forward_lean_reward",
+          "weight": 1.5
+        },
+        "heading_hold": {
+          "function": "mjlab_microduck.tasks.mdp.heading_hold_reward",
+          "weight": 1.0
+        }
+      },
+      "events": [
+        "reset_base",
+        "reset_robot_joints",
+        "push_robot",
+        "encoder_bias",
+        "base_com",
+        "expand_bam_friction_fields",
+        "reset_action_history",
+        "randomize_wheel_friction",
+        "randomize_com",
+        "randomize_head_com",
+        "randomize_mass_inertia",
+        "randomize_joint_friction",
+        "randomize_armature"
+      ],
+      "terminations": [
+        "time_out",
+        "fell_over",
+        "out_of_terrain_bounds",
+        "nan_state"
+      ],
+      "curriculum": [
+        "action_rate_weight",
+        "wheel_friction",
+        "com_range",
+        "head_com_range"
+      ],
+      "sensors": [
+        "mjlab.sensor.contact_sensor.ContactSensorCfg",
+        "mjlab.sensor.contact_sensor.ContactSensorCfg"
+      ]
+    },
+    {
+      "id": "Mjlab-Velocity-Flat-MicroDuck",
+      "backlash": false,
+      "rough": false,
+      "physics_dt": 0.005,
+      "decimation": 4,
+      "num_steps_per_env": 24,
+      "official_max_iterations": 50000,
+      "model": {
+        "nq": 21,
+        "nv": 20,
+        "bodies": 16,
+        "passive_joints": []
+      },
+      "observations": {
+        "actor": [
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "head_command",
+          "body_command"
+        ],
+        "critic": [
+          "base_lin_vel",
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "foot_height",
+          "foot_air_time",
+          "foot_contact",
+          "foot_contact_forces",
+          "head_command",
+          "body_command"
+        ]
+      },
+      "commands": {
+        "twist": "mjlab_microduck.tasks.mdp.VelocityCommandCommandOnlyCfg",
+        "head_pose": "mjlab_microduck.tasks.mdp.UniformPoseCommandCfg",
+        "body_pose": "mjlab_microduck.tasks.mdp.UniformPoseCommandCfg"
+      },
+      "rewards": {
+        "track_linear_velocity": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.track_linear_velocity",
+          "weight": 2.0
+        },
+        "track_angular_velocity": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.track_angular_velocity",
+          "weight": 2.0
+        },
+        "upright": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.upright",
+          "weight": 2.0
+        },
+        "pose": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.variable_posture",
+          "weight": 1.0
+        },
+        "body_ang_vel": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.body_angular_velocity_penalty",
+          "weight": -0.05
+        },
+        "angular_momentum": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.angular_momentum_penalty",
+          "weight": -0.02
+        },
+        "dof_pos_limits": {
+          "function": "mjlab.envs.mdp.rewards.joint_pos_limits",
+          "weight": -1.0
+        },
+        "action_rate_l2": {
+          "function": "mjlab.envs.mdp.rewards.action_rate_l2",
+          "weight": -0.1
+        },
+        "air_time": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.feet_air_time",
+          "weight": 3.0
+        },
+        "foot_clearance": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.feet_clearance",
+          "weight": -2.0
+        },
+        "foot_swing_height": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.feet_swing_height",
+          "weight": -0.25
+        },
+        "foot_slip": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.feet_slip",
+          "weight": -0.1
+        },
+        "self_collisions": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.self_collision_cost",
+          "weight": -1.0
+        },
+        "head_pose_tracking": {
+          "function": "mjlab_microduck.tasks.mdp.head_pose_tracking",
+          "weight": 2.0
+        },
+        "body_pose_tracking": {
+          "function": "mjlab_microduck.tasks.mdp.body_pose_tracking_6d",
+          "weight": 0.0
+        },
+        "head_pose_bias": {
+          "function": "mjlab_microduck.tasks.mdp.head_pose_bias_penalty",
+          "weight": 0.0
+        }
+      },
+      "events": [
+        "reset_base",
+        "reset_robot_joints",
+        "push_robot",
+        "foot_friction",
+        "encoder_bias",
+        "base_com",
+        "expand_bam_friction_fields",
+        "reset_action_history",
+        "randomize_com",
+        "randomize_head_com",
+        "randomize_mass_inertia",
+        "randomize_joint_friction",
+        "randomize_armature"
+      ],
+      "terminations": [
+        "time_out",
+        "fell_over",
+        "out_of_terrain_bounds",
+        "nan_state"
+      ],
+      "curriculum": [
+        "action_rate_weight",
+        "standing_envs",
+        "head_pose_range",
+        "body_pose_range",
+        "com_range",
+        "head_com_range",
+        "head_pose_bias_weight"
+      ],
+      "sensors": [
+        "mjlab.sensor.contact_sensor.ContactSensorCfg",
+        "mjlab.sensor.contact_sensor.ContactSensorCfg",
+        "mjlab.sensor.terrain_height_sensor.TerrainHeightSensorCfg"
+      ]
+    },
+    {
+      "id": "Mjlab-Velocity-Flat-MicroDuck-Rollers",
+      "backlash": false,
+      "rough": false,
+      "physics_dt": 0.005,
+      "decimation": 4,
+      "num_steps_per_env": 24,
+      "official_max_iterations": 50000,
+      "model": {
+        "nq": 25,
+        "nv": 24,
+        "bodies": 20,
+        "passive_joints": [
+          "passive_LF_wheel",
+          "passive_LR_wheel",
+          "passive_RF_wheel",
+          "passive_RR_wheel"
+        ]
+      },
+      "observations": {
+        "actor": [
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "head_command",
+          "body_command"
+        ],
+        "critic": [
+          "base_lin_vel",
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "foot_air_time",
+          "foot_contact",
+          "foot_contact_forces",
+          "wheel_vel",
+          "head_command",
+          "body_command"
+        ]
+      },
+      "commands": {
+        "twist": "mjlab_microduck.tasks.mdp.RelativeHeadingVelocityCommandCfg"
+      },
+      "rewards": {
+        "upright": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.upright",
+          "weight": 2.0
+        },
+        "pose": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.variable_posture",
+          "weight": 2.0
+        },
+        "body_ang_vel": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.body_angular_velocity_penalty",
+          "weight": -0.05
+        },
+        "angular_momentum": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.angular_momentum_penalty",
+          "weight": -0.02
+        },
+        "action_rate_l2": {
+          "function": "mjlab.envs.mdp.rewards.action_rate_l2",
+          "weight": -1.0
+        },
+        "com_height_target": {
+          "function": "mjlab_microduck.tasks.mdp.com_height_target",
+          "weight": 2.0
+        },
+        "self_collisions": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.self_collision_cost",
+          "weight": -1.0
+        },
+        "feet_flat": {
+          "function": "mjlab_microduck.tasks.mdp.feet_flat_penalty",
+          "weight": -2.0
+        },
+        "neck_action_rate_l2": {
+          "function": "mjlab_microduck.tasks.mdp.neck_action_rate_l2",
+          "weight": -0.5
+        },
+        "neck_joint_pos_l2": {
+          "function": "mjlab_microduck.tasks.mdp.neck_joint_pos_l2",
+          "weight": -0.5
+        },
+        "joint_torques_l2": {
+          "function": "mjlab_microduck.tasks.mdp.joint_torques_l2",
+          "weight": -0.001
+        },
+        "action_over_limit": {
+          "function": "mjlab_microduck.tasks.mdp.action_over_limit_penalty",
+          "weight": -0.5
+        },
+        "hip_roll_neutral": {
+          "function": "mjlab_microduck.tasks.mdp.joint_deviation_l1",
+          "weight": -2.0
+        },
+        "wheel_speed": {
+          "function": "mjlab_microduck.tasks.mdp.wheel_speed_reward",
+          "weight": 10.0
+        },
+        "braking": {
+          "function": "mjlab_microduck.tasks.mdp.braking_reward",
+          "weight": 1.0
+        },
+        "skating_air_time": {
+          "function": "mjlab_microduck.tasks.mdp.skating_air_time_reward",
+          "weight": 1.5
+        },
+        "glide": {
+          "function": "mjlab_microduck.tasks.mdp.glide_reward",
+          "weight": 4.0
+        },
+        "single_support": {
+          "function": "mjlab_microduck.tasks.mdp.single_support_reward",
+          "weight": 3.0
+        },
+        "gait_symmetry": {
+          "function": "mjlab_microduck.tasks.mdp.gait_symmetry_penalty",
+          "weight": -1.0
+        },
+        "forward_lean": {
+          "function": "mjlab_microduck.tasks.mdp.forward_lean_reward",
+          "weight": 1.5
+        },
+        "heading_hold": {
+          "function": "mjlab_microduck.tasks.mdp.heading_hold_reward",
+          "weight": 1.0
+        }
+      },
+      "events": [
+        "reset_base",
+        "reset_robot_joints",
+        "push_robot",
+        "encoder_bias",
+        "base_com",
+        "expand_bam_friction_fields",
+        "reset_action_history",
+        "randomize_wheel_friction",
+        "randomize_com",
+        "randomize_head_com",
+        "randomize_mass_inertia",
+        "randomize_joint_friction",
+        "randomize_armature"
+      ],
+      "terminations": [
+        "time_out",
+        "fell_over",
+        "out_of_terrain_bounds",
+        "nan_state"
+      ],
+      "curriculum": [
+        "action_rate_weight",
+        "wheel_friction",
+        "com_range",
+        "head_com_range"
+      ],
+      "sensors": [
+        "mjlab.sensor.contact_sensor.ContactSensorCfg",
+        "mjlab.sensor.contact_sensor.ContactSensorCfg"
+      ]
+    },
+    {
+      "id": "Mjlab-Velocity-Rough-Backlash-MicroDuck",
+      "backlash": true,
+      "rough": true,
+      "physics_dt": 0.005,
+      "decimation": 4,
+      "num_steps_per_env": 24,
+      "official_max_iterations": 50000,
+      "model": {
+        "nq": 35,
+        "nv": 34,
+        "bodies": 16,
+        "passive_joints": [
+          "passive_left_hip_yaw_backlash",
+          "passive_left_hip_roll_backlash",
+          "passive_left_hip_pitch_backlash",
+          "passive_left_knee_backlash",
+          "passive_left_ankle_backlash",
+          "passive_neck_pitch_backlash",
+          "passive_head_pitch_backlash",
+          "passive_head_yaw_backlash",
+          "passive_head_roll_backlash",
+          "passive_right_hip_yaw_backlash",
+          "passive_right_hip_roll_backlash",
+          "passive_right_hip_pitch_backlash",
+          "passive_right_knee_backlash",
+          "passive_right_ankle_backlash"
+        ]
+      },
+      "observations": {
+        "actor": [
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "head_command",
+          "body_command"
+        ],
+        "critic": [
+          "base_lin_vel",
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "foot_height",
+          "foot_air_time",
+          "foot_contact",
+          "foot_contact_forces",
+          "head_command",
+          "body_command"
+        ]
+      },
+      "commands": {
+        "twist": "mjlab_microduck.tasks.mdp.VelocityCommandCommandOnlyCfg",
+        "head_pose": "mjlab_microduck.tasks.mdp.UniformPoseCommandCfg",
+        "body_pose": "mjlab_microduck.tasks.mdp.UniformPoseCommandCfg"
+      },
+      "rewards": {
+        "track_linear_velocity": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.track_linear_velocity",
+          "weight": 2.0
+        },
+        "track_angular_velocity": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.track_angular_velocity",
+          "weight": 2.0
+        },
+        "upright": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.upright",
+          "weight": 2.0
+        },
+        "pose": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.variable_posture",
+          "weight": 1.0
+        },
+        "body_ang_vel": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.body_angular_velocity_penalty",
+          "weight": -0.05
+        },
+        "angular_momentum": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.angular_momentum_penalty",
+          "weight": -0.02
+        },
+        "dof_pos_limits": {
+          "function": "mjlab.envs.mdp.rewards.joint_pos_limits",
+          "weight": -1.0
+        },
+        "action_rate_l2": {
+          "function": "mjlab.envs.mdp.rewards.action_rate_l2",
+          "weight": -0.1
+        },
+        "air_time": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.feet_air_time",
+          "weight": 3.0
+        },
+        "foot_clearance": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.feet_clearance",
+          "weight": -2.0
+        },
+        "foot_swing_height": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.feet_swing_height",
+          "weight": -0.25
+        },
+        "foot_slip": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.feet_slip",
+          "weight": -0.1
+        },
+        "self_collisions": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.self_collision_cost",
+          "weight": -1.0
+        },
+        "head_pose_tracking": {
+          "function": "mjlab_microduck.tasks.mdp.head_pose_tracking",
+          "weight": 2.0
+        },
+        "body_pose_tracking": {
+          "function": "mjlab_microduck.tasks.mdp.body_pose_tracking_6d",
+          "weight": 0.0
+        },
+        "head_pose_bias": {
+          "function": "mjlab_microduck.tasks.mdp.head_pose_bias_penalty",
+          "weight": 0.0
+        }
+      },
+      "events": [
+        "reset_base",
+        "reset_robot_joints",
+        "push_robot",
+        "foot_friction",
+        "encoder_bias",
+        "base_com",
+        "expand_bam_friction_fields",
+        "reset_action_history",
+        "randomize_com",
+        "randomize_head_com",
+        "randomize_mass_inertia",
+        "randomize_joint_friction",
+        "randomize_armature"
+      ],
+      "terminations": [
+        "time_out",
+        "fell_over",
+        "out_of_terrain_bounds",
+        "nan_state"
+      ],
+      "curriculum": [
+        "terrain_levels",
+        "action_rate_weight",
+        "standing_envs",
+        "head_pose_range",
+        "body_pose_range",
+        "com_range",
+        "head_com_range",
+        "head_pose_bias_weight"
+      ],
+      "sensors": [
+        "mjlab.sensor.contact_sensor.ContactSensorCfg",
+        "mjlab.sensor.contact_sensor.ContactSensorCfg",
+        "mjlab.sensor.terrain_height_sensor.TerrainHeightSensorCfg"
+      ]
+    },
+    {
+      "id": "Mjlab-Velocity-Rough-MicroDuck",
+      "backlash": false,
+      "rough": true,
+      "physics_dt": 0.005,
+      "decimation": 4,
+      "num_steps_per_env": 24,
+      "official_max_iterations": 50000,
+      "model": {
+        "nq": 21,
+        "nv": 20,
+        "bodies": 16,
+        "passive_joints": []
+      },
+      "observations": {
+        "actor": [
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "head_command",
+          "body_command"
+        ],
+        "critic": [
+          "base_lin_vel",
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "foot_height",
+          "foot_air_time",
+          "foot_contact",
+          "foot_contact_forces",
+          "head_command",
+          "body_command"
+        ]
+      },
+      "commands": {
+        "twist": "mjlab_microduck.tasks.mdp.VelocityCommandCommandOnlyCfg",
+        "head_pose": "mjlab_microduck.tasks.mdp.UniformPoseCommandCfg",
+        "body_pose": "mjlab_microduck.tasks.mdp.UniformPoseCommandCfg"
+      },
+      "rewards": {
+        "track_linear_velocity": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.track_linear_velocity",
+          "weight": 2.0
+        },
+        "track_angular_velocity": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.track_angular_velocity",
+          "weight": 2.0
+        },
+        "upright": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.upright",
+          "weight": 2.0
+        },
+        "pose": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.variable_posture",
+          "weight": 1.0
+        },
+        "body_ang_vel": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.body_angular_velocity_penalty",
+          "weight": -0.05
+        },
+        "angular_momentum": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.angular_momentum_penalty",
+          "weight": -0.02
+        },
+        "dof_pos_limits": {
+          "function": "mjlab.envs.mdp.rewards.joint_pos_limits",
+          "weight": -1.0
+        },
+        "action_rate_l2": {
+          "function": "mjlab.envs.mdp.rewards.action_rate_l2",
+          "weight": -0.1
+        },
+        "air_time": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.feet_air_time",
+          "weight": 3.0
+        },
+        "foot_clearance": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.feet_clearance",
+          "weight": -2.0
+        },
+        "foot_swing_height": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.feet_swing_height",
+          "weight": -0.25
+        },
+        "foot_slip": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.feet_slip",
+          "weight": -0.1
+        },
+        "self_collisions": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.self_collision_cost",
+          "weight": -1.0
+        },
+        "head_pose_tracking": {
+          "function": "mjlab_microduck.tasks.mdp.head_pose_tracking",
+          "weight": 2.0
+        },
+        "body_pose_tracking": {
+          "function": "mjlab_microduck.tasks.mdp.body_pose_tracking_6d",
+          "weight": 0.0
+        },
+        "head_pose_bias": {
+          "function": "mjlab_microduck.tasks.mdp.head_pose_bias_penalty",
+          "weight": 0.0
+        }
+      },
+      "events": [
+        "reset_base",
+        "reset_robot_joints",
+        "push_robot",
+        "foot_friction",
+        "encoder_bias",
+        "base_com",
+        "expand_bam_friction_fields",
+        "reset_action_history",
+        "randomize_com",
+        "randomize_head_com",
+        "randomize_mass_inertia",
+        "randomize_joint_friction",
+        "randomize_armature"
+      ],
+      "terminations": [
+        "time_out",
+        "fell_over",
+        "out_of_terrain_bounds",
+        "nan_state"
+      ],
+      "curriculum": [
+        "terrain_levels",
+        "action_rate_weight",
+        "standing_envs",
+        "head_pose_range",
+        "body_pose_range",
+        "com_range",
+        "head_com_range",
+        "head_pose_bias_weight"
+      ],
+      "sensors": [
+        "mjlab.sensor.contact_sensor.ContactSensorCfg",
+        "mjlab.sensor.contact_sensor.ContactSensorCfg",
+        "mjlab.sensor.terrain_height_sensor.TerrainHeightSensorCfg"
+      ]
+    },
+    {
+      "id": "Mjlab-Velocity-Swizzle-Backlash-MicroDuck",
+      "backlash": true,
+      "rough": false,
+      "physics_dt": 0.005,
+      "decimation": 4,
+      "num_steps_per_env": 24,
+      "official_max_iterations": 50000,
+      "model": {
+        "nq": 39,
+        "nv": 38,
+        "bodies": 20,
+        "passive_joints": [
+          "passive_left_hip_yaw_backlash",
+          "passive_left_hip_roll_backlash",
+          "passive_left_hip_pitch_backlash",
+          "passive_left_knee_backlash",
+          "passive_left_ankle_backlash",
+          "passive_LF_wheel",
+          "passive_LR_wheel",
+          "passive_neck_pitch_backlash",
+          "passive_head_pitch_backlash",
+          "passive_head_yaw_backlash",
+          "passive_head_roll_backlash",
+          "passive_right_hip_yaw_backlash",
+          "passive_right_hip_roll_backlash",
+          "passive_right_hip_pitch_backlash",
+          "passive_right_knee_backlash",
+          "passive_right_ankle_backlash",
+          "passive_RF_wheel",
+          "passive_RR_wheel"
+        ]
+      },
+      "observations": {
+        "actor": [
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "head_command",
+          "body_command"
+        ],
+        "critic": [
+          "base_lin_vel",
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "foot_air_time",
+          "foot_contact",
+          "foot_contact_forces",
+          "wheel_vel",
+          "head_command",
+          "body_command"
+        ]
+      },
+      "commands": {
+        "twist": "mjlab_microduck.tasks.mdp.RelativeHeadingVelocityCommandCfg",
+        "head_pose": "mjlab_microduck.tasks.mdp.UniformPoseCommandCfg"
+      },
+      "rewards": {
+        "upright": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.upright",
+          "weight": 2.0
+        },
+        "pose": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.variable_posture",
+          "weight": 2.0
+        },
+        "body_ang_vel": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.body_angular_velocity_penalty",
+          "weight": -0.05
+        },
+        "angular_momentum": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.angular_momentum_penalty",
+          "weight": -0.02
+        },
+        "action_rate_l2": {
+          "function": "mjlab.envs.mdp.rewards.action_rate_l2",
+          "weight": -1.0
+        },
+        "com_height_target": {
+          "function": "mjlab_microduck.tasks.mdp.com_height_target",
+          "weight": 2.0
+        },
+        "self_collisions": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.self_collision_cost",
+          "weight": -1.0
+        },
+        "feet_flat": {
+          "function": "mjlab_microduck.tasks.mdp.feet_flat_penalty",
+          "weight": -2.0
+        },
+        "neck_action_rate_l2": {
+          "function": "mjlab_microduck.tasks.mdp.neck_action_rate_l2",
+          "weight": -0.5
+        },
+        "joint_torques_l2": {
+          "function": "mjlab_microduck.tasks.mdp.joint_torques_l2",
+          "weight": -0.001
+        },
+        "action_over_limit": {
+          "function": "mjlab_microduck.tasks.mdp.action_over_limit_penalty",
+          "weight": -0.5
+        },
+        "wheel_speed": {
+          "function": "mjlab_microduck.tasks.mdp.wheel_speed_reward",
+          "weight": 10.0
+        },
+        "forward_lean": {
+          "function": "mjlab_microduck.tasks.mdp.forward_lean_reward",
+          "weight": 1.5
+        },
+        "heading_hold": {
+          "function": "mjlab_microduck.tasks.mdp.heading_hold_reward",
+          "weight": 1.0
+        },
+        "leg_symmetry": {
+          "function": "mjlab_microduck.tasks.mdp.leg_symmetry_reward",
+          "weight": 2.0
+        },
+        "grounded": {
+          "function": "mjlab_microduck.tasks.mdp.grounded_reward",
+          "weight": 1.0
+        },
+        "heading_tracking": {
+          "function": "mjlab_microduck.tasks.mdp.heading_tracking_reward",
+          "weight": 0.0
+        },
+        "head_pose_tracking": {
+          "function": "mjlab_microduck.tasks.mdp.head_pose_tracking",
+          "weight": 0.0
+        }
+      },
+      "events": [
+        "reset_base",
+        "reset_robot_joints",
+        "push_robot",
+        "encoder_bias",
+        "base_com",
+        "expand_bam_friction_fields",
+        "reset_action_history",
+        "randomize_wheel_friction",
+        "randomize_com",
+        "randomize_head_com",
+        "randomize_mass_inertia",
+        "randomize_joint_friction",
+        "randomize_armature"
+      ],
+      "terminations": [
+        "time_out",
+        "fell_over",
+        "out_of_terrain_bounds",
+        "nan_state"
+      ],
+      "curriculum": [
+        "action_rate_weight",
+        "wheel_friction",
+        "com_range",
+        "head_com_range",
+        "heading_hold_weight",
+        "heading_tracking_weight",
+        "head_pose_tracking_weight",
+        "head_pose_range"
+      ],
+      "sensors": [
+        "mjlab.sensor.contact_sensor.ContactSensorCfg",
+        "mjlab.sensor.contact_sensor.ContactSensorCfg"
+      ]
+    },
+    {
+      "id": "Mjlab-Velocity-Swizzle-MicroDuck",
+      "backlash": false,
+      "rough": false,
+      "physics_dt": 0.005,
+      "decimation": 4,
+      "num_steps_per_env": 24,
+      "official_max_iterations": 50000,
+      "model": {
+        "nq": 25,
+        "nv": 24,
+        "bodies": 20,
+        "passive_joints": [
+          "passive_LF_wheel",
+          "passive_LR_wheel",
+          "passive_RF_wheel",
+          "passive_RR_wheel"
+        ]
+      },
+      "observations": {
+        "actor": [
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "head_command",
+          "body_command"
+        ],
+        "critic": [
+          "base_lin_vel",
+          "base_ang_vel",
+          "projected_gravity",
+          "joint_pos",
+          "joint_vel",
+          "actions",
+          "command",
+          "foot_air_time",
+          "foot_contact",
+          "foot_contact_forces",
+          "wheel_vel",
+          "head_command",
+          "body_command"
+        ]
+      },
+      "commands": {
+        "twist": "mjlab_microduck.tasks.mdp.RelativeHeadingVelocityCommandCfg",
+        "head_pose": "mjlab_microduck.tasks.mdp.UniformPoseCommandCfg"
+      },
+      "rewards": {
+        "upright": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.upright",
+          "weight": 2.0
+        },
+        "pose": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.variable_posture",
+          "weight": 2.0
+        },
+        "body_ang_vel": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.body_angular_velocity_penalty",
+          "weight": -0.05
+        },
+        "angular_momentum": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.angular_momentum_penalty",
+          "weight": -0.02
+        },
+        "action_rate_l2": {
+          "function": "mjlab.envs.mdp.rewards.action_rate_l2",
+          "weight": -1.0
+        },
+        "com_height_target": {
+          "function": "mjlab_microduck.tasks.mdp.com_height_target",
+          "weight": 2.0
+        },
+        "self_collisions": {
+          "function": "mjlab.tasks.velocity.mdp.rewards.self_collision_cost",
+          "weight": -1.0
+        },
+        "feet_flat": {
+          "function": "mjlab_microduck.tasks.mdp.feet_flat_penalty",
+          "weight": -2.0
+        },
+        "neck_action_rate_l2": {
+          "function": "mjlab_microduck.tasks.mdp.neck_action_rate_l2",
+          "weight": -0.5
+        },
+        "joint_torques_l2": {
+          "function": "mjlab_microduck.tasks.mdp.joint_torques_l2",
+          "weight": -0.001
+        },
+        "action_over_limit": {
+          "function": "mjlab_microduck.tasks.mdp.action_over_limit_penalty",
+          "weight": -0.5
+        },
+        "wheel_speed": {
+          "function": "mjlab_microduck.tasks.mdp.wheel_speed_reward",
+          "weight": 10.0
+        },
+        "forward_lean": {
+          "function": "mjlab_microduck.tasks.mdp.forward_lean_reward",
+          "weight": 1.5
+        },
+        "heading_hold": {
+          "function": "mjlab_microduck.tasks.mdp.heading_hold_reward",
+          "weight": 1.0
+        },
+        "leg_symmetry": {
+          "function": "mjlab_microduck.tasks.mdp.leg_symmetry_reward",
+          "weight": 2.0
+        },
+        "grounded": {
+          "function": "mjlab_microduck.tasks.mdp.grounded_reward",
+          "weight": 1.0
+        },
+        "heading_tracking": {
+          "function": "mjlab_microduck.tasks.mdp.heading_tracking_reward",
+          "weight": 0.0
+        },
+        "head_pose_tracking": {
+          "function": "mjlab_microduck.tasks.mdp.head_pose_tracking",
+          "weight": 0.0
+        }
+      },
+      "events": [
+        "reset_base",
+        "reset_robot_joints",
+        "push_robot",
+        "encoder_bias",
+        "base_com",
+        "expand_bam_friction_fields",
+        "reset_action_history",
+        "randomize_wheel_friction",
+        "randomize_com",
+        "randomize_head_com",
+        "randomize_mass_inertia",
+        "randomize_joint_friction",
+        "randomize_armature"
+      ],
+      "terminations": [
+        "time_out",
+        "fell_over",
+        "out_of_terrain_bounds",
+        "nan_state"
+      ],
+      "curriculum": [
+        "action_rate_weight",
+        "wheel_friction",
+        "com_range",
+        "head_com_range",
+        "heading_hold_weight",
+        "heading_tracking_weight",
+        "head_pose_tracking_weight",
+        "head_pose_range"
+      ],
+      "sensors": [
+        "mjlab.sensor.contact_sensor.ContactSensorCfg",
+        "mjlab.sensor.contact_sensor.ContactSensorCfg"
+      ]
+    }
+  ],
+  "target_combinations": 8,
+  "note": "Registry inventory only. Registration does not establish training or behavior validation.",
+  "representative_tasks": [
+    "Mjlab-Velocity-Flat-MicroDuck",
+    "Mjlab-StandUp-Flat-MicroDuck"
+  ]
+}

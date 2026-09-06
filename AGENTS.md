@@ -13,3 +13,7 @@ This project extends the pinned official `pollen-robotics/microduck_rl` and `pol
 - Keep optional simulators/frameworks in isolated locked environments. Preserve official pins; document any unavoidable dependency compatibility overrides and verify affected paths.
 - Use modular entry points and small focused commits on feature branches. Preserve failed job artifacts. Do not overwrite prior output directories or present automatic retries as successful initial runs. Record project/upstream provenance.
 - The external Harness is not ready; future integration uses a deterministic mock, not a substitute internal agent loop. Keep interface-only capabilities visibly unavailable.
+
+- Current RL acceptance scope is the representative tasks in `configs/training.json` (Flat Walking and Flat StandUp), across both backends and both RL frameworks. The complete official registry is an inventory, not a requirement to reproduce every task. New tasks should enter through task registration and shared adapters.
+- Preserve each framework's native PPO semantics. RSL-RL uses its native distributed learner; SB3 uses native PPO/vector environments and independent parallel runs. Do not introduce decoupled asynchronous actors or claim SB3 supports distributed gradient updates. Measure throughput before selecting GPU/environment counts.
+- W&B must run OFFLINE. The current saved account belongs to someone else. Do not authenticate, upload or sync to it. Propagate offline mode to every distributed worker; keep local run directories and artifacts.

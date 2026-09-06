@@ -1,0 +1,35 @@
+{
+  "schema_version": 1,
+  "task_scope": "representative_official_tasks",
+  "backends": [
+    "mujoco",
+    "isaac-newton"
+  ],
+  "frameworks": [
+    "rsl-rl",
+    "sb3"
+  ],
+  "logger": {
+    "project": "oh-my-duck",
+    "entity": null,
+    "mode": "offline"
+  },
+  "parallelism": {
+    "rsl-rl": "native_distributed_ppo",
+    "sb3": "native_ppo_vector_envs_and_parallel_independent_runs",
+    "async_actor_learner": false
+  },
+  "acceptance": [
+    "configuration",
+    "64_env_5_iteration_smoke",
+    "reward_and_state_audit",
+    "native_checkpoint_resume",
+    "normalized_onnx_export",
+    "task_specific_behavior",
+    "sim2sim"
+  ],
+  "representative_tasks": [
+    "Mjlab-Velocity-Flat-MicroDuck",
+    "Mjlab-StandUp-Flat-MicroDuck"
+  ]
+}

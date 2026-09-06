@@ -77,3 +77,6 @@ Resume adds `--resume outputs/my-sb3-run` and uses a new output directory. PPO r
 Local policy packaging for an official RSL-RL walking export uses `training/mujoco/package_policy.py`. It invokes the official publisher dry-run and validates schema 2, records project/upstream provenance, and labels smoke artifacts unvalidated. It has no upload mode.
 
 SB3 export uses a registered inference runner extension with the original native SB3 policy and VecNormalize statistics. It inherits `OnPolicyRunner.export_policy_to_onnx` and calls official `mjlab_microduck.export.run_export`; task construction and metadata remain official. Run `python omd.py export --backend mujoco --rl-framework sb3 -- --run outputs/my-sb3-run --output outputs/my-sb3-export` inside a submitted job. `export.json` records graph parity including normalization-clipping outliers. No tensor remapping into an RSL-RL checkpoint is performed.
+
+
+Current acceptance scope and native parallelism: [representative reproduction](rl-reproduction.md). W&B is now the default training logger, strictly offline; online account credentials are not used for training uploads. MuJoCo SB3 export accepts any registered official task and applies its numerical gate per export; acceptance evidence currently remains limited to the previously verified walking task.

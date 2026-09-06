@@ -104,3 +104,8 @@ Full official AGENTS.md read; 199 official CPU regressions passed, 1 skipped. Of
 ## Newton collision and 720p replay checkpoint (2026-09-06)
 
 `omd-newton-contact-20260906-08` succeeded: all five official collision hulls, all 15 collision relationships and both explicit foot-ground contact parameter sets passed actual compiled-model checks. The static plane is retained; explicit Newton contact pairs resolve its filter translation limitation. A 700-tick / 14-second official BAM policy replay completed with 1280×720 / 25-fps H.264 video and visual frame inspection. Command tracking remains inadequate; full Isaac walking task migration and training are still outstanding. Future ground-friction DR must update explicit pair parameters. Detailed failed attempts and final evidence are retained in the official compliance report.
+
+
+## Representative RL reproduction scope (2026-09-06)
+
+用户收敛验收范围为官方 Flat Walking 与 Flat StandUp，覆盖 MuJoCo/mjlab 与 Isaac Lab/Newton、RSL-RL 与 SB3，共 8 个组合。完整 33 项官方任务仅作扩展清单，不能把注册当作复现通过。各框架保留原生 PPO：RSL-RL 使用原生多 GPU 分布式学习，SB3 使用向量环境与跨 GPU 独立任务并行，不引入异步 actor–learner。吞吐通过实际测量决定 GPU/环境数量。W&B 为标配但只用 offline，现有线上账号不是用户账号，禁止上传或同步。当前已验证结果保持原有范围，新增组合仍需 smoke、恢复、导出、有效行为与 sim2sim 验收。任务选择和日志默认值集中在 `configs/training.json`，详细矩阵见 [RL reproduction](rl-reproduction.md)。本地 main 已合并，新开发分支为 `feat/rl-task-reproduction`。
