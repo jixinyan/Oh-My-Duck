@@ -21,7 +21,7 @@ def main():
             "axis": model.jnt_axis[i].tolist(), "armature": float(model.dof_armature[d]),
             "damping": float(model.dof_damping[d]), "frictionloss": float(model.dof_frictionloss[d])})
     Path(sys.argv[2]).write_text(json.dumps({"mujoco": mujoco.__version__, "bodies": bodies, "joints": joints,
-        "scope": "Raw official robot_walk.xml before training collision and BAM overrides"}, indent=2) + "\n")
+        "scope": f"Raw official {Path(sys.argv[1]).name} before training collision and BAM overrides"}, indent=2) + "\n")
 
 if __name__ == "__main__":
     main()

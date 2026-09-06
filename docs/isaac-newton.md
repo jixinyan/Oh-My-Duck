@@ -77,3 +77,15 @@ These tests use actual installed Isaac packages, construct configs and verify re
 ## Video resolution
 
 Isaac headless `probe`/`eval` render at **1280×720** by default. Override with `--video-width 1920 --video-height 1080` (or lower dimensions for faster diagnostics). Both dimensions must be even for H.264. The actual resolution is recorded in `result.json`; `--video` saves `rollout.mp4`, and the first rendered frame is saved as `frame.png`.
+
+
+## Robot model selection
+
+Asset conversion accepts `--model walk` (default) and `--model groundcontact`. StandUp must use the official ground-contact model rather than reusing walking collisions. The model name, source files and converter implementation enter the artifact fingerprint; outputs are isolated under `artifacts/isaac-newton/<model>/<fingerprint>/`. Source or converter changes produce a new artifact directory and preserve previous evidence.
+
+```bash
+python omd.py submit --name omd-groundcontact-assets --gpus 1 -- \
+  python omd.py assets --backend isaac-newton -- --model groundcontact --accept-eula
+```
+
+Conversion is an asset gate. It does not register or validate a complete StandUp training task.
