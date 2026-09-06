@@ -53,6 +53,8 @@ def main(mode="eval"):
         cfg.scene.num_envs = args.num_envs
         if args.actuator == "bam":
             from .bam_actuator import OfficialBamActuatorCfg
+            from .walk_asset import spawn_official_walk
+            cfg.scene.robot.spawn.func = spawn_official_walk
             cfg.scene.robot.actuators = {"official_bam": OfficialBamActuatorCfg(joint_names_expr=list(JOINT_NAMES))}
         # Keep the actual failed state available; assess it explicitly below.
         cfg.terminations.fallen = None
