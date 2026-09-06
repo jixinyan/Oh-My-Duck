@@ -16,12 +16,21 @@ def main(mode="eval"):
     parser.add_argument("--num-envs", type=int, default=2)
     parser.add_argument("--video", action="store_true")
     parser.add_argument("--policy", type=Path)
+    parser.add_argument("--actuator", choices=["pd", "bam"], default="pd")
+    parser.add_argument("--schedule", type=Path, help="Shared command sequence for policy evaluation")
     args = parser.parse_args()
     if args.steps < 1 or args.num_envs < 1:
         parser.error("steps and num-envs must be positive")
+    schedule = None
+    if args.schedule:
+        from .contracts import protocol
+        schedule = protocol.compile_schedule(json.loads(args.schedule.read_text()))
+        args.steps = len(schedule)
     args.output.mkdir(parents=True, exist_ok=False)
     report = {"status": "running", "scope": "Raw-asset PD diagnostic; not BAM locomotion or sim2sim",
               "planned_ticks": args.steps, "recorded_ticks": 0, "mode": mode}
+    if args.actuator == "bam":
+        report["scope"] = "Official BAM policy replay on converted asset; complete task/contact parity pending"
     env = writer = None
     trace = []
     started = time.monotonic()
@@ -37,6 +46,11 @@ def main(mode="eval"):
             raise RuntimeError("No allocated CUDA device; run through a server job")
         cfg = DiagnosticEnvCfg()
         cfg.scene.num_envs = args.num_envs
+        if args.actuator == "bam":
+            from .bam_actuator import OfficialBamActuatorCfg
+            cfg.scene.robot.actuators = {"official_bam": OfficialBamActuatorCfg(joint_names_expr=list(JOINT_NAMES))}
+        # Keep the actual failed state available; assess it explicitly below.
+        cfg.terminations.fallen = None
         cfg.episode_length_s = (args.steps + 2) * 0.02
         if args.video or mode == "probe":
             from isaaclab.sensors import CameraCfg
@@ -49,7 +63,10 @@ def main(mode="eval"):
             env = DiagnosticEnv(cfg)
             obs, _ = env.reset()
             report.update(inspect_solver(env))
-            report["asset_checks"] = check_raw_asset(env, json.loads((asset_dir() / "reference.json").read_text()))
+            armature_override = None
+            if args.actuator == "bam":
+                armature_override = float(env.scene["robot"].actuators["official_bam"].armature[0, 0])
+            report["asset_checks"] = check_raw_asset(env, json.loads((asset_dir() / "reference.json").read_text()), armature_override)
             report["packages"] = {n: importlib.metadata.version(n) for n in ("isaaclab", "newton", "mujoco-warp", "warp-lang", "torch")}
             session = None
             if args.policy:
@@ -58,14 +75,17 @@ def main(mode="eval"):
                 if session.get_inputs()[0].shape != [1, 61] or session.get_outputs()[0].shape != [1, 14]:
                     raise ValueError("Expected a 61-input/14-output policy")
                 metadata = session.get_modelmeta().custom_metadata_map
-                if tuple(metadata.get("joint_names", "").split(",")) != JOINT_NAMES or float(metadata.get("action_scale", "nan")) != 1.0:
+                scales = np.asarray([float(x) for x in metadata.get("action_scale", "nan").split(",")])
+                if tuple(metadata.get("joint_names", "").split(",")) != JOINT_NAMES or scales.size not in (1, 14) or not np.all(scales == 1.0):
                     raise ValueError("Policy metadata does not match canonical joint order and scale")
                 report["policy_sha256"] = hashlib.sha256(args.policy.read_bytes()).hexdigest()
             if args.video:
                 import imageio.v2 as imageio
                 writer = imageio.get_writer(args.output / "rollout.mp4", fps=25)
             for step in range(args.steps):
-                state = obs["policy"]
+                state = obs["policy"].clone()
+                command = schedule[step][2] if schedule else (0., 0., 0.)
+                state[:, 48:51] = torch.tensor(command, device=env.device)
                 if tuple(state.shape) != (args.num_envs, 61) or not torch.isfinite(state).all():
                     raise ValueError("Malformed or non-finite observation")
                 if session:
@@ -78,7 +98,10 @@ def main(mode="eval"):
                     raise ValueError("Non-finite policy action")
                 robot = env.scene["robot"]
                 trace.append({"obs": state.detach().cpu().numpy().copy(), "action": action.cpu().numpy().copy(),
-                    "root_pos": as_torch(robot.data.root_pos_w).cpu().numpy().copy()})
+                    "root_pos": as_torch(robot.data.root_pos_w).cpu().numpy().copy(),
+                    "twist": torch.cat((as_torch(robot.data.root_lin_vel_b)[:, :2], as_torch(robot.data.root_ang_vel_b)[:, 2:3]), dim=-1).cpu().numpy().copy(),
+                    "command": np.asarray(command),
+                    "joint_pos": as_torch(robot.data.joint_pos).cpu().numpy().copy()})
                 if (args.video or mode == "probe") and step % 2 == 0:
                     camera = env.scene["camera"]
                     lookat = as_torch(robot.data.root_pos_w).clone()
@@ -99,8 +122,16 @@ def main(mode="eval"):
                 with torch.inference_mode():
                     obs, reward, terminated, truncated, info = env.step(action)
                 report["recorded_ticks"] += 1
+                from .mdp import fallen
+                if fallen(env).any():
+                    report["fallen_height_m"] = as_torch(robot.data.root_pos_w)[:, 2].cpu().tolist()
+                    report["fallen_gravity"] = as_torch(robot.data.projected_gravity_b).cpu().tolist()
+                    raise RuntimeError(f"Policy replay fell at tick {step + 1}")
                 if terminated.any() or truncated.any():
                     raise RuntimeError(f"Diagnostic terminated at tick {step + 1}; automatic reset is not a pass")
+            measured = np.stack([item["twist"] for item in trace])
+            commanded = np.stack([item["command"] for item in trace])[:, None, :]
+            report["twist_rmse"] = np.sqrt(np.mean((measured-commanded)**2, axis=(0, 1))).tolist()
             report["status"] = "passed"
     except Exception as error:
         report["status"] = "failed"
