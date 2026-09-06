@@ -16,7 +16,7 @@ def collider_group(label):
     raise ValueError(f"Unmapped walk collider: {label}")
 
 
-def align_collision_groups():
+def align_collision_groups(*_event_args):
     from newton import ShapeFlags
     from isaaclab_newton.physics.newton_manager import NewtonManager
     builder = NewtonManager._builder

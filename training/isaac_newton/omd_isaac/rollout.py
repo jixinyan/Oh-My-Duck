@@ -74,6 +74,9 @@ def main(mode="eval"):
             if args.actuator == "bam":
                 armature_override = float(env.scene["robot"].actuators["official_bam"].armature[0, 0])
             report["asset_checks"] = check_raw_asset(env, json.loads((asset_dir() / "reference.json").read_text()), armature_override)
+            if args.actuator == "bam":
+                from .collision_checks import check_walk_collisions
+                report["collision_checks"] = check_walk_collisions(env)
             report["packages"] = {n: importlib.metadata.version(n) for n in ("isaaclab", "newton", "mujoco-warp", "warp-lang", "torch")}
             session = None
             if args.policy:
