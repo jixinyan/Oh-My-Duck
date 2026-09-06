@@ -120,3 +120,28 @@ is under `src/oh_my_duck`; the obsolete tracked training packages and their stal
 bytecode/metadata have been removed. Original licenses and experiment evidence
 remain. The user confirmed module-batched implementation, then consolidated
 validation, with early physics gates where later work depends on physical semantics.
+
+
+## Architecture merge checkpoint, 2026-09-06
+
+The user requested merging the implemented domain architecture before completing
+runtime acceptance. Source has nine domain directories under `src/oh_my_duck`.
+Eight obsolete directories contained only ignored Python bytecode; these were
+removed from the working tree, along with generated egg metadata. Wheel package
+rules exclude bytecode. README now shows the actual directory tree.
+
+The immutable `5971dca` batch passed all eight training/resume combinations.
+SB3 passed four exports and local packages; RSL passed MuJoCo Walking, while
+three exports failed an elementwise stress gate on 100x random observations.
+Ordinary samples passed. The revised audit keeps the nominal elementwise gate
+and uses a per-action-vector infinity norm for stress samples, with both errors
+and tolerances reported; five focused tests reject injected numerical errors.
+This revision still needs actual checkpoint revalidation.
+
+EGL frames can be black during MuJoCo task replay and deployment rehearsal.
+Single-thread ONNX sessions passed one isolated render experiment but did not
+resolve full replay failures, so they are only an inference resource choice.
+Blank-frame rejection now also covers CPU rehearsal. Failed attempts remain in
+`outputs/acceptance-20260906-{rsl-rl,sb3}-01` and thread/EGL diagnostic directories.
+Newton DDP remains queued. No smoke checkpoint demonstrates learned behavior,
+and no policy was uploaded. Validation continues after the local main merge.

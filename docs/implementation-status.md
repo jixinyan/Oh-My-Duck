@@ -21,6 +21,15 @@ explicit evidence for implemented functionality. Work is local on
 | Multi-GPU | Native RSL MuJoCo DDP previously passed; Newton DDP queued; no distributed SB3 gradient claim |
 | Hardware | Unavailable; all hardware acceptance deferred |
 
+The consolidated batch at `5971dca` passed training and resume for all eight
+combinations. All four SB3 exports/local packages and the MuJoCo Walking RSL
+export/package passed. Three RSL exports hit the extreme-input numerical gate;
+normal inputs passed. The revised gate retains elementwise nominal checks and
+reports normwise stress error separately; runtime revalidation is pending.
+MuJoCo EGL video remains intermittent, including in CPU rehearsal. These are
+open validation issues, not evidence of accepted learned policies. The architecture
+is ready to merge locally; validation continues on a separate feature branch.
+
 The most recent CPU batch passed 24 lightweight tests and 59 task/SB3 semantic
 tests. Installed-runtime Isaac/sensor checks and the final end-to-end batch follow.
 

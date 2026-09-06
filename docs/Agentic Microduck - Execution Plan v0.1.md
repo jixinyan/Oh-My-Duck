@@ -1,7 +1,5 @@
 ---
 
-> 当前实现状态（2026-09-06）：源码按 `src/oh_my_duck/{rl,agentic,robotics,core,perception,voice,experience,infrastructure,cli}` 分域，旧 `training/` 包已移除。两个代表任务、两个仿真后端与两个原生 PPO 已有 smoke/恢复/导出证据；行为、sim2sim 和最终统一验收单独记录。单卡本机运行，多卡才提交 job；W&B 离线。采用“模块成批实现 → 静态/CPU 检查 → 必要物理门槛 → 统一端到端验收”的开发节奏。详见 [当前状态](implementation-status.md) 与 [证据](reports/domain-refactor.md)。
-
 title: Agentic Microduck — 分步执行计划
 version: 0.2
 status: In progress
@@ -12,6 +10,8 @@ tags:
   - implementation-plan
   - sim-to-real
 ---
+
+> 当前实现状态（2026-09-06）：源码按 `src/oh_my_duck/{rl,agentic,robotics,core,perception,voice,experience,infrastructure,cli}` 分域，旧 `training/` 包已移除。两个代表任务、两个仿真后端与两个原生 PPO 已有 smoke/恢复/导出证据；行为、sim2sim 和最终统一验收单独记录。单卡本机运行，多卡才提交 job；W&B 离线。采用“模块成批实现 → 静态/CPU 检查 → 必要物理门槛 → 统一端到端验收”的开发节奏。结构重构先合入本地 main，验证另开分支：8/8 短训练与恢复通过；极端输入导出门槛、MuJoCo EGL 视频及完整行为验收仍待完成。详见 [当前状态](implementation-status.md) 与 [证据](reports/domain-refactor.md)。
 
 # Agentic Microduck · 分步执行计划 v0.2
 
@@ -124,7 +124,7 @@ tags:
 
 工作内容：
 
-- 扩展第 01–02 步已建立的代码仓库：公共契约与评测位于 `training/common/`，官方后端位于 `training/mujoco/`，迁移新增 `training/isaac_newton/`。统一入口显式选择后端，其他包随实际功能添加。
+- 扩展第 01–02 步已建立的代码仓库：公共契约位于 `src/oh_my_duck/core/`，评测位于 `rl/evaluation/`，两个仿真后端位于 `rl/backends/{mujoco,isaac_newton}/`。任务、MDP 与原生 PPO 分别位于 `rl/tasks/`、`rl/mdp/`、`rl/learners/`；其他领域按整体项目 scope 逐步实现。
 - 根据官方支持情况选择并固定 Isaac Lab、Newton 与 MuJoCo-Warp 的兼容组合；将选择理由和限制写入版本记录。
 - 运行选定后端的最小物理示例，确认 GPU 物理步骤可执行。
 - 导入 Microduck 资产，核对几何、关节、质量惯量、碰撞、坐标轴、足部和默认姿态；需要转换时保留可重现的转换过程。

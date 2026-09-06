@@ -102,6 +102,20 @@ The first scope is one robot, one external host and one active task. Complex who
 
 All first-party code lives in `src/oh_my_duck`, grouped by project capability: `rl`, `agentic`, `robotics`, `perception`, `voice`, and `experience`, with shared `core` and `infrastructure` modules. Dependency locks live in `environments/`.
 
+```text
+src/oh_my_duck/
+├── rl/              tasks, rewards, simulators, PPO, export and evaluation
+├── agentic/         external Harness, tools, skills and application assembly
+├── robotics/        robot models, motors, execution and policy interfaces
+├── perception/      perception interfaces
+├── voice/           audio and voice interfaces
+├── experience/      episode records
+├── core/            shared contracts
+├── infrastructure/  environments, jobs and tracking
+└── cli/             public commands
+```
+
+
 The public development entry point is `python omd.py --help`. Backend dependencies are isolated. Voice, tools and hardware packages will be added as those milestones are implemented.
 
 ## Upstream

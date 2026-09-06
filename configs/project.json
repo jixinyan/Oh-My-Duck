@@ -87,5 +87,16 @@
     "video": "offscreen_1280x720",
     "single_gpu": "direct_development_host"
   },
-  "rl_framework_registry": "oh_my_duck.rl.training.frameworks:default_framework_registry"
+  "rl_framework_registry": "oh_my_duck.rl.training.frameworks:default_framework_registry",
+  "rl_acceptance": {
+    "state": "validation_in_progress",
+    "smoke_and_resume": "8_of_8_passed_at_5971dca",
+    "open_items": [
+      "RSL extreme-input export parity revalidation",
+      "MuJoCo EGL video and CPU rehearsal",
+      "consolidated sim2sim",
+      "Newton multi-GPU execution queued",
+      "learned behavior validation"
+    ]
+  }
 }

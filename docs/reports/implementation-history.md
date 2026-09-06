@@ -38,13 +38,13 @@ Updated: 2026-09-06. Current priority: **complete the whole-project framework, t
 - The full upstream semantic audit is **not complete**. Source inventories and targeted review do not substitute for it.
 - No training or evaluation job has been submitted in this framework-first iteration.
 
-See [framework validation](framework-validation.md) and [architecture](architecture.md). Subsequent job results will include task IDs, configurations, logs, metrics and video links.
+See [framework validation](framework-validation.md) and [architecture](../architecture.md). Subsequent job results will include task IDs, configurations, logs, metrics and video links.
 
 ## Isaac reference review and Git workflow (2026-09-06)
 
 Reviewed `kabilankb/isaaclab-microduck` at `4310fe0` without running its simulator. Static comparison confirms the same HOME names/order/values as our contract; asset parity, runtime joint order, BAM, delayed observations, environment compatibility and video remain unvalidated. The reference uses explicit PD and has inconsistent locomotion status descriptions; its results are not our baseline. See the [review and implementation sequence](isaac-newton-reference-review.md).
 
-Local history already contained framework commit `bca0a90`; this investigation uses `docs/isaac-newton-reference-review`. Subsequent features use focused branches and commits per [development conventions](development.md). No remote push has occurred.
+Local history already contained framework commit `bca0a90`; this investigation uses `docs/isaac-newton-reference-review`. Subsequent features use focused branches and commits per [development conventions](../development.md). No remote push has occurred.
 
 ## Environment status correction (2026-09-06)
 
@@ -66,7 +66,7 @@ Newton training environment installation completed. Dependency checks pass for 1
 
 ## Earlier checkpoint: both environments installed (2026-09-06)
 
-Both Isaac environment setups and dependency checks now pass; this supersedes the preceding conversion-installing status. The Isaac asset conversion job `omd-isaac-assets-20260906-01` (`local-d0faa6d27c42`) has been submitted for one GPU and is queued. MuJoCo probe remains queued for project quota. No GPU results exist yet. Remaining work starts with conversion/solver diagnostics, then BAM and official locomotion migration; see [the current integration guide](isaac-newton.md).
+Both Isaac environment setups and dependency checks now pass; this supersedes the preceding conversion-installing status. The Isaac asset conversion job `omd-isaac-assets-20260906-01` (`local-d0faa6d27c42`) has been submitted for one GPU and is queued. MuJoCo probe remains queued for project quota. No GPU results exist yet. Remaining work starts with conversion/solver diagnostics, then BAM and official locomotion migration; see [the current integration guide](../isaac-newton.md).
 
 ## Current checkpoint: worker results (2026-09-06)
 
@@ -91,7 +91,7 @@ The user explicitly agreed to the NVIDIA Omniverse EULA. Submitted `omd-isaac-as
 - Conversion retry `omd-isaac-assets-20260906-02` succeeded, task `e9ec42f9-1680-4831-86bf-48719990a2ce`; verified asset fingerprint `e158fea3b1b7edc26738ff877ef7bd1660ae56ac333c27c0c2fd8b5b3c694c3a`. EULA startup is resolved.
 - Probe `omd-isaac-probe-20260906-01` failed at argument parsing because the submitted separator was misplaced; no simulation occurred. Corrected probe `omd-isaac-probe-20260906-02`, task `f525ac94-c18b-4fb7-aa85-425e448f46ed`, succeeded: 2 environments, 100 control ticks, Newton `SolverMuJoCo` on `cuda:0`, canonical joint/action mapping and raw asset checks passed. Evidence: `outputs/isaac-probe-20260906-02/`.
 - Manual inspection found the initial video's camera pose was stale despite nonuniform frames. `69c3329` enables live camera pose updates and asserts rendered camera position; repeat validation pending. Existing physical checks remain valid, but that video is not accepted as a useful visual diagnostic. USD physics-material binding warnings, contact parity and BAM remain open.
-- Per user steering, branch `feat/rl-framework-selection` introduces independent RL-framework selection. RSL-RL routes preserve the existing launch commands; SB3 PPO delegates to pinned Isaac Lab with an optional dependency extra. Actual SB3 install and task-aware CLI help pass; GPU learning and framework-native checkpoint lifecycle verification remain pending. Root suite: 17 passing tests. See [RL framework scope and boundaries](rl-frameworks.md).
+- Per user steering, branch `feat/rl-framework-selection` introduces independent RL-framework selection. RSL-RL routes preserve the existing launch commands; SB3 PPO delegates to pinned Isaac Lab with an optional dependency extra. Actual SB3 install and task-aware CLI help pass; GPU learning and framework-native checkpoint lifecycle verification remain pending. Root suite: 17 passing tests. See [RL framework scope and boundaries](../rl-frameworks.md).
 
 ## Current checkpoint: Newton and two RL frameworks validated for diagnostics (2026-09-06)
 
@@ -113,7 +113,7 @@ Full official AGENTS.md read; 199 official CPU regressions passed, 1 skipped. Of
 
 ## Representative RL reproduction scope (2026-09-06)
 
-用户收敛验收范围为官方 Flat Walking 与 Flat StandUp，覆盖 MuJoCo/mjlab 与 Isaac Lab/Newton、RSL-RL 与 SB3，共 8 个组合。完整 33 项官方任务仅作扩展清单，不能把注册当作复现通过。各框架保留原生 PPO：RSL-RL 使用原生多 GPU 分布式学习，SB3 使用向量环境与跨 GPU 独立任务并行，不引入异步 actor–learner。吞吐通过实际测量决定 GPU/环境数量。W&B 为标配但只用 offline，现有线上账号不是用户账号，禁止上传或同步。当前已验证结果保持原有范围，新增组合仍需 smoke、恢复、导出、有效行为与 sim2sim 验收。任务选择和日志默认值集中在 `configs/training.json`，详细矩阵见 [RL reproduction](rl-reproduction.md)。本地 main 已合并，新开发分支为 `feat/rl-task-reproduction`。
+用户收敛验收范围为官方 Flat Walking 与 Flat StandUp，覆盖 MuJoCo/mjlab 与 Isaac Lab/Newton、RSL-RL 与 SB3，共 8 个组合。完整 33 项官方任务仅作扩展清单，不能把注册当作复现通过。各框架保留原生 PPO：RSL-RL 使用原生多 GPU 分布式学习，SB3 使用向量环境与跨 GPU 独立任务并行，不引入异步 actor–learner。吞吐通过实际测量决定 GPU/环境数量。W&B 为标配但只用 offline，现有线上账号不是用户账号，禁止上传或同步。当前已验证结果保持原有范围，新增组合仍需 smoke、恢复、导出、有效行为与 sim2sim 验收。任务选择和日志默认值集中在 `configs/training.json`，详细矩阵见 [RL reproduction](../rl-reproduction.md)。本地 main 已合并，新开发分支为 `feat/rl-task-reproduction`。
 
 
 ## 2026-09-06：任务源码归属调整
@@ -129,7 +129,7 @@ Full official AGENTS.md read; 199 official CPU regressions passed, 1 skipped. Of
 
 ## 2026-09-06 — approved domain architecture refactor
 
-业务实现统一进入 `src/oh_my_duck`，按 RL、agentic、robotics、perception、voice、experience、core 和 infrastructure 分层。训练依赖锁独立保存在 `environments/`；任务、MDP、机器人和策略配置均为项目源码。外部 harness 保持规划/记忆职责，尚未实现的适配器不声明可用。详见 [architecture.md](architecture.md)。
+业务实现统一进入 `src/oh_my_duck`，按 RL、agentic、robotics、perception、voice、experience、core 和 infrastructure 分层。训练依赖锁独立保存在 `environments/`；任务、MDP、机器人和策略配置均为项目源码。外部 harness 保持规划/记忆职责，尚未实现的适配器不声明可用。详见 [architecture.md](../architecture.md)。
 
 迁移后轻量测试 21 项、MuJoCo/SB3/官方 MDP 与 manifest 测试 53 项通过；新训练入口和 Newton 任务适配仍需 GPU 验证。双任务 × 双后端 × 双框架的训练、恢复、导出与回放验收尚未全部完成。旧代码清理在对应验证通过后执行。
 

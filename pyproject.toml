@@ -31,3 +31,6 @@ testpaths = ["tests"]
 [tool.setuptools.package-data]
 "oh_my_duck.robotics.microduck" = ["microduck/**/*", "xl330_test_bench/**/*"]
 "oh_my_duck.rl.backends.isaac_newton" = ["resources/*.usda"]
+
+[tool.setuptools.exclude-package-data]
+"*" = ["**/__pycache__/*", "**/*.pyc", "**/*.pyo"]
