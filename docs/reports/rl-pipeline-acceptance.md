@@ -60,11 +60,11 @@ were checked. Tests: 27 lightweight + 72 task/SB3; earlier installed-runtime
 checks passed seven Isaac and two Newton binding tests.
 
 Architecture is merged into local `main` (`6303ca4`); follow-up fixes are on
-`feat/rl-pipeline-validation`. Nothing has been pushed.
+`feat/rl-pipeline-validation`.
 
 Long training and learned gait/recovery acceptance remain. Native RSL MuJoCo DDP
 has earlier passing evidence; the two-GPU Newton StandUp smoke job
-`omd-newton-stand-rsl-0906-01` is still queued (`local-b8a72a8b843d`). This is not
-DDP validation. Single-GPU work runs directly on the host; multi-GPU runs use the
+`omd-newton-stand-rsl-0906-01` started running on 2026-09-07 (job `a52ff51b`); both native worker ranks started.
+Completion and DDP acceptance remain pending. Single-GPU work runs directly on the host; multi-GPU runs use the
 scheduler. Host GPUs are shared and busy, so no isolated throughput or optimal
 GPU/environment-count claim is made. W&B remains offline.

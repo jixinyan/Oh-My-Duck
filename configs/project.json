@@ -96,7 +96,7 @@
     "open_items": [
       "MuJoCo EGL video and CPU rehearsal",
       "consolidated sim2sim",
-      "Newton multi-GPU execution queued",
+      "Newton multi-GPU job a52ff51b running; acceptance pending",
       "learned behavior validation"
     ],
     "architecture_merge": "6303ca4",

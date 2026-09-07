@@ -1,9 +1,9 @@
 # Implementation status
 
-Updated 2026-09-06. The product scope remains the Agentic Microduck Project Design.
+Updated 2026-09-07. The product scope remains the Agentic Microduck Project Design.
 Implementation proceeds by domain, with interfaces for later capabilities and
 explicit evidence for implemented functionality. Architecture merged into local `main` at `6303ca4`; follow-up validation is on
-`feat/rl-pipeline-validation`. No push or public policy upload has occurred.
+`feat/rl-pipeline-validation`. No public policy upload has occurred.
 
 | Component | Current state |
 |---|---|
@@ -18,7 +18,7 @@ explicit evidence for implemented functionality. Architecture merged into local 
 | Task behavior | All five-iteration policies fail behavior gates; long training and convergence acceptance remain |
 | Task replay | All 24 replay contexts completed; 60 videos and finite 61/14 traces checked |
 | CPU rehearsal/sim2sim/local packages | All eight policies exported/packaged and replayed in both backends plus CPU/BAM |
-| Multi-GPU | Native RSL MuJoCo DDP previously passed; Newton DDP queued; no distributed SB3 gradient claim |
+| Multi-GPU | Native RSL MuJoCo DDP previously passed; Newton DDP running (job `a52ff51b`), acceptance pending; no distributed SB3 gradient claim |
 | Hardware | Unavailable; all hardware acceptance deferred |
 
 The consolidated batch at `5971dca` passed training and resume for all eight
