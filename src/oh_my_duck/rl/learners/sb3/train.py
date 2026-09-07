@@ -79,6 +79,7 @@ def main():
     parser.add_argument("--backend", default="mujoco")
     parser.add_argument("--num-envs", type=int, default=64)
     parser.add_argument("--iterations", type=int, default=5)
+    parser.add_argument("--checkpoint-interval", type=int, help="PPO updates between native checkpoint bundles; default: task save interval")
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--output", type=Path, required=True)
@@ -93,6 +94,9 @@ def main():
     task = project_tasks().get(args.task)
     binding = task.binding(args.backend)
     cfg, official_agent = build_environment(binding), binding.rsl_config.build()
+    checkpoint_interval = args.checkpoint_interval or official_agent.save_interval
+    if args.checkpoint_interval is not None and args.checkpoint_interval < 1:
+        parser.error("checkpoint-interval must be positive")
     cfg.scene.num_envs = args.num_envs
     cfg.seed = args.seed
     if args.episode_length_s is not None:
@@ -134,8 +138,16 @@ def main():
         callback = RewardAudit(adapter)
         before = model.num_timesteps
         environment_step_before = adapter.env.common_step_counter
+        from .snapshots import PeriodicCheckpoint
+        snapshots = PeriodicCheckpoint(args.output / 'checkpoints', checkpoint_interval, adapter, {
+            'task': args.task, 'backend': args.backend, 'framework': 'sb3',
+            'num_envs': args.num_envs, 'timesteps_before': before,
+            'upstream': json.loads((ROOT / 'configs/upstream.json').read_text())['repositories'],
+            'provenance': provenance, 'official_agent': asdict(official_agent),
+            'resume': str(args.resume) if args.resume else None,
+        })
         model.learn(total_timesteps=args.iterations * args.num_envs * official_agent.num_steps_per_env,
-                    callback=callback, reset_num_timesteps=not bool(args.resume))
+                    callback=[callback, snapshots], reset_num_timesteps=not bool(args.resume))
         model.save(args.output / "model.zip")
         normalized.save(args.output / "vecnormalize.pkl")
         # Verify native reload including normalization, not just ZIP existence.
