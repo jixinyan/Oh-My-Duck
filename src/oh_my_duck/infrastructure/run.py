@@ -15,6 +15,8 @@ from oh_my_duck.rl.training.frameworks import default_framework_registry
 
 
 def main():
+    from oh_my_duck.infrastructure.headless import configure_egl
+    configure_egl()
     parser = argparse.ArgumentParser(description=__doc__, add_help=False)
     parser.add_argument("action", choices=["assets", "probe", "train", "export", "eval", "compare", "rehearsal", "package"])
     parser.add_argument("--backend", default="mujoco")

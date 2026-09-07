@@ -10,7 +10,7 @@ from oh_my_duck.core.paths import project_root
 def source_provenance():
     root = project_root()
     digest = hashlib.sha256()
-    paths = sorted([*root.joinpath("src").rglob("*.py"), *root.joinpath("configs").glob("*.json")])
+    paths = sorted([*root.joinpath("src").rglob("*.py"), *root.joinpath("configs").rglob("*.json")])
     for path in paths:
         digest.update(str(path.relative_to(root)).encode() + b"\0" + path.read_bytes() + b"\0")
     packages = {}

@@ -97,7 +97,7 @@ def test_finite_helper_sanitizes_nan_and_inf():
 
 def test_safe_obs_wrappers_are_wired_into_the_critic():
     # Guards must actually be installed on the env cfg, not just exist.
-    from oh_my_duck.rl.tasks.microduck_velocity_env_cfg import (
+    from oh_my_duck.rl.tasks.walking.environment import (
         make_microduck_velocity_env_cfg,
     )
 
@@ -110,7 +110,7 @@ def test_safe_obs_wrappers_are_wired_into_the_critic():
 
 
 def test_nan_state_termination_watches_the_contact_sensor():
-    from oh_my_duck.rl.tasks.microduck_velocity_env_cfg import (
+    from oh_my_duck.rl.tasks.walking.environment import (
         make_microduck_velocity_env_cfg,
     )
 
@@ -123,7 +123,7 @@ def test_standup_env_is_also_guarded():
     # The deployed standing policy trains on StandUp, which builds on mjlab's
     # base env (NOT the microduck velocity env) and therefore does not inherit
     # the guards wired there.
-    from oh_my_duck.rl.tasks.microduck_standup_env_cfg import (
+    from oh_my_duck.rl.tasks.stand_up.environment import (
         make_microduck_standup_env_cfg,
     )
 

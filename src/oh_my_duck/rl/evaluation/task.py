@@ -8,12 +8,18 @@ from collections import defaultdict
 
 
 def main():
+    from oh_my_duck.infrastructure.headless import configure_egl
+
+    configure_egl()
+    from oh_my_duck.rl.evaluation.mujoco_video import MujocoVideo
+
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--task", required=True)
     parser.add_argument("--backend", required=True)
     parser.add_argument("--policy", required=True, type=Path)
     parser.add_argument("--output", required=True, type=Path)
     parser.add_argument("--video", action="store_true")
+    parser.add_argument("--mujoco-renderer", choices=("egl", "osmesa"), default="egl")
     parser.add_argument("--width", type=int, default=1280)
     parser.add_argument("--height", type=int, default=720)
     parser.add_argument("--seed", type=int, default=42)
@@ -51,15 +57,25 @@ def main():
         "backend": args.backend,
         "policy_sha256": hashlib.sha256(args.policy.read_bytes()).hexdigest(),
         "auto_reset": False,
+        "mujoco_renderer": args.mujoco_renderer,
         "render_resolution": [args.width, args.height],
+        "renderer": "isolated-native-mujoco" if args.backend == "mujoco" else "native-newton",
         "seed": args.seed,
         "scenarios": {},
     }
-    env = writer = None
+    env = writer = video = None
     try:
         env = create_environment(
-            task, cfg, backend=args.backend, device="cuda:0", render_mode="rgb_array" if args.video else None
+            task,
+            cfg,
+            backend=args.backend,
+            device="cuda:0",
+            render_mode="rgb_array" if args.video and args.backend != "mujoco" else None,
         )
+        if args.video and args.backend == "mujoco":
+            video = MujocoVideo(
+                env.sim.mj_model, width=args.width, height=args.height, renderer=args.mujoco_renderer
+            )
         for index, scenario in enumerate(protocol.scenarios):
             if scenario.reset_probabilities is not None:
                 event = env.event_manager.get_term_cfg("set_ground_state")
@@ -101,13 +117,14 @@ def main():
                 }.items():
                     trace[key].append(value)
                 if writer is not None and step % 2 == 0:
-                    if args.backend == "mujoco":
-                        import mujoco
-
-                        camera = env._offline_renderer._cam
-                        camera.type = mujoco.mjtCamera.mjCAMERA_FREE
-                        camera.lookat[:] = robot.root_link_pos_w[0].cpu().numpy()
-                    frame = env.render()
+                    if video is not None:
+                        frame = video.render(
+                            env.sim.data.qpos[0].cpu().numpy(),
+                            env.sim.data.qvel[0].cpu().numpy(),
+                            robot.root_link_pos_w[0].cpu().numpy(),
+                        )
+                    else:
+                        frame = env.render()
                     if (
                         frame.shape != (args.height, args.width, 3)
                         or not np.isfinite(frame).all()
@@ -150,11 +167,20 @@ def main():
         report.update(status="error", error=repr(error), traceback=traceback.format_exc())
         raise
     finally:
-        if writer is not None:
-            writer.close()
-        if env is not None:
-            env.close()
-        (args.output / "result.json").write_text(json.dumps(report, indent=2) + "\n")
+        try:
+            if writer is not None:
+                writer.close()
+            if env is not None:
+                env.close()
+            if video is not None:
+                video.close()
+        except Exception as cleanup_error:
+            report["cleanup_error"] = repr(cleanup_error)
+            if report.get("status") != "error":
+                report["status"] = "error"
+                raise
+        finally:
+            (args.output / "result.json").write_text(json.dumps(report, indent=2) + "\n")
     print(json.dumps(report, indent=2))
     return 0 if report["status"] == "passed" else 2
 

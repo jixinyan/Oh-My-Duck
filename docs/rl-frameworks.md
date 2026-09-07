@@ -80,3 +80,8 @@ SB3 export uses a registered inference runner extension with the original native
 
 
 Current acceptance scope and native parallelism: [representative reproduction](rl-reproduction.md). W&B is now the default training logger, strictly offline; online account credentials are not used for training uploads. MuJoCo SB3 export accepts any registered official task and applies its numerical gate per export; acceptance evidence currently remains limited to the previously verified walking task.
+
+SB3 checkpoints include an environment-progress companion in `run.json`, alongside
+the native model and VecNormalize files. It preserves the official task curriculum
+counter on resume, following the native mjlab/RSL convention. See
+[resume validation](reports/resume-validation.md) for legacy-run handling and evidence.

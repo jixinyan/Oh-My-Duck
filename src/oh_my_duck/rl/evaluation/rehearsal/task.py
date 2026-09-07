@@ -9,11 +9,17 @@ import math
 
 
 def main():
+    from oh_my_duck.infrastructure.headless import configure_egl
+
+    configure_egl()
+    from oh_my_duck.rl.evaluation.mujoco_video import MujocoVideo
+
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--task", required=True)
     parser.add_argument("--policy", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--video", action="store_true")
+    parser.add_argument("--mujoco-renderer", choices=("egl", "osmesa"), default="egl")
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--width", type=int, default=1280)
     parser.add_argument("--height", type=int, default=720)
@@ -41,7 +47,11 @@ def main():
     model, data, controller, _ = ip.load_mujoco_with_bam(str(scene), bam, 0.005, 0.1, ip.BAM_VIN_MIN)
     model.vis.global_.offwidth = args.width
     model.vis.global_.offheight = args.height
-    renderer = mujoco.Renderer(model, width=args.width, height=args.height) if args.video else None
+    renderer = (
+        MujocoVideo(model, width=args.width, height=args.height, renderer=args.mujoco_renderer)
+        if args.video
+        else None
+    )
     writer = None
     report = {
         "task": task.id,
@@ -49,6 +59,7 @@ def main():
         "policy_sha256": hashlib.sha256(args.policy.read_bytes()).hexdigest(),
         "seed": args.seed,
         "auto_reset": False,
+        "mujoco_renderer": args.mujoco_renderer,
         "scenarios": {},
         "physics_dt": 0.005,
         "policy_dt": 0.02,
@@ -93,10 +104,6 @@ def main():
                 writer = imageio.get_writer(
                     args.output / (scenario.name + ".mp4"), fps=25, codec="libx264", macro_block_size=1
                 )
-                camera = mujoco.MjvCamera()
-                camera.distance = 0.85
-                camera.azimuth = 135
-                camera.elevation = -20
             for step, command in enumerate(scenario.commands):
                 policy.set_vel_cmd(*command)
                 obs = policy.get_observations().copy()
@@ -126,12 +133,14 @@ def main():
                 }.items():
                     trace[key].append(value)
                 if writer is not None and step % 2 == 0:
-                    camera.lookat[:] = data.xpos[policy.trunk_base_id]
-                    renderer.update_scene(data, camera=camera)
-                    frame = renderer.render()
-                    if frame.shape != (args.height,args.width,3) or not np.isfinite(frame).all() or np.ptp(frame.astype(float)) < 1:
-                        imageio.imwrite(args.output/(scenario.name+'_invalid.png'),frame)
-                        raise ValueError('CPU rehearsal produced an empty rendered frame')
+                    frame = renderer.render(data.qpos, data.qvel, data.xpos[policy.trunk_base_id])
+                    if (
+                        frame.shape != (args.height, args.width, 3)
+                        or not np.isfinite(frame).all()
+                        or np.ptp(frame.astype(float)) < 1
+                    ):
+                        imageio.imwrite(args.output / (scenario.name + "_invalid.png"), frame)
+                        raise ValueError("CPU rehearsal produced an empty rendered frame")
                     writer.append_data(frame)
                     if step == 0:
                         imageio.imwrite(args.output / (scenario.name + ".png"), frame)
@@ -169,11 +178,18 @@ def main():
         report.update(status="error", error=repr(error), traceback=traceback.format_exc())
         raise
     finally:
-        if writer is not None:
-            writer.close()
-        if renderer is not None:
-            renderer.close()
-        (args.output / "result.json").write_text(json.dumps(report, indent=2) + "\n")
+        try:
+            if writer is not None:
+                writer.close()
+            if renderer is not None:
+                renderer.close()
+        except Exception as cleanup_error:
+            report["cleanup_error"] = repr(cleanup_error)
+            if report.get("status") != "error":
+                report["status"] = "error"
+                raise
+        finally:
+            (args.output / "result.json").write_text(json.dumps(report, indent=2) + "\n")
     print(json.dumps(report, indent=2))
     return 0 if report["status"] == "passed" else 2
 

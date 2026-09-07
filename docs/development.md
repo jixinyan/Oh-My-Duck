@@ -45,3 +45,18 @@ Update the original design and execution documents when scope, module responsibi
 Resource allocation is explicit and based on the experiment. The user permits single-node multi-GPU jobs and does not impose an artificial runtime or task-count cap. Never infer that reserving more GPUs automatically parallelizes a single-GPU trainer.
 
 **执行方式更新（2026-09-06，用户最新指示）**：单 GPU 开发、验证和训练直接在开发机 headless 运行；涉及多 GPU 的实验再提交 job。此前已提交任务保留其独立证据记录。
+
+
+## Diagrams
+
+Use illustrative, editable SVG flowcharts in `docs/diagrams/` for new or revised
+project diagrams. Embed them with relative Markdown image paths. The README's
+[project overview](diagrams/project-overview.svg) and
+[RL pipeline](diagrams/rl-pipeline.svg) establish the visual style: vector icons,
+clear module groups, readable labels, directed connections and explicit external
+or future boundaries. Keep diagrams focused on project scope; experiment progress
+belongs in reports. Include SVG `<title>` / `<desc>` and descriptive Markdown alt
+text. Use a self-contained viewBox and system font fallbacks; no scripts, remote
+fonts or rasterized substitutes. Check XML, references and a rendered preview.
+
+Task families keep `environment.py` and `ppo.py` together under `src/oh_my_duck/rl/tasks/<family>/`. See the [RL source map](../src/oh_my_duck/rl/README.md) and [full training campaigns](rl-campaigns.md).

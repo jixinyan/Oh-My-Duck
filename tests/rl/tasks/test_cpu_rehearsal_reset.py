@@ -4,7 +4,7 @@ import numpy as np
 import torch
 from oh_my_duck.rl.evaluation.rehearsal.infer_policy import MICRODUCK_XML
 from oh_my_duck.rl.evaluation.rehearsal.state import sample_ground_pose
-from oh_my_duck.rl.tasks.microduck_standup_env_cfg import make_microduck_standup_env_cfg
+from oh_my_duck.rl.tasks.stand_up.environment import make_microduck_standup_env_cfg
 from oh_my_duck.rl.evaluation.protocols import standup
 
 

@@ -34,7 +34,8 @@ cli/                         unified public commands
 core/                        shared contracts and project configuration
 agentic/                     harness, tools, skills and application assembly
 robotics/                    execution backends, policies and Microduck models/motors
-rl/tasks/                    editable task recipes and catalog
+rl/tasks/<family>/           environment.py + ppo.py per task family
+rl/tasks/shared/             symmetry, terrain and task variants
 rl/mdp/                      observations, rewards, resets, commands and curricula
 rl/models/                   configurable actor/critic definitions
 rl/backends/{mujoco,isaac_newton}/
@@ -42,6 +43,7 @@ rl/learners/{rsl_rl,sb3}/      native PPO integrations
 rl/training/                 task/framework registry and process dispatch
 rl/artifacts/                normalized export and schema-2 packaging
 rl/evaluation/               audits, metrics and deployment rehearsal
+rl/experiments/              independent per-GPU training campaigns
 perception/                  active perception interfaces
 voice/                       audio, ASR, TTS and persistent voice interfaces
 experience/                  episode recording and replay contracts

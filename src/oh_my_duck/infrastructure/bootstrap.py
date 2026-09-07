@@ -26,7 +26,11 @@ def main():
     parser.add_argument("--skip-env", action="store_true")
     parser.add_argument("--backend", choices=["mujoco", "isaac-newton"], default="mujoco")
     parser.add_argument("--rl-framework", choices=["rsl-rl", "sb3"], default="rsl-rl")
+    parser.add_argument("--software-renderer", action="store_true", help="Install pinned local OSMesa for headless video on Ubuntu 22.04 amd64")
     args = parser.parse_args()
+    if args.software_renderer:
+        from oh_my_duck.infrastructure.headless import install_osmesa
+        install_osmesa()
     if args.backend == "isaac-newton":
         run([sys.executable, "-m", "oh_my_duck.infrastructure.bootstrap_isaac", "--rl-framework", args.rl_framework, *(["--skip-env"] if args.skip_env else [])])
         return
@@ -64,7 +68,7 @@ def main():
         project = ROOT / "environments/mujoco"
         extras = ["--extra", "sb3"] if args.rl_framework == "sb3" else []
         run(["uv", "sync", "--project", project, "--locked", "--python", "3.12", *extras], env=env)
-    print("Bootstrap complete. GPU validation must run through the scheduler.")
+    print("Bootstrap complete. Run single-GPU validation locally; schedule multi-GPU experiments.")
 
 
 if __name__ == "__main__":

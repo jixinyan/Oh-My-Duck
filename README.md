@@ -27,22 +27,7 @@ The duck's name, voice and remembered experiences give it continuity. Learning n
 
 ## How it fits together
 
-```mermaid
-flowchart TB
-    User["User · text / explicit voice recording / voice setup"]
-    User --> Voice["Voice services\nASR · voice profiles · TTS · playback"]
-    User --> Bridge["Harness bridge"]
-    Voice <--> Bridge
-    Bridge <--> Harness["External embodied harness\nreasoning · planning · scheduling · memory"]
-    Bridge <--> Tools["Robot tools\nperception · skills · state · cancellation"]
-    Tools <--> Sim["Simulation adapters"]
-    Tools <--> Real["Microduck adapter\nofficial onboard runtime"]
-    Sim <--> World["Simulated robot and sensors"]
-    Real <--> Duck["Physical Microduck\nmotion · camera · ToF · IMU · audio"]
-    Tools --> Episodes["Episode recorder\nobservations · actions · outcomes · voice events"]
-    Voice --> Episodes
-    Episodes --> Harness
-```
+![Project architecture: interaction, external harness, robot tools, simulation and experience recording.](docs/diagrams/project-overview.svg)
 
 **The external harness supplies the agent loop.** Oh My Duck supplies robot-specific tools, execution adapters, training, voice services and evidence. We do not build a second planner or long-term memory system inside the robot integration. A deterministic mock will stand in for the unfinished harness during protocol development.
 
@@ -50,24 +35,15 @@ High-frequency joint control stays with the policy/runtime. The harness chooses 
 
 ## Train with MuJoCo or Isaac / Newton
 
-```mermaid
-flowchart LR
-    Assets["Robot assets · task definitions · BAM actuator model"]
-    Assets --> MJ["Official training backend\nmjlab / MuJoCo-Warp"]
-    Assets --> Isaac["Migrated training backend\nIsaac Lab / Newton"]
-    MJ --> Package["Policy package\ncheckpoint · normalized ONNX · metadata"]
-    Isaac --> Package
-    Package --> Compare["Sim2sim evaluation\nsame commands · state · metrics"]
-    Compare --> Evidence["Headless rollouts\ntrajectories · metrics · video"]
-    Package --> Rehearsal["Official CPU MuJoCo / BAM rehearsal"]
-    Rehearsal --> Hardware["Later: onboard and hardware validation"]
-```
+![RL pipeline: two simulation backends and two native PPO frameworks, normalized export, sim2sim and deployment rehearsal.](docs/diagrams/rl-pipeline.svg)
 
-RL frameworks are a separate extension axis: RSL-RL and Stable-Baselines3 are the first integration targets, with explicit adapters for each supported simulation backend. Framework-native checkpoints and normalization remain part of the policy artifact; framework-independent evaluation enables comparison. See [RL framework choices and extension](docs/rl-frameworks.md).
+RL frameworks are a separate extension axis: RSL-RL and Stable-Baselines3 are the initial supported integrations, with explicit adapters for each supported simulation backend. Framework-native checkpoints and normalization remain part of the policy artifact; framework-independent evaluation enables comparison. See [RL framework choices and extension](docs/rl-frameworks.md).
 
 Both training backends are part of the project scope. The official backend remains available after the Isaac migration. **Isaac uses Newton**, initially targeting its MuJoCo-Warp solver; a PhysX substitution is not an equivalent backend.
 
 Representative RL tasks are flat-ground Walking and StandUp. Task recipes, MDP functions, robot assets and actor/critic settings are maintained in the [RL and robotics modules](docs/architecture.md#source-organization); both backends build on this owned source. BAM actuator behavior, joint mapping, observation/action timing and normalization must match before comparing learning results. Compatible joint policies follow the official **61-observation / 14-action, 50 Hz** contract. Vision/navigation policies need their own adapters; an arbitrary VLA cannot be deployed by simply renaming its output.
+
+Task families have separate environment and PPO configurations under `rl/tasks/<family>/`; see the [RL source map](src/oh_my_duck/rl/README.md). [Training campaigns](docs/rl-campaigns.md) can assign one independent task/framework run to each allocated GPU.
 
 Training and evaluation run headlessly. Optional offscreen video supports visual inspection alongside numerical metrics. Single-GPU development, validation and training run directly on the host; multi-GPU experiments use submitted jobs. W&B records runs offline.
 

@@ -70,6 +70,17 @@ def run_train(task_id, cfg, log_dir):
             print(f'[INFO] Loading native checkpoint {resume}', flush=True)
             runner.load(str(resume))
         before = runner.current_learning_iteration
+        if rank == 0:
+            # Native RSL checkpoints already include curriculum state. Retain
+            # identity before training so a periodic checkpoint can resume even
+            # if the process never reaches the completion report below.
+            (log_dir / 'run.json').write_text(json.dumps({
+                'task': task_id, 'backend': cfg.backend, 'framework': 'rsl-rl',
+                'status': 'running', 'iteration_before': before,
+                'num_envs_per_rank': cfg.env.scene.num_envs,
+                'world_size': int(os.environ.get('WORLD_SIZE', 1)),
+                'provenance': provenance, 'behavior': 'unvalidated',
+            }, indent=2) + '\n')
         runner.learn(num_learning_iterations=cfg.agent.max_iterations, init_at_random_ep_len=True)
         if rank == 0:
             import subprocess

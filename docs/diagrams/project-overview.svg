@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1120" height="846" viewBox="0 0 1120 846" role="img" aria-labelledby="title desc">
+<title id="title">From conversation to robot action</title><desc id="desc">Project scope: text and voice enter a bridge to an external reasoning harness. Robot tools control simulation or a future physical Microduck. Tools and voice emit episode evidence for the external harness.</desc>
+<defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="7" refY="4" orient="auto-start-reverse" markerUnits="userSpaceOnUse"><path d="M1 1l6 3-6 3" fill="none" stroke="#728599" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></marker>
+<symbol id="person" viewBox="0 0 48 48"><circle cx="24" cy="13" r="8"/><path d="M9 42v-6c0-16 30-16 30 0v6M16 42V32m16 10V32"/></symbol>
+<symbol id="voice" viewBox="0 0 48 48"><rect x="18" y="4" width="12" height="25" rx="6"/><path d="M11 21v3a13 13 0 0 0 26 0v-3M24 37v7m-8 0h16M4 15v14m40-14v14"/></symbol>
+<symbol id="harness" viewBox="0 0 48 48"><rect x="8" y="8" width="32" height="32" rx="8"/><path d="M18 0v8m12-8v8M18 40v8m12-8v8M0 18h8m-8 12h8m32-12h8m-8 12h8M16 26l7-10 9 8-7 9Z"/></symbol>
+<symbol id="bridge" viewBox="0 0 48 48"><path d="M4 36h40M8 36V15m32 21V15M8 18c8 17 24 17 32 0M16 29v7m8-5v5m8-7v7"/></symbol>
+<symbol id="tools" viewBox="0 0 48 48"><rect x="4" y="15" width="40" height="28" rx="5"/><path d="M16 15V8h16v7M4 26h40M20 23h8v8h-8Z"/></symbol>
+<symbol id="world" viewBox="0 0 48 48"><path d="M4 32l20-12 20 12-20 12ZM4 22l20-12 20 12M24 10v34M14 26l20 12M14 38l20-12"/></symbol>
+<symbol id="duck" viewBox="0 0 48 48"><path d="M23 21V12a9 9 0 0 1 18 0v10H29v9H15v-8h8ZM41 13l6 4-6 3M15 31l-4 9H4m25-9 5 9h9M20 31v5m5-5v5"/><circle cx="34" cy="11" r="1.4" fill="currentColor" stroke="none"/></symbol>
+<symbol id="record" viewBox="0 0 48 48"><path d="M10 4h22l7 8v32H10ZM31 4v10h8M17 22h15m-15 7h15m-15 7h9"/></symbol>
+<symbol id="task" viewBox="0 0 48 48"><rect x="7" y="6" width="34" height="38" rx="5"/><path d="M15 16l3 3 5-6m-8 14 3 3 5-6m5-8h7m-7 11h7M15 37h20"/></symbol>
+<symbol id="network" viewBox="0 0 48 48"><path d="M10 10l14 6L10 38m0-28 14 23 14-9-14-8m0 17 14-23m-14 6 14 22"/><g fill="white"><circle cx="10" cy="10" r="4"/><circle cx="10" cy="38" r="4"/><circle cx="24" cy="16" r="4"/><circle cx="24" cy="33" r="4"/><circle cx="38" cy="10" r="4"/><circle cx="38" cy="24" r="4"/><circle cx="38" cy="38" r="4"/></g></symbol>
+<symbol id="package" viewBox="0 0 48 48"><path d="M5 13l19-9 19 9v24l-19 9L5 37ZM5 13l19 10 19-10M24 23v23M15 8l19 10v9"/></symbol>
+<symbol id="compare" viewBox="0 0 48 48"><rect x="2" y="5" width="17" height="26" rx="3"/><rect x="29" y="17" width="17" height="26" rx="3"/><path d="M24 7h17m-5-5 5 5-5 5M24 41H7m5-5-5 5 5 5M6 24l4-8 5 3m18 16 4-8 5 3"/></symbol>
+<symbol id="video" viewBox="0 0 48 48"><rect x="4" y="8" width="40" height="32" rx="5"/><path d="M19 16l13 8-13 8Z"/></symbol>
+</defs>
+<rect width="1120" height="846" rx="24" fill="#f5f8fb"/>
+<g font-family="Inter, DejaVu Sans, Arial, sans-serif">
+<text x="40" y="43" fill="#087f8c" font-size="14" font-weight="700">FROM CONVERSATION TO ROBOT ACTION</text>
+<text x="40" y="78" fill="#172b40" font-size="25" font-weight="650">One duck. A shared language for interaction and execution.</text>
+<path d="M184 226V292" fill="none" stroke="#728599" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M304 172H352V350H408" fill="none" stroke="#728599" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M304 350H408" fill="none" stroke="#728599" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+<path d="M548 226V292" fill="none" stroke="#728599" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+<path d="M548 407V476" fill="none" stroke="#728599" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+<path d="M688 530H932V407" fill="none" stroke="#728599" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M932 292V172H688" fill="none" stroke="#728599" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)"/>
+<path d="M488 581V616H224V650" fill="none" stroke="#728599" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+<path d="M608 581V616H896V650" fill="none" stroke="#728599" stroke-width="2" stroke-linejoin="round" marker-end="url(#arrow)" marker-start="url(#arrow)"/>
+<rect x="64" y="118" width="240" height="108" rx="16" fill="#edf4ff" stroke="#dbe4ed" stroke-width="1.5"/>
+<use href="#person" x="82" y="136" width="38" height="38" fill="none" stroke="#3568bd" color="#3568bd" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="132" y="153" fill="#172b40" font-size="18" font-weight="650">You</text>
+<text x="84" y="184" fill="#53677b" font-size="14" font-weight="400">Text, explicit recording</text>
+<text x="84" y="206" fill="#53677b" font-size="14" font-weight="400">and voice setup</text>
+<rect x="408" y="118" width="280" height="108" rx="16" fill="#f3effa" stroke="#7651ae" stroke-width="1.5" stroke-dasharray="6 5"/>
+<use href="#harness" x="426" y="136" width="38" height="38" fill="none" stroke="#7651ae" color="#7651ae" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="476" y="153" fill="#172b40" font-size="18" font-weight="650">External harness</text>
+<text x="428" y="184" fill="#53677b" font-size="14" font-weight="400">Reasoning · planning</text>
+<text x="428" y="206" fill="#53677b" font-size="14" font-weight="400">Scheduling · memory</text>
+<rect x="64" y="292" width="240" height="115" rx="16" fill="#fff" stroke="#dbe4ed" stroke-width="1.5"/>
+<use href="#voice" x="82" y="310" width="38" height="38" fill="none" stroke="#087f8c" color="#087f8c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="132" y="327" fill="#172b40" font-size="18" font-weight="650">Voice services</text>
+<text x="84" y="358" fill="#53677b" font-size="14" font-weight="400">ASR · persistent voice</text>
+<text x="84" y="380" fill="#53677b" font-size="14" font-weight="400">TTS · playback control</text>
+<rect x="408" y="292" width="280" height="115" rx="16" fill="#eaf7f6" stroke="#dbe4ed" stroke-width="1.5"/>
+<use href="#bridge" x="426" y="310" width="38" height="38" fill="none" stroke="#087f8c" color="#087f8c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="476" y="327" fill="#172b40" font-size="18" font-weight="650">Harness bridge</text>
+<text x="428" y="358" fill="#53677b" font-size="14" font-weight="400">Requests, tool calls</text>
+<text x="428" y="380" fill="#53677b" font-size="14" font-weight="400">and execution results</text>
+<rect x="808" y="292" width="248" height="115" rx="16" fill="#fff" stroke="#dbe4ed" stroke-width="1.5"/>
+<use href="#record" x="826" y="310" width="38" height="38" fill="none" stroke="#087f8c" color="#087f8c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="876" y="327" fill="#172b40" font-size="16" font-weight="650">Episode recorder</text>
+<text x="828" y="358" fill="#53677b" font-size="14" font-weight="400">Observations · outcomes</text>
+<text x="828" y="380" fill="#53677b" font-size="14" font-weight="400">Tool + voice events</text>
+<rect x="408" y="476" width="280" height="105" rx="16" fill="#eaf7f6" stroke="#dbe4ed" stroke-width="1.5"/>
+<use href="#tools" x="426" y="494" width="38" height="38" fill="none" stroke="#087f8c" color="#087f8c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="476" y="511" fill="#172b40" font-size="18" font-weight="650">Robot tools</text>
+<text x="428" y="542" fill="#53677b" font-size="14" font-weight="400">Perception · skills · state</text>
+<text x="428" y="564" fill="#53677b" font-size="14" font-weight="400">Cancel + confirm stop</text>
+<rect x="64" y="650" width="320" height="110" rx="16" fill="#edf4ff" stroke="#dbe4ed" stroke-width="1.5"/>
+<use href="#world" x="82" y="668" width="38" height="38" fill="none" stroke="#3568bd" color="#3568bd" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="132" y="685" fill="#172b40" font-size="18" font-weight="650">Simulation adapters</text>
+<text x="84" y="716" fill="#53677b" font-size="14" font-weight="400">Simulated robot + sensors</text>
+<text x="84" y="738" fill="#53677b" font-size="14" font-weight="400">Same tool semantics</text>
+<rect x="736" y="650" width="320" height="110" rx="16" fill="#fff5e8" stroke="#b76a19" stroke-width="1.5" stroke-dasharray="6 5"/>
+<use href="#duck" x="754" y="668" width="38" height="38" fill="none" stroke="#b76a19" color="#b76a19" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+<text x="804" y="685" fill="#172b40" font-size="18" font-weight="650">Physical Microduck</text>
+<text x="756" y="716" fill="#53677b" font-size="14" font-weight="400">Official onboard runtime</text>
+<text x="756" y="738" fill="#53677b" font-size="14" font-weight="400">Future hardware validation</text>
+<text x="741" y="157" fill="#53677b" font-size="13" font-weight="500">Episode evidence</text>
+<text x="567" y="452" fill="#53677b" font-size="13" font-weight="400">Task lifecycle</text>
+<text x="710" y="517" fill="#53677b" font-size="13" font-weight="400">Record what happened</text>
+<text x="40" y="800" fill="#087f8c" font-size="12" font-weight="700">PROJECT SCOPE</text>
+<text x="185" y="800" fill="#53677b" font-size="14" font-weight="400">Capabilities are implemented in stages; this map describes the full design.</text>
+<text x="40" y="824" fill="#53677b" font-size="14" font-weight="400">Joint control stays in the policy/runtime. The external harness owns the agent loop.</text>
+</g></svg>

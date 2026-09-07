@@ -7,11 +7,11 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_env_cfg:make_microduck_velocity_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.walking.environment:make_microduck_velocity_env_cfg",
             "kwargs": {}
           },
           "rsl_config": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_env_cfg:MicroduckRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.walking.ppo:MicroduckRlCfg"
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
@@ -22,11 +22,11 @@
         },
         "isaac-newton": {
           "environment": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_env_cfg:make_microduck_velocity_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.walking.environment:make_microduck_velocity_env_cfg",
             "kwargs": {}
           },
           "rsl_config": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_env_cfg:MicroduckRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.walking.ppo:MicroduckRlCfg"
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
@@ -55,13 +55,13 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_env_cfg:make_microduck_velocity_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.walking.environment:make_microduck_velocity_env_cfg",
             "kwargs": {
               "rough": true
             }
           },
           "rsl_config": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_env_cfg:MicroduckRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.walking.ppo:MicroduckRlCfg"
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
@@ -84,11 +84,11 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_velstand_env_cfg:make_microduck_velstand_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.velocity_stand.environment:make_microduck_velstand_env_cfg",
             "kwargs": {}
           },
           "rsl_config": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_velstand_env_cfg:MicroduckVelStandRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.velocity_stand.ppo:MicroduckVelStandRlCfg"
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
@@ -111,13 +111,13 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_velstand_env_cfg:make_microduck_velstand_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.velocity_stand.environment:make_microduck_velstand_env_cfg",
             "kwargs": {
               "rough": true
             }
           },
           "rsl_config": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_velstand_env_cfg:MicroduckVelStandRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.velocity_stand.ppo:MicroduckVelStandRlCfg"
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
@@ -140,11 +140,11 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_standup_env_cfg:make_microduck_standup_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.stand_up.environment:make_microduck_standup_env_cfg",
             "kwargs": {}
           },
           "rsl_config": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_standup_env_cfg:MicroduckStandUpRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.stand_up.ppo:MicroduckStandUpRlCfg"
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
@@ -155,11 +155,11 @@
         },
         "isaac-newton": {
           "environment": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_standup_env_cfg:make_microduck_standup_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.stand_up.environment:make_microduck_standup_env_cfg",
             "kwargs": {}
           },
           "rsl_config": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_standup_env_cfg:MicroduckStandUpRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.stand_up.ppo:MicroduckStandUpRlCfg"
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
@@ -188,13 +188,13 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_standup_env_cfg:make_microduck_standup_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.stand_up.environment:make_microduck_standup_env_cfg",
             "kwargs": {
               "rough": true
             }
           },
           "rsl_config": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_standup_env_cfg:MicroduckStandUpRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.stand_up.ppo:MicroduckStandUpRlCfg"
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
@@ -217,11 +217,11 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_sitstand_env_cfg:make_microduck_sitstand_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.sit_stand.environment:make_microduck_sitstand_env_cfg",
             "kwargs": {}
           },
           "rsl_config": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_sitstand_env_cfg:MicroduckSitStandRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.sit_stand.ppo:MicroduckSitStandRlCfg"
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
@@ -244,13 +244,13 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_sitstand_env_cfg:make_microduck_sitstand_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.sit_stand.environment:make_microduck_sitstand_env_cfg",
             "kwargs": {
               "rough": true
             }
           },
           "rsl_config": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_sitstand_env_cfg:MicroduckSitStandRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.sit_stand.ppo:MicroduckSitStandRlCfg"
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
@@ -273,11 +273,11 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_ground_pick_env_cfg:make_microduck_ground_pick_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.ground_pick.environment:make_microduck_ground_pick_env_cfg",
             "kwargs": {}
           },
           "rsl_config": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_ground_pick_env_cfg:MicroduckGroundPickRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.ground_pick.ppo:MicroduckGroundPickRlCfg"
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
@@ -300,11 +300,11 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_ball_kick_env_cfg:make_microduck_ball_kick_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.ball_kick.environment:make_microduck_ball_kick_env_cfg",
             "kwargs": {}
           },
           "rsl_config": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_ball_kick_env_cfg:MicroduckBallKickRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.ball_kick.ppo:MicroduckBallKickRlCfg"
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
@@ -327,13 +327,13 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_ground_pick_env_cfg:make_microduck_ground_pick_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.ground_pick.environment:make_microduck_ground_pick_env_cfg",
             "kwargs": {
               "rough": true
             }
           },
           "rsl_config": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_ground_pick_env_cfg:MicroduckGroundPickRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.ground_pick.ppo:MicroduckGroundPickRlCfg"
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
@@ -356,11 +356,11 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_rollers_env_cfg:make_microduck_velocity_rollers_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.roller_walking.environment:make_microduck_velocity_rollers_env_cfg",
             "kwargs": {}
           },
           "rsl_config": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_rollers_env_cfg:MicroduckRollersRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.roller_walking.ppo:MicroduckRollersRlCfg"
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
@@ -383,11 +383,11 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_swizzle_env_cfg:make_microduck_velocity_swizzle_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.swizzle.environment:make_microduck_velocity_swizzle_env_cfg",
             "kwargs": {}
           },
           "rsl_config": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_swizzle_env_cfg:MicroduckSwizzleRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.swizzle.ppo:MicroduckSwizzleRlCfg"
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
@@ -410,11 +410,11 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_roller_crouch_env_cfg:make_microduck_roller_crouch_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.roller_crouch.environment:make_microduck_roller_crouch_env_cfg",
             "kwargs": {}
           },
           "rsl_config": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_roller_crouch_env_cfg:MicroduckRollerCrouchRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.roller_crouch.ppo:MicroduckRollerCrouchRlCfg"
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
@@ -437,11 +437,11 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_roller_slope_env_cfg:make_microduck_roller_slope_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.roller_slope.environment:make_microduck_roller_slope_env_cfg",
             "kwargs": {}
           },
           "rsl_config": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_roller_slope_env_cfg:MicroduckRollerSlopeRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.roller_slope.ppo:MicroduckRollerSlopeRlCfg"
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
@@ -464,11 +464,11 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_roller_standup_env_cfg:make_microduck_roller_standup_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.roller_stand_up.environment:make_microduck_roller_standup_env_cfg",
             "kwargs": {}
           },
           "rsl_config": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_roller_standup_env_cfg:MicroduckRollerStandUpRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.roller_stand_up.ppo:MicroduckRollerStandUpRlCfg"
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
@@ -491,11 +491,11 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_spin_env_cfg:make_microduck_spin_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.spin.environment:make_microduck_spin_env_cfg",
             "kwargs": {}
           },
           "rsl_config": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_spin_env_cfg:MicroduckSpinRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.spin.ppo:MicroduckSpinRlCfg"
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
@@ -518,11 +518,11 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_roulade_env_cfg:make_microduck_roulade_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.roulade.environment:make_microduck_roulade_env_cfg",
             "kwargs": {}
           },
           "rsl_config": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_roulade_env_cfg:MicroduckRouladeRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.roulade.ppo:MicroduckRouladeRlCfg"
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
@@ -545,11 +545,11 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_env_cfg:make_microduck_velocity_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.walking.environment:make_microduck_velocity_env_cfg",
             "kwargs": {}
           },
           "rsl_config": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_env_cfg:MicroduckRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.walking.ppo:MicroduckRlCfg"
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
@@ -575,13 +575,13 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_env_cfg:make_microduck_velocity_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.walking.environment:make_microduck_velocity_env_cfg",
             "kwargs": {
               "rough": true
             }
           },
           "rsl_config": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_env_cfg:MicroduckRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.walking.ppo:MicroduckRlCfg"
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
@@ -607,11 +607,11 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_velstand_env_cfg:make_microduck_velstand_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.velocity_stand.environment:make_microduck_velstand_env_cfg",
             "kwargs": {}
           },
           "rsl_config": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_velstand_env_cfg:MicroduckVelStandRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.velocity_stand.ppo:MicroduckVelStandRlCfg"
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
@@ -637,13 +637,13 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_velstand_env_cfg:make_microduck_velstand_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.velocity_stand.environment:make_microduck_velstand_env_cfg",
             "kwargs": {
               "rough": true
             }
           },
           "rsl_config": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_velstand_env_cfg:MicroduckVelStandRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.velocity_stand.ppo:MicroduckVelStandRlCfg"
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
@@ -669,11 +669,11 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_standup_env_cfg:make_microduck_standup_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.stand_up.environment:make_microduck_standup_env_cfg",
             "kwargs": {}
           },
           "rsl_config": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_standup_env_cfg:MicroduckStandUpRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.stand_up.ppo:MicroduckStandUpRlCfg"
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
@@ -699,13 +699,13 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_standup_env_cfg:make_microduck_standup_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.stand_up.environment:make_microduck_standup_env_cfg",
             "kwargs": {
               "rough": true
             }
           },
           "rsl_config": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_standup_env_cfg:MicroduckStandUpRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.stand_up.ppo:MicroduckStandUpRlCfg"
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
@@ -731,11 +731,11 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_sitstand_env_cfg:make_microduck_sitstand_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.sit_stand.environment:make_microduck_sitstand_env_cfg",
             "kwargs": {}
           },
           "rsl_config": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_sitstand_env_cfg:MicroduckSitStandRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.sit_stand.ppo:MicroduckSitStandRlCfg"
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
@@ -761,13 +761,13 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_sitstand_env_cfg:make_microduck_sitstand_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.sit_stand.environment:make_microduck_sitstand_env_cfg",
             "kwargs": {
               "rough": true
             }
           },
           "rsl_config": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_sitstand_env_cfg:MicroduckSitStandRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.sit_stand.ppo:MicroduckSitStandRlCfg"
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
@@ -793,11 +793,11 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_ground_pick_env_cfg:make_microduck_ground_pick_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.ground_pick.environment:make_microduck_ground_pick_env_cfg",
             "kwargs": {}
           },
           "rsl_config": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_ground_pick_env_cfg:MicroduckGroundPickRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.ground_pick.ppo:MicroduckGroundPickRlCfg"
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
@@ -823,13 +823,13 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_ground_pick_env_cfg:make_microduck_ground_pick_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.ground_pick.environment:make_microduck_ground_pick_env_cfg",
             "kwargs": {
               "rough": true
             }
           },
           "rsl_config": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_ground_pick_env_cfg:MicroduckGroundPickRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.ground_pick.ppo:MicroduckGroundPickRlCfg"
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
@@ -855,11 +855,11 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_ball_kick_env_cfg:make_microduck_ball_kick_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.ball_kick.environment:make_microduck_ball_kick_env_cfg",
             "kwargs": {}
           },
           "rsl_config": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_ball_kick_env_cfg:MicroduckBallKickRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.ball_kick.ppo:MicroduckBallKickRlCfg"
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
@@ -885,11 +885,11 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_rollers_env_cfg:make_microduck_velocity_rollers_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.roller_walking.environment:make_microduck_velocity_rollers_env_cfg",
             "kwargs": {}
           },
           "rsl_config": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_rollers_env_cfg:MicroduckRollersRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.roller_walking.ppo:MicroduckRollersRlCfg"
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
@@ -915,11 +915,11 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_swizzle_env_cfg:make_microduck_velocity_swizzle_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.swizzle.environment:make_microduck_velocity_swizzle_env_cfg",
             "kwargs": {}
           },
           "rsl_config": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_velocity_swizzle_env_cfg:MicroduckSwizzleRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.swizzle.ppo:MicroduckSwizzleRlCfg"
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
@@ -945,11 +945,11 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_roller_crouch_env_cfg:make_microduck_roller_crouch_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.roller_crouch.environment:make_microduck_roller_crouch_env_cfg",
             "kwargs": {}
           },
           "rsl_config": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_roller_crouch_env_cfg:MicroduckRollerCrouchRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.roller_crouch.ppo:MicroduckRollerCrouchRlCfg"
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
@@ -975,11 +975,11 @@
       "bindings": {
         "mujoco": {
           "environment": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_roller_slope_env_cfg:make_microduck_roller_slope_env_cfg",
+            "symbol": "oh_my_duck.rl.tasks.roller_slope.environment:make_microduck_roller_slope_env_cfg",
             "kwargs": {}
           },
           "rsl_config": {
-            "symbol": "oh_my_duck.rl.tasks.microduck_roller_slope_env_cfg:MicroduckRollerSlopeRlCfg"
+            "symbol": "oh_my_duck.rl.tasks.roller_slope.ppo:MicroduckRollerSlopeRlCfg"
           },
           "runner": {
             "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
