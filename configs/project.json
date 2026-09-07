@@ -105,13 +105,16 @@
     "task_layout": "14 task families with environment.py and ppo.py; 33 semantic catalog entries preserved",
     "full_training_campaign": {
       "config": "configs/experiments/representative-full.json",
-      "status": "prepared_for_submission",
+      "status": "submitted_pending",
       "nodes": 1,
       "gpus": 8,
       "num_envs_per_gpu": 4096,
       "walking_iterations": 50000,
       "stand_up_iterations": 15000,
-      "checkpoint_interval": 250
+      "checkpoint_interval": 250,
+      "job_name": "omd-rl-full-0907-01",
+      "queue_id": "local-662cf40c7dfb",
+      "source_commit": "1f45996b2e9ec22c97f492cf1b5a727081cc303f"
     }
   }
 }

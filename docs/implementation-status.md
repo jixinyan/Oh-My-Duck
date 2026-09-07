@@ -70,3 +70,9 @@ environments and a two-iteration final segment; the real 4096-environment capaci
 gate runs on the allocated training node before long training. Newton binding
 checks also passed (two tests). Source/config provenance now includes nested
 experiment manifests. Full submission follows from the committed snapshot.
+
+
+Full training has been submitted as `omd-rl-full-0907-01`, queue ID
+`local-662cf40c7dfb`, source `1f45996`; latest submission state is Pending.
+The single eight-GPU node runs all eight task/backend/framework combinations.
+See [the allocation and evidence record](reports/full-training-2026-09-07.md).
