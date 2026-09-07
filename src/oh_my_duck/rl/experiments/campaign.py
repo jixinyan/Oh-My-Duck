@@ -2,6 +2,7 @@
 import argparse
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import json
+import hashlib
 import os
 from pathlib import Path
 import re
@@ -75,7 +76,8 @@ def main():
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=False)
     commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=root, text=True).strip()
-    report = {'source_commit': commit, 'status': 'running', 'devices': devices, 'plan': plan, 'runs': {}}
+    report = {'source_commit': commit, 'status': 'running', 'devices': devices, 'plan': plan,
+              'config_sha256': hashlib.sha256(args.config.read_bytes()).hexdigest(), 'runs': {}}
     children = []
     def stop(signum, frame):
         for child in children:

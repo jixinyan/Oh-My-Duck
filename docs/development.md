@@ -58,3 +58,5 @@ or future boundaries. Keep diagrams focused on project scope; experiment progres
 belongs in reports. Include SVG `<title>` / `<desc>` and descriptive Markdown alt
 text. Use a self-contained viewBox and system font fallbacks; no scripts, remote
 fonts or rasterized substitutes. Check XML, references and a rendered preview.
+
+Task families keep `environment.py` and `ppo.py` together under `src/oh_my_duck/rl/tasks/<family>/`. See the [RL source map](../src/oh_my_duck/rl/README.md) and [full training campaigns](rl-campaigns.md).

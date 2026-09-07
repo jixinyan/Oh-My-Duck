@@ -4,7 +4,9 @@ Task behavior belongs to `src/oh_my_duck/rl/tasks` and `rl/mdp`; robot models an
 motors belong to `robotics/microduck`. The source is editable and versioned here.
 Only generic simulator and native PPO packages are external dependencies.
 
-1. Start from the closest maintained task factory and preserve its observation,
+1. Create `rl/tasks/<family>/environment.py` and `ppo.py` (see `walking/` and
+   `stand_up/`). Reuse a family for flat/rough/backlash variants. Start from the
+   closest maintained task factory and preserve its observation,
    noise, delay, BAM, randomization and NaN-guard stack.
 2. Add observations, rewards, events, commands or curricula in the corresponding
    `rl/mdp` module. Use entity APIs for state writes and name-resolved joint/body
@@ -13,7 +15,8 @@ Only generic simulator and native PPO packages are external dependencies.
    environment recipe, runtime factory, native RSL configuration and runner.
    Unsupported bindings remain absent. A runtime factory receives `cfg`, `task`,
    `device`, and `render_mode`; adding a task does not require editing a learner.
-4. Configure actor/critic widths or native RSL classes in the task's `rsl_config`.
+4. Configure actor/critic widths and native PPO defaults in the family's `ppo.py`,
+   referenced by the task's `rsl_config`.
    For SB3, set `policy_configs.sb3` to a `module:factory` reference returning
    `Sb3PolicyCfg`. It receives `task_id` and the task's `agent_cfg`; reference
    `kwargs` may supply extra parameters. Return an editable native

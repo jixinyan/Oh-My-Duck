@@ -49,3 +49,24 @@ See [domain refactor evidence](reports/domain-refactor.md),
 [historical implementation log](reports/implementation-history.md).
 
 See [headless rendering evidence](reports/rendering-validation.md) for the explicit software renderer and preserved failed attempts.
+
+
+## Task organization and full-training preparation — 2026-09-07
+
+Task recipes now live in 14 family directories with separate `environment.py` and
+`ppo.py`; flat/rough/backlash variants keep the existing registry. All 33 compiled
+task catalog entries match the prior semantic inventory (module paths excluded).
+Thirty lightweight and 74 task/SB3 tests passed, including native periodic
+checkpoint reload and GPU/rank isolation. Full campaigns have a 64-env smoke,
+resume and 4096-env capacity gate before the official full iteration budgets.
+Long-training submission and worker gates are recorded separately below.
+
+
+The new campaign worker completed two reduced-size end-to-end gates (RSL-RL and
+SB3 Walking) in `outputs/campaign-gate-0907-01`. Every stage completed, including
+periodic SB3 bundle resume, final package and both-backend/CPU video. Both reported
+`behavior_failed`, with no execution error. These orchestration gates used 64
+environments and a two-iteration final segment; the real 4096-environment capacity
+gate runs on the allocated training node before long training. Newton binding
+checks also passed (two tests). Source/config provenance now includes nested
+experiment manifests. Full submission follows from the committed snapshot.
