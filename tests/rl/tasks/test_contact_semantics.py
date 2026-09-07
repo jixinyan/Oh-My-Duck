@@ -3,7 +3,7 @@ import numpy as np
 import torch
 import mujoco
 from mjlab.scene import Scene
-from oh_my_duck.rl.tasks.microduck_velocity_env_cfg import make_microduck_velocity_env_cfg
+from oh_my_duck.rl.tasks.walking.environment import make_microduck_velocity_env_cfg
 from oh_my_duck.rl.backends.isaac_newton.task_binding.sensors import aggregate_contacts
 
 

@@ -141,8 +141,8 @@ from mjlab.utils.noise import UniformNoiseCfg as Unoise
 
 from oh_my_duck.robotics.microduck.microduck_constants import MICRODUCK_STANDUP_ROBOT_CFG
 from oh_my_duck.rl import mdp as microduck_mdp
-from oh_my_duck.rl.tasks.microduck_velocity_env_cfg import HEAD_BODY_NAMES
-from oh_my_duck.rl.tasks.symmetry import PpoWithSymmetryCfg, SYMMETRY_CFG
+from oh_my_duck.rl.tasks.walking.environment import HEAD_BODY_NAMES
+from oh_my_duck.rl.tasks.shared.symmetry import PpoWithSymmetryCfg, SYMMETRY_CFG
 
 
 def make_microduck_roulade_env_cfg(play: bool = False) -> ManagerBasedRlEnvCfg:
@@ -732,42 +732,3 @@ def make_microduck_roulade_env_cfg(play: bool = False) -> ManagerBasedRlEnvCfg:
 
 
 # ── RL runner config ──────────────────────────────────────────────────────────
-
-MicroduckRouladeRlCfg = RslRlOnPolicyRunnerCfg(
-    actor=RslRlModelCfg(
-        hidden_dims=(512, 256, 128),
-        activation="elu",
-        obs_normalization=True,  # normalizer MUST be baked into ONNX by export.py
-        distribution_cfg={
-            "class_name": "GaussianDistribution",
-            "init_std": 1.0,
-            "std_type": "scalar",
-        },
-    ),
-    critic=RslRlModelCfg(
-        hidden_dims=(512, 256, 128),
-        activation="elu",
-        obs_normalization=True,
-    ),
-    algorithm=PpoWithSymmetryCfg(
-        value_loss_coef=1.0,
-        use_clipped_value_loss=True,
-        clip_param=0.2,
-        entropy_coef=0.01,
-        num_learning_epochs=5,
-        num_mini_batches=4,
-        learning_rate=1.0e-3,
-        schedule="adaptive",
-        gamma=0.99,
-        lam=0.95,
-        desired_kl=0.01,
-        max_grad_norm=1.0,
-        symmetry_cfg=SYMMETRY_CFG if ENABLE_SYMMETRY else None,
-    ),
-    wandb_project="mjlab_microduck",
-    experiment_name="microduck_roulade",
-    run_name="microduck_roulade",
-    save_interval=250,
-    num_steps_per_env=24,
-    max_iterations=10_000,
-)

@@ -23,10 +23,8 @@ from mjlab.managers.scene_entity_config import SceneEntityCfg
 from mjlab.tasks.velocity import mdp
 
 from oh_my_duck.rl import mdp as microduck_mdp
-from oh_my_duck.rl.tasks.microduck_velocity_rollers_env_cfg import (
-    MicroduckRollersRlCfg,
-    make_microduck_velocity_rollers_env_cfg,
-)
+from oh_my_duck.rl.tasks.roller_walking.ppo import MicroduckRollersRlCfg
+from oh_my_duck.rl.tasks.roller_walking.environment import make_microduck_velocity_rollers_env_cfg
 
 # Stride / anti-swizzle rewards to drop for the swizzle task.
 _ANTI_SWIZZLE = ("single_support", "glide", "skating_air_time", "gait_symmetry", "hip_roll_neutral")
@@ -192,8 +190,3 @@ def make_microduck_velocity_swizzle_env_cfg(play: bool = False) -> ManagerBasedR
 
 
 # Same PPO hyperparameters as the stride roller task, new experiment/run name.
-MicroduckSwizzleRlCfg = dataclasses.replace(
-    MicroduckRollersRlCfg,
-    experiment_name="velocity_swizzle",
-    run_name="velocity_swizzle",
-)

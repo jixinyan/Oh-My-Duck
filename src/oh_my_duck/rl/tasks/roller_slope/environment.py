@@ -21,11 +21,9 @@ from mjlab.terrains import TerrainEntityCfg
 from mjlab.terrains.terrain_generator import TerrainGeneratorCfg
 
 from oh_my_duck.rl import mdp as microduck_mdp
-from oh_my_duck.rl.tasks.slope_terrain import FlatRampTerrainCfg, RAMP_DEG_MAX
-from oh_my_duck.rl.tasks.microduck_velocity_rollers_env_cfg import (
-    make_microduck_velocity_rollers_env_cfg,
-)
-from oh_my_duck.rl.tasks.symmetry import PpoWithSymmetryCfg
+from oh_my_duck.rl.tasks.shared.slope_terrain import FlatRampTerrainCfg, RAMP_DEG_MAX
+from oh_my_duck.rl.tasks.roller_walking.environment import make_microduck_velocity_rollers_env_cfg
+from oh_my_duck.rl.tasks.shared.symmetry import PpoWithSymmetryCfg
 
 # Géométrie du terrain plat+rampe+sortie.
 FLAT_LENGTH        = 2.0
@@ -222,26 +220,3 @@ def make_microduck_roller_slope_env_cfg(play: bool = False) -> ManagerBasedRlEnv
     cfg.curriculum["terrain_levels"] = CurriculumTermCfg(func=microduck_mdp.terrain_levels_slope)
 
     return cfg
-
-
-MicroduckRollerSlopeRlCfg = RslRlOnPolicyRunnerCfg(
-    actor=RslRlModelCfg(
-        hidden_dims=(512, 256, 128),
-        activation="elu",
-        obs_normalization=True,
-        distribution_cfg={"class_name": "GaussianDistribution", "init_std": 1.0, "std_type": "scalar"},
-    ),
-    critic=RslRlModelCfg(hidden_dims=(512, 256, 128), activation="elu", obs_normalization=True),
-    algorithm=PpoWithSymmetryCfg(
-        value_loss_coef=1.0, use_clipped_value_loss=True, clip_param=0.2,
-        entropy_coef=0.01, num_learning_epochs=5, num_mini_batches=4,
-        learning_rate=1.0e-3, schedule="adaptive", gamma=0.99, lam=0.95,
-        desired_kl=0.01, max_grad_norm=1.0, symmetry_cfg=None,
-    ),
-    wandb_project="mjlab_microduck",
-    experiment_name="roller_slope",
-    run_name="roller_slope",
-    save_interval=250,
-    num_steps_per_env=24,
-    max_iterations=8_000,
-)

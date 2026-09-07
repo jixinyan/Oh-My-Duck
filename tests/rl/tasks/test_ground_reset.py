@@ -2,7 +2,7 @@
 from types import SimpleNamespace
 import torch
 from oh_my_duck.rl.mdp.events import set_random_ground_state
-from oh_my_duck.rl.tasks.microduck_standup_env_cfg import make_microduck_standup_env_cfg
+from oh_my_duck.rl.tasks.stand_up.environment import make_microduck_standup_env_cfg
 
 
 class RobotData:

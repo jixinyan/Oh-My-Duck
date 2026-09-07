@@ -138,7 +138,7 @@ def test_reset_clears_the_ema():
 
 
 def test_standup_cfg_wiring():
-    from oh_my_duck.rl.tasks.microduck_standup_env_cfg import (
+    from oh_my_duck.rl.tasks.stand_up.environment import (
         make_microduck_standup_env_cfg,
     )
 
@@ -156,7 +156,7 @@ def test_standup_cfg_wiring():
 
 
 def test_velocity_cfg_unchanged_no_gate():
-    from oh_my_duck.rl.tasks.microduck_velocity_env_cfg import (
+    from oh_my_duck.rl.tasks.walking.environment import (
         make_microduck_velocity_env_cfg,
     )
 
@@ -167,7 +167,7 @@ def test_velocity_cfg_unchanged_no_gate():
 def test_velstand_inherited_term_is_gated():
     # Velstand episodes survive falls — the inherited velocity-env term must not
     # charge the ground phase.
-    from oh_my_duck.rl.tasks.microduck_velstand_env_cfg import (
+    from oh_my_duck.rl.tasks.velocity_stand.environment import (
         make_microduck_velstand_env_cfg,
     )
 

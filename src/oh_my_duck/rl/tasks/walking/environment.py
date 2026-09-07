@@ -120,7 +120,7 @@ from mjlab.utils.noise import UniformNoiseCfg as Unoise
 
 from oh_my_duck.robotics.microduck.microduck_constants import MICRODUCK_WALK_ROBOT_CFG
 from oh_my_duck.rl import mdp as microduck_mdp
-from oh_my_duck.rl.tasks.symmetry import PpoWithSymmetryCfg, SYMMETRY_CFG
+from oh_my_duck.rl.tasks.shared.symmetry import PpoWithSymmetryCfg, SYMMETRY_CFG
 
 
 # Microduck-specific rough terrain: much gentler than the default ROUGH_TERRAINS_CFG.
@@ -908,43 +908,3 @@ def make_microduck_velocity_env_cfg(
     )
 
     return cfg
-
-
-MicroduckRlCfg = RslRlOnPolicyRunnerCfg(
-    actor=RslRlModelCfg(
-        hidden_dims=(512, 256, 128),
-        activation="elu",
-        obs_normalization=True,
-        distribution_cfg={
-            "class_name": "GaussianDistribution",
-            "init_std": 1.0,
-            "std_type": "scalar",
-        },
-    ),
-    critic=RslRlModelCfg(
-        hidden_dims=(512, 256, 128),
-        activation="elu",
-        obs_normalization=True,
-    ),
-    algorithm=PpoWithSymmetryCfg(
-        value_loss_coef=1.0,
-        use_clipped_value_loss=True,
-        clip_param=0.2,
-        entropy_coef=0.01,
-        num_learning_epochs=5,
-        num_mini_batches=4,
-        learning_rate=1.0e-3,
-        schedule="adaptive",
-        gamma=0.99,
-        lam=0.95,
-        desired_kl=0.01,
-        max_grad_norm=1.0,
-        symmetry_cfg=SYMMETRY_CFG if ENABLE_SYMMETRY else None,
-    ),
-    wandb_project="mjlab_microduck",
-    experiment_name="velocity",  # Directory name
-    run_name="velocity",  # Appended to datetime in wandb: <datetime>_velocity
-    save_interval=250,
-    num_steps_per_env=24,
-    max_iterations=50_000,
-)
