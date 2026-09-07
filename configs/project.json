@@ -100,7 +100,7 @@
       "learned behavior validation"
     ],
     "architecture_merge": "6303ca4",
-    "validation_branch": "feat/rl-pipeline-validation",
+    "validation_branch": "main",
     "export_and_local_package": "8_of_8_passed; RSL revalidated at 6303ca4",
     "task_layout": "14 task families with environment.py and ppo.py; 33 semantic catalog entries preserved",
     "full_training_campaign": {
@@ -115,6 +115,7 @@
       "job_name": "omd-rl-full-0907-01",
       "queue_id": "local-662cf40c7dfb",
       "source_commit": "1f45996b2e9ec22c97f492cf1b5a727081cc303f"
-    }
+    },
+    "latest_merge": "5ef433b"
   }
 }

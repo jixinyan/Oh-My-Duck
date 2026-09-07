@@ -5,6 +5,8 @@ Latest scheduler state at submission: **Pending**; no long-training completion
 or learned behavior is claimed. One node, eight GPUs, one independent native
 learner per GPU. Source snapshot: `1f45996b2e9ec22c97f492cf1b5a727081cc303f`.
 The configuration is `configs/experiments/representative-full.json`.
+After submission, the source branch was merged into main at `5ef433b`; the running
+campaign continues to use its original immutable snapshot.
 
 | Allocation slot | Simulation | PPO | Task | Environments | Full iterations |
 |---|---|---|---|---|---|

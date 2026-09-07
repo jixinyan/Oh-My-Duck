@@ -2,8 +2,8 @@
 
 Updated 2026-09-07. The product scope remains the Agentic Microduck Project Design.
 Implementation proceeds by domain, with interfaces for later capabilities and
-explicit evidence for implemented functionality. Architecture merged into local `main` at `6303ca4`; follow-up validation is on
-`feat/rl-pipeline-validation`. No public policy upload has occurred.
+explicit evidence for implemented functionality. Task-family organization, single-GPU pipeline fixes and full-training campaigns
+are merged into `main` at `5ef433b`. Submitted training keeps source `1f45996`. No public policy upload has occurred.
 
 | Component | Current state |
 |---|---|
