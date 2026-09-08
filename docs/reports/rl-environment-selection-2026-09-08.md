@@ -36,47 +36,42 @@ sim2sim plus CPU/BAM video acceptance. Periodic previews use checkpoints saved
 every 1000 updates plus the final checkpoint; a busy renderer coalesces to the
 latest available save. There is no continuous assistant reward monitoring.
 
-At preparation, GPUs 2–5 held other workloads. Original controls remain on 0/7.
-The intended calibration allocation is 1/6; the original GPU-1 preview worker
-can be identity-checked and paused during measurement, then automatically
-resumed. Its checkpoints remain on disk. New full-run previews use GPU 0.
+Current attempt: `outputs/experiments/measured-env-0908-03`, immutable source
+`f9fcf80`, supervisor PID 2232835, launched 2026-09-08 12:57 UTC. Six initial
+64-environment / 5-update training smokes passed on GPUs 1/6/2/3/4/5:
+MuJoCo RSL Walking/StandUp, MuJoCo SB3 Walking/StandUp, and Newton RSL
+Walking/StandUp. Their export/rehearsal/throughput preparation continues. Newton
+SB3 Walking/StandUp are queued for the next available GPU. Counts are not yet
+selected and the new full-training phase has not started. Original controls
+continue on 0/7. No learned-behavior acceptance claim changes.
 
-Current state: implementation and focused tests passed; launch evidence will be
-recorded separately below. The previous original Walking benchmark preferred
-8192 (~98k samples/s) over 4096/16384; other combinations require their own data.
+The coordinator verifies both converted Newton assets before launching workers.
+It pauses the original preview controller, lets its in-flight render finish and
+release CUDA, then calibrates. Original previews automatically resume after
+preparation, including on ordinary failure/interruption. Full training follows
+only if all eight preparations pass. Selected counts are recorded in
+`outputs/experiments/measured-env-0908-03/selected.json`; new periodic videos will
+appear at `outputs/experiments/measured-env-0908-03/previews/index.html`.
 
-The first launch (`measured-env-0908-01`, source `f6a0609`) passed MuJoCo/RSL
-smoke/export (and Walking rehearsal/resume), but Walking calibration was rejected
-because a paused pre-existing preview still held a CUDA context. No throughput
-result from this attempt is accepted. The attempt was explicitly stopped and all
-artifacts retained. The controller now pauses only preview scheduling and drains
-its existing child command before calibration. GPUs 2–5 subsequently became free;
-a separate six-GPU attempt is planned, preserving original training on 0/7.
+Preserved startup attempts:
 
-Launch evidence: `outputs/experiments/measured-env-0908-02.launch.json` records
-supervisor PID 2171344 and immutable source `c84f169`. All six GPUs 1/6/2/3/4/5
-were clear of other compute sessions before launch. The six initial preparations
-are active; the remaining two combinations use the next available GPU. Existing
-original controls remain on 0/7. Environment counts have not yet been selected,
-and this new campaign has not yet entered full training. The supervisor runs
-all eight preparations, writes `selected.json`, then launches the full matrix
-without an assistant monitoring loop. Original previews resume after preparation;
-new previews appear at `outputs/experiments/measured-env-0908-02/previews/index.html`.
+| Attempt | Observed issue | Resolution |
+|---|---|---|
+| `measured-env-0908-01`, `f6a0609` | Pausing an in-flight preview retained its CUDA context; isolated benchmark rejected it | Pause only scheduling and drain the existing render |
+| `measured-env-0908-02`, `c84f169` | Nested `prepare` directory names collided in native RSL run lookup; Newton fingerprints had changed after metadata edits | Include a campaign-path digest in native tags; validate assets before any training |
 
-Focused validation: 14 tests plus 9 subtests passed, including exclusion of
-startup/contaminated timing, SB3 complete-update timestamps, selected-count
-capacity gating, native learning-rate routing, and reuse of the first free GPU
-rather than waiting for a busy assignment. Git source is on
-`feat/rl-measured-environments`; no new main merge is claimed.
+Both attempts were explicitly stopped; their partial artifacts are preserved.
+Neither reached full training. The stale asset fingerprint came solely from a
+policy-inventory addition and an Isaac status label in `configs/upstream.json`.
+All robot source bytes, converter/reference/path implementation and dependency
+lock matched the accepted conversion, as did every generated artifact hash. The
+unchanged USD trees were copied under the new fingerprint with metadata-only
+reuse provenance; no new conversion or physical change is claimed. Audit script
+and manifests: `outputs/diagnostics/asset-metadata-rekey-0908-01`.
 
-Correction to the launch-only observation above: attempt 02 stopped during startup.
-Shared RSL log lookup used the nested directory name `prepare` without campaign
-identity, colliding with attempt 01. A full campaign-path digest now disambiguates
-native tags. Newton also rejected missing fingerprints after `configs/upstream.json`
-changed only the policy inventory and a status label. All robot bytes, converter,
-reference extractor, path implementation, dependency lock and generated asset
-hashes matched the accepted conversion. The unchanged USD trees were copied under
-the new fingerprint with explicit metadata-only reuse provenance; no conversion
-or physics change is claimed. Evidence: `outputs/diagnostics/asset-metadata-rekey-0908-01`.
-The coordinator now verifies both Newton assets before starting any workers.
-Attempt 02 and all partial results remain preserved; it never started full training.
+Focused validation: 20 tests plus 9 subtests passed. Tests cover warmup exclusion,
+complete SB3 PPO timing, contamination/headroom rejection, selected-count capacity
+gates, native learning-rate routing, first-free-GPU reuse, nested run-name isolation
+and asset integrity. Changes are committed on `feat/rl-measured-environments`;
+no new main merge is claimed. The original Walking benchmark's 8192 result
+(~98k samples/s) remains a reference, not the answer for every combination.

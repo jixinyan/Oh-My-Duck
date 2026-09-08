@@ -5,15 +5,15 @@ Implementation proceeds by domain, with interfaces for later capabilities and
 explicit evidence for implemented functionality. Task-family organization, single-GPU pipeline fixes and full-training campaigns
 are merged into `main` at `5ef433b`. Submitted training keeps source `1f45996`. No public policy upload has occurred.
 
-Latest scope: prepare and train both tasks across both owned backends and both
-native PPO frameworks. Per-combination environment selection measures complete
-PPO throughput with 15% VRAM headroom; all eight counts remain to be measured. Attempt `measured-env-0908-02` stopped during startup because of native-log
-name collisions and metadata-invalidated Newton asset fingerprints. Both causes
-are corrected; the separate replacement launch is pending. Full training has not
-started; it will start only after all preparation gates pass.
-Existing original controls and previous artifacts are preserved. Available GPUs
-serve queued independent runs; no learned-behavior claim changes. See
-[environment selection](reports/rl-environment-selection-2026-09-08.md).
+Latest scope: train both tasks across both owned backends and both native PPO
+frameworks. `measured-env-0908-03` (source `f9fcf80`) is preparing on GPUs
+1/6/2/3/4/5: six initial 64-env/5-update training smokes passed; Newton SB3
+Walking/StandUp are queued for the next free card. All eight environment counts
+remain to be selected from measured PPO throughput with 15% VRAM headroom.
+Full training starts automatically after all preparations pass; it has not yet
+started. Original controls continue on 0/7. Their preview controller is temporarily
+paused and will automatically resume after isolated calibration. Prior failed
+startup artifacts are preserved. See [selection and startup evidence](reports/rl-environment-selection-2026-09-08.md).
 
 Latest user preference: no continuous LLM training polling. A background worker
 saves native videos every 1000 PPO updates (24000 control steps per environment)

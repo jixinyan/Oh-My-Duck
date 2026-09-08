@@ -89,14 +89,15 @@
     "mujoco_video": "explicit_osmesa_on_current_host; native_newton_video_unchanged",
     "representative_videos_verified": 60,
     "checkpoint_previews": {
-      "state": "background_periodic_worker_configured",
+      "state": "temporarily_paused_for_isolated_calibration_auto_resume",
       "gallery": "outputs/previews/official-periodic-0908-01/index.html",
       "manifest": "outputs/previews/official-periodic-0908-01/result.json",
       "mode": "fixed_checkpoint_intervals_without_llm_polling",
       "ppo_update_interval": 1000,
       "control_steps_per_environment": 24000,
       "final_diagnosis": "after_both_original_training_processes_end",
-      "previous_galleries_retained": true
+      "previous_galleries_retained": true,
+      "pause_manifest": "outputs/experiments/measured-env-0908-03/result.json"
     },
     "local_rl_gpu_policy": "explicit_idle_gpu_allocation_authorized_2026_09_08",
     "local_rl_gpus": {
@@ -113,7 +114,7 @@
       }
     },
     "environment_selection": {
-      "state": "preparation_stopped_startup_fixes_validated",
+      "state": "six_smokes_passed_preparation_running_two_queued",
       "config": "configs/experiments/representative-throughput.json",
       "module": "oh_my_duck.rl.experiments.throughput",
       "scope": "two_tasks_two_backends_two_frameworks",
@@ -122,8 +123,8 @@
       "warmup_updates": 10,
       "measured_updates": 30,
       "learned_behavior": "unverified",
-      "campaign": "outputs/experiments/measured-env-0908-02",
-      "source_commit": "c84f1695982591c96178774d04db2b8e7c7122b4",
+      "campaign": "outputs/experiments/measured-env-0908-03",
+      "source_commit": "f9fcf80ded663a95494e6d43fa9edfede5a0308f",
       "allocated_gpus": [
         1,
         6,
@@ -137,7 +138,7 @@
         7
       ],
       "queue": "next_available_gpu",
-      "final_training": "not_started",
+      "final_training": "automatic_after_all_eight_preparations_pass_not_yet_started",
       "periodic_video_updates": 1000
     }
   },
