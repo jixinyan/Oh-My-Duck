@@ -399,3 +399,14 @@ ONNX metadata, so this demonstrates compatible execution of a successful policy,
 not our own training reproduction. See [published-policy reference](published-policy-reference-2026-09-08.md)
 for the source/hash, videos, exact paired states, SVG trajectories and motion-cost
 measurements. Published Walking still fails at runtime action scales 1.0 and 0.9.
+
+
+## Subsequent official-history and checkpoint audit
+
+See [official source history](official-source-history-2026-09-08.md) for verified
+recipe configuration continuity, exact published-byte runtime commits, CAD/contact
+geometry comparison and the failed full-task checkpoint-1500 batteries. The
+replacement milestone observer uses the correct resume directories and advances
+original tasks independently. Only the original learners continue; the angular
+penalty diagnostic has finished without prone/supine recovery, and further tuning
+is deferred. Earlier active-run/observer statements above are historical.

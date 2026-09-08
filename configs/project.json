@@ -211,19 +211,31 @@
         "interpretation": "similar early learning and behavior; long-run reproduction remains unverified"
       },
       "milestone_observer": {
-        "manifest": "outputs/baselines/matched-growth-0908-01/result.json",
+        "manifest": "outputs/baselines/official-growth-0908-02/result.json",
         "source_commit": "0792f99598d39336d35f091c0a96848c6a2dabf3",
-        "iterations": [
-          500,
-          1000,
+        "scope": "independent original-task milestones with available owned counterparts; normalizer-aware export and corrected CPU diagnostics, not full behavior acceptance",
+        "latest_completed_iteration": 1500,
+        "latest_behavior": "both_walking_fail; original_standup_standing_only; owned_standup_standing_and_sitting_only",
+        "previous_manifest": "outputs/baselines/matched-growth-0908-01/result.json",
+        "walking_iterations": [
           1500,
           2500,
           4000,
-          6000
+          6000,
+          10000,
+          20000,
+          30000,
+          40000,
+          49999
         ],
-        "scope": "matched native export and corrected CPU no-video diagnostics; not full behavior acceptance",
-        "latest_completed_iteration": 1000,
-        "latest_behavior": "both_walking_fail; original_standup_standing_only; owned_standup_standing_and_sitting_only"
+        "standup_iterations": [
+          1500,
+          2500,
+          4000,
+          6000,
+          10000,
+          14999
+        ]
       },
       "standup_recovery_diagnosis": {
         "report": "docs/reports/standup-recovery-diagnosis-2026-09-08.md",
@@ -307,7 +319,15 @@
         "report": "docs/reports/walking-transfer-diagnosis-2026-09-08.md"
       },
       "current_priority": "official_default_recipe_behavior_then_owned_equivalence_then_newton_sb3",
-      "video_review": "outputs/previews/review-0908-01/index.html"
+      "video_review": "outputs/previews/review-0908-01/index.html",
+      "official_source_history": {
+        "report": "docs/reports/official-source-history-2026-09-08.md",
+        "config_variants": 6,
+        "differences": "8 Walking logging-name differences only; StandUp identical",
+        "published_training_run": "unknown",
+        "static_collision_hull_audit": "completed; no large geometry change identified; dynamic equivalence unproven",
+        "own_behavior_reproduced": false
+      }
     },
     "cpu_rehearsal": {
       "state": "corrected_matrix_execution_verified_8_of_8",

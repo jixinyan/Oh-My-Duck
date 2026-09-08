@@ -16,6 +16,14 @@ All eight final CPU/native videos and local packaging are checked; own-policy
 behavior reproduction remains open. The user reaffirmed official-recipe-first
 reproduction; the prepared second tuning experiment is deferred and was not launched.
 
+Official history audit confirms six historical/current train/play configurations
+differ only in Walking logging names. Published policy bytes are traced to official
+runtime commits; their exact training run remains unknown. At checkpoint 1500,
+both original/owned Walking nearly stand still in CPU replay; neither StandUp
+recovers from prone/supine. A replacement observer fixes resumed checkpoint lookup
+and advances original task assessments independently while owned runs are paused.
+See [source-history evidence](reports/official-source-history-2026-09-08.md).
+
 The corrected CPU/BAM matrix now completes all eight preserved acceptance policies
 with finite 61/14 traces and 20 checked videos; all short policies still fail
 behavior. Native previews use scoring v2 (`outputs/previews/shared-gpu7-0908-02`).

@@ -4,12 +4,14 @@ title: Agentic Microduck — 分步执行计划
 version: 0.2
 status: In progress
 created: 2026-09-06
-updated: 2026-09-07
+updated: 2026-09-08
 tags:
   - microduck
   - implementation-plan
   - sim-to-real
 ---
+
+> 最新官方核查（2026-09-08）：历史 Velocity2 与当前固定 Velocity 的六组 train/play 配置仅日志命名不同，StandUp 配置一致；发布 Walking/StandUp 的字节哈希已追溯到官方 runtime 提交，但确切训练 run 仍未知。CAD 重导出未发现大幅接触凸包变化。原版与 owned 的 1500 轮回放都未通过完整任务；目前仅两组官方原版在 GPU 7、4096 环境/组、W&B offline 继续训练。owned/部分 Newton 保持暂停，第二项调参实验未启动。检查器已修正续训 checkpoint 路径并独立跟踪两项原版任务。以下较早日期的状态为历史记录；最新证据见 [官方历史核查](reports/official-source-history-2026-09-08.md) 和 [实现状态](implementation-status.md)。
 
 > 当前实现状态（2026-09-07）：源码按 `src/oh_my_duck/{rl,agentic,robotics,core,perception,voice,experience,infrastructure,cli}` 分域，旧 `training/` 包已移除。两个代表任务、两个仿真后端与两个原生 PPO 已有 smoke/恢复/导出证据；行为、sim2sim 和最终统一验收单独记录。单卡本机运行，多卡才提交 job；W&B 离线。采用“模块成批实现 → 静态/CPU 检查 → 必要物理门槛 → 统一端到端验收”的开发节奏。结构重构、单卡 pipeline 修复和完整训练编排已合入 main（5ef433b）：8/8 短训练、恢复、导出与本地打包通过；全部 8 个组合已完成单卡训练/恢复/导出/打包及双后端、CPU/BAM 回放；60 段 720p 视频和 61/14 轨迹已检查。MuJoCo 显式使用 OSMesa 渲染，Isaac 保持原生 Newton；SB3 课程进度恢复已补齐并验证。短训练策略均未通过行为标准，长训练收敛与 Newton 多卡验收尚未完成；旧任务 a52ff51b 于 2026-09-08 查询时已不存在于平台 API，不能作为通过证据。详见 [当前状态](implementation-status.md) 与 [端到端证据](reports/rl-pipeline-acceptance.md)。
 
