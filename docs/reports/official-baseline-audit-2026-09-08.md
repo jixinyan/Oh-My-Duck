@@ -359,3 +359,23 @@ reusing or overwriting failed attempts. It does not restart or alter training.
 Evidence: `outputs/baselines/matched-growth-0908-01/{launch,result}.json`.
 These single-seed, no-video diagnostics measure learning progress; repeated-seed
 native-backend and CPU video acceptance remain separate requirements.
+
+
+## Current recovery triage and corrected CPU matrix
+
+A paired 16-reset StandUp battery found sitting success falling from 13/16 at
+2000/2250 to 10/16 at 2500 and 8/16 at 2750, with no prone/supine successes. The
+owned MuJoCo StandUp learner is now SIGSTOP-paused at logged iteration 2985 for
+diagnosis; original controls and owned Walking continue. A separate, gated native
+PPO experiment follows the official recipe's own first recommendation: halve only
+body angular-velocity penalty. See [recovery diagnosis](standup-recovery-diagnosis-2026-09-08.md)
+for exact results, curriculum continuity, reward measurements, pause identity and
+experimental limits. This supersedes the preceding four-active-learner snapshot.
+
+Corrected CPU/BAM matrix revalidation is complete for the original eight preserved
+acceptance policies. All eight executions pass finite-state/61/14 checks and all
+20 videos pass 1280×720, 25 FPS and trace-matched frame counts. Selected final
+Walking and face-up StandUp frames were inspected for each policy; they show falls
+or remaining down. All eight still report `behavior_failed`, as short policies.
+Evidence: `outputs/baselines/corrected-cpu-matrix-0908-01/result.json`. This closes
+corrected CPU execution revalidation, not learned-task or hardware acceptance.

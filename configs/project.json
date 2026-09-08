@@ -110,7 +110,7 @@
     "task_layout": "14 task families with environment.py and ppo.py; 33 semantic catalog entries preserved",
     "full_training_campaign": {
       "config": "configs/experiments/representative-full.json",
-      "status": "official_baseline_priority_two_owned_active_three_newton_suspended_three_sb3_stopped",
+      "status": "official_baseline_priority_owned_walking_active_owned_standup_diagnosis_pause_three_newton_suspended_three_sb3_stopped",
       "nodes": 1,
       "gpus": 1,
       "num_envs_per_gpu": 4096,
@@ -127,12 +127,12 @@
       "local_manifest": "outputs/experiments/shared-gpu7-0908-01/campaign.json",
       "execution": "direct_development_host",
       "gpu_model": "NVIDIA H200",
-      "updated_at": "2026-09-08T05:56:27.995050+00:00",
+      "updated_at": "2026-09-08T06:29:10.913997+00:00",
       "reward_snapshot": "docs/reports/reward-trends-2026-09-08.md",
       "gpu_indices": [
         7
       ],
-      "active_runs": 2,
+      "active_runs": 1,
       "stopped_runs": [
         "mujoco-sb3-walking",
         "mujoco-sb3-stand_up",
@@ -142,7 +142,8 @@
       "paused_runs": [
         "isaac-newton-rsl-rl-walking",
         "isaac-newton-rsl-rl-stand_up",
-        "isaac-newton-sb3-walking"
+        "isaac-newton-sb3-walking",
+        "mujoco-rsl-rl-stand_up"
       ],
       "pause_mechanism": "SIGSTOP; verify recorded PID and command identity before SIGCONT",
       "preview_gallery": "outputs/previews/shared-gpu7-0908-02/index.html"
@@ -221,15 +222,38 @@
           6000
         ],
         "scope": "matched native export and corrected CPU no-video diagnostics; not full behavior acceptance"
+      },
+      "standup_recovery_diagnosis": {
+        "report": "docs/reports/standup-recovery-diagnosis-2026-09-08.md",
+        "reset_samples_per_checkpoint": 16,
+        "training_seeds": 1,
+        "checkpoints": [
+          2000,
+          2250,
+          2500,
+          2750
+        ],
+        "sitting_passes": [
+          13,
+          13,
+          10,
+          8
+        ],
+        "prone_and_supine_passes": 0,
+        "owned_run": "SIGSTOP_paused_for_diagnosis_at_2985",
+        "experiment": "outputs/baselines/standup-angular-penalty-0908-01/result.json",
+        "experiment_status": "gated_in_progress_no_improvement_claim"
       }
     },
     "cpu_rehearsal": {
-      "state": "corrected_ab_completed_full_matrix_revalidation_pending",
+      "state": "corrected_matrix_execution_verified_8_of_8",
       "controller": "oh_my_duck.robotics.microduck.actuators.cpu_bam.MicroduckMujocoController",
       "tests": "3_passed_real_jacobian_load_motor_and_reset_checks",
-      "behavior": "walking_2000_and_published_fail_command_response; standup_2500_passes_standing_sitting_only",
+      "behavior": "all_short_matrix_policies_fail; learned-policy recovery diagnosis remains open",
       "report": "docs/reports/official-baseline-audit-2026-09-08.md",
-      "corrected_ab": "outputs/baselines/cpu-bam-dof-0908-01/comparison.json"
+      "corrected_ab": "outputs/baselines/cpu-bam-dof-0908-01/comparison.json",
+      "matrix": "outputs/baselines/corrected-cpu-matrix-0908-01/result.json",
+      "videos": 20
     }
   }
 }

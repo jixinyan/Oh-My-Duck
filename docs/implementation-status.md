@@ -5,17 +5,18 @@ Implementation proceeds by domain, with interfaces for later capabilities and
 explicit evidence for implemented functionality. Task-family organization, single-GPU pipeline fixes and full-training campaigns
 are merged into `main` at `5ef433b`. Submitted training keeps source `1f45996`. No public policy upload has occurred.
 
-Current official-first goal: four MuJoCo learners are active on GPU 7 (original
-and owned Walking/StandUp); three Newton learners are suspended, and three earlier
-SB3 attempts were stopped. Learned behavior remains unverified. Corrected CPU BAM
-A/B is complete for Walking 2000, StandUp 2500 and published alpha; Walking still
-fails command response and StandUp passes only standing/sitting. Historical CPU
-matrix execution below predates the DOF-load correction and needs revalidation.
-Matched checkpoint-250 original/owned CPU comparison also completed: both fail
-Walking and pass only standing-start StandUp; early rewards are close, with
-long-run equivalence unverified. See the [current baseline audit](reports/official-baseline-audit-2026-09-08.md).
-Native previews now use scoring v2 (`outputs/previews/shared-gpu7-0908-02`); a
-separate observer schedules equal-iteration original/owned CPU diagnostics.
+Current official-first goal: original MuJoCo Walking/StandUp and owned MuJoCo
+Walking continue on GPU 7. Owned StandUp is paused for diagnosis after paired
+reset batteries show regression; three Newton learners remain suspended and
+three earlier SB3 attempts stopped. A separate gated diagnostic follows the
+pinned official recipe's recommendation to halve only body angular-velocity
+penalty. No long-run behavior success is claimed.
+
+The corrected CPU/BAM matrix now completes all eight preserved acceptance policies
+with finite 61/14 traces and 20 checked videos; all short policies still fail
+behavior. Native previews use scoring v2 (`outputs/previews/shared-gpu7-0908-02`).
+See [baseline audit](reports/official-baseline-audit-2026-09-08.md) and
+[StandUp diagnosis](reports/standup-recovery-diagnosis-2026-09-08.md).
 
 | Component | Current state |
 |---|---|
@@ -29,7 +30,7 @@ separate observer schedules equal-iteration original/owned CPU diagnostics.
 | Newton physics | Actual solver, canonical state/sensors, precise collisions, BAM cadence, DR and penalties audited |
 | Task behavior | All five-iteration policies fail behavior gates; long training and convergence acceptance remain |
 | Task replay | All 24 replay contexts completed; 60 videos and finite 61/14 traces checked |
-| CPU rehearsal/sim2sim/local packages | Eight historical execution checks completed; corrected CPU load semantics require matrix revalidation; no learned behavior acceptance |
+| CPU rehearsal/sim2sim/local packages | All eight corrected CPU/BAM executions revalidated; 20 videos checked; learned behavior remains unverified |
 | Multi-GPU | Native RSL MuJoCo DDP previously passed; Newton DDP acceptance pending; old job `a52ff51b` no longer exists in the platform API; no distributed SB3 gradient claim |
 | Hardware | Unavailable; all hardware acceptance deferred |
 
