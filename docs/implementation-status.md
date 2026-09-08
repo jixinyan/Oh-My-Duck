@@ -126,3 +126,13 @@ observation equality are verified. Repeated original runs also show contact-forc
 and trajectory nondeterminism; long-run behavior is still unverified. Walking
 controls and the complete sensor-refresh comparison are in progress. See the
 [baseline audit](reports/official-baseline-audit-2026-09-08.md) for evidence and limits.
+
+
+Walking runtime controls now also match compiled arrays and initial/subset actor
+and critic observations; all four original/owned representative PPO smoke runs
+completed. A published-policy rehearsal exposed a Walking scoring false positive:
+standing almost still met the global RMSE threshold. Scoring v2 now requires signed
+motion response in every commanded segment; the preserved published-policy trace
+is reclassified `behavior_failed`. This changes acceptance scoring, not training
+semantics. Six focused protocol/reset tests pass. See the baseline audit for the
+measured commands, responses and remaining interpretation limits.

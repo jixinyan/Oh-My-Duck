@@ -95,10 +95,49 @@ curriculum stage (StandUp: 0, 600, 1500, 2500, 4000). These are diagnostic trace
 not training or a curriculum pacing experiment. The first diagnostic version
 manually reset a subset without the complete sensor refresh; its initial full
 reset/model comparisons remain useful, but its subset trace is superseded by v2,
-which uses public `env.reset(env_ids=...)`. V2 matched controls and Walking controls
-are running; no result from an unfinished control is claimed.
+which uses public `env.reset(env_ids=...)`. Both v2 task controls and all four
+64-env/5-iteration native PPO controls have now completed.
 
 Evidence: `outputs/baselines/official-0908-01/`, especially
 `probe-owned-standup-v2/result.json`, `export-official-standup-v2/result.json`,
 and `remaining-controls-{plan,result}.json`. New GPU work uses only GPU 7 and
 all W&B runs remain offline. Long-run learned behavior remains unverified.
+
+
+## Walking controls and a corrected behavior gate
+
+Walking's 468 compiled arrays match exactly. Full and noncontiguous subset reset
+qpos/qvel and actor/critic observations also match exactly. First-step reward is
+identical; the largest qvel difference is 2.38e-7. StandUp v2 full and subset reset
+qpos/qvel and actor observations match; critic contact-force differences remain.
+All four original/owned × Walking/StandUp native PPO smoke runs completed.
+Original Walking export passed 44 scalar and 9 penalty checks; owned StandUp
+export passed 51 scalar and 9 penalty checks. Owned Walking export is in progress.
+Runtime comparisons are in `runtime-comparison.json` under the evidence directory.
+
+The pinned published `alpha_walking.onnx` is **not established as a successful gait
+reference**. In the current CPU/BAM battery it stood almost stationary: commanded
+forward 0.1 m/s yielded mean 0.000172 m/s, and commanded yaw 0.5 rad/s yielded
+0.0163 rad/s. Total XY displacement was approximately [0.00256, 0.00098] m. Video
+keyframes corroborate this. The 61-D input carries the correct twist in slots
+48:51 (error <1.5e-9), with zero head/body command slots. Its metadata declares the
+same observation order, servos and HOME convention; the cause of its behavior in
+this runtime is not yet established. In task MuJoCo it also fails the old tracking
+criterion. This is not evidence that every official policy behaves this way.
+
+The CPU battery originally returned `passed`: global RMSE is diluted by idle
+segments, and the old limits even allowed a completely stationary policy to pass.
+That was a scoring defect. Walking scoring version 2 retains the prior fall and
+tracking limits and additionally requires at least 50% signed mean response in
+**each commanded motion segment**. This is a project acceptance guard against
+non-response, not a change to official training/rewards or a claim that 50% alone
+establishes gait quality. Real motion, command tracking and video review remain
+required. Regression tests cover stationary, wrong-direction, missing-turn,
+tracking and falling cases; six protocol/reset tests pass.
+
+Original traces, videos and the false-positive result are preserved under
+`published-walking-cpu/`. `rescored-v2.json` explicitly supersedes its behavior
+classification with `behavior_failed`; forward/turn response fractions are 0.17%
+and 3.25%. Existing immutable training/preview snapshots retain their old scorer:
+use the current scorer on their saved traces before making new behavior claims.
+No long-run policy has passed current behavior acceptance yet.

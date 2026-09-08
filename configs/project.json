@@ -146,14 +146,22 @@
       "baseline": "mujoco_rsl_rl",
       "static_audit": "docs/reports/official-baseline-audit-2026-09-08.md",
       "open_items": [
-        "matched Walking runtime and PPO controls",
-        "matched original/owned learned-behavior evaluation with repeated seeds",
+        "long-run pinned-original versus owned behavioral comparison",
+        "published policy rehearsal interpretation and repeated-seed task evaluation",
         "Newton and SB3 behavioral acceptance after the official baseline"
       ],
       "priority": "official_mujoco_rsl_behavior_then_newton_and_sb3",
       "reset_state_rng_parity": "verified_15_real_mujoco_cases",
       "compiled_standup_model": "468_arrays_exact",
-      "official_standup_smoke_export": "passed_64_env_5_iterations_51_scalars_9_penalties"
+      "official_standup_smoke_export": "passed_64_env_5_iterations_51_scalars_9_penalties",
+      "compiled_walking_model": "468_arrays_exact",
+      "native_ppo_controls": "official_and_owned_both_tasks_64_env_5_iterations_completed",
+      "walking_scoring": {
+        "version": 2,
+        "minimum_command_response_fraction": 0.5,
+        "published_policy_cpu_reference": "behavior_failed_after_rescoring",
+        "reason": "stationary policies passed the previous global RMSE gate"
+      }
     }
   }
 }

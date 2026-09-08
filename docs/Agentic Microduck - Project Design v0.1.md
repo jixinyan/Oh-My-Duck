@@ -753,3 +753,13 @@ commit 的独立对照环境已按原 lock 离线安装；它仅用于实验对�
 及 51 个 scalar / 9 个 penalty 检查通过。长训练行为尚未复现完成，Walking 对照
 和后续视频、CPU/BAM 验收继续进行。只用 GPU 7，W&B offline，保留失败产物。
 详见 [baseline audit](reports/official-baseline-audit-2026-09-08.md)。
+
+
+**行为验收修正（2026-09-08）**：Walking 原有全程 RMSE 门槛会把原地站立误判为成功。
+现采用 scoring v2：保留原有稳定性/误差检查，并要求每个运动指令阶段至少有 50%
+同方向平均响应。该检查是排除无响应的项目验收下限，不改变官方 reward/训练配方，
+也不单独代表步态质量达标。已发布 alpha policy 在当前 CPU/BAM 回放的前进/转向
+响应仅为指令的 0.17%/3.25%，旧通过结果已保留并用独立文件重评分为失败。
+Walking 的原版/重构版编译模型、reset 状态及 actor/critic 初始观测一致；两任务
+四个原版/重构 PPO smoke 已完成。长期效果仍待复现，不能把发布文件名或 smoke
+当作官方效果的实证。详细证据见 baseline audit。

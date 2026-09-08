@@ -18,6 +18,7 @@ class EvaluationProtocol:
     minimum_height: float
     maximum_tilt: float
     hold_seconds: float = 1.0
+    minimum_command_response: float = 0.5
 
     def score(self, trace, completed):
         height, tilt = np.asarray(trace["height"]), np.asarray(trace["tilt"])
@@ -25,14 +26,36 @@ class EvaluationProtocol:
             twist = np.asarray(trace["twist"])
             command = np.asarray(trace["command"])
             rmse = np.sqrt(np.mean((twist - command) ** 2, axis=0))
+            # Whole-episode RMSE dilutes motion errors with idle time: standing
+            # still passes the old 0.1 m/s / 0.5 rad/s limits. Require meaningful
+            # signed response in every commanded segment, independently of RMSE.
+            boundaries = np.r_[0, np.flatnonzero(np.any(np.diff(command, axis=0), axis=1)) + 1, len(command)]
+            responses = []
+            for start, end in zip(boundaries[:-1], boundaries[1:]):
+                requested = command[start]
+                for axis in np.flatnonzero(np.abs(requested) > 1e-8):
+                    measured = float(twist[start:end, axis].mean())
+                    responses.append({
+                        "start_tick": int(start), "end_tick": int(end),
+                        "axis": ("vx", "vy", "yaw_rate")[axis],
+                        "command": float(requested[axis]), "measured_mean": measured,
+                        "response_fraction": measured / float(requested[axis]),
+                    })
+            responds = bool(responses) and all(
+                row["response_fraction"] >= self.minimum_command_response for row in responses
+            )
             return {
                 "success": bool(
                     completed
                     and (height >= self.minimum_height).all()
                     and (tilt <= self.maximum_tilt).all()
                     and (rmse <= [0.1, 0.1, 0.5]).all()
+                    and responds
                 ),
                 "twist_rmse": rmse.tolist(),
+                "command_response": responses,
+                "minimum_command_response": self.minimum_command_response,
+                "scoring_version": 2,
                 "min_height_m": float(height.min()),
                 "max_tilt_rad": float(tilt.max()),
             }
