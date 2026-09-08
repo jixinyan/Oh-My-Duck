@@ -221,7 +221,9 @@
           4000,
           6000
         ],
-        "scope": "matched native export and corrected CPU no-video diagnostics; not full behavior acceptance"
+        "scope": "matched native export and corrected CPU no-video diagnostics; not full behavior acceptance",
+        "latest_completed_iteration": 500,
+        "latest_behavior": "both_walking_fail; both_standup_pass_standing_only"
       },
       "standup_recovery_diagnosis": {
         "report": "docs/reports/standup-recovery-diagnosis-2026-09-08.md",
@@ -242,7 +244,7 @@
         "prone_and_supine_passes": 0,
         "owned_run": "SIGSTOP_paused_for_diagnosis_at_2985",
         "experiment": "outputs/baselines/standup-angular-penalty-0908-01/result.json",
-        "experiment_status": "gated_in_progress_no_improvement_claim"
+        "experiment_status": "comparison_training_after_smoke_export_cpu_video_capacity_gates"
       }
     },
     "cpu_rehearsal": {

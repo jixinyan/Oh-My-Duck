@@ -379,3 +379,11 @@ Walking and face-up StandUp frames were inspected for each policy; they show fal
 or remaining down. All eight still report `behavior_failed`, as short policies.
 Evidence: `outputs/baselines/corrected-cpu-matrix-0908-01/result.json`. This closes
 corrected CPU execution revalidation, not learned-task or hardware acceptance.
+
+
+The scheduled checkpoint-500 comparison completed all four exports and corrected
+CPU batteries. Both original/owned Walking fail tracking (forward mean
+−0.00464/−0.01060 m/s, yaw 0.0831/0.2224 rad/s); both StandUp policies still pass
+only the standing-start case. No long-run equivalence or learned recovery claim
+follows. Evidence: `matched-growth-0908-01/iteration-500/result.json` under
+`outputs/baselines`. The observer now waits for checkpoint 1000.

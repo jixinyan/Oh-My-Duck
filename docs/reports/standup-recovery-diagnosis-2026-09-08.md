@@ -92,8 +92,16 @@ branch's label and environment-step count. All recipe curricula, other rewards,
 actuator parameters and task thresholds remain intact. Each stage discards its
 smoke/capacity weights and starts from the same preserved checkpoint.
 
-The experiment is gated/in progress; no improvement is claimed. Its exact script
+The smoke, normalized export, corrected CPU video and 4096-environment capacity/
+export gates completed. Comparison training is now running; no improvement is claimed. Its exact script
 hash, source snapshot `0792f99`, checkpoint hash, commands and stage outcomes are
 recorded in its manifest. A matched 16-reset battery and videos are required after
 training before choosing whether this tuning is useful. CPU examples alone do not
 prove native-backend or Newton/SB3 success.
+
+
+The saved default and diagnostic environment YAMLs were compared without
+instantiating YAML objects. Across rewards, curricula, commands, observations and
+events, the only difference is `rewards.body_ang_vel.weight: -0.05 → -0.025`.
+The live comparison worker's environment confirms GPU 7 and W&B offline. Evidence:
+`standup-angular-penalty-0908-01/recipe-difference.json`.
