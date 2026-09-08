@@ -122,3 +122,21 @@ preview. It was paused for diagnosis under the user’s standing instruction. It
 latest complete checkpoint at cumulative iteration 1500 is preserved with an
 operator-stop record. Five runs continue on GPU 7; this is a triage decision,
 not proof that the stopped configuration could never converge.
+
+
+## Prepared SB3 campaign configuration
+
+The native CLI learning-rate override is now available as optional per-run
+`learning_rate` in campaign manifests. It reaches all four training stages
+(smoke, resume check, capacity and full); it cannot silently disappear between
+gates and training. Recovery rejects a changed declaration before reusing old
+gates. Four focused tests and nine subtests pass, covering invalid inputs,
+unchanged defaults, actual worker command construction and recovery validation.
+This is orchestration testing with process execution mocked; the earlier real
+64-env/five-iteration native CLI test remains separate evidence.
+
+`configs/experiments/representative-sb3-lr-1e-4.json` prepares both tasks/backends
+with native constant learning rate 1e-4. A dry run verifies four independent runs
+and explicit one-GPU sharing without creating output or starting workers. It has
+not been launched; current GPU priority remains the original MuJoCo controls and
+StandUp diagnosis. Low-KL short tests do not demonstrate convergence.

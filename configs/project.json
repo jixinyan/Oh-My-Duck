@@ -256,6 +256,14 @@
       "corrected_ab": "outputs/baselines/cpu-bam-dof-0908-01/comparison.json",
       "matrix": "outputs/baselines/corrected-cpu-matrix-0908-01/result.json",
       "videos": 20
+    },
+    "sb3_learning_rate_campaign": {
+      "state": "prepared_not_launched",
+      "config": "configs/experiments/representative-sb3-lr-1e-4.json",
+      "learning_rate": 0.0001,
+      "tests": "4_passed_9_subtests_command_routing_defaults_validation_recovery",
+      "native_cli_smoke": "earlier_64_env_5_iteration_mujoco_standup_passed",
+      "behavior": "unverified"
     }
   }
 }

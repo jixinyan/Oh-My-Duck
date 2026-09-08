@@ -17,6 +17,8 @@ with finite 61/14 traces and 20 checked videos; all short policies still fail
 behavior. Native previews use scoring v2 (`outputs/previews/shared-gpu7-0908-02`).
 See [baseline audit](reports/official-baseline-audit-2026-09-08.md) and
 [StandUp diagnosis](reports/standup-recovery-diagnosis-2026-09-08.md).
+SB3 campaign learning-rate routing is tested; a four-combination 1e-4 configuration
+is prepared but not launched. Default task recipes and native PPO algorithms remain unchanged.
 
 | Component | Current state |
 |---|---|

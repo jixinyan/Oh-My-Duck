@@ -43,6 +43,8 @@ def main():
             run = output/name
             command += ['--num-envs', str(count), '--iterations', str(iterations), '--seed', str(spec['seed']),
                         '--checkpoint-interval', str(2 if name == 'smoke' else plan['checkpoint_interval']), '--output', str(run)]
+            if 'learning_rate' in spec:
+                command += ['--learning-rate', str(spec['learning_rate'])]
             if resume is not None:
                 bundles = sorted((resume/'checkpoints').glob('step_*'))
                 command += ['--resume', str(bundles[-1] if bundles else resume)]

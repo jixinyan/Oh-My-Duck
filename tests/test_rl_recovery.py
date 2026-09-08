@@ -28,6 +28,12 @@ class RecoveryIntegrity(unittest.TestCase):
                               'checkpoint_sha256': hashes['model.zip'], 'completed_iterations': 20,
                               'source_campaign': str(previous.parent)}
             self.assertEqual(validate_checkpoint(spec, root)['remaining_iterations'], 80)
+            spec['learning_rate'] = 0.0001
+            with self.assertRaisesRegex(ValueError, 'learning_rate differs'):
+                validate_checkpoint(spec, root)
+            source['spec']['learning_rate'] = 0.0001
+            (previous / 'result.json').write_text(json.dumps(source))
+            self.assertEqual(validate_checkpoint(spec, root)['remaining_iterations'], 80)
             spec['resume']['completed_iterations'] = 19
             with self.assertRaisesRegex(ValueError, 'progress'):
                 validate_checkpoint(spec, root)

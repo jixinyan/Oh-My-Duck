@@ -98,3 +98,26 @@ TASK --learning-rate 0.0001 ...` explicitly sets native SB3's learning rate,
 including on resume. The default and retained runs are unchanged. Override and
 effective learning rate are recorded in run/checkpoint metadata. A small KL probe
 is not convergence evidence; retuned runs need their own gates and output paths.
+
+
+Campaign run entries may set an optional numeric `learning_rate` for native SB3.
+The same value is forwarded to smoke, resume check, capacity and full training,
+and is retained in campaign/run provenance. Omitting it preserves the existing
+framework default. Values must be finite and positive; RSL-RL entries reject this
+field and retain their native adaptive schedule.
+
+[The prepared four-combination SB3 experiment](../configs/experiments/representative-sb3-lr-1e-4.json)
+uses `0.0001` with the unchanged official task recipes. It is **prepared, not
+launched or behavior-validated**. Inspect allocation without starting training:
+
+```bash
+python omd.py campaign --config configs/experiments/representative-sb3-lr-1e-4.json \
+  --output outputs/experiments/NEW --runs-per-gpu 4 --dry-run
+```
+
+Actual allocation/sharing remains explicit and should follow measured throughput
+and the current GPU-7-only constraint. A recovery may reuse preceding gates only
+when its learning-rate declaration matches the source campaign; changing or
+adding that declaration requires fresh gates. This prevents retuned training from
+silently inheriting validation of another setting. The direct native training
+CLI still supports deliberate learning-rate overrides on fresh/resumed runs.

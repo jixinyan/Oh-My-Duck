@@ -3,6 +3,7 @@ import argparse
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import json
 import hashlib
+import math
 import os
 from pathlib import Path
 import re
@@ -33,6 +34,12 @@ def load_plan(path):
             raise ValueError('Resource and iteration counts must be positive')
         if row['backend'] not in ('mujoco', 'isaac-newton') or row['framework'] not in ('rsl-rl', 'sb3'):
             raise ValueError('Unsupported native training combination')
+        if 'learning_rate' in row:
+            rate = row['learning_rate']
+            if row['framework'] != 'sb3':
+                raise ValueError('Campaign learning_rate applies only to native SB3')
+            if isinstance(rate, bool) or not isinstance(rate, (int, float)) or not math.isfinite(rate) or rate <= 0:
+                raise ValueError('SB3 learning_rate must be a finite positive number')
     return plan
 
 

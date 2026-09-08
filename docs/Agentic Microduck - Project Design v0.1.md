@@ -777,3 +777,9 @@ CPU BAM 已修正 joint/DOF 摩擦约束索引并通过 3 项真实物理/reset 
 和项目内 Walking 继续。课程恢复计数与实际阶段对照正常。另开受控实验遵循官方
 源码建议，只将身体角速度惩罚减半；原版及默认配方不变，尚无改善结论。
 详见 [StandUp recovery diagnosis](reports/standup-recovery-diagnosis-2026-09-08.md)。
+
+
+**SB3 实验入口补充**：campaign 可逐 run 声明原生 SB3 `learning_rate`，所有训练
+阶段一致传递；恢复时不能用不同学习率的旧检查结果跳过前置验证。四组合 1e-4
+配置已准备并通过 dry run，但尚未启动或验证收敛。官方任务配方和 RSL 原生自适应
+PPO 保持不变。详见 [RL campaigns](rl-campaigns.md)。
