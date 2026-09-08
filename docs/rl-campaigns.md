@@ -89,3 +89,12 @@ be repeated to limit previews, and omitting `--watch` renders one snapshot per r
 Rendering uses only the explicitly selected GPU and W&B stays offline. Failed
 exports/renders keep their logs and do not stop training. Every attempt has its
 own directory and checkpoint hash; behavior failures remain visibly labelled.
+
+## SB3 learning-rate diagnosis
+
+The current SB3 mapping uses a constant learning rate; RSL's native adaptive-KL
+schedule is not transferred into SB3. `omd train --rl-framework sb3 ... --
+TASK --learning-rate 0.0001 ...` explicitly sets native SB3's learning rate,
+including on resume. The default and retained runs are unchanged. Override and
+effective learning rate are recorded in run/checkpoint metadata. A small KL probe
+is not convergence evidence; retuned runs need their own gates and output paths.

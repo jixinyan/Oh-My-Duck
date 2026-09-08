@@ -3,6 +3,7 @@ import argparse
 from dataclasses import asdict
 import hashlib
 import json
+import math
 from pathlib import Path
 import subprocess
 import sys
@@ -80,6 +81,7 @@ def main():
     parser.add_argument("--num-envs", type=int, default=64)
     parser.add_argument("--iterations", type=int, default=5)
     parser.add_argument("--checkpoint-interval", type=int, help="PPO updates between native checkpoint bundles; default: task save interval")
+    parser.add_argument("--learning-rate", type=float, help="Explicit native SB3 learning rate; on resume overrides the saved schedule")
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--output", type=Path, required=True)
@@ -88,6 +90,8 @@ def main():
     args = parser.parse_args()
     if args.num_envs < 1 or args.iterations < 1:
         parser.error("num-envs and iterations must be positive")
+    if args.learning_rate is not None and (not math.isfinite(args.learning_rate) or args.learning_rate <= 0):
+        parser.error("learning-rate must be finite and positive")
     configure_torch_backends()
     from oh_my_duck.infrastructure.provenance import source_provenance, validate_resume
     provenance = source_provenance()
@@ -108,7 +112,7 @@ def main():
     try:
         tracking = start_run(backend=args.backend, framework="sb3", task=args.task, directory=args.output,
             config={"num_envs": args.num_envs, "iterations": args.iterations, "seed": args.seed,
-                    "resume_source": str(args.resume) if args.resume else None,
+                    "resume_source": str(args.resume) if args.resume else None, "learning_rate_override": args.learning_rate,
                     "official_agent": asdict(official_agent), "provenance":provenance})
         adapter = MjlabSb3VecEnv(create_environment(task,cfg,backend=args.backend,device=args.device))
         progress_source = "fresh_environment"
@@ -118,7 +122,8 @@ def main():
             if previous["backend"] != args.backend or previous["task"] != args.task or previous["upstream"] != json.loads((ROOT / "configs/upstream.json").read_text())["repositories"]:
                 raise ValueError("Resume task or upstream pin differs")
             normalized = VecNormalize.load(args.resume / "vecnormalize.pkl", adapter)
-            model = PPO.load(args.resume / "model.zip", env=normalized, device=args.device)
+            model = PPO.load(args.resume / "model.zip", env=normalized, device=args.device,
+                             **({"learning_rate": args.learning_rate} if args.learning_rate is not None else {}))
             from .checkpoint import restore_progress
             adapter.env.common_step_counter, progress_source = restore_progress(previous, model.num_timesteps)
         else:
@@ -127,7 +132,8 @@ def main():
             policy_cfg = task.policy_configs["sb3"].build(task_id=args.task,agent_cfg=official_agent)
             model = PPO(policy_cfg.policy, normalized, n_steps=official_agent.num_steps_per_env,
                 batch_size=args.num_envs * official_agent.num_steps_per_env // algorithm.num_mini_batches,
-                n_epochs=algorithm.num_learning_epochs, learning_rate=algorithm.learning_rate,
+                n_epochs=algorithm.num_learning_epochs,
+                learning_rate=args.learning_rate if args.learning_rate is not None else algorithm.learning_rate,
                 gamma=algorithm.gamma, gae_lambda=algorithm.lam, clip_range=algorithm.clip_param,
                 ent_coef=algorithm.entropy_coef, vf_coef=algorithm.value_loss_coef,
                 max_grad_norm=algorithm.max_grad_norm, target_kl=algorithm.desired_kl,
@@ -145,6 +151,8 @@ def main():
             'upstream': json.loads((ROOT / 'configs/upstream.json').read_text())['repositories'],
             'provenance': provenance, 'official_agent': asdict(official_agent),
             'resume': str(args.resume) if args.resume else None,
+            'learning_rate_override': args.learning_rate,
+            'effective_learning_rate_at_save_start': float(model.lr_schedule(1.0)),
         })
         model.learn(total_timesteps=args.iterations * args.num_envs * official_agent.num_steps_per_env,
                     callback=[callback, snapshots], reset_num_timesteps=not bool(args.resume))
@@ -164,6 +172,8 @@ def main():
         np.testing.assert_allclose(actual, expected, atol=1e-5, rtol=1e-5)
         report = {"framework": "sb3", "backend": args.backend, "task": args.task,
             "num_envs": args.num_envs, "iterations": args.iterations,
+            "learning_rate_override": args.learning_rate,
+            "effective_learning_rate": float(model.lr_schedule(model._current_progress_remaining)),
             "timesteps_before": before, "timesteps_after": model.num_timesteps,
             "resume": str(args.resume) if args.resume else None,
             "env_state_before": {"common_step_counter": environment_step_before},
