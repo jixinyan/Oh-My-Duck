@@ -77,3 +77,15 @@ Only the remaining task budget is trained. New output directories preserve the
 original attempt and operator stop records. Native resume restores optimizer,
 normalizer and curriculum state but starts fresh simulation episodes. Checkpoint
 intervals bound lost work; native RSL iteration indexing remains unchanged.
+
+## Checkpoint video previews
+
+`python omd.py preview --campaign outputs/experiments/RUN --output outputs/previews/NEW \
+--gpu 7 --watch` serially exports new saved checkpoints through the official path
+and evaluates them in their training backend with 1280×720 video. Open the output
+`index.html` for the local gallery; refresh after new renders finish. This is a
+checkpoint preview, not a live camera feed or a public service. `--run-id ID` may
+be repeated to limit previews, and omitting `--watch` renders one snapshot per run.
+Rendering uses only the explicitly selected GPU and W&B stays offline. Failed
+exports/renders keep their logs and do not stop training. Every attempt has its
+own directory and checkpoint hash; behavior failures remain visibly labelled.

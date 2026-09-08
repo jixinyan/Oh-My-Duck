@@ -13,6 +13,7 @@ COMMANDS = {
     "frameworks": (None, "List RL frameworks, backend compatibility and validation status"),
     "status": (None, "Show component implementation status without initializing hardware"),
     "setup": ("bootstrap.py", "Fetch pinned sources/models and prepare a backend environment"),
+    "preview": ("preview.py", "Render checkpoint videos and a local gallery; optionally watch training"),
     "campaign": ("campaign.py", "Run independent native RL pipelines, one per allocated GPU"),
     "submit": ("submit.py", "Submit a job with explicit resources and provenance"),
     "assets": ("run.py", "Build source-pinned assets for the selected backend"),
@@ -65,7 +66,7 @@ def main():
         print((root / "configs/project.json").read_text())
         return 0
     filename = COMMANDS[command][0]
-    module = importlib.import_module("oh_my_duck.rl.experiments.campaign" if command == "campaign"
+    module = importlib.import_module("oh_my_duck.rl.experiments." + command if command in {"campaign", "preview"}
                                     else "oh_my_duck.infrastructure." + filename.removesuffix(".py"))
     sys.argv = [sys.argv[0], *([command] if filename == "run.py" else []), *sys.argv[2:]]
     return module.main()
