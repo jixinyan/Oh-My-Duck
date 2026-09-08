@@ -87,7 +87,13 @@
     "video": "offscreen_1280x720",
     "single_gpu": "direct_development_host",
     "mujoco_video": "explicit_osmesa_on_current_host; native_newton_video_unchanged",
-    "representative_videos_verified": 60
+    "representative_videos_verified": 60,
+    "local_rl_gpu": 7,
+    "checkpoint_previews": {
+      "state": "five_retained_run_previews_completed_behavior_failed_last_standup_rendering",
+      "gallery": "outputs/previews/shared-gpu7-0908-01/index.html",
+      "mode": "periodic_saved_checkpoints"
+    }
   },
   "rl_framework_registry": "oh_my_duck.rl.training.frameworks:default_framework_registry",
   "rl_acceptance": {
@@ -104,25 +110,34 @@
     "task_layout": "14 task families with environment.py and ppo.py; 33 semantic catalog entries preserved",
     "full_training_campaign": {
       "config": "configs/experiments/representative-full.json",
-      "status": "local_full_training_running_8_of_8",
+      "status": "six_continuing_on_gpu7_two_mujoco_sb3_stopped",
       "nodes": 1,
-      "gpus": 8,
+      "gpus": 1,
       "num_envs_per_gpu": 4096,
       "walking_iterations": 50000,
       "stand_up_iterations": 15000,
       "checkpoint_interval": 250,
       "job_name": "omd-rl-full-0907-01",
       "queue_id": "local-662cf40c7dfb",
-      "source_commit": "1f45996b2e9ec22c97f492cf1b5a727081cc303f",
+      "source_commit": "b0fa5feefbf11a6b0d5cfbec003744313e0f0751",
       "job_status": "failed",
       "job_id": "b2bab260-030d-4521-8598-77adb7863b4c",
       "job_failure_cause": "unknown; empty log and no log pod names",
-      "local_attempt": "full-local-0908-01",
-      "local_manifest": "outputs/experiments/full-local-0908-01/campaign.json",
+      "local_attempt": "shared-gpu7-0908-01",
+      "local_manifest": "outputs/experiments/shared-gpu7-0908-01/campaign.json",
       "execution": "direct_development_host",
       "gpu_model": "NVIDIA H200",
-      "updated_at": "2026-09-08T02:08:32Z",
-      "reward_snapshot": "docs/reports/reward-trends-2026-09-08.md"
+      "updated_at": "2026-09-08T03:53:29.845178+00:00",
+      "reward_snapshot": "docs/reports/reward-trends-2026-09-08.md",
+      "gpu_indices": [
+        7
+      ],
+      "active_runs": 6,
+      "stopped_runs": [
+        "mujoco-sb3-walking",
+        "mujoco-sb3-stand_up"
+      ],
+      "diagnosis_report": "docs/reports/rl-recovery-2026-09-08.md"
     },
     "latest_merge": "5ef433b"
   }

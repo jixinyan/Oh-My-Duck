@@ -88,3 +88,15 @@ At 2026-09-08 02:08 UTC all eight local runs had entered full training. Early
 returns improved relative to initial records; SB3 StandUp shows substantial
 regression from its early peak. No learned behavior acceptance is claimed.
 See [the measured reward snapshot](reports/reward-trends-2026-09-08.md).
+
+
+## Triage and one-GPU continuation — 2026-09-08
+
+The two regressing MuJoCo SB3 runs are stopped with artifacts preserved. Six
+retained runs resumed native checkpoints on GPU 7 at source `b0fa5fe`; the other
+GPUs are released from this campaign. Checkpoint video previews are available at
+`outputs/previews/shared-gpu7-0908-01/index.html`. Early RSL task videos show
+partial skill progress, with no complete behavior acceptance. A controlled native
+SB3 update comparison demonstrates substantially lower KL with smaller learning
+rates; stable long-training convergence is still unvalidated. See the
+[recovery, diagnosis and video report](reports/rl-recovery-2026-09-08.md).

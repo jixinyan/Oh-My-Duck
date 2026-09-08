@@ -1,7 +1,7 @@
 # Reinforcement learning
 
 Choose the task first, then the simulation backend and native PPO framework.
-Use `python omd.py tasks`, `train`, `campaign`, `export`, `compare`, `rehearsal`
+Use `python omd.py tasks`, `train`, `campaign`, `preview`, `export`, `compare`, `rehearsal`
 and `package` from the repository root. Generic simulators and PPO remain dependencies;
 Microduck environment definitions, motors and policy contracts are owned source.
 
@@ -21,7 +21,7 @@ rl/
 ├── backends/              MuJoCo and Isaac/Newton simulation adapters
 ├── learners/              native RSL-RL and SB3 training/checkpoints
 ├── training/              task/runtime/framework registration
-├── experiments/           independent per-GPU campaign orchestration
+├── experiments/           campaigns, checkpoint recovery and video previews
 ├── artifacts/             normalization-aware export and local packaging
 └── evaluation/            task batteries, sim2sim, CPU/BAM and video
 ```

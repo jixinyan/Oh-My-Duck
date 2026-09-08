@@ -43,9 +43,9 @@ Both training backends are part of the project scope. The official backend remai
 
 Representative RL tasks are flat-ground Walking and StandUp. Task recipes, MDP functions, robot assets and actor/critic settings are maintained in the [RL and robotics modules](docs/architecture.md#source-organization); both backends build on this owned source. BAM actuator behavior, joint mapping, observation/action timing and normalization must match before comparing learning results. Compatible joint policies follow the official **61-observation / 14-action, 50 Hz** contract. Vision/navigation policies need their own adapters; an arbitrary VLA cannot be deployed by simply renaming its output.
 
-Task families have separate environment and PPO configurations under `rl/tasks/<family>/`; see the [RL source map](src/oh_my_duck/rl/README.md). [Training campaigns](docs/rl-campaigns.md) can assign one independent task/framework run to each allocated GPU.
+Task families have separate environment and PPO configurations under `rl/tasks/<family>/`; see the [RL source map](src/oh_my_duck/rl/README.md). [Training campaigns](docs/rl-campaigns.md) assign independent task/framework runs to GPUs, with explicit sharing and checkpoint recovery when needed.
 
-Training and evaluation run headlessly. Optional offscreen video supports visual inspection alongside numerical metrics. Single-GPU development, validation and training run directly on the host; multi-GPU experiments use submitted jobs. W&B records runs offline.
+Training and evaluation run headlessly. `omd preview` creates checkpoint videos and a local gallery for visual inspection alongside numerical metrics. Single-GPU development, validation and training run directly on the host; multi-GPU experiments use submitted jobs. W&B records runs offline.
 
 ## A voice and history that persist
 
