@@ -152,3 +152,20 @@ policy. Original Walking videos are still being rendered separately.
 Review gallery: `outputs/previews/official-review-0908-01/index.html`, with original
 training successes/failures and a clearly identified published reference. No
 published reference or early checkpoint is promoted as our complete reproduction.
+
+## Latest user-directed observation workflow
+
+The user clarified that periodic background videos should continue, while LLM
+polling and intermediate analysis should stop. The earlier milestone CPU-diagnostic
+observer and the old paused-owned-run preview watcher were stopped between tasks.
+Their outputs remain preserved. The replacement worker saves native previews at
+1000-update intervals (24000 control steps per environment) and final checkpoints,
+without blocking either training process. Normalizer-aware export remains required
+for each video. It does not launch intermediate multi-seed diagnostic batteries.
+After both original learners end, it records final CPU videos and 16 seeded CPU
+batteries per task; behavior conclusions remain subject to review. Errors retain
+artifacts and do not trigger automatic training retries or public publishing.
+
+Configuration/provenance: `outputs/previews/official-periodic-0908-01/{plan,launch}.json`.
+Gallery: `outputs/previews/official-periodic-0908-01/index.html`.
+This supersedes earlier descriptions of ongoing milestone diagnosis in this report.

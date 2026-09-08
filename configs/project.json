@@ -89,9 +89,14 @@
     "mujoco_video": "explicit_osmesa_on_current_host; native_newton_video_unchanged",
     "representative_videos_verified": 60,
     "checkpoint_previews": {
-      "state": "initial_six_retained_run_previews_completed_behavior_failed_watcher_active",
-      "gallery": "outputs/previews/shared-gpu7-0908-01/index.html",
-      "mode": "periodic_saved_checkpoints"
+      "state": "background_periodic_worker_configured",
+      "gallery": "outputs/previews/official-periodic-0908-01/index.html",
+      "manifest": "outputs/previews/official-periodic-0908-01/result.json",
+      "mode": "fixed_checkpoint_intervals_without_llm_polling",
+      "ppo_update_interval": 1000,
+      "control_steps_per_environment": 24000,
+      "final_diagnosis": "after_both_original_training_processes_end",
+      "previous_galleries_retained": true
     },
     "local_rl_gpu_policy": "explicit_idle_gpu_allocation_authorized_2026_09_08",
     "local_rl_gpus": {
@@ -251,7 +256,9 @@
         "previous_manifests": [
           "outputs/baselines/matched-growth-0908-01/result.json",
           "outputs/baselines/official-growth-0908-02/result.json"
-        ]
+        ],
+        "state": "stopped_per_user_preference",
+        "replacement": "outputs/previews/official-periodic-0908-01/result.json"
       },
       "standup_recovery_diagnosis": {
         "report": "docs/reports/standup-recovery-diagnosis-2026-09-08.md",
@@ -408,7 +415,8 @@
         "walking_32768": "execution_completed_timing_and_total_gpu_memory_confounded",
         "standup": "not_started",
         "figure": "docs/reports/figures/official-walking-environment-scaling.svg"
-      }
+      },
+      "monitoring_policy": "background_periodic_videos_only_during_training; unified_diagnosis_after_completion; no_continuous_llm_polling"
     },
     "cpu_rehearsal": {
       "state": "corrected_matrix_execution_verified_8_of_8",
