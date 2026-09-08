@@ -9,8 +9,11 @@ Current official-first goal: original MuJoCo Walking/StandUp continue. The user
 reopened idle GPUs: Walking remains on GPU 7; StandUp migrates from checkpoint
 2000 to GPU 0 through native resume; configuration/curriculum audit passed.
 GPU 0 later became shared with a foreign process. Diagnostics use GPU 1; a separate
-4096/8192/16384/32768-environment throughput benchmark runs on GPU 3. Long
-learners retain 4096 pending measured selection. See [resource/progress review](reports/official-training-resource-review-2026-09-08.md).
+Walking throughput benchmark measured 4096/8192/16384 on GPU 3, with 8192 best
+at 98k samples/s. A foreign eight-GPU job confounded the 32768 case and stopped
+the sweep before StandUp. Long learners retain 4096. Original StandUp sitting
+success remains 15/16 at checkpoint 2500; prone/supine remain 0/16. Eight original
+checkpoint-2000 CPU/native StandUp videos are checked. See [resource/progress review](reports/official-training-resource-review-2026-09-08.md).
 Owned default Walking (3299) and StandUp (2985) are paused for diagnosis; three
 Newton learners remain suspended and three earlier SB3 attempts stopped. Walking
 3000 has only 0.98% forward response when native pushes are zeroed, despite 36.4%

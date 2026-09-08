@@ -102,10 +102,53 @@ No benchmark checkpoint is promoted as a learned policy.
 
 Evidence: `outputs/baselines/official-env-scaling-0908-01/{plan,result,launch}.json`.
 
-First exclusive-GPU Walking measurements are complete: 4096 environments yield
-67,968 samples/s at 1.446 s/iteration and sampled peak 5,781 MiB; 8192 yield
-98,353 samples/s at 1.999 s/iteration and 12,223 MiB. That is approximately 45%
-higher throughput. No foreign GPU process was observed during either case.
-Serialized config audit confirms only environment count and native resume/logging/
-benchmark-budget fields differ. Larger sizes and StandUp are still being measured;
-these first two results do not yet select the final long-training scale.
+The clean Walking measurements are now:
+
+| Environments | Samples/s | Mean iteration time | Sampled peak memory |
+|---|---:|---:|---:|
+| 4096 | 67,968 | 1.446 s | 5.6 GiB |
+| 8192 | 98,353 | 1.999 s | 11.9 GiB |
+| 16384 | 93,275 | 4.216 s | 28.4 GiB |
+
+![Official Walking environment scaling: throughput peaks at 8192 among three clean measurements](figures/official-walking-environment-scaling.svg)
+
+8192 gives approximately 45% more throughput than 4096 in this measurement.
+16384 does not improve it and uses more memory. Each is one short benchmark;
+these do not measure time to a learned gait. Serialized config audit confirms only
+scene/derived terrain environment counts and native resume/logging/benchmark-budget
+fields differ. Native PPO minibatches and epochs remain unchanged.
+
+The 32768 case completed 40 updates, but another user's eight-GPU distributed job
+entered during it. Its timing and total-GPU-memory samples are **confounded**, so
+neither is used to select a size or plotted as an exclusive-GPU measurement. The
+initial plot assertion correctly rejected that case; its failed attempt is kept.
+The sweep then stopped before StandUp because the GPU remained occupied. All eight
+GPUs were observed occupied by that foreign workload; no foreign process was
+changed and no automatic retry was launched on another shared GPU. StandUp scaling
+remains unmeasured. Existing original long learners continue under shared load.
+Evidence remains under `official-env-scaling-0908-01`; clean configuration audit is
+`walking-clean-config-audit.json`, figure inputs `walking-plot-provenance.json`.
+
+## Latest behavior and videos
+
+Original StandUp checkpoint 2500 passes standing 16/16 and sitting 15/16 on the
+same reset seeds, retaining the improvement seen at 2000. Prone/supine remain
+0/16 each. The corresponding single-seed original/owned batteries pass standing
+and sitting only. Evidence: `official-standup-paired-2500-0908-01/result.json` and
+`official-growth-0908-03/standup-2500/result.json` under `outputs/baselines`.
+
+Original Walking checkpoint 2500 still fails corrected CPU tracking: forward mean
+−0.000167 m/s and yaw mean 0.03415 rad/s at commands 0.1 m/s and 0.5 rad/s. The owned
+counterpart also fails. Improvements in training metrics have not yet produced
+accepted nominal deployment behavior.
+
+All eight original checkpoint-2000 StandUp CPU/native videos have been checked:
+1280×720, 25 FPS, 200 frames each, with finite 400×61 observations and 400×14 actions.
+Selected 0.2/7-second frames show standing/sitting recovery, persistent forward
+lean from prone, and remaining down from supine. The native playback uses the
+owned evaluation adapter with the frozen original ONNX, not an additional trained
+policy. Original Walking videos are still being rendered separately.
+
+Review gallery: `outputs/previews/official-review-0908-01/index.html`, with original
+training successes/failures and a clearly identified published reference. No
+published reference or early checkpoint is promoted as our complete reproduction.

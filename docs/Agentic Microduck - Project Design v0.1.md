@@ -13,7 +13,7 @@ tags:
   - project-design
 ---
 
-> 最新资源授权（2026-09-08）：用户重新开放空闲 GPU。Walking 保持 GPU 7；StandUp 已从 2000 轮完整 checkpoint 在 GPU 0 原生续训，配置/课程恢复检查通过；评估使用 GPU 1。GPU 0 后续进入其他用户任务，吞吐受干扰。另在 GPU 3 测试 4096/8192/16384/32768 环境的原生 PPO 吞吐，尚未改变长训练规模。两组仍各 4096 环境、headless、W&B offline。按同课程阶段的任务趋势和固定姿态回放决定继续或停止，不凭总 reward 或预算盲目续训。见 [资源与训练评审](reports/official-training-resource-review-2026-09-08.md)。
+> 最新资源授权（2026-09-08）：用户重新开放空闲 GPU。Walking 保持 GPU 7；StandUp 已从 2000 轮完整 checkpoint 在 GPU 0 原生续训，配置/课程恢复检查通过；评估使用 GPU 1。GPU 0 后续进入其他用户任务，吞吐受干扰。Walking 的 4096/8192/16384 环境吞吐测试有效，其中 8192 最好；32768 受后来进入的其他用户八卡任务干扰，后续 StandUp 扩容测试已停止，尚未改变长训练规模。两组仍各 4096 环境、headless、W&B offline。按同课程阶段的任务趋势和固定姿态回放决定继续或停止，不凭总 reward 或预算盲目续训。见 [资源与训练评审](reports/official-training-resource-review-2026-09-08.md)。
 
 > 最新官方核查（2026-09-08）：历史 Velocity2 与当前固定 Velocity 的六组 train/play 配置仅日志命名不同，StandUp 配置一致；发布 Walking/StandUp 的字节哈希已追溯到官方 runtime 提交，但确切训练 run 仍未知。CAD 重导出未发现大幅接触凸包变化。原版与 owned 的 1500 轮回放都未通过完整任务；目前仅两组官方原版在 GPU 7、4096 环境/组、W&B offline 继续训练。owned/部分 Newton 保持暂停，第二项调参实验未启动。检查器已修正续训 checkpoint 路径并独立跟踪两项原版任务。以下较早日期的状态为历史记录；最新证据见 [官方历史核查](reports/official-source-history-2026-09-08.md) 和 [实现状态](implementation-status.md)。
 

@@ -102,7 +102,10 @@
         "migration": "outputs/baselines/official-standup-gpu0-0908-01/result.json"
       },
       "diagnostics": 1,
-      "capacity_benchmark": 3
+      "capacity_benchmark": {
+        "last_gpu": 3,
+        "state": "stopped_due_to_foreign_gpu_load"
+      }
     }
   },
   "rl_framework_registry": "oh_my_duck.rl.training.frameworks:default_framework_registry",
@@ -224,8 +227,8 @@
         "manifest": "outputs/baselines/official-growth-0908-03/result.json",
         "source_commit": "0792f99598d39336d35f091c0a96848c6a2dabf3",
         "scope": "independent original-task milestones with native resume segment resolution; GPU 1 diagnostics; available owned counterparts; behavior acceptance separate",
-        "latest_completed_iteration": 2000,
-        "latest_behavior": "both_walking_fail; both_standup_standing_and_sitting_only_at_seed42; paired original sitting improves 13/16 to 15/16",
+        "latest_completed_iteration": 2500,
+        "latest_behavior": "both_walking_fail; both_standup_standing_and_sitting_only_at_seed42; paired original sitting stays 15/16 at 2500",
         "walking_iterations": [
           2000,
           2500,
@@ -361,12 +364,21 @@
             "sitting": 15,
             "face_down": 0,
             "face_up": 0
+          },
+          "2500": {
+            "standing": 16,
+            "sitting": 15,
+            "face_down": 0,
+            "face_up": 0
           }
         },
-        "gpu0_sharing": "foreign process arrived after allocation; throughput confounded"
+        "gpu0_sharing": "all eight GPUs acquired by foreign distributed workload after initial allocation",
+        "paired_2500_manifest": "outputs/baselines/official-standup-paired-2500-0908-01/result.json",
+        "official_2000_standup_videos_checked": 8,
+        "official_video_gallery": "outputs/previews/official-review-0908-01/index.html"
       },
       "environment_scaling": {
-        "state": "running_capacity_benchmark_not_long_training",
+        "state": "partial_measurements_sweep_stopped_for_foreign_gpu_load",
         "gpu": 3,
         "environment_counts": [
           4096,
@@ -381,7 +393,21 @@
         "warmup_updates": 10,
         "measured_updates": 30,
         "manifest": "outputs/baselines/official-env-scaling-0908-01/result.json",
-        "long_run_counts_changed": false
+        "long_run_counts_changed": false,
+        "valid_walking_counts": [
+          4096,
+          8192,
+          16384
+        ],
+        "preferred_measured_walking_count": 8192,
+        "walking_samples_per_second": {
+          "4096": 67967.7345,
+          "8192": 98353.1766,
+          "16384": 93274.9269
+        },
+        "walking_32768": "execution_completed_timing_and_total_gpu_memory_confounded",
+        "standup": "not_started",
+        "figure": "docs/reports/figures/official-walking-environment-scaling.svg"
       }
     },
     "cpu_rehearsal": {
