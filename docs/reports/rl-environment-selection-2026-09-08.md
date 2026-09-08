@@ -52,3 +52,19 @@ result from this attempt is accepted. The attempt was explicitly stopped and all
 artifacts retained. The controller now pauses only preview scheduling and drains
 its existing child command before calibration. GPUs 2–5 subsequently became free;
 a separate six-GPU attempt is planned, preserving original training on 0/7.
+
+Launch evidence: `outputs/experiments/measured-env-0908-02.launch.json` records
+supervisor PID 2171344 and immutable source `c84f169`. All six GPUs 1/6/2/3/4/5
+were clear of other compute sessions before launch. The six initial preparations
+are active; the remaining two combinations use the next available GPU. Existing
+original controls remain on 0/7. Environment counts have not yet been selected,
+and this new campaign has not yet entered full training. The supervisor runs
+all eight preparations, writes `selected.json`, then launches the full matrix
+without an assistant monitoring loop. Original previews resume after preparation;
+new previews appear at `outputs/experiments/measured-env-0908-02/previews/index.html`.
+
+Focused validation: 14 tests plus 9 subtests passed, including exclusion of
+startup/contaminated timing, SB3 complete-update timestamps, selected-count
+capacity gating, native learning-rate routing, and reuse of the first free GPU
+rather than waiting for a busy assignment. Git source is on
+`feat/rl-measured-environments`; no new main merge is claimed.

@@ -113,7 +113,7 @@
       }
     },
     "environment_selection": {
-      "state": "implemented_launch_pending",
+      "state": "preparation_running",
       "config": "configs/experiments/representative-throughput.json",
       "module": "oh_my_duck.rl.experiments.throughput",
       "scope": "two_tasks_two_backends_two_frameworks",
@@ -121,7 +121,24 @@
       "vram_fraction": 0.85,
       "warmup_updates": 10,
       "measured_updates": 30,
-      "learned_behavior": "unverified"
+      "learned_behavior": "unverified",
+      "campaign": "outputs/experiments/measured-env-0908-02",
+      "source_commit": "c84f1695982591c96178774d04db2b8e7c7122b4",
+      "allocated_gpus": [
+        1,
+        6,
+        2,
+        3,
+        4,
+        5
+      ],
+      "original_controls_gpus": [
+        0,
+        7
+      ],
+      "queue": "next_available_gpu",
+      "final_training": "automatic_after_all_eight_preparations_pass",
+      "periodic_video_updates": 1000
     }
   },
   "rl_framework_registry": "oh_my_duck.rl.training.frameworks:default_framework_registry",
