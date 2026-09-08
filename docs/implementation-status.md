@@ -100,3 +100,12 @@ partial skill progress, with no complete behavior acceptance. A controlled nativ
 SB3 update comparison demonstrates substantially lower KL with smaller learning
 rates; stable long-training convergence is still unvalidated. See the
 [recovery, diagnosis and video report](reports/rl-recovery-2026-09-08.md).
+
+
+At the 2026-09-08 04:04 UTC status review, Newton SB3 StandUp also showed
+return decline (last 50 logged records 11.95 versus 14.45 previously), elevated
+KL (recent values 0.13–0.29) and failure of all four spawn checks on its preceding
+preview. It was paused for diagnosis under the user’s standing instruction. Its
+latest complete checkpoint at cumulative iteration 1500 is preserved with an
+operator-stop record. Five runs continue on GPU 7; this is a triage decision,
+not proof that the stopped configuration could never converge.

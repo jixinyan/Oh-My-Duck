@@ -113,3 +113,12 @@ checkpoint failed after 9.12 s, with min height 0.0377 m and max tilt 1.253 rad.
 StandUp SB3 previews were still rendering their per-spawn videos at this report
 update; inspect `previews.json` for later results. Existing completed videos remain
 available while those renders continue.
+
+
+At the 2026-09-08 04:04 UTC status review, Newton SB3 StandUp also showed
+return decline (last 50 logged records 11.95 versus 14.45 previously), elevated
+KL (recent values 0.13–0.29) and failure of all four spawn checks on its preceding
+preview. It was paused for diagnosis under the user’s standing instruction. Its
+latest complete checkpoint at cumulative iteration 1500 is preserved with an
+operator-stop record. Five runs continue on GPU 7; this is a triage decision,
+not proof that the stopped configuration could never converge.

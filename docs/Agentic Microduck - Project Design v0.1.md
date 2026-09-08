@@ -17,7 +17,7 @@ tags:
 
 > RL 组织与训练计划（2026-09-07）：任务按家族目录组织，每个目录分离 `environment.py` 与 `ppo.py`；共享 MDP、仿真后端和原生 learner 保持独立。完整训练使用单节点 8 GPU，每卡独立训练一个 Walking/StandUp × MuJoCo/Newton × RSL-RL/SB3 组合，4096 环境/卡，采用任务默认 50,000/15,000 轮；每 250 轮保存 checkpoint。完整训练状态更新（2026-09-08）：`omd-rl-full-0907-01`（平台 ID `b2bab260`）已 Failed；日志为空、无可查询 pod，原因未确定，未生成训练 manifest。按用户最新指示，已在本机 8 张 H200 启动独立尝试 `full-local-0908-01`，沿用固定源码 `1f45996` 和原训练预算；截至 2026-09-08 02:08 UTC，8/8 已进入正式训练，初期 reward 有提升，但 SB3 StandUp 存在明显回撤；完整训练与行为验收尚未完成。见 [reward 记录](reports/reward-trends-2026-09-08.md)。提交前检查、实际 job 状态和行为验收见 [训练计划](rl-campaigns.md) 与 [当前进度](implementation-status.md)。
 
-> 训练处置更新（2026-09-08）：已停止退化的 MuJoCo SB3 两组，保留全部产物；其余六组从 native checkpoint 集中到 GPU 7 续训，其他卡留给用户项目。新增 `omd preview` 周期 checkpoint 视频画廊；初期视频只显示部分能力，未通过完整行为验收。SB3 固定学习率的 KL 过冲已有对照证据，新增显式学习率参数用于独立实验，未改动保留训练或官方任务语义。见 [处置与诊断记录](reports/rl-recovery-2026-09-08.md)。
+> 训练处置更新（2026-09-08）：已停止退化的 MuJoCo SB3 两组，保留全部产物；其余六组从 native checkpoint 集中到 GPU 7 续训，其他卡留给用户项目。新增 `omd preview` 周期 checkpoint 视频画廊；初期视频只显示部分能力，未通过完整行为验收。SB3 固定学习率的 KL 过冲已有对照证据，新增显式学习率参数用于独立实验，未改动保留训练或官方任务语义。见 [处置与诊断记录](reports/rl-recovery-2026-09-08.md)。 04:04 UTC 复查后，Newton SB3 StandUp 因回报回落、高 KL 和回放四种姿态均未通过，也已暂停诊断；现在五组在 GPU 7 继续。
 
 # Agentic Microduck
 

@@ -90,7 +90,7 @@
     "representative_videos_verified": 60,
     "local_rl_gpu": 7,
     "checkpoint_previews": {
-      "state": "five_retained_run_previews_completed_behavior_failed_last_standup_rendering",
+      "state": "initial_six_retained_run_previews_completed_behavior_failed_watcher_active",
       "gallery": "outputs/previews/shared-gpu7-0908-01/index.html",
       "mode": "periodic_saved_checkpoints"
     }
@@ -110,7 +110,7 @@
     "task_layout": "14 task families with environment.py and ppo.py; 33 semantic catalog entries preserved",
     "full_training_campaign": {
       "config": "configs/experiments/representative-full.json",
-      "status": "six_continuing_on_gpu7_two_mujoco_sb3_stopped",
+      "status": "five_continuing_on_gpu7_three_sb3_runs_stopped",
       "nodes": 1,
       "gpus": 1,
       "num_envs_per_gpu": 4096,
@@ -127,15 +127,16 @@
       "local_manifest": "outputs/experiments/shared-gpu7-0908-01/campaign.json",
       "execution": "direct_development_host",
       "gpu_model": "NVIDIA H200",
-      "updated_at": "2026-09-08T03:53:29.845178+00:00",
+      "updated_at": "2026-09-08T04:05:32.820292+00:00",
       "reward_snapshot": "docs/reports/reward-trends-2026-09-08.md",
       "gpu_indices": [
         7
       ],
-      "active_runs": 6,
+      "active_runs": 5,
       "stopped_runs": [
         "mujoco-sb3-walking",
-        "mujoco-sb3-stand_up"
+        "mujoco-sb3-stand_up",
+        "isaac-newton-sb3-stand_up"
       ],
       "diagnosis_report": "docs/reports/rl-recovery-2026-09-08.md"
     },
