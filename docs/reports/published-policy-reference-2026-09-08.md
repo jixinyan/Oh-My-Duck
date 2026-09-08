@@ -21,7 +21,11 @@ The additional `alpha_stand.onnx` download has SHA-256
 `1569268713e40deea795dd2922dba50d3621e15a872855408b6b1b125b1c094b`.
 Its provenance is recorded beside the artifact in
 `artifacts/policies/official/088524a64e2557dc453256b6071dbb9d23888802/stand-reference-provenance.json`;
-the original Walking download record remains unchanged.
+the original Walking download record remains unchanged. The bootstrap inventory
+in `configs/upstream.json` now includes `alpha_stand.onnx` at the same pinned
+revision, so a fresh checkout can obtain this successful reference. Both ONNX
+files match the pinned Hub LFS hashes; the pinned inventory contains one Walking
+policy. Evidence: `reference-inventory.json` in the validation directory.
 
 The pinned microduck runtime's policy-channel design maps this file to
 `BEST_alpha_stand_body_control.onnx` from its earlier runtime repository and labels

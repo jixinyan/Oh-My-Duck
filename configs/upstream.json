@@ -17,6 +17,7 @@
     "revision": "088524a64e2557dc453256b6071dbb9d23888802",
     "files": [
       "alpha_walking.onnx",
+      "alpha_stand.onnx",
       "manifest.json",
       "README.md"
     ]
@@ -26,7 +27,7 @@
     "tag": "v3.0.0-beta2.patch1",
     "physics": "newton",
     "solver": "mujoco_warp",
-    "status": "integration_in_progress_runtime_unvalidated",
+    "status": "runtime_validated_own_training_behavior_pending",
     "commit": "ffff603eafc6b74264a5261cc0183d6a65390d78"
   },
   "reference_repositories": {
