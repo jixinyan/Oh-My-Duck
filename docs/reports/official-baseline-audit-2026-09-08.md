@@ -339,3 +339,23 @@ StandUp has just passed the 2500 recovery-spawn curriculum stage; a small window
 change alone is not evidence of irreversible divergence. Full context is recorded
 in `reward-comparison.json`; further checkpoint behavior determines continuation
 or diagnosis under the user's instruction to stop unpromising runs.
+
+
+## Ongoing checkpoint observation
+
+The old preview watcher (`25fd4df`, scoring v1) was stopped between renders after
+verifying it had no child process. Its gallery and attempts remain preserved.
+The replacement uses immutable `0792f99`, GPU 7 and scoring v2, watching only the
+two active owned MuJoCo runs. Native preview gallery:
+`outputs/previews/shared-gpu7-0908-02/index.html`; launch/provenance record:
+`outputs/previews/shared-gpu7-0908-02-launch.json`. These native task videos are
+separate from the corrected CPU/BAM A/B videos above.
+
+A lightweight milestone observer waits for original and owned checkpoints at
+500, 1000, 1500, 2500, 4000 and 6000 iterations, then runs the same export/scalar/
+penalty and corrected CPU diagnostics. It pins observer code to `0792f99`, uses
+only GPU 7, preserves each milestone directory, and reports errors without
+reusing or overwriting failed attempts. It does not restart or alter training.
+Evidence: `outputs/baselines/matched-growth-0908-01/{launch,result}.json`.
+These single-seed, no-video diagnostics measure learning progress; repeated-seed
+native-backend and CPU video acceptance remain separate requirements.

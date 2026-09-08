@@ -144,7 +144,8 @@
         "isaac-newton-rsl-rl-stand_up",
         "isaac-newton-sb3-walking"
       ],
-      "pause_mechanism": "SIGSTOP; verify recorded PID and command identity before SIGCONT"
+      "pause_mechanism": "SIGSTOP; verify recorded PID and command identity before SIGCONT",
+      "preview_gallery": "outputs/previews/shared-gpu7-0908-02/index.html"
     },
     "latest_merge": "5ef433b",
     "official_baseline_reproduction": {
@@ -207,6 +208,19 @@
         "training_seed": 42,
         "report": "outputs/baselines/matched-iteration-250-0908-02/result.json",
         "interpretation": "similar early learning and behavior; long-run reproduction remains unverified"
+      },
+      "milestone_observer": {
+        "manifest": "outputs/baselines/matched-growth-0908-01/result.json",
+        "source_commit": "0792f99598d39336d35f091c0a96848c6a2dabf3",
+        "iterations": [
+          500,
+          1000,
+          1500,
+          2500,
+          4000,
+          6000
+        ],
+        "scope": "matched native export and corrected CPU no-video diagnostics; not full behavior acceptance"
       }
     },
     "cpu_rehearsal": {

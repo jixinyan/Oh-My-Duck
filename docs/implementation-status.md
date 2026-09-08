@@ -14,6 +14,8 @@ matrix execution below predates the DOF-load correction and needs revalidation.
 Matched checkpoint-250 original/owned CPU comparison also completed: both fail
 Walking and pass only standing-start StandUp; early rewards are close, with
 long-run equivalence unverified. See the [current baseline audit](reports/official-baseline-audit-2026-09-08.md).
+Native previews now use scoring v2 (`outputs/previews/shared-gpu7-0908-02`); a
+separate observer schedules equal-iteration original/owned CPU diagnostics.
 
 | Component | Current state |
 |---|---|
