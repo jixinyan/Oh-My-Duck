@@ -465,3 +465,11 @@ Walking 的原版/重构版编译模型、reset 状态及 actor/critic 初始观
 与 checkpoint，完成基线后验证 PID/命令身份再用 SIGCONT 恢复，不能重复启动替代进程。
 基线实测每轮耗时由约 11–12 秒降到 7–8 秒。已终止的三个 SB3 尝试与本次暂停分开
 记录。所有长训练效果仍未验收通过。实验配置、进程及恢复记录见 baseline audit。
+
+
+**CPU/BAM 重验（2026-09-08）**：发现 pinned BAM 的 CPU 控制器用 joint id 匹配
+DOF 摩擦约束；Microduck 对应编号为 1–14 与 6–19，导致外部负载及摩擦预算计算
+不等价于训练端。项目 CPU 扩展已按真实 DOF 修正，保留原生电机/电压及摩擦公式，
+通过真实 MuJoCo 约束 Jacobian 投影、转矩不变和 reset 测试，共 3 项。旧 CPU
+行为结论保留但须重验；修正后的 policy A/B 回放尚待完成。训练端 Warp 不使用
+此错误索引，当前训练继续，不能将本修正当作策略收敛。详见 baseline audit。

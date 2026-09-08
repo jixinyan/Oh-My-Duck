@@ -180,6 +180,13 @@
         "native_normalized_export_parity": "passed_32_samples",
         "learned_behavior": "unverified"
       }
+    },
+    "cpu_rehearsal": {
+      "state": "revalidation_required_after_cpu_bam_dof_index_fix",
+      "controller": "oh_my_duck.robotics.microduck.actuators.cpu_bam.MicroduckMujocoController",
+      "tests": "3_passed_real_jacobian_load_motor_and_reset_checks",
+      "behavior": "pending_corrected_replay",
+      "report": "docs/reports/official-baseline-audit-2026-09-08.md"
     }
   }
 }

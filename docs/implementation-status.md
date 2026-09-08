@@ -147,3 +147,12 @@ before this status update and is running its 15,000-iteration budget. Baseline
 iteration time improved by about 1.5× after suspending extensions. No long-run
 behavior success is claimed. Evidence and safe resumption identity records are
 linked in the [baseline audit](reports/official-baseline-audit-2026-09-08.md).
+
+
+CPU/BAM behavioral acceptance requires revalidation: the pinned CPU controller
+matched DOF-friction constraints by joint ids, unlike the training Warp path.
+The owned CPU adapter now uses actual DOFs while retaining native motor/sag and
+friction formulas. Three real-physics/reset tests pass, including independent
+Jacobian-force projection and unchanged motor torque. Old traces remain preserved;
+corrected policy replay is pending. This is an evaluation/CPU-load correction,
+not evidence that training converged. See the baseline audit.

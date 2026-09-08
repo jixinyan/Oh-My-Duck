@@ -61,6 +61,8 @@ def main():
         "auto_reset": False,
         "mujoco_renderer": args.mujoco_renderer,
         "scenarios": {},
+        "bam_controller": type(controller).__module__ + "." + type(controller).__name__,
+        "friction_constraint_index": "dof",
         "physics_dt": 0.005,
         "policy_dt": 0.02,
         "differences": [

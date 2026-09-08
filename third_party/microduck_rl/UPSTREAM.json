@@ -10,7 +10,8 @@
     "Rehearsal assets resolved relative to installed package",
     "Native SB3 policy factory added for editable actor configuration",
     "Publishing provenance names jixinyan/Oh-My-Duck",
-    "Selected upstream CPU regression tests migrated; CLI name changed to omd-publish"
+    "Selected upstream CPU regression tests migrated; CLI name changed to omd-publish",
+    "CPU rehearsal uses a project BAM extension to match FRICTION_DOF constraints by DOF id, correcting pinned BAM CPU joint-id indexing; motor and friction formulas and dependency pins are unchanged."
   ],
   "files": [
     {

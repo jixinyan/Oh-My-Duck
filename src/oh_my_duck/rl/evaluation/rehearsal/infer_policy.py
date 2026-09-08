@@ -67,7 +67,7 @@ def load_mujoco_with_bam(xml_path: str, bam_model, timestep: float, vin_drop_gai
     friction constraint. Armature is set on the dofs by MujocoController.
     Returns (model, data, bam_ctrl, actuator_names).
     """
-    from bam.mujoco import MujocoController
+    from oh_my_duck.robotics.microduck.actuators.cpu_bam import MicroduckMujocoController
 
     kt = bam_model.kt.value
     R = bam_model.R.value
@@ -97,7 +97,7 @@ def load_mujoco_with_bam(xml_path: str, bam_model, timestep: float, vin_drop_gai
     model = spec.compile()
     model.opt.timestep = timestep
     data = mujoco.MjData(model)
-    bam_ctrl = MujocoController(bam_model, names, model, data,
+    bam_ctrl = MicroduckMujocoController(bam_model, names, model, data,
                                 vin_drop_gain=vin_drop_gain, vin_min=vin_min)
     print(f"BAM {BAM_MODEL} actuators on {len(names)} joints: kt={kt:.4f} R={R:.4f} "
           f"vin={bam_model.actuator.vin:.2f}V kp_fw={bam_model.actuator.kp:.0f} "

@@ -199,3 +199,42 @@ their old reports. Latest completed preview forward/yaw response fractions were
 (Newton/SB3). All still fail the complete behavior gate. These are specific saved
 checkpoints, not assertions about the current unsaved training weights. Evidence:
 `outputs/baselines/official-0908-01/preview-rescored-v2.json`.
+
+
+## CPU BAM load-indexing correction — revalidation required
+
+The trained owned Walking checkpoint 2000 also nearly stood still in CPU/BAM:
+forward mean -0.000176 m/s and turn mean 0.01939 rad/s, despite nonzero commands.
+StandUp checkpoint 2500 passed standing/sitting and failed face-down/face-up there.
+Those traces are preserved in `outputs/baselines/trained-cpu-0908-01`.
+
+Investigation found a concrete CPU controller defect in pinned BAM `62bd8ce`:
+`MujocoController.update()` subtracts DOF-friction forces by matching `efc_id` to
+**joint ids**. The robot's controlled joints are 1–14, while their DOFs and actual
+FRICTION_DOF constraint ids are 6–19. The Warp BAM path already scatters these
+forces by DOF. MuJoCo's own [3.10 constraint code](https://mujoco.readthedocs.io/en/3.10.0/_modules/mujoco_warp/_src/island.html)
+also uses `dof_treeid[efc_id]` for FRICTION_DOF, versus a joint-to-DOF lookup for
+joint-limit constraints. Incorrect subtraction contaminates the external motor
+load used by BAM's load-dependent friction model. Its behavioral impact remains
+an A/B measurement, not an assumed explanation of every failed policy.
+
+The project extension `robotics/microduck/actuators/cpu_bam.py` retains the native
+motor/sag update and recomputes only the friction fields with correctly indexed
+loads before `mj_step`. The friction formula is the same stateless BAM function.
+Reset also aligns the controller clock with the rewound simulation clock; the
+current XL330 proportional controller does not use dt, so that timing correction
+cannot explain Walking response. No dependency pin or training recipe changes.
+CPU rehearsal reports now identify the controller and DOF indexing explicitly.
+
+Three tests pass, including a real robot comparison against **MuJoCo's constraint
+Jacobian projection**, independent of efc-id indexing. The old budget differs; the
+corrected budget matches the projected load, while native motor torque is exactly
+preserved. Reset clock/targets/sag and all official ground spawn states also pass.
+Evidence: `tests/rl/tasks/test_cpu_bam.py` and
+`outputs/baselines/trained-cpu-0908-01/cpu-bam-tests.log`.
+
+Earlier CPU rehearsal behavior results are retained as historical observations
+under the old controller and require revalidation. Their finite execution/video
+checks do not certify matched motor-load semantics. Current full MuJoCo training
+uses the unaffected Warp controller and continues while corrected CPU A/B runs
+are prepared. Learned-behavior acceptance remains open.
