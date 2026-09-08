@@ -28,13 +28,26 @@ early-curriculum capacity measurement; later contact workload can differ.
 Larger environment counts also enlarge PPO batches and total samples for the
 same update budget, so faster samples/second does not guarantee faster learning.
 
-`oh_my_duck.rl.experiments.throughput` prepares all combinations before launching
-full training from the generated `selected.json`. Limited available GPUs run
-independent tasks in per-GPU queues; this is not distributed SB3. Full workers
-repeat smoke/capacity gates, then train, export, package locally and run native
-sim2sim plus CPU/BAM video acceptance. Periodic previews use checkpoints saved
-every 1000 updates plus the final checkpoint; a busy renderer coalesces to the
-latest available save. There is no continuous assistant reward monitoring.
+`oh_my_duck.rl.experiments.throughput` now starts all independent workers
+immediately. GPU work takes a process-safe stage lease; CPU BAM rehearsal/video
+and local packaging release that lease. Each worker finishes its own smoke,
+resume, throughput and capacity/export gates, then enters full training immediately.
+There is no all-eight preparation barrier and no repeated preparation for full
+training. Actual stage devices are recorded in each worker result. File locks
+prevent two managed GPU stages sharing a card; external workloads remain separate.
+Full workers subsequently export, package locally, and perform sim2sim/CPU video
+acceptance. Periodic checkpoints are saved every 1000 updates plus the final save.
+A busy renderer coalesces to the latest save; no assistant reward-monitoring loop runs.
+
+The running legacy `measured-env-0908-03` preparation is retained rather than
+restarted. Its old barrier supervisor is paused while workers continue measuring.
+`oh_my_duck.rl.experiments.adopt_preparation` can start each ready full learner
+from its verified preparation on a free GPU. It validates complete gates, exact
+specification and unchanged training/evaluation source. It preserves legacy GPU
+reservations until their workers exit, and gives the two already-queued preparatory
+workers priority to avoid racing that existing allocator. This transition does
+not retroactively change the live legacy worker code. Newly launched campaigns
+use stage leases throughout.
 
 Current attempt: `outputs/experiments/measured-env-0908-03`, immutable source
 `f9fcf80`, supervisor PID 2232835, launched 2026-09-08 12:57 UTC. Six initial
@@ -48,10 +61,9 @@ continue on 0/7. No learned-behavior acceptance claim changes.
 The coordinator verifies both converted Newton assets before launching workers.
 It pauses the original preview controller, lets its in-flight render finish and
 release CUDA, then calibrates. Original previews automatically resume after
-preparation, including on ordinary failure/interruption. Full training follows
-only if all eight preparations pass. Selected counts are recorded in
-`outputs/experiments/measured-env-0908-03/selected.json`; new periodic videos will
-appear at `outputs/experiments/measured-env-0908-03/previews/index.html`.
+preparation, including on ordinary failure/interruption. The global full-training barrier is superseded by per-run adoption; selected
+counts remain in each preparation result. The successor full campaign records
+its own manifest and preview gallery.
 
 Preserved startup attempts:
 

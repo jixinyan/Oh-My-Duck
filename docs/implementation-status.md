@@ -10,8 +10,9 @@ frameworks. `measured-env-0908-03` (source `f9fcf80`) is preparing on GPUs
 1/6/2/3/4/5: six initial 64-env/5-update training smokes passed; Newton SB3
 Walking/StandUp are queued for the next free card. All eight environment counts
 remain to be selected from measured PPO throughput with 15% VRAM headroom.
-Full training starts automatically after all preparations pass; it has not yet
-started. Original controls continue on 0/7. Their preview controller is temporarily
+Full training now starts per combination after its own gates pass. The old
+global-barrier supervisor is paused for handover while its live preparations
+continue; current full-training launch evidence is recorded in the report. Original controls continue on 0/7. Their preview controller is temporarily
 paused and will automatically resume after isolated calibration. Prior failed
 startup artifacts are preserved. See [selection and startup evidence](reports/rl-environment-selection-2026-09-08.md).
 

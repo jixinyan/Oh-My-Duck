@@ -138,8 +138,11 @@
         7
       ],
       "queue": "next_available_gpu",
-      "final_training": "automatic_after_all_eight_preparations_pass_not_yet_started",
-      "periodic_video_updates": 1000
+      "final_training": "each_combination_after_its_own_gates",
+      "periodic_video_updates": 1000,
+      "scheduling": "independent_per_combination_gpu_stage_leases",
+      "existing_preparation": "preserved_under_handover",
+      "handover_module": "oh_my_duck.rl.experiments.adopt_preparation"
     }
   },
   "rl_framework_registry": "oh_my_duck.rl.training.frameworks:default_framework_registry",

@@ -86,6 +86,7 @@ def main():
                         help='Explicit independent learner sharing; does not share gradients')
     parser.add_argument('--queue', action='store_true', help='Run sequentially on each allocated GPU when runs outnumber GPUs')
     parser.add_argument('--prepare-only', action='store_true')
+    parser.add_argument('--gpu-stage-pool', action='store_true', help='Share GPU slots per stage; CPU work releases its slot')
     args = parser.parse_args()
     root = project_root()
     plan = load_plan(args.config)
@@ -101,6 +102,8 @@ def main():
         count = subprocess.check_output([str(root/'.envs/mujoco/bin/python'), '-c',
             'import torch; print(torch.cuda.device_count())'], text=True).strip()
         visible = ','.join(str(i) for i in range(int(count)))
+    if args.gpu_stage_pool:
+        args.queue = True
     if args.queue:
         if args.runs_per_gpu != 1:
             parser.error('Queued calibration/full runs require one worker per GPU')
@@ -135,11 +138,11 @@ def main():
         free_devices.put(device)
     @contextmanager
     def allocation(proposed):
-        device = free_devices.get() if args.queue else proposed
+        device = free_devices.get() if args.queue and not args.gpu_stage_pool else proposed
         try:
             yield device
         finally:
-            if args.queue:
+            if args.queue and not args.gpu_stage_pool:
                 free_devices.put(device)
     stopping = threading.Event()
     original_stop = stop
@@ -161,14 +164,18 @@ def main():
                     '--output', str(output/row['id'])]
                 if args.prepare_only:
                     command.append('--prepare-only')
-                child = subprocess.Popen(command, cwd=root, env=worker_environment(device, output.name),
+                environment = worker_environment(device, output.name)
+                if args.gpu_stage_pool:
+                    environment.update(OMD_GPU_POOL=str(output/'gpu-leases'),
+                                       OMD_GPU_POOL_DEVICES=','.join(dict.fromkeys(devices)))
+                child = subprocess.Popen(command, cwd=root, env=environment,
                                          stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
                 with lock:
                     children.append(child)
                     report['runs'][row['id']].update(pid=child.pid, device=device, status='running')
                     save()
                 return row['id'], child.wait()
-    with ThreadPoolExecutor(max_workers=len(set(devices)) if args.queue else len(devices)) as pool:
+    with ThreadPoolExecutor(max_workers=len(set(devices)) if args.queue and not args.gpu_stage_pool else len(devices)) as pool:
         futures = [pool.submit(execute, row, device) for row, device in zip(plan['runs'], devices)]
         for future in as_completed(futures):
             identity, code = future.result()

@@ -1,6 +1,8 @@
 """Smoke, capacity gate, full native training and task-specific evaluation on one GPU."""
 import argparse
 import hashlib
+import os
+from contextlib import nullcontext
 import json
 from pathlib import Path
 import subprocess
@@ -8,6 +10,7 @@ import sys
 import time
 from oh_my_duck.core.paths import project_root
 from .campaign import load_plan
+from .gpu_pool import gpu_lease
 
 
 def native_run_tag(output, identity, stage):
@@ -21,6 +24,7 @@ def main():
     parser.add_argument('--run-id', required=True)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--prepare-only', action='store_true', help='Run gates and optional throughput selection without full training')
+    parser.add_argument('--prepared', type=Path, help='Reuse verified completed preparation from an earlier campaign')
     args = parser.parse_args()
     plan = load_plan(args.config)
     spec = next(row for row in plan['runs'] if row['id'] == args.run_id)
@@ -36,8 +40,16 @@ def main():
         report['stages'][name] = {'status': 'running', 'command': command}
         save()
         started = time.monotonic()
-        with (output/(name+'.log')).open('w') as stream:
-            code = subprocess.call(command, cwd=root, stdout=stream, stderr=subprocess.STDOUT)
+        cpu_only = name in ('smoke-rehearsal', 'rehearsal', 'package')
+        with nullcontext() if cpu_only else gpu_lease() as device:
+            report['stages'][name]['gpu'] = None if cpu_only else device
+            save()
+            with (output/(name+'.log')).open('w') as stream:
+                if cpu_only:
+                    code = subprocess.call(command, cwd=root, stdout=stream, stderr=subprocess.STDOUT,
+                                           env={**os.environ, 'CUDA_VISIBLE_DEVICES': ''})
+                else:
+                    code = subprocess.call(command, cwd=root, stdout=stream, stderr=subprocess.STDOUT)
         report['stages'][name].update(status='completed' if code in allowed else 'failed',
                                       exit_code=code, wall_time_s=time.monotonic()-started)
         save()
@@ -94,7 +106,12 @@ def main():
             '--output', str(output/name), '--video', '--mujoco-renderer', 'osmesa'], allowed=(0, 2))
     save()
     try:
-        if spec.get('resume'):
+        if args.prepared:
+            from .preparation import validate_preparation
+            report['preparation'] = validate_preparation(args.prepared, spec, root)
+            save()
+            run = train('full', spec['num_envs'], spec['iterations'])
+        elif spec.get('resume'):
             from .recovery import validate_checkpoint
             recovery = validate_checkpoint(spec, root)
             report['recovery'] = recovery
@@ -115,7 +132,7 @@ def main():
                         report['environment_search_stop'] = 'next_count_exceeds_projected_vram_budget'
                         break
                     name = f'scaling-{count}'
-                    with GpuSampler() as sampler:
+                    with gpu_lease(), GpuSampler() as sampler:
                         candidate = train(name, count, search['updates'])
                     row = {'num_envs': count, 'run': str(candidate), 'gpu': sampler.data,
                            'measurement': measure(candidate, output/(name+'.log'), spec['framework'], count,

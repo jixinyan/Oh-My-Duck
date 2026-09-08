@@ -1,4 +1,4 @@
-"""Prepare every combination, then train with its measured environment count."""
+"""Train each combination as soon as its own gates pass; CPU stages release GPUs."""
 import argparse
 import json
 import os
@@ -102,33 +102,23 @@ def main():
                 time.sleep(2)
             report['preview_pause']['draining_children'] = []
             save()
-        prepare = launch('prepare', [sys.executable, '-m', 'oh_my_duck.rl.experiments.campaign',
-            '--config', str(args.config.resolve()), '--output', str(output/'prepare'), '--queue', '--prepare-only'])
-        code = prepare.wait()
-        if code:
-            raise RuntimeError(f'Preparation failed ({code}); no automatic full training or retry')
-        resume_preview()
-        selected = dict(plan)
-        selected.pop('environment_search')
-        selected['runs'] = []
-        for spec in plan['runs']:
-            evidence = json.loads((output/'prepare'/spec['id']/'result.json').read_text())
-            if evidence['status'] != 'prepared' or 'environment_selection' not in evidence:
-                raise RuntimeError('Every combination must pass preparation before full launch')
-            selected['runs'].append(evidence['spec'])
-        selected['selection_evidence'] = str(output/'prepare')
-        config = output/'selected.json'
-        config.write_text(json.dumps(selected, indent=2)+'\n')
-        report['status'] = 'training'
+        report['status'] = 'preparing_and_training_independently'
         full = launch('full', [sys.executable, '-m', 'oh_my_duck.rl.experiments.campaign',
-            '--config', str(config), '--output', str(output/'full'), '--queue'])
+            '--config', str(args.config.resolve()), '--output', str(output/'full'), '--gpu-stage-pool'])
         while not (output/'full/campaign.json').exists():
             if full.poll() is not None:
-                raise RuntimeError('Full campaign exited before writing its manifest')
+                raise RuntimeError('Campaign exited before writing its manifest')
             time.sleep(1)
         previews = launch('previews', [sys.executable, '-m', 'oh_my_duck.rl.experiments.preview',
             '--campaign', str(output/'full'), '--output', str(output/'previews'),
             '--gpu', args.preview_gpu, '--watch'])
+        while full.poll() is None:
+            # Scheduling only: no intermediate policy/reward diagnosis.
+            progress = [output/'full'/spec['id']/'result.json' for spec in plan['runs']]
+            rows = [json.loads(p.read_text()) for p in progress if p.exists()]
+            if len(rows) == len(progress) and all('full' in row['stages'] or row['status'] == 'execution_failed' for row in rows):
+                resume_preview()
+            time.sleep(5)
         report['full_exit_code'] = full.wait()
         report['preview_exit_code'] = previews.wait()
         report['status'] = json.loads((output/'full/campaign.json').read_text())['status']
