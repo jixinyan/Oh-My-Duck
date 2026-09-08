@@ -387,3 +387,15 @@ CPU batteries. Both original/owned Walking fail tracking (forward mean
 only the standing-start case. No long-run equivalence or learned recovery claim
 follows. Evidence: `matched-growth-0908-01/iteration-500/result.json` under
 `outputs/baselines`. The observer now waits for checkpoint 1000.
+
+
+## Successful published StandUp reference
+
+The separately downloaded, pinned official `alpha_stand` passes all 64 corrected
+CPU reset samples and all four seed-42 CPU video cases, with final ground geometry
+contacts on both feet only. It also passes all four native MuJoCo and all four Isaac/Newton scenarios; eight
+native videos and finite 61/14 traces are checked. Its training checkpoint/settings are absent from
+ONNX metadata, so this demonstrates compatible execution of a successful policy,
+not our own training reproduction. See [published-policy reference](published-policy-reference-2026-09-08.md)
+for the source/hash, videos, exact paired states, SVG trajectories and motion-cost
+measurements. Published Walking still fails at runtime action scales 1.0 and 0.9.

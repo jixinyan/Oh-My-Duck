@@ -245,6 +245,21 @@
         "owned_run": "SIGSTOP_paused_for_diagnosis_at_2985",
         "experiment": "outputs/baselines/standup-angular-penalty-0908-01/result.json",
         "experiment_status": "comparison_training_after_smoke_export_cpu_video_capacity_gates"
+      },
+      "published_stand_reference": {
+        "state": "cpu_and_both_native_backends_behavior_verified_for_published_policy",
+        "published_revision": "088524a64e2557dc453256b6071dbb9d23888802",
+        "policy_sha256": "1569268713e40deea795dd2922dba50d3621e15a872855408b6b1b125b1c094b",
+        "cpu_reset_samples_passed": 64,
+        "cpu_reset_samples_total": 64,
+        "cpu_videos_verified": 4,
+        "native_mujoco_scenarios_passed": 4,
+        "own_training_reproduction": false,
+        "report": "docs/reports/published-policy-reference-2026-09-08.md",
+        "native_newton_scenarios_passed": 4,
+        "native_videos_verified": 8,
+        "newton_solver": "newton.solvers.SolverMuJoCo",
+        "native_seed_count": 1
       }
     },
     "cpu_rehearsal": {

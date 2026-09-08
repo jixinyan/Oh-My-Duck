@@ -30,6 +30,7 @@ is prepared but not launched. Default task recipes and native PPO algorithms rem
 | MuJoCo RL | Both representative tasks × both native PPO frameworks passed the single-GPU lifecycle and completed replay |
 | Isaac/Newton RL | Both representative tasks × both native PPO frameworks passed the single-GPU lifecycle and completed replay |
 | Newton physics | Actual solver, canonical state/sensors, precise collisions, BAM cadence, DR and penalties audited |
+| Published StandUp reference | Official frozen policy passes 64/64 CPU reset samples and 4/4 cases in each native backend; 12 videos checked; own training reproduction remains open |
 | Task behavior | All five-iteration policies fail behavior gates; long training and convergence acceptance remain |
 | Task replay | All 24 replay contexts completed; 60 videos and finite 61/14 traces checked |
 | CPU rehearsal/sim2sim/local packages | All eight corrected CPU/BAM executions revalidated; 20 videos checked; learned behavior remains unverified |

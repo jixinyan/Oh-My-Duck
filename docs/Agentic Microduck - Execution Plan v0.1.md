@@ -477,3 +477,11 @@ CPU BAM 已修正 joint/DOF 摩擦约束索引并通过 3 项真实物理/reset 
 阶段一致传递；恢复时不能用不同学习率的旧检查结果跳过前置验证。四组合 1e-4
 配置已准备并通过 dry run，但尚未启动或验证收敛。官方任务配方和 RSL 原生自适应
 PPO 保持不变。详见 [RL campaigns](rl-campaigns.md)。
+
+
+**成功策略参照（2026-09-08）**：官方发布的 `alpha_stand` 在项目 CPU/BAM 中通过
+16 组起始采样 × 4 姿态（64/64）及四个视频回放，原生 MuJoCo 与 Isaac/Newton 各四场景也通过。
+这证明当前接口/CPU 模型能够执行真实恢复动作，但该发布文件缺少具体训练
+checkpoint 来源，不能替代我们自己的训练复现。两后端共八个原生视频已通过检查；
+Newton 使用已约定的 `SolverMuJoCo` 路径。
+轨迹、接触与视频证据见 [published-policy reference](reports/published-policy-reference-2026-09-08.md)。
