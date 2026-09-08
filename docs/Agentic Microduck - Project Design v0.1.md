@@ -13,6 +13,8 @@ tags:
   - project-design
 ---
 
+> 最新训练矩阵与环境选档（2026-09-08）：按用户要求，两个代表任务 × MuJoCo/Isaac-Newton × RSL-RL/SB3 都进入训练计划。每个组合按预热后的实际 PPO 吞吐选择环境数，保留 15% VRAM 余量，不统一锁死为 8192，也不盲目填满显存。已有原版对照保留；空闲卡分批准备和训练，其他项目占用的卡不动。代码和针对性测试已完成，选档和长训练的实际状态以运行 manifest 为准；行为复现仍待验收。见 [环境选档记录](reports/rl-environment-selection-2026-09-08.md)。
+
 > 最新训练观察方式（2026-09-08）：不再由助手持续轮询/分析训练；后台每 1000 次原生 PPO 更新（每环境 24000 个控制 steps）保存 checkpoint 视频，并保留最终 checkpoint 视频。中途不再执行多种子诊断；两组原版训练结束后统一做 CPU/BAM 视频和 16 组重置评估。已有训练继续，原中途诊断和旧预览 watcher 已由新后台视频 worker 替换。视频画廊：`outputs/previews/official-periodic-0908-01/index.html`。
 
 > 最新资源授权（2026-09-08）：用户重新开放空闲 GPU。Walking 保持 GPU 7；StandUp 已从 2000 轮完整 checkpoint 在 GPU 0 原生续训，配置/课程恢复检查通过；评估使用 GPU 1。GPU 0 后续进入其他用户任务，吞吐受干扰。Walking 的 4096/8192/16384 环境吞吐测试有效，其中 8192 最好；32768 受后来进入的其他用户八卡任务干扰，后续 StandUp 扩容测试已停止，尚未改变长训练规模。两组仍各 4096 环境、headless、W&B offline。按同课程阶段的任务趋势和固定姿态回放决定继续或停止，不凭总 reward 或预算盲目续训。见 [资源与训练评审](reports/official-training-resource-review-2026-09-08.md)。

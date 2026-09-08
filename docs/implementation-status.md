@@ -5,6 +5,13 @@ Implementation proceeds by domain, with interfaces for later capabilities and
 explicit evidence for implemented functionality. Task-family organization, single-GPU pipeline fixes and full-training campaigns
 are merged into `main` at `5ef433b`. Submitted training keeps source `1f45996`. No public policy upload has occurred.
 
+Latest scope: prepare and train both tasks across both owned backends and both
+native PPO frameworks. Per-combination environment selection measures complete
+PPO throughput with 15% VRAM headroom; all eight counts remain to be measured.
+Existing original controls and previous artifacts are preserved. Available GPUs
+serve queued independent runs; no learned-behavior claim changes. See
+[environment selection](reports/rl-environment-selection-2026-09-08.md).
+
 Latest user preference: no continuous LLM training polling. A background worker
 saves native videos every 1000 PPO updates (24000 control steps per environment)
 and at the final checkpoint; unified CPU video/16-reset diagnosis runs after both

@@ -14,6 +14,7 @@ def main():
     parser.add_argument('--config', type=Path, required=True)
     parser.add_argument('--run-id', required=True)
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--prepare-only', action='store_true', help='Run gates and optional throughput selection without full training')
     args = parser.parse_args()
     plan = load_plan(args.config)
     spec = next(row for row in plan['runs'] if row['id'] == args.run_id)
@@ -99,8 +100,38 @@ def main():
             smoke_policy, _ = export('smoke-export', smoke)
             rehearsal('smoke-rehearsal', smoke_policy)
             train('resume-check', 64, 1, smoke)
+            if search := plan.get('environment_search'):
+                from .scaling import GpuSampler, choose, measure
+                rows = report['environment_search'] = []
+                for count in search['candidates']:
+                    # A conservative linear extrapolation prevents knowingly filling VRAM.
+                    if rows and rows[-1]['gpu']['peak_mib'] * count / rows[-1]['num_envs'] > rows[-1]['gpu']['total_mib'] * search['memory_fraction']:
+                        report['environment_search_stop'] = 'next_count_exceeds_projected_vram_budget'
+                        break
+                    name = f'scaling-{count}'
+                    with GpuSampler() as sampler:
+                        candidate = train(name, count, search['updates'])
+                    row = {'num_envs': count, 'run': str(candidate), 'gpu': sampler.data,
+                           'measurement': measure(candidate, output/(name+'.log'), spec['framework'], count,
+                                                  search['warmup_updates'], search['updates'])}
+                    rows.append(row)
+                    save()
+                    if sampler.data['foreign_pids'] or sampler.data['errors']:
+                        raise RuntimeError('Contaminated throughput benchmark; preserved, no automatic retry')
+                    best = choose(rows, search['memory_fraction'])
+                    if row['measurement']['samples_per_second'] < best['measurement']['samples_per_second'] * search['stop_below_best_fraction']:
+                        report['environment_search_stop'] = 'throughput_regressed'
+                        break
+                best = choose(rows, search['memory_fraction'])
+                spec['num_envs'] = best['num_envs']
+                report['environment_selection'] = best
+                save()
             capacity = train('capacity', spec['num_envs'], 5)
             export('capacity-export', capacity)
+            if args.prepare_only:
+                report['status'] = 'prepared'
+                save()
+                return 0
             run = train('full', spec['num_envs'], spec['iterations'])
         policy, checkpoint = export('export', run)
         stage('package', prefix+['package', '--', '--onnx', str(policy), '--checkpoint', str(checkpoint),

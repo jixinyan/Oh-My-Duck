@@ -111,6 +111,17 @@
         "last_gpu": 3,
         "state": "stopped_due_to_foreign_gpu_load"
       }
+    },
+    "environment_selection": {
+      "state": "implemented_launch_pending",
+      "config": "configs/experiments/representative-throughput.json",
+      "module": "oh_my_duck.rl.experiments.throughput",
+      "scope": "two_tasks_two_backends_two_frameworks",
+      "metric": "steady_state_samples_per_second_including_native_ppo",
+      "vram_fraction": 0.85,
+      "warmup_updates": 10,
+      "measured_updates": 30,
+      "learned_behavior": "unverified"
     }
   },
   "rl_framework_registry": "oh_my_duck.rl.training.frameworks:default_framework_registry",

@@ -1,0 +1,106 @@
+{
+  "schema_version": 1,
+  "description": "Eight owned task/backend/framework combinations; select measured steady-state throughput with 15% VRAM headroom. Larger PPO batches are an explicit recipe/resource difference.",
+  "checkpoint_interval": 1000,
+  "smoke_iterations": 5,
+  "runs": [
+    {
+      "id": "mujoco-rsl-rl-walking",
+      "backend": "mujoco",
+      "framework": "rsl-rl",
+      "task": "Mjlab-Velocity-Flat-MicroDuck",
+      "experiment": "velocity",
+      "num_envs": 4096,
+      "iterations": 50000,
+      "seed": 42
+    },
+    {
+      "id": "mujoco-rsl-rl-stand_up",
+      "backend": "mujoco",
+      "framework": "rsl-rl",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "experiment": "microduck_stand",
+      "num_envs": 4096,
+      "iterations": 15000,
+      "seed": 42
+    },
+    {
+      "id": "mujoco-sb3-walking",
+      "backend": "mujoco",
+      "framework": "sb3",
+      "task": "Mjlab-Velocity-Flat-MicroDuck",
+      "experiment": "velocity",
+      "num_envs": 4096,
+      "iterations": 50000,
+      "seed": 42,
+      "learning_rate": 0.0001
+    },
+    {
+      "id": "mujoco-sb3-stand_up",
+      "backend": "mujoco",
+      "framework": "sb3",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "experiment": "microduck_stand",
+      "num_envs": 4096,
+      "iterations": 15000,
+      "seed": 42,
+      "learning_rate": 0.0001
+    },
+    {
+      "id": "isaac-newton-rsl-rl-walking",
+      "backend": "isaac-newton",
+      "framework": "rsl-rl",
+      "task": "Mjlab-Velocity-Flat-MicroDuck",
+      "experiment": "velocity",
+      "num_envs": 4096,
+      "iterations": 50000,
+      "seed": 42
+    },
+    {
+      "id": "isaac-newton-rsl-rl-stand_up",
+      "backend": "isaac-newton",
+      "framework": "rsl-rl",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "experiment": "microduck_stand",
+      "num_envs": 4096,
+      "iterations": 15000,
+      "seed": 42
+    },
+    {
+      "id": "isaac-newton-sb3-walking",
+      "backend": "isaac-newton",
+      "framework": "sb3",
+      "task": "Mjlab-Velocity-Flat-MicroDuck",
+      "experiment": "velocity",
+      "num_envs": 4096,
+      "iterations": 50000,
+      "seed": 42,
+      "learning_rate": 0.0001
+    },
+    {
+      "id": "isaac-newton-sb3-stand_up",
+      "backend": "isaac-newton",
+      "framework": "sb3",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "experiment": "microduck_stand",
+      "num_envs": 4096,
+      "iterations": 15000,
+      "seed": 42,
+      "learning_rate": 0.0001
+    }
+  ],
+  "environment_search": {
+    "candidates": [
+      4096,
+      8192,
+      16384,
+      32768,
+      65536,
+      131072
+    ],
+    "warmup_updates": 10,
+    "updates": 40,
+    "memory_fraction": 0.85,
+    "stop_below_best_fraction": 0.95
+  }
+}
