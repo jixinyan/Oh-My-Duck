@@ -105,3 +105,12 @@ The original barrier supervisor is paused; its preparation workers continue.
 After that preparation campaign exits, the successor terminates the superseded
 controller and restores the original preview worker. No duplicate full campaign
 will be launched by the old controller.
+
+User decision supersedes selection: use 8192 for every new learner and start full
+training promptly. Sweeps and the superseded handover were explicitly terminated;
+completed artifacts remain. Seven combinations passed all smoke/export/CPU-video/
+resume gates; six also completed 8192 training. Reuse checks require identical
+recipe/seed and unchanged training/evaluation inputs. A matching completed 8192
+run is re-exported for its capacity gate; an interrupted larger run cannot qualify.
+Newton SB3 StandUp still needs its smoke lifecycle. New learners use all eight
+GPUs; original controls continue sharing 0/7. No all-combination barrier remains.

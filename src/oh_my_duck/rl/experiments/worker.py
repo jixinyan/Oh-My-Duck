@@ -111,6 +111,14 @@ def main():
             report['preparation'] = validate_preparation(args.prepared, spec, root)
             save()
             run = train('full', spec['num_envs'], spec['iterations'])
+        elif spec.get('preparation_source'):
+            from .preparation import reuse_smoke
+            report['preparation'] = reuse_smoke(spec['preparation_source'], spec, root)
+            save()
+            previous_capacity = report['preparation']['capacity_run']
+            capacity = Path(previous_capacity) if previous_capacity else train('capacity', spec['num_envs'], 5)
+            export('capacity-export', capacity)
+            run = train('full', spec['num_envs'], spec['iterations'])
         elif spec.get('resume'):
             from .recovery import validate_checkpoint
             recovery = validate_checkpoint(spec, root)

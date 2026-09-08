@@ -52,3 +52,22 @@ def test_partial_or_changed_preparation_cannot_bypass_gates(tmp_path):
     with patch('oh_my_duck.rl.experiments.preparation.subprocess.check_output',return_value='src/oh_my_duck/rl/tasks/reward.py'):
         with pytest.raises(ValueError,match='inputs changed'):
             validate_preparation(path,spec,tmp_path)
+
+
+def test_interrupted_sweep_reuses_only_completed_matching_size(tmp_path):
+    from oh_my_duck.rl.experiments.preparation import reuse_smoke
+    directory=tmp_path/'prepare'/'task';directory.mkdir(parents=True)
+    spec={'id':'task','framework':'sb3','num_envs':8192,'seed':42,'learning_rate':0.0001}
+    stages={name:{'status':'completed'} for name in ('smoke','smoke-export','smoke-rehearsal','resume-check')}
+    stages['smoke']['command']=['--num-envs','64','--iterations','5']
+    stages['scaling-8192']={'status':'completed','command':['--num-envs','8192','--iterations','40'],'run':'measured-8192'}
+    stages['scaling-32768']={'status':'running','command':['--num-envs','32768']}
+    path=directory/'result.json';path.write_text(json.dumps({'status':'running','spec':{**spec,'num_envs':4096},'stages':stages}))
+    (directory.parent/'campaign.json').write_text(json.dumps({'source_commit':'old'}))
+    (directory/'smoke-export').mkdir();(directory/'smoke-export/policy.onnx').touch()
+    (directory/'smoke-rehearsal').mkdir();(directory/'smoke-rehearsal/stand.mp4').touch()
+    with patch('oh_my_duck.rl.experiments.preparation.subprocess.check_output',return_value=''):
+        assert reuse_smoke(path,spec,tmp_path)['capacity_run']=='measured-8192'
+        assert reuse_smoke(path,{**spec,'num_envs':16384},tmp_path)['capacity_run'] is None
+        with pytest.raises(ValueError,match='recipe'):
+            reuse_smoke(path,{**spec,'learning_rate':0.001},tmp_path)
