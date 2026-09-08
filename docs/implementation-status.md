@@ -11,8 +11,10 @@ frameworks. `measured-env-0908-03` (source `f9fcf80`) is preparing on GPUs
 Walking/StandUp are queued for the next free card. All eight environment counts
 remain to be selected from measured PPO throughput with 15% VRAM headroom.
 Full training now starts per combination after its own gates pass. The old
-global-barrier supervisor is paused for handover while its live preparations
-continue; current full-training launch evidence is recorded in the report. Original controls continue on 0/7. Their preview controller is temporarily
+global-barrier supervisor is paused while its live preparations continue.
+`independent-full-0908-01` (source `392776a`) now adopts each completed
+preparation independently; at startup, all new full learners still awaited their
+own remaining gates. New campaigns release GPU slots during CPU stages. Original controls continue on 0/7. Their preview controller is temporarily
 paused and will automatically resume after isolated calibration. Prior failed
 startup artifacts are preserved. See [selection and startup evidence](reports/rl-environment-selection-2026-09-08.md).
 

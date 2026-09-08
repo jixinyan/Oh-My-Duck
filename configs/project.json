@@ -97,7 +97,8 @@
       "control_steps_per_environment": 24000,
       "final_diagnosis": "after_both_original_training_processes_end",
       "previous_galleries_retained": true,
-      "pause_manifest": "outputs/experiments/measured-env-0908-03/result.json"
+      "pause_manifest": "outputs/experiments/measured-env-0908-03/result.json",
+      "successor_gallery": "outputs/experiments/independent-full-0908-01/previews/index.html"
     },
     "local_rl_gpu_policy": "explicit_idle_gpu_allocation_authorized_2026_09_08",
     "local_rl_gpus": {
@@ -114,7 +115,7 @@
       }
     },
     "environment_selection": {
-      "state": "six_smokes_passed_preparation_running_two_queued",
+      "state": "independent_handover_running_preparations_preserved",
       "config": "configs/experiments/representative-throughput.json",
       "module": "oh_my_duck.rl.experiments.throughput",
       "scope": "two_tasks_two_backends_two_frameworks",
@@ -142,7 +143,10 @@
       "periodic_video_updates": 1000,
       "scheduling": "independent_per_combination_gpu_stage_leases",
       "existing_preparation": "preserved_under_handover",
-      "handover_module": "oh_my_duck.rl.experiments.adopt_preparation"
+      "handover_module": "oh_my_duck.rl.experiments.adopt_preparation",
+      "full_campaign": "outputs/experiments/independent-full-0908-01/full/campaign.json",
+      "handover_source_commit": "392776ac523512b0782301294654bf9ec4048197",
+      "full_launch_verified": false
     }
   },
   "rl_framework_registry": "oh_my_duck.rl.training.frameworks:default_framework_registry",

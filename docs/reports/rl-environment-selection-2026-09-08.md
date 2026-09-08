@@ -87,3 +87,21 @@ gates, native learning-rate routing, first-free-GPU reuse, nested run-name isola
 and asset integrity. Changes are committed on `feat/rl-measured-environments`;
 no new main merge is claimed. The original Walking benchmark's 8192 result
 (~98k samples/s) remains a reference, not the answer for every combination.
+
+The handover is now active: `outputs/experiments/independent-full-0908-01`,
+source `392776a`, supervisor PID 2338948, launched 13:11 UTC. Its
+`full/campaign.json` tracks each independent full learner and its selected count;
+`previews/index.html` is the successor gallery. Existing preparation processes,
+checkpoints and measurements were retained. At handover verification, the first
+six combinations were measuring 16384/32768 candidates and the last two remained
+queued; no new full learner had yet passed all its gates. Original controls on
+0/7 continued. Low instantaneous GPU utilization can now also reflect native
+CPU initialization/JIT within a benchmark, not an unallocated training process.
+
+Scheduling validation: 18 tests and 9 subtests passed, covering GPU lock release,
+nested leases, free-card adoption before other preparations finish, rejection of
+partial/changed preparation, and existing campaign/selection/export routing.
+The original barrier supervisor is paused; its preparation workers continue.
+After that preparation campaign exits, the successor terminates the superseded
+controller and restores the original preview worker. No duplicate full campaign
+will be launched by the old controller.
