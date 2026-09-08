@@ -113,7 +113,7 @@
       }
     },
     "environment_selection": {
-      "state": "preparation_running",
+      "state": "preparation_stopped_startup_fixes_validated",
       "config": "configs/experiments/representative-throughput.json",
       "module": "oh_my_duck.rl.experiments.throughput",
       "scope": "two_tasks_two_backends_two_frameworks",
@@ -137,7 +137,7 @@
         7
       ],
       "queue": "next_available_gpu",
-      "final_training": "automatic_after_all_eight_preparations_pass",
+      "final_training": "not_started",
       "periodic_video_updates": 1000
     }
   },

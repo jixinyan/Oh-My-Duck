@@ -7,9 +7,10 @@ are merged into `main` at `5ef433b`. Submitted training keeps source `1f45996`. 
 
 Latest scope: prepare and train both tasks across both owned backends and both
 native PPO frameworks. Per-combination environment selection measures complete
-PPO throughput with 15% VRAM headroom; all eight counts remain to be measured. Six preparations are running on GPUs
-1/6/2/3/4/5 in `measured-env-0908-02` (source `c84f169`), with two combinations
-queued for the next available card; full training starts after all gates pass.
+PPO throughput with 15% VRAM headroom; all eight counts remain to be measured. Attempt `measured-env-0908-02` stopped during startup because of native-log
+name collisions and metadata-invalidated Newton asset fingerprints. Both causes
+are corrected; the separate replacement launch is pending. Full training has not
+started; it will start only after all preparation gates pass.
 Existing original controls and previous artifacts are preserved. Available GPUs
 serve queued independent runs; no learned-behavior claim changes. See
 [environment selection](reports/rl-environment-selection-2026-09-08.md).

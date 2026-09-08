@@ -68,3 +68,15 @@ startup/contaminated timing, SB3 complete-update timestamps, selected-count
 capacity gating, native learning-rate routing, and reuse of the first free GPU
 rather than waiting for a busy assignment. Git source is on
 `feat/rl-measured-environments`; no new main merge is claimed.
+
+Correction to the launch-only observation above: attempt 02 stopped during startup.
+Shared RSL log lookup used the nested directory name `prepare` without campaign
+identity, colliding with attempt 01. A full campaign-path digest now disambiguates
+native tags. Newton also rejected missing fingerprints after `configs/upstream.json`
+changed only the policy inventory and a status label. All robot bytes, converter,
+reference extractor, path implementation, dependency lock and generated asset
+hashes matched the accepted conversion. The unchanged USD trees were copied under
+the new fingerprint with explicit metadata-only reuse provenance; no conversion
+or physics change is claimed. Evidence: `outputs/diagnostics/asset-metadata-rekey-0908-01`.
+The coordinator now verifies both Newton assets before starting any workers.
+Attempt 02 and all partial results remain preserved; it never started full training.

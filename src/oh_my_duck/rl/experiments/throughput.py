@@ -66,6 +66,11 @@ def main():
         return child
     save()
     try:
+        from oh_my_duck.rl.backends.isaac_newton.paths import require_asset
+        from oh_my_duck.rl.training.tasks import project_tasks
+        models = {project_tasks().get(spec['task']).model for spec in plan['runs'] if spec['backend'] == 'isaac-newton'}
+        report['verified_newton_assets'] = {model: str(require_asset(model)) for model in sorted(models)}
+        save()
         if args.pause_preview_launch:
             identity = json.loads(args.pause_preview_launch.read_text())
             pid = identity['pid']

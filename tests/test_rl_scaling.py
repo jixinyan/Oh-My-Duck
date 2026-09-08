@@ -79,3 +79,11 @@ def test_worker_selects_count_then_capacity_gates_without_starting_full():
         assert all('full' != Path(c[c.index('--output')+1]).name for c in observed)
         assert observed[-1][observed[-1].index('--num-envs')+1] == '8192'
         assert report['spec']['iterations'] == 50000
+
+
+def test_nested_campaigns_cannot_collide_in_native_log_lookup():
+    from oh_my_duck.rl.experiments.worker import native_run_tag
+    first = Path('/outputs/attempt-one/prepare/walking')
+    second = Path('/outputs/attempt-two/prepare/walking')
+    assert native_run_tag(first, 'walking', 'smoke') != native_run_tag(second, 'walking', 'smoke')
+    assert native_run_tag(first, 'walking', 'smoke') == native_run_tag(first, 'walking', 'smoke')

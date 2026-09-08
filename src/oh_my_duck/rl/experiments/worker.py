@@ -1,5 +1,6 @@
 """Smoke, capacity gate, full native training and task-specific evaluation on one GPU."""
 import argparse
+import hashlib
 import json
 from pathlib import Path
 import subprocess
@@ -7,6 +8,11 @@ import sys
 import time
 from oh_my_duck.core.paths import project_root
 from .campaign import load_plan
+
+
+def native_run_tag(output, identity, stage):
+    campaign_key = hashlib.sha256(str(output.parent.resolve()).encode()).hexdigest()[:12]
+    return f'{output.parent.name}-{campaign_key}_{identity}_{stage}'
 
 
 def main():
@@ -50,7 +56,7 @@ def main():
                 bundles = sorted((resume/'checkpoints').glob('step_*'))
                 command += ['--resume', str(bundles[-1] if bundles else resume)]
         else:
-            tag = output.parent.name+'_'+spec['id']+'_'+name
+            tag = native_run_tag(output, spec['id'], name)
             command += ['--env.scene.num-envs', str(count), '--agent.max-iterations', str(iterations),
                         '--agent.seed', str(spec['seed']), '--agent.run-name', tag,
                         '--agent.save-interval', str(plan['checkpoint_interval']), '--agent.upload-model', 'False']
