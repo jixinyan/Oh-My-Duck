@@ -82,3 +82,9 @@ completed; subsequent gates and full training remain in progress. Failed schedul
 evidence is preserved; local launch metadata is in
 `outputs/jobs/omd-rl-local-0908-01/launch.json`.
 See [the allocation and evidence record](reports/full-training-2026-09-07.md).
+
+
+At 2026-09-08 02:08 UTC all eight local runs had entered full training. Early
+returns improved relative to initial records; SB3 StandUp shows substantial
+regression from its early peak. No learned behavior acceptance is claimed.
+See [the measured reward snapshot](reports/reward-trends-2026-09-08.md).

@@ -95,7 +95,7 @@
     "smoke_and_resume": "8_of_8_passed_at_5971dca",
     "open_items": [
       "Newton native DDP acceptance; old job a52ff51b no longer exists in platform API",
-      "4096-environment capacity and full representative training",
+      "full representative training and convergence; SB3 StandUp stability",
       "learned behavior validation"
     ],
     "architecture_merge": "6303ca4",
@@ -104,7 +104,7 @@
     "task_layout": "14 task families with environment.py and ppo.py; 33 semantic catalog entries preserved",
     "full_training_campaign": {
       "config": "configs/experiments/representative-full.json",
-      "status": "local_attempt_running_smoke_8_of_8_completed",
+      "status": "local_full_training_running_8_of_8",
       "nodes": 1,
       "gpus": 8,
       "num_envs_per_gpu": 4096,
@@ -121,7 +121,8 @@
       "local_manifest": "outputs/experiments/full-local-0908-01/campaign.json",
       "execution": "direct_development_host",
       "gpu_model": "NVIDIA H200",
-      "updated_at": "2026-09-08"
+      "updated_at": "2026-09-08T02:08:32Z",
+      "reward_snapshot": "docs/reports/reward-trends-2026-09-08.md"
     },
     "latest_merge": "5ef433b"
   }
