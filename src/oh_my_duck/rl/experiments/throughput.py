@@ -74,8 +74,28 @@ def main():
             if stat[19] != str(identity['start_ticks']) or os.getpgid(pid) != pid or '/outputs/previews/' not in command:
                 raise RuntimeError('Preview process identity does not match; refusing to signal')
             paused = {'pid': pid, 'start_ticks': str(identity['start_ticks'])}
-            os.killpg(pid, signal.SIGSTOP)
+            os.kill(pid, signal.SIGSTOP)
             report['preview_pause'] = {**paused, 'status': 'paused_for_isolated_calibration'}
+            save()
+            # Pause only the controller. Its already-started export/video must
+            # finish normally, releasing CUDA before any benchmark can start.
+            while True:
+                active = []
+                for proc in Path('/proc').iterdir():
+                    if not proc.name.isdecimal() or int(proc.name) == pid:
+                        continue
+                    try:
+                        fields = (proc/'stat').read_text().rsplit(')', 1)[1].split()
+                        if int(fields[2]) == pid and fields[0] not in ('Z', 'X'):
+                            active.append(int(proc.name))
+                    except (FileNotFoundError, ProcessLookupError):
+                        pass
+                if not active:
+                    break
+                report['preview_pause']['draining_children'] = active
+                save()
+                time.sleep(2)
+            report['preview_pause']['draining_children'] = []
             save()
         prepare = launch('prepare', [sys.executable, '-m', 'oh_my_duck.rl.experiments.campaign',
             '--config', str(args.config.resolve()), '--output', str(output/'prepare'), '--queue', '--prepare-only'])

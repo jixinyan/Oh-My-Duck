@@ -44,3 +44,11 @@ resumed. Its checkpoints remain on disk. New full-run previews use GPU 0.
 Current state: implementation and focused tests passed; launch evidence will be
 recorded separately below. The previous original Walking benchmark preferred
 8192 (~98k samples/s) over 4096/16384; other combinations require their own data.
+
+The first launch (`measured-env-0908-01`, source `f6a0609`) passed MuJoCo/RSL
+smoke/export (and Walking rehearsal/resume), but Walking calibration was rejected
+because a paused pre-existing preview still held a CUDA context. No throughput
+result from this attempt is accepted. The attempt was explicitly stopped and all
+artifacts retained. The controller now pauses only preview scheduling and drains
+its existing child command before calibration. GPUs 2–5 subsequently became free;
+a separate six-GPU attempt is planned, preserving original training on 0/7.

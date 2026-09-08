@@ -1,5 +1,7 @@
 """Launch one independent task/framework run per allocated GPU; no shared learner."""
 import argparse
+from contextlib import contextmanager
+import queue
 from concurrent.futures import ThreadPoolExecutor, as_completed
 import json
 import hashlib
@@ -109,7 +111,7 @@ def main():
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=False)
     commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=root, text=True).strip()
-    report = {'source_commit': commit, 'status': 'running', 'devices': devices, 'plan': plan,
+    report = {'source_commit': commit, 'status': 'running', 'devices': list(dict.fromkeys(devices)) if args.queue else devices, 'plan': plan,
               'runs_per_gpu': args.runs_per_gpu,
               'config_sha256': hashlib.sha256(args.config.read_bytes()).hexdigest(), 'runs': {}}
     children = []
@@ -128,7 +130,17 @@ def main():
         temporary.write_text(json.dumps(report, indent=2)+'\n')
         temporary.replace(output/'campaign.json')
     lock = threading.Lock()
-    lanes = {device: threading.Lock() for device in devices}
+    free_devices = queue.Queue()
+    for device in dict.fromkeys(devices):
+        free_devices.put(device)
+    @contextmanager
+    def allocation(proposed):
+        device = free_devices.get() if args.queue else proposed
+        try:
+            yield device
+        finally:
+            if args.queue:
+                free_devices.put(device)
     stopping = threading.Event()
     original_stop = stop
     def stop(signum, frame):
@@ -137,12 +149,10 @@ def main():
     for sig in (signal.SIGTERM, signal.SIGINT):
         signal.signal(sig, stop)
     for row, device in zip(plan['runs'], devices):
-        report['runs'][row['id']] = {'device': device, 'status': 'queued'}
+        report['runs'][row['id']] = {'device': None if args.queue else device, 'status': 'queued'}
     save()
     def execute(row, device):
-        # Distinct locks retain explicit simultaneous sharing when --queue is absent.
-        lane = lanes[device] if args.queue else threading.Lock()
-        with lane:
+        with allocation(device) as device:
             if stopping.is_set():
                 return row['id'], 143
             with (output/(row['id']+'.log')).open('x') as log:
@@ -155,10 +165,10 @@ def main():
                                          stdout=log, stderr=subprocess.STDOUT, start_new_session=True)
                 with lock:
                     children.append(child)
-                    report['runs'][row['id']].update(pid=child.pid, status='running')
+                    report['runs'][row['id']].update(pid=child.pid, device=device, status='running')
                     save()
                 return row['id'], child.wait()
-    with ThreadPoolExecutor(max_workers=len(devices)) as pool:
+    with ThreadPoolExecutor(max_workers=len(set(devices)) if args.queue else len(devices)) as pool:
         futures = [pool.submit(execute, row, device) for row, device in zip(plan['runs'], devices)]
         for future in as_completed(futures):
             identity, code = future.result()
