@@ -741,3 +741,15 @@ recording:
 **执行方式更新（2026-09-06，用户最新指示）**：单 GPU 开发、验证和训练直接在开发机 headless 运行；涉及多 GPU 的实验再提交 job。此前已提交任务保留其独立证据记录。
 
 **Newton 任务接入更新（2026-09-06）**：Walking/StandUp 已通过实际物理与 MDP 门槛并注册共用运行时；StandUp 使用项目内 Isaac manager 在 graph 捕获前精确编译官方接触规则。两个原生 PPO 共用任务入口，恢复、导出及行为验收继续按独立门槛记录。导出的官方 MuJoCo 元数据参考与策略训练后端分别标注。详见 `docs/reports/domain-refactor.md`。
+
+
+### 2026-09-08：当前目标为官方效果复现，再验证扩展效果
+
+先复现 MuJoCo/native RSL-RL 的 Walking 与 StandUp 行为，再让 Newton 与 SB3
+达到相同任务标准；不以 smoke、reward 上升或流程完成替代策略效果。官方固定
+commit 的独立对照环境已按原 lock 离线安装；它仅用于实验对照，不成为项目运行时依赖。
+真实 MuJoCo 中 15 个 reset 对照的 qpos/qvel 与 CUDA RNG 消耗完全一致，编译模型
+468 个数组完全一致。两边 StandUp 64-env/5-iteration PPO smoke 已完成；官方导出
+及 51 个 scalar / 9 个 penalty 检查通过。长训练行为尚未复现完成，Walking 对照
+和后续视频、CPU/BAM 验收继续进行。只用 GPU 7，W&B offline，保留失败产物。
+详见 [baseline audit](reports/official-baseline-audit-2026-09-08.md)。

@@ -113,6 +113,16 @@ not proof that the stopped configuration could never converge.
 
 Official MuJoCo/RSL learned-behavior reproduction remains **unverified**. The
 2026-09-08 static audit aligns task/PPO configuration, 228/229 MDP definitions
-modulo local imports, BAM and core dependency pins, but identifies an unresolved
-Entity-based StandUp reset rewrite and missing matched original/refactor runtime
-comparison. See [baseline audit](reports/official-baseline-audit-2026-09-08.md).
+modulo local imports, BAM and core dependency pins, and the subsequent real-runtime audit verifies the Entity-based StandUp reset
+state writes in 15 cases. Matched original/refactor learned-behavior comparison
+remains outstanding. See [baseline audit](reports/official-baseline-audit-2026-09-08.md).
+
+
+Current goal: reproduce official MuJoCo/native RSL learned behavior first, then
+match it in Newton and SB3. Isolated pinned-original StandUp PPO smoke and official
+export/scalar audit passed; both implementations passed 64-env/5-iteration smoke.
+Compiled-model equality, exact reset state/RNG parity and first-reset actor
+observation equality are verified. Repeated original runs also show contact-force
+and trajectory nondeterminism; long-run behavior is still unverified. Walking
+controls and the complete sensor-refresh comparison are in progress. See the
+[baseline audit](reports/official-baseline-audit-2026-09-08.md) for evidence and limits.

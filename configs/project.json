@@ -146,9 +146,14 @@
       "baseline": "mujoco_rsl_rl",
       "static_audit": "docs/reports/official-baseline-audit-2026-09-08.md",
       "open_items": [
-        "StandUp Entity reset state/observation parity",
-        "matched pinned-original versus owned training and evaluation"
-      ]
+        "matched Walking runtime and PPO controls",
+        "matched original/owned learned-behavior evaluation with repeated seeds",
+        "Newton and SB3 behavioral acceptance after the official baseline"
+      ],
+      "priority": "official_mujoco_rsl_behavior_then_newton_and_sb3",
+      "reset_state_rng_parity": "verified_15_real_mujoco_cases",
+      "compiled_standup_model": "468_arrays_exact",
+      "official_standup_smoke_export": "passed_64_env_5_iterations_51_scalars_9_penalties"
     }
   }
 }
