@@ -16,6 +16,12 @@ python omd.py submit --name omd-rl-full-YYYYMMDD-01 --gpus 8 -- \
   --output outputs/experiments/full-YYYYMMDD-01
 ```
 
+The user authorized running the full campaign on the local eight-GPU host after
+scheduler failure on 2026-09-08. From an immutable source snapshot, the same CLI
+can run directly with `CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6,7 WANDB_MODE=offline`;
+use a detached process with file logs for training that outlives the terminal.
+See [the failure and local launch record](reports/full-training-2026-09-07.md).
+
 Use a new name and output directory for each attempt. Submission uses an immutable
 committed source snapshot. The campaign respects the allocated GPU order, isolates
 CUDA visibility, clears inherited distributed ranks and keeps W&B offline. It

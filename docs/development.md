@@ -44,7 +44,7 @@ Update the original design and execution documents when scope, module responsibi
 
 Resource allocation is explicit and based on the experiment. The user permits single-node multi-GPU jobs and does not impose an artificial runtime or task-count cap. Never infer that reserving more GPUs automatically parallelizes a single-GPU trainer.
 
-**执行方式更新（2026-09-06，用户最新指示）**：单 GPU 开发、验证和训练直接在开发机 headless 运行；涉及多 GPU 的实验再提交 job。此前已提交任务保留其独立证据记录。
+**执行方式更新（2026-09-08，用户最新指示）**：单 GPU 开发、验证和训练直接在开发机 headless 运行。调度训练失败后，当前完整训练也获准使用本机空闲的 8 张 GPU；多卡 job 仍是可选执行方式。所有尝试使用独立输出目录和固定源码，保留此前失败记录。
 
 
 ## Diagrams

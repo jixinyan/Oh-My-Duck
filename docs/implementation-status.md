@@ -1,6 +1,6 @@
 # Implementation status
 
-Updated 2026-09-07. The product scope remains the Agentic Microduck Project Design.
+Updated 2026-09-08. The product scope remains the Agentic Microduck Project Design.
 Implementation proceeds by domain, with interfaces for later capabilities and
 explicit evidence for implemented functionality. Task-family organization, single-GPU pipeline fixes and full-training campaigns
 are merged into `main` at `5ef433b`. Submitted training keeps source `1f45996`. No public policy upload has occurred.
@@ -18,7 +18,7 @@ are merged into `main` at `5ef433b`. Submitted training keeps source `1f45996`. 
 | Task behavior | All five-iteration policies fail behavior gates; long training and convergence acceptance remain |
 | Task replay | All 24 replay contexts completed; 60 videos and finite 61/14 traces checked |
 | CPU rehearsal/sim2sim/local packages | All eight policies exported/packaged and replayed in both backends plus CPU/BAM |
-| Multi-GPU | Native RSL MuJoCo DDP previously passed; Newton DDP running (job `a52ff51b`), acceptance pending; no distributed SB3 gradient claim |
+| Multi-GPU | Native RSL MuJoCo DDP previously passed; Newton DDP acceptance pending; old job `a52ff51b` no longer exists in the platform API; no distributed SB3 gradient claim |
 | Hardware | Unavailable; all hardware acceptance deferred |
 
 The consolidated batch at `5971dca` passed training and resume for all eight
@@ -40,8 +40,9 @@ checks passed seven Isaac and two Newton binding tests. Wheel resources/licenses
 bytecode exclusion, three environment locks and local Markdown links were checked.
 See [complete acceptance evidence](reports/rl-pipeline-acceptance.md).
 
-Single-GPU work runs directly on the development host; only multi-GPU experiments
-use scheduler jobs. W&B remains offline. Current host workloads contend for GPUs,
+Single-GPU work runs directly on the development host. Following the scheduled
+campaign failure, the user also authorized the eight-GPU campaign on the local
+H200 host on 2026-09-08; multi-GPU scheduler submission remains available. W&B remains offline. Current host workloads contend for GPUs,
 so observed throughput is not an isolated hardware benchmark.
 
 See [domain refactor evidence](reports/domain-refactor.md),
@@ -72,7 +73,12 @@ checks also passed (two tests). Source/config provenance now includes nested
 experiment manifests. Full submission follows from the committed snapshot.
 
 
-Full training has been submitted as `omd-rl-full-0907-01`, queue ID
-`local-662cf40c7dfb`, source `1f45996`; latest submission state is Pending.
-The single eight-GPU node runs all eight task/backend/framework combinations.
+The scheduled attempt `omd-rl-full-0907-01` (platform ID `b2bab260`, original
+queue ID `local-662cf40c7dfb`) is **Failed**. Its log is empty, the platform exposes
+no log pods, and no campaign manifest exists; the root cause remains unknown.
+A separate local attempt `full-local-0908-01` started on eight H200 GPUs using
+the same immutable source `1f45996` and training budgets. All eight smoke stages
+completed; subsequent gates and full training remain in progress. Failed scheduler
+evidence is preserved; local launch metadata is in
+`outputs/jobs/omd-rl-local-0908-01/launch.json`.
 See [the allocation and evidence record](reports/full-training-2026-09-07.md).

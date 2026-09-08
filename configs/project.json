@@ -82,7 +82,7 @@
   "execution": {
     "hardware_available": false,
     "harness": "external_with_planned_mock",
-    "server_jobs": "Alaya HTrain for multi-GPU only",
+    "server_jobs": "Alaya HTrain available for multi-GPU; local eight-GPU campaign authorized 2026-09-08",
     "headless": true,
     "video": "offscreen_1280x720",
     "single_gpu": "direct_development_host",
@@ -94,9 +94,8 @@
     "state": "validation_in_progress",
     "smoke_and_resume": "8_of_8_passed_at_5971dca",
     "open_items": [
-      "MuJoCo EGL video and CPU rehearsal",
-      "consolidated sim2sim",
-      "Newton multi-GPU job a52ff51b running; acceptance pending",
+      "Newton native DDP acceptance; old job a52ff51b no longer exists in platform API",
+      "4096-environment capacity and full representative training",
       "learned behavior validation"
     ],
     "architecture_merge": "6303ca4",
@@ -105,7 +104,7 @@
     "task_layout": "14 task families with environment.py and ppo.py; 33 semantic catalog entries preserved",
     "full_training_campaign": {
       "config": "configs/experiments/representative-full.json",
-      "status": "submitted_pending",
+      "status": "local_attempt_running_smoke_8_of_8_completed",
       "nodes": 1,
       "gpus": 8,
       "num_envs_per_gpu": 4096,
@@ -114,7 +113,15 @@
       "checkpoint_interval": 250,
       "job_name": "omd-rl-full-0907-01",
       "queue_id": "local-662cf40c7dfb",
-      "source_commit": "1f45996b2e9ec22c97f492cf1b5a727081cc303f"
+      "source_commit": "1f45996b2e9ec22c97f492cf1b5a727081cc303f",
+      "job_status": "failed",
+      "job_id": "b2bab260-030d-4521-8598-77adb7863b4c",
+      "job_failure_cause": "unknown; empty log and no log pod names",
+      "local_attempt": "full-local-0908-01",
+      "local_manifest": "outputs/experiments/full-local-0908-01/campaign.json",
+      "execution": "direct_development_host",
+      "gpu_model": "NVIDIA H200",
+      "updated_at": "2026-09-08"
     },
     "latest_merge": "5ef433b"
   }
