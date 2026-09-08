@@ -116,7 +116,7 @@
       }
     },
     "environment_selection": {
-      "state": "fixed_8192_seven_full_one_finishing_smoke",
+      "state": "all_eight_fixed_8192_full_training_verified",
       "config": "configs/experiments/representative-8192.json",
       "module": "oh_my_duck.rl.experiments.throughput",
       "scope": "two_tasks_two_backends_two_frameworks",
@@ -149,9 +149,10 @@
       "handover_module": "oh_my_duck.rl.experiments.adopt_preparation",
       "full_campaign": "outputs/experiments/fixed-8192-0908-01/campaign.json",
       "handover_source_commit": "392776ac523512b0782301294654bf9ec4048197",
-      "full_launch_verified": "7_of_8_updates_observed",
+      "full_launch_verified": "8_of_8_actual_ppo_updates_and_offline_gpu_processes",
       "num_envs": 8192,
-      "sweep": "stopped_by_user_request"
+      "sweep": "stopped_by_user_request",
+      "runtime_audit": "outputs/experiments/fixed-8192-0908-01/startup-runtime-audit-complete.json"
     }
   },
   "rl_framework_registry": "oh_my_duck.rl.training.frameworks:default_framework_registry",

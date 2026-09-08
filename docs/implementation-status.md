@@ -9,8 +9,8 @@ Latest user decision supersedes environment sweeps: all eight new combinations
 use 8192 environments. Scaling and the old handover were explicitly stopped;
 completed matching gates will be reused, with missing gates run independently.
 `configs/experiments/representative-8192.json` keeps native PPO and task budgets,
-SB3 learning rate 1e-4, and offline W&B. Seven full learners have produced updates as of 13:29 UTC; Newton SB3 StandUp
-is finishing its CPU video gate. Campaign `fixed-8192-0908-01`, source `3070b71`.
+SB3 learning rate 1e-4, and offline W&B. All eight full learners have produced PPO updates and passed startup checks;
+each uses 8192 environments. Live process checks confirm offline W&B. Campaign `fixed-8192-0908-01`, source `3070b71`.
 See [fixed-size launch evidence](reports/rl-fixed-8192-2026-09-08.md).
 
 Latest scope: train both tasks across both owned backends and both native PPO
