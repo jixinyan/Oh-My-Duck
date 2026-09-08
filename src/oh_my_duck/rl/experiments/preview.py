@@ -13,7 +13,7 @@ from oh_my_duck.core.paths import project_root
 from .campaign import worker_environment
 
 
-def checkpoint_source(spec, campaign, root):
+def checkpoint_source(spec, campaign, root, minimum_updates=0):
     """Prefer a completed periodic save; recoveries can preview their source save."""
     result = campaign / spec['id'] / 'result.json'
     if result.exists():
@@ -26,6 +26,10 @@ def checkpoint_source(spec, campaign, root):
                 bundles.insert(0, directory)
             for bundle in bundles:
                 if all((bundle / name).exists() for name in ('model.zip', 'vecnormalize.pkl', 'run.json')):
+                    if minimum_updates:
+                        metadata = json.loads((bundle/'run.json').read_text())
+                        if metadata['timesteps_after'] < minimum_updates * metadata['num_envs'] * 24:
+                            continue
                     return bundle, bundle / 'model.zip'
         elif '--agent.run-name' in command:
             tag = command[command.index('--agent.run-name') + 1]
@@ -34,7 +38,7 @@ def checkpoint_source(spec, campaign, root):
                 saves = sorted(directories[0].glob('model_*.pt'),
                                key=lambda p: int(p.stem.split('_')[-1]), reverse=True)
                 for save in saves:
-                    if time.time() - save.stat().st_mtime >= 15:
+                    if int(save.stem.split('_')[-1]) >= minimum_updates and time.time() - save.stat().st_mtime >= 15:
                         return directories[0], save
     recovery = spec.get('resume')
     if recovery:
@@ -74,8 +78,9 @@ def main():
     parser.add_argument('--run-id', action='append')
     parser.add_argument('--watch', action='store_true')
     parser.add_argument('--interval', type=float, default=60)
+    parser.add_argument('--minimum-updates', type=int, default=0, help='Skip initial untrained checkpoints')
     args = parser.parse_args()
-    if not args.gpu.isdecimal() or args.interval <= 0:
+    if not args.gpu.isdecimal() or args.interval <= 0 or args.minimum_updates < 0:
         parser.error('Use a numeric GPU ordinal and a positive polling interval')
     root, output = project_root(), args.output.resolve()
     output.mkdir(parents=True, exist_ok=False)
@@ -101,7 +106,7 @@ def main():
                 parser.error('Unknown run ID')
             specs = [spec for spec in specs if spec['id'] in args.run_id]
         for spec in specs:
-            source = checkpoint_source(spec, args.campaign, root)
+            source = checkpoint_source(spec, args.campaign, root, args.minimum_updates)
             if source is None:
                 continue
             run, checkpoint = source
