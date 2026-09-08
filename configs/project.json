@@ -244,7 +244,20 @@
         "prone_and_supine_passes": 0,
         "owned_run": "SIGSTOP_paused_for_diagnosis_at_2985",
         "experiment": "outputs/baselines/standup-angular-penalty-0908-01/result.json",
-        "experiment_status": "comparison_training_after_smoke_export_cpu_video_capacity_gates"
+        "experiment_status": "comparison_training_after_smoke_export_cpu_video_capacity_gates",
+        "intermediate_2250": {
+          "state": "paired_reset_battery_completed_full_comparison_running",
+          "reset_samples": 16,
+          "training_seeds": 1,
+          "default_sitting_passes": 13,
+          "diagnostic_sitting_passes": 16,
+          "standing_passes_each": 16,
+          "prone_passes_each": 0,
+          "supine_passes_each": 0,
+          "video": false,
+          "own_recovery_reproduced": false,
+          "evidence": "outputs/baselines/standup-angular-penalty-0908-01/intermediate-2250/result.json"
+        }
       },
       "published_stand_reference": {
         "state": "cpu_and_both_native_backends_behavior_verified_for_published_policy",

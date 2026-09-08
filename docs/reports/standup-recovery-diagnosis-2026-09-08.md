@@ -93,7 +93,7 @@ actuator parameters and task thresholds remain intact. Each stage discards its
 smoke/capacity weights and starts from the same preserved checkpoint.
 
 The smoke, normalized export, corrected CPU video and 4096-environment capacity/
-export gates completed. Comparison training is now running; no improvement is claimed. Its exact script
+export gates completed. Comparison training is running toward its fixed 2500 target. Its exact script
 hash, source snapshot `0792f99`, checkpoint hash, commands and stage outcomes are
 recorded in its manifest. A matched 16-reset battery and videos are required after
 training before choosing whether this tuning is useful. CPU examples alone do not
@@ -105,3 +105,22 @@ instantiating YAML objects. Across rewards, curricula, commands, observations an
 events, the only difference is `rewards.body_ang_vel.weight: -0.05 → -0.025`.
 The live comparison worker's environment confirms GPU 7 and W&B offline. Evidence:
 `standup-angular-penalty-0908-01/recipe-difference.json`.
+
+
+## Intermediate checkpoint 2250
+
+The diagnostic checkpoint passes standing and sitting in all 16 paired reset
+samples each; the default checkpoint at the same saved iteration passes standing
+16/16 and sitting 13/16. Both still fail all 16 prone and all 16 supine trials.
+This is a limited improvement in sitting recovery, **not recovery reproduction**.
+The intermediate export passed its native-normalizer numerical audit; this battery
+did not render video. It uses the same base seeds 100–115 and existing scenario
+seed offsets as the default comparison. Only one training seed is represented.
+
+Evidence: `outputs/baselines/standup-angular-penalty-0908-01/intermediate-2250/result.json`
+and `cpu-seeds/result.json`; checkpoint SHA-256
+`a1ea8ca01ac67855ca2154bc8e095d1f0d28f717a43c8623c0eafbca58ec6fbf`.
+The fixed experiment continues to 2500. Its separate postprocessor waits for the
+recorded supervisor identity to finish, then produces the final paired battery,
+native video and local package; it neither promotes the policy nor starts another
+training attempt. Default recipes and the paused default learner remain intact.

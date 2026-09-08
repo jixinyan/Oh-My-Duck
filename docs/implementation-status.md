@@ -10,7 +10,9 @@ Walking continue on GPU 7. Owned StandUp is paused for diagnosis after paired
 reset batteries show regression; three Newton learners remain suspended and
 three earlier SB3 attempts stopped. A separate gated diagnostic follows the
 pinned official recipe's recommendation to halve only body angular-velocity
-penalty. No long-run behavior success is claimed.
+penalty. At checkpoint 2250, paired sitting recovery improves from 13/16 to 16/16;
+prone and supine remain 0/16 each. Its fixed 2500 comparison is still running.
+No own-policy long-run behavior success is claimed.
 
 The corrected CPU/BAM matrix now completes all eight preserved acceptance policies
 with finite 61/14 traces and 20 checked videos; all short policies still fail
