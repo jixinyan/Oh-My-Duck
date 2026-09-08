@@ -19,6 +19,8 @@ tags:
 
 > 训练处置更新（2026-09-08）：已停止退化的 MuJoCo SB3 两组，保留全部产物；其余六组从 native checkpoint 集中到 GPU 7 续训，其他卡留给用户项目。新增 `omd preview` 周期 checkpoint 视频画廊；初期视频只显示部分能力，未通过完整行为验收。SB3 固定学习率的 KL 过冲已有对照证据，新增显式学习率参数用于独立实验，未改动保留训练或官方任务语义。见 [处置与诊断记录](reports/rl-recovery-2026-09-08.md)。 04:04 UTC 复查后，Newton SB3 StandUp 因回报回落、高 KL 和回放四种姿态均未通过，也已暂停诊断；现在五组在 GPU 7 继续。
 
+> 官方复现边界：MuJoCo + RSL-RL 才是官方基线，SB3/Newton 属于扩展。流程验证不等于学到官方能力；原版与重构版的同条件训练/评估对照尚未完成。静态审计还发现 StandUp reset 的跨后端写入改写待数值验证，不能先断言它等价或是失败原因。见 [官方基线审计](reports/official-baseline-audit-2026-09-08.md)。
+
 # Agentic Microduck
 
 ## 项目概览与详细设计 · v0.2

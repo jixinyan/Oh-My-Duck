@@ -140,6 +140,15 @@
       ],
       "diagnosis_report": "docs/reports/rl-recovery-2026-09-08.md"
     },
-    "latest_merge": "5ef433b"
+    "latest_merge": "5ef433b",
+    "official_baseline_reproduction": {
+      "state": "learned_behavior_unverified",
+      "baseline": "mujoco_rsl_rl",
+      "static_audit": "docs/reports/official-baseline-audit-2026-09-08.md",
+      "open_items": [
+        "StandUp Entity reset state/observation parity",
+        "matched pinned-original versus owned training and evaluation"
+      ]
+    }
   }
 }

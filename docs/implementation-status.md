@@ -109,3 +109,10 @@ preview. It was paused for diagnosis under the user’s standing instruction. It
 latest complete checkpoint at cumulative iteration 1500 is preserved with an
 operator-stop record. Five runs continue on GPU 7; this is a triage decision,
 not proof that the stopped configuration could never converge.
+
+
+Official MuJoCo/RSL learned-behavior reproduction remains **unverified**. The
+2026-09-08 static audit aligns task/PPO configuration, 228/229 MDP definitions
+modulo local imports, BAM and core dependency pins, but identifies an unresolved
+Entity-based StandUp reset rewrite and missing matched original/refactor runtime
+comparison. See [baseline audit](reports/official-baseline-audit-2026-09-08.md).
