@@ -61,3 +61,19 @@ labelled `.partial` and must not be used as complete checkpoints. Model optimize
 and normalization state are restored; live simulation state and RNG trajectories
 are not bitwise restart guarantees. A campaign rerun never silently overwrites or
 resumes a previous experiment.
+
+## Explicit GPU sharing and continuation
+
+`--runs-per-gpu N` permits up to N independent native learners on each visible
+GPU; the default remains one. With `CUDA_VISIBLE_DEVICES=7 --runs-per-gpu 6`, six
+runs share local GPU 7 without shared gradients. Measure aggregate throughput and
+memory on the actual host; low VRAM usage alone does not establish spare compute.
+
+A run may contain a `resume` record naming the exact prior run/checkpoint, its
+SHA-256, native `completed_iterations`, and `source_campaign`. Continuation checks
+identity, native progress, SB3 normalizer hashes and the preceding smoke/export/
+rehearsal/resume/capacity gates before bypassing those already completed gates.
+Only the remaining task budget is trained. New output directories preserve the
+original attempt and operator stop records. Native resume restores optimizer,
+normalizer and curriculum state but starts fresh simulation episodes. Checkpoint
+intervals bound lost work; native RSL iteration indexing remains unchanged.

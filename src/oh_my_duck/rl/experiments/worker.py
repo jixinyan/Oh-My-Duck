@@ -37,7 +37,7 @@ def main():
         if code not in allowed:
             raise RuntimeError(f'{name} exited {code}; see {output/(name+".log")}')
         return code
-    def train(name, count, iterations, resume=None):
+    def train(name, count, iterations, resume=None, resume_checkpoint=None):
         command = prefix+['train', '--backend', spec['backend'], '--rl-framework', spec['framework'], '--', spec['task']]
         if spec['framework'] == 'sb3':
             run = output/name
@@ -53,7 +53,7 @@ def main():
                         '--agent.save-interval', str(plan['checkpoint_interval']), '--agent.upload-model', 'False']
             if resume is not None:
                 command += ['--agent.resume', 'True', '--agent.load-run', resume.name,
-                            '--agent.load-checkpoint', latest_checkpoint(resume).name]
+                            '--agent.load-checkpoint', resume_checkpoint or latest_checkpoint(resume).name]
         stage(name, command)
         if spec['framework'] == 'rsl-rl':
             matches = list((root/'logs/rsl_rl'/spec['experiment']).glob('*_'+tag))
@@ -85,13 +85,21 @@ def main():
             '--output', str(output/name), '--video', '--mujoco-renderer', 'osmesa'], allowed=(0, 2))
     save()
     try:
-        smoke = train('smoke', 64, plan['smoke_iterations'])
-        smoke_policy, _ = export('smoke-export', smoke)
-        rehearsal('smoke-rehearsal', smoke_policy)
-        train('resume-check', 64, 1, smoke)
-        capacity = train('capacity', spec['num_envs'], 5)
-        export('capacity-export', capacity)
-        run = train('full', spec['num_envs'], spec['iterations'])
+        if spec.get('resume'):
+            from .recovery import validate_checkpoint
+            recovery = validate_checkpoint(spec, root)
+            report['recovery'] = recovery
+            save()
+            run = train('full', spec['num_envs'], recovery['remaining_iterations'],
+                        Path(recovery['run']), recovery['checkpoint'])
+        else:
+            smoke = train('smoke', 64, plan['smoke_iterations'])
+            smoke_policy, _ = export('smoke-export', smoke)
+            rehearsal('smoke-rehearsal', smoke_policy)
+            train('resume-check', 64, 1, smoke)
+            capacity = train('capacity', spec['num_envs'], 5)
+            export('capacity-export', capacity)
+            run = train('full', spec['num_envs'], spec['iterations'])
         policy, checkpoint = export('export', run)
         stage('package', prefix+['package', '--', '--onnx', str(policy), '--checkpoint', str(checkpoint),
                                 '--output', str(output/'package')])

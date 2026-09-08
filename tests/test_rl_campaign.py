@@ -18,3 +18,11 @@ class CampaignIsolation(unittest.TestCase):
         self.assertEqual(env['CUDA_VISIBLE_DEVICES'],'3')
         self.assertEqual(env['WANDB_MODE'],'offline')
         for key in ('WORLD_SIZE','RANK','LOCAL_RANK'):self.assertNotIn(key,env)
+
+    def test_gpu_sharing_requires_explicit_capacity(self):
+        self.assertEqual(assigned_devices('7', 6, runs_per_gpu=6), ['7'] * 6)
+        self.assertEqual(assigned_devices('5,3', 3, runs_per_gpu=2), ['5', '5', '3'])
+        with self.assertRaises(ValueError):
+            assigned_devices('7', 6)
+        with self.assertRaises(ValueError):
+            assigned_devices('7', 1, runs_per_gpu=0)

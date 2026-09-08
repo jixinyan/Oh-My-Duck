@@ -36,14 +36,16 @@ def load_plan(path):
     return plan
 
 
-def assigned_devices(visible, count):
+def assigned_devices(visible, count, runs_per_gpu=1):
     devices = [s.strip() for s in visible.split(',') if s.strip()]
-    if len(devices) < count or len(devices) != len(set(devices)):
+    if runs_per_gpu < 1:
+        raise ValueError('runs-per-gpu must be positive')
+    if len(devices) * runs_per_gpu < count or len(devices) != len(set(devices)):
         raise ValueError('Campaign needs a distinct allocated GPU for every run')
     # Pinned mjlab select_gpus consumes ordinal CUDA_VISIBLE_DEVICES entries.
     if not all(s.isdecimal() for s in devices):
         raise ValueError('Pinned native GPU selector requires numeric allocation ordinals')
-    return devices[:count]
+    return [device for device in devices for _ in range(runs_per_gpu)][:count]
 
 
 def worker_environment(device, group):
@@ -60,11 +62,16 @@ def main():
     parser.add_argument('--config', type=Path, required=True)
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--dry-run', action='store_true')
+    parser.add_argument('--runs-per-gpu', type=int, default=1,
+                        help='Explicit independent learner sharing; does not share gradients')
     args = parser.parse_args()
     root = project_root()
     plan = load_plan(args.config)
+    if args.runs_per_gpu < 1:
+        parser.error('--runs-per-gpu must be positive')
     if args.dry_run:
-        print(json.dumps({'required_gpus': len(plan['runs']), **plan}, indent=2))
+        print(json.dumps({'required_gpus': (len(plan['runs']) + args.runs_per_gpu - 1) // args.runs_per_gpu,
+                          'runs_per_gpu': args.runs_per_gpu, **plan}, indent=2))
         return 0
     visible = os.environ.get('CUDA_VISIBLE_DEVICES')
     if visible is None:
@@ -72,11 +79,12 @@ def main():
         count = subprocess.check_output([str(root/'.envs/mujoco/bin/python'), '-c',
             'import torch; print(torch.cuda.device_count())'], text=True).strip()
         visible = ','.join(str(i) for i in range(int(count)))
-    devices = assigned_devices(visible, len(plan['runs']))
+    devices = assigned_devices(visible, len(plan['runs']), args.runs_per_gpu)
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=False)
     commit = subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=root, text=True).strip()
     report = {'source_commit': commit, 'status': 'running', 'devices': devices, 'plan': plan,
+              'runs_per_gpu': args.runs_per_gpu,
               'config_sha256': hashlib.sha256(args.config.read_bytes()).hexdigest(), 'runs': {}}
     children = []
     def stop(signum, frame):
