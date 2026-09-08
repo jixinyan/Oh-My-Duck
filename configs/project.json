@@ -153,6 +153,17 @@
       "num_envs": 8192,
       "sweep": "stopped_by_user_request",
       "runtime_audit": "outputs/experiments/fixed-8192-0908-01/startup-runtime-audit-complete.json"
+    },
+    "obsolete_process_cleanup": {
+      "state": "completed",
+      "superseded_campaign": "shared-gpu7-0908-01",
+      "processes_terminated": 26,
+      "paused_learners_terminated": 5,
+      "gpu": 7,
+      "gpu_memory_released_mib": 23732,
+      "current_eight_learners_verified_alive": true,
+      "retained_checkpoint_hashes_unchanged": true,
+      "audit": "outputs/maintenance/process-cleanup-0908-01/result.json"
     }
   },
   "rl_framework_registry": "oh_my_duck.rl.training.frameworks:default_framework_registry",

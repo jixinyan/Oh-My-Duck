@@ -5,6 +5,11 @@ Implementation proceeds by domain, with interfaces for later capabilities and
 explicit evidence for implemented functionality. Task-family organization, single-GPU pipeline fixes and full-training campaigns
 are merged into `main` at `5ef433b`. Submitted training keeps source `1f45996`. No public policy upload has occurred.
 
+Unused-process cleanup completed: all 26 processes in the old paused
+`shared-gpu7-0908-01` tree exited, releasing 23.2 GiB on GPU 7. Current eight
+learners, original controls and preview workers remain active; retained checkpoint
+hashes are unchanged. See the fixed-size training report for the cleanup audit.
+
 Latest user decision supersedes environment sweeps: all eight new combinations
 use 8192 environments. Scaling and the old handover were explicitly stopped;
 completed matching gates will be reused, with missing gates run independently.
