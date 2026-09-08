@@ -110,7 +110,7 @@
     "task_layout": "14 task families with environment.py and ppo.py; 33 semantic catalog entries preserved",
     "full_training_campaign": {
       "config": "configs/experiments/representative-full.json",
-      "status": "five_continuing_on_gpu7_three_sb3_runs_stopped",
+      "status": "official_baseline_priority_two_owned_active_three_newton_suspended_three_sb3_stopped",
       "nodes": 1,
       "gpus": 1,
       "num_envs_per_gpu": 4096,
@@ -127,18 +127,24 @@
       "local_manifest": "outputs/experiments/shared-gpu7-0908-01/campaign.json",
       "execution": "direct_development_host",
       "gpu_model": "NVIDIA H200",
-      "updated_at": "2026-09-08T04:05:32.820292+00:00",
+      "updated_at": "2026-09-08T05:07:48.925628+00:00",
       "reward_snapshot": "docs/reports/reward-trends-2026-09-08.md",
       "gpu_indices": [
         7
       ],
-      "active_runs": 5,
+      "active_runs": 2,
       "stopped_runs": [
         "mujoco-sb3-walking",
         "mujoco-sb3-stand_up",
         "isaac-newton-sb3-stand_up"
       ],
-      "diagnosis_report": "docs/reports/rl-recovery-2026-09-08.md"
+      "diagnosis_report": "docs/reports/rl-recovery-2026-09-08.md",
+      "paused_runs": [
+        "isaac-newton-rsl-rl-walking",
+        "isaac-newton-rsl-rl-stand_up",
+        "isaac-newton-sb3-walking"
+      ],
+      "pause_mechanism": "SIGSTOP; verify recorded PID and command identity before SIGCONT"
     },
     "latest_merge": "5ef433b",
     "official_baseline_reproduction": {
@@ -161,6 +167,18 @@
         "minimum_command_response_fraction": 0.5,
         "published_policy_cpu_reference": "behavior_failed_after_rescoring",
         "reason": "stationary policies passed the previous global RMSE gate"
+      },
+      "original_full_control": {
+        "task": "Mjlab-StandUp-Flat-MicroDuck",
+        "status": "training",
+        "num_envs": 4096,
+        "seed": 42,
+        "iterations": 15000,
+        "active_runs": 1,
+        "gpu": 7,
+        "manifest": "outputs/baselines/official-standup-full-0908-01/result.json",
+        "native_normalized_export_parity": "passed_32_samples",
+        "learned_behavior": "unverified"
       }
     }
   }

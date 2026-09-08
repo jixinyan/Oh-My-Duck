@@ -136,3 +136,14 @@ motion response in every commanded segment; the preserved published-policy trace
 is reclassified `behavior_failed`. This changes acceptance scoring, not training
 semantics. Six focused protocol/reset tests pass. See the baseline audit for the
 measured commands, responses and remaining interpretation limits.
+
+
+Official-first resource priority is now active: two owned MuJoCo learners and one
+isolated original StandUp control are training on GPU 7. Three live Newton
+learners are suspended with SIGSTOP, retaining process/checkpoint state for later
+SIGCONT; they are separate from the three earlier stopped SB3 attempts. The
+original control passed 4096-env capacity/export and normalized numerical parity
+before this status update and is running its 15,000-iteration budget. Baseline
+iteration time improved by about 1.5× after suspending extensions. No long-run
+behavior success is claimed. Evidence and safe resumption identity records are
+linked in the [baseline audit](reports/official-baseline-audit-2026-09-08.md).

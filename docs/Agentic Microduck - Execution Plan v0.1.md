@@ -457,3 +457,11 @@ commit 的独立对照环境已按原 lock 离线安装；它仅用于实验对�
 Walking 的原版/重构版编译模型、reset 状态及 actor/critic 初始观测一致；两任务
 四个原版/重构 PPO smoke 已完成。长期效果仍待复现，不能把发布文件名或 smoke
 当作官方效果的实证。详细证据见 baseline audit。
+
+
+**官方长期对照与资源优先级（2026-09-08）**：原版 StandUp 已通过 4096-env/5-iteration
+容量、导出及归一化数值对照，现以 seed 42 执行 15,000 轮完整原生 PPO。GPU 7 上
+同时继续两个项目内 MuJoCo 训练；三个活跃 Newton 学习器用 SIGSTOP 暂挂，保留内存
+与 checkpoint，完成基线后验证 PID/命令身份再用 SIGCONT 恢复，不能重复启动替代进程。
+基线实测每轮耗时由约 11–12 秒降到 7–8 秒。已终止的三个 SB3 尝试与本次暂停分开
+记录。所有长训练效果仍未验收通过。实验配置、进程及恢复记录见 baseline audit。
