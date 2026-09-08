@@ -793,3 +793,14 @@ PPO 保持不变。详见 [RL campaigns](rl-campaigns.md)。
 checkpoint 来源，不能替代我们自己的训练复现。两后端共八个原生视频已通过检查；
 Newton 使用已约定的 `SolverMuJoCo` 路径。
 轨迹、接触与视频证据见 [published-policy reference](reports/published-policy-reference-2026-09-08.md)。
+
+
+**行为验收补充（2026-09-08）**：Walking 3000 在普通原生回放中前进响应为 36.4%，
+只把推力设为零便降到 0.98%；转向仍有 83.4%。固定条件的原生回放和 CPU/BAM
+都近乎静止，因此不能把受推后的运动算作自主步行。40 组同输入 BAM 计算对照通过，
+积分器及固定延迟对照均未恢复步态。项目内 Walking 已在 3299 轮暂停，保留 3250
+checkpoint；原版双任务继续。角速度惩罚减半的 StandUp 实验完成 2500 轮，
+成对坐姿起立由默认 10/16 提高为 15/16，但俯卧/仰卧仍各 0/16，尚未达到目标。
+原版/重构版 1000 轮对照也均未通过完整任务。详见
+[Walking diagnosis](reports/walking-transfer-diagnosis-2026-09-08.md) 和
+[StandUp diagnosis](reports/standup-recovery-diagnosis-2026-09-08.md)。

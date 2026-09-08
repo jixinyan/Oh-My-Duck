@@ -222,8 +222,8 @@
           6000
         ],
         "scope": "matched native export and corrected CPU no-video diagnostics; not full behavior acceptance",
-        "latest_completed_iteration": 500,
-        "latest_behavior": "both_walking_fail; both_standup_pass_standing_only"
+        "latest_completed_iteration": 1000,
+        "latest_behavior": "both_walking_fail; original_standup_standing_only; owned_standup_standing_and_sitting_only"
       },
       "standup_recovery_diagnosis": {
         "report": "docs/reports/standup-recovery-diagnosis-2026-09-08.md",
@@ -244,7 +244,7 @@
         "prone_and_supine_passes": 0,
         "owned_run": "SIGSTOP_paused_for_diagnosis_at_2985",
         "experiment": "outputs/baselines/standup-angular-penalty-0908-01/result.json",
-        "experiment_status": "comparison_training_after_smoke_export_cpu_video_capacity_gates",
+        "experiment_status": "training_export_cpu_video_and_paired_resets_completed_native_video_package_pending",
         "intermediate_2250": {
           "state": "paired_reset_battery_completed_full_comparison_running",
           "reset_samples": 16,
@@ -257,6 +257,18 @@
           "video": false,
           "own_recovery_reproduced": false,
           "evidence": "outputs/baselines/standup-angular-penalty-0908-01/intermediate-2250/result.json"
+        },
+        "final_2500": {
+          "standing": 16,
+          "sitting": 15,
+          "face_down": 0,
+          "face_up": 0,
+          "reset_samples": 16,
+          "training_seeds": 1,
+          "default_sitting_passes": 10,
+          "sitting_gained": 5,
+          "sitting_lost": 0,
+          "own_recovery_reproduced": false
         }
       },
       "published_stand_reference": {
@@ -273,6 +285,19 @@
         "native_videos_verified": 8,
         "newton_solver": "newton.solvers.SolverMuJoCo",
         "native_seed_count": 1
+      },
+      "walking_transfer_diagnosis": {
+        "checkpoint": 3000,
+        "standard_native_forward_response": 0.3644169494509697,
+        "zero_push_native_forward_response": 0.00976410519797355,
+        "zero_push_native_turn_response": 0.8336701989173889,
+        "nominal_native_forward_response": 0.00926717824768275,
+        "cpu_forward_response": -0.0019328017447622118,
+        "all_complete_task_gates": "failed",
+        "bam_matched_samples": 40,
+        "bam_compute_parity": "passed_at_matched_inputs_not_solver_equivalence",
+        "owned_run": "SIGSTOP_paused_at_3299_latest_checkpoint_3250",
+        "report": "docs/reports/walking-transfer-diagnosis-2026-09-08.md"
       }
     },
     "cpu_rehearsal": {

@@ -5,20 +5,21 @@ Implementation proceeds by domain, with interfaces for later capabilities and
 explicit evidence for implemented functionality. Task-family organization, single-GPU pipeline fixes and full-training campaigns
 are merged into `main` at `5ef433b`. Submitted training keeps source `1f45996`. No public policy upload has occurred.
 
-Current official-first goal: original MuJoCo Walking/StandUp and owned MuJoCo
-Walking continue on GPU 7. Owned StandUp is paused for diagnosis after paired
-reset batteries show regression; three Newton learners remain suspended and
-three earlier SB3 attempts stopped. A separate gated diagnostic follows the
-pinned official recipe's recommendation to halve only body angular-velocity
-penalty. At checkpoint 2250, paired sitting recovery improves from 13/16 to 16/16;
-prone and supine remain 0/16 each. Its fixed 2500 comparison is still running.
-No own-policy long-run behavior success is claimed.
+Current official-first goal: original MuJoCo Walking/StandUp continue on GPU 7.
+Owned default Walking (3299) and StandUp (2985) are paused for diagnosis; three
+Newton learners remain suspended and three earlier SB3 attempts stopped. Walking
+3000 has only 0.98% forward response when native pushes are zeroed, despite 36.4%
+in its standard preview; it also nearly stops in nominal native and CPU replay.
+The official-guided StandUp angular-penalty diagnostic completed 2500: paired
+sitting improves from default 10/16 to 15/16, but prone/supine remain 0/16 each.
+Native video and packaging are pending; own-policy behavior reproduction remains open.
 
 The corrected CPU/BAM matrix now completes all eight preserved acceptance policies
 with finite 61/14 traces and 20 checked videos; all short policies still fail
 behavior. Native previews use scoring v2 (`outputs/previews/shared-gpu7-0908-02`).
 See [baseline audit](reports/official-baseline-audit-2026-09-08.md) and
-[StandUp diagnosis](reports/standup-recovery-diagnosis-2026-09-08.md).
+[StandUp diagnosis](reports/standup-recovery-diagnosis-2026-09-08.md), and
+[Walking condition/transfer diagnosis](reports/walking-transfer-diagnosis-2026-09-08.md).
 SB3 campaign learning-rate routing is tested; a four-combination 1e-4 configuration
 is prepared but not launched. Default task recipes and native PPO algorithms remain unchanged.
 

@@ -124,3 +124,19 @@ The fixed experiment continues to 2500. Its separate postprocessor waits for the
 recorded supervisor identity to finish, then produces the final paired battery,
 native video and local package; it neither promotes the policy nor starts another
 training attempt. Default recipes and the paused default learner remain intact.
+
+
+## Final checkpoint 2500
+
+The fixed 501-update diagnostic completed, and normalized export plus the corrected
+CPU video battery completed. The 16 paired reset samples give standing 16/16,
+sitting 15/16, prone 0/16 and supine 0/16. Relative to default checkpoint 2500,
+five sitting seeds improve and none regress (10/16 → 15/16). The single seed
+that fails sitting is not evidence that the intermediate 16/16 was a stable
+training advantage. Neither result reproduces full recovery. Native video and
+local packaging are being completed by the recorded postprocessor.
+
+Evidence: `standup-angular-penalty-0908-01/{result,postprocess-result}.json` and
+`paired-reset-battery/result.json` under `outputs/baselines`. The official
+recommendation's next candidate is softer action-rate regularization; it must
+remain a separate controlled experiment, keeping default controls unchanged.
