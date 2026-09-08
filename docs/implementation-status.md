@@ -12,7 +12,9 @@ Newton learners remain suspended and three earlier SB3 attempts stopped. Walking
 in its standard preview; it also nearly stops in nominal native and CPU replay.
 The official-guided StandUp angular-penalty diagnostic completed 2500: paired
 sitting improves from default 10/16 to 15/16, but prone/supine remain 0/16 each.
-Native video and packaging are pending; own-policy behavior reproduction remains open.
+All eight final CPU/native videos and local packaging are checked; own-policy
+behavior reproduction remains open. The user reaffirmed official-recipe-first
+reproduction; the prepared second tuning experiment is deferred and was not launched.
 
 The corrected CPU/BAM matrix now completes all eight preserved acceptance policies
 with finite 61/14 traces and 20 checked videos; all short policies still fail
@@ -175,3 +177,12 @@ friction formulas. Three real-physics/reset tests pass, including independent
 Jacobian-force projection and unchanged motor torque. Old traces remain preserved;
 corrected policy replay has since completed without restoring the missing behavior (see current baseline audit). This is an evaluation/CPU-load correction,
 not evidence that training converged. See the baseline audit.
+
+
+## Current video review
+
+`outputs/previews/review-0908-01/index.html` links six existing clips with explicit
+labels: default-recipe owned Walking/StandUp, the same Walking policy's CPU
+rehearsal, published StandUp in MuJoCo/Newton, and the separate angular-penalty
+diagnostic. The gallery does not conflate published-policy replay with own
+training success. All six local video targets were checked.

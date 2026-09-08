@@ -244,7 +244,7 @@
         "prone_and_supine_passes": 0,
         "owned_run": "SIGSTOP_paused_for_diagnosis_at_2985",
         "experiment": "outputs/baselines/standup-angular-penalty-0908-01/result.json",
-        "experiment_status": "training_export_cpu_video_and_paired_resets_completed_native_video_package_pending",
+        "experiment_status": "assessed_own_recovery_not_reproduced",
         "intermediate_2250": {
           "state": "paired_reset_battery_completed_full_comparison_running",
           "reset_samples": 16,
@@ -268,7 +268,14 @@
           "default_sitting_passes": 10,
           "sitting_gained": 5,
           "sitting_lost": 0,
-          "own_recovery_reproduced": false
+          "own_recovery_reproduced": false,
+          "final_videos_checked": 8,
+          "local_schema2_package": "passed"
+        },
+        "next_action_rate_experiment": {
+          "state": "deferred_not_launched",
+          "manifest": "outputs/baselines/standup-action-rate-cap-0908-01/plan.json",
+          "reason": "user priority: reproduce official recipe before more tuning"
         }
       },
       "published_stand_reference": {
@@ -298,7 +305,9 @@
         "bam_compute_parity": "passed_at_matched_inputs_not_solver_equivalence",
         "owned_run": "SIGSTOP_paused_at_3299_latest_checkpoint_3250",
         "report": "docs/reports/walking-transfer-diagnosis-2026-09-08.md"
-      }
+      },
+      "current_priority": "official_default_recipe_behavior_then_owned_equivalence_then_newton_sb3",
+      "video_review": "outputs/previews/review-0908-01/index.html"
     },
     "cpu_rehearsal": {
       "state": "corrected_matrix_execution_verified_8_of_8",

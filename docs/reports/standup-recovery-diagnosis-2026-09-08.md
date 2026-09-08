@@ -134,9 +134,23 @@ sitting 15/16, prone 0/16 and supine 0/16. Relative to default checkpoint 2500,
 five sitting seeds improve and none regress (10/16 → 15/16). The single seed
 that fails sitting is not evidence that the intermediate 16/16 was a stable
 training advantage. Neither result reproduces full recovery. Native video and
-local packaging are being completed by the recorded postprocessor.
+local schema-2 packaging have completed. All eight final CPU/native videos pass
+720p/25 FPS/200-frame and finite 61/14-trace checks. Selected final frames confirm
+sitting recovery and failed prone/supine recovery in both contexts. Evidence:
+`final-video-audit.json`.
 
 Evidence: `standup-angular-penalty-0908-01/{result,postprocess-result}.json` and
 `paired-reset-battery/result.json` under `outputs/baselines`. The official
 recommendation's next candidate is softer action-rate regularization; it must
 remain a separate controlled experiment, keeping default controls unchanged.
+
+
+## Priority clarification
+
+The user reiterated that this project should reproduce the official recipe first,
+then extend its simulator/framework choices with equivalent capability. The
+prepared `standup-action-rate-cap-0908-01` experiment was **not launched**; its
+manifest records deferral. Its proposed softer action-rate cap is not a project
+default. Existing original default-recipe controls continue. Resolve their learned
+behavior and the published-policy training provenance before prioritizing more
+reward/curriculum tuning. The completed ablation remains diagnostic evidence.

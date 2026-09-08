@@ -498,3 +498,12 @@ checkpoint；原版双任务继续。角速度惩罚减半的 StandUp 实验完�
 原版/重构版 1000 轮对照也均未通过完整任务。详见
 [Walking diagnosis](reports/walking-transfer-diagnosis-2026-09-08.md) 和
 [StandUp diagnosis](reports/standup-recovery-diagnosis-2026-09-08.md)。
+
+
+**优先级确认**：用户再次明确先复现官方配方的训练能力，再验证项目内相同配方，
+然后完成 Newton/SB3 等价扩展。准备中的第二个 StandUp 动作变化惩罚实验未启动，
+暂缓调参支线；不将诊断配方写入默认任务。已有角速度诊断的八个最终视频和本地
+策略包检查完成，但恢复能力仍不合格。可查看本地视频对照页
+`outputs/previews/review-0908-01/index.html`，其中明确区分默认自训练、官方发布参照
+和调参诊断。官方发布权重对应的具体训练 run 来源仍需查清，不能假定它与当前
+固定版本默认配方相同。
