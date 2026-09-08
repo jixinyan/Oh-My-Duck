@@ -238,3 +238,104 @@ under the old controller and require revalidation. Their finite execution/video
 checks do not certify matched motor-load semantics. Current full MuJoCo training
 uses the unaffected Warp controller and continues while corrected CPU A/B runs
 are prepared. Learned-behavior acceptance remains open.
+
+
+## Corrected CPU A/B and interface controls
+
+The corrected CPU controller replay is complete for owned Walking checkpoint
+2000, owned StandUp checkpoint 2500, and the published alpha Walking policy.
+Policy hashes and seed 42 are identical across each before/after pair; evidence:
+`outputs/baselines/cpu-bam-dof-0908-01/{launch,comparison,video-check}.json`.
+All six videos are 1280×720 at 25 FPS. Selected Walking frames at 4/12 seconds and
+all four final StandUp frames were inspected: Walking remains essentially in
+place, while prone/supine StandUp remains down. These are selected-frame checks,
+not a claim of reviewing every video frame.
+
+| Policy | Corrected CPU result |
+|---|---|
+| Owned Walking 2000 | Forward mean −0.000163 m/s for 0.1 m/s; yaw mean 0.01677 rad/s for 0.5 rad/s; fails |
+| Published alpha Walking | Forward mean 0.000106 m/s; yaw mean 0.01541 rad/s for the same commands; fails |
+| Owned StandUp 2500 | Standing/sitting pass; face-down and face-up fail (final tilt 0.522/1.150 rad) |
+
+Thus the DOF correction fixes a measured load computation defect but **does not
+restore the missing behavior in these samples**. The published policy's old
+`success: true` in the preserved comparison input used scoring v1; its separately
+rescored original trace also fails v2. Do not attribute that status change to the
+physics correction. Full corrected CPU acceptance across eight combinations is
+still outstanding, as is learned-behavior acceptance.
+
+Further diagnostics kept the official task recipe unchanged:
+
+- Twelve short command/scene cases compared groundcontact and walk scenes for
+  published/owned policies. The two scenes produced identical trajectories for
+  each case. A 0.3 m/s forward command mostly produced sideways velocity
+  (−0.089/−0.114 m/s), not forward tracking. A 1 rad/s yaw command elicited about
+  0.727 rad/s from the owned policy. This is a diagnostic command scan, not a
+  relaxed acceptance protocol. Evidence: `outputs/baselines/cpu-command-scene-0908-01`.
+- A temporary observer matched training's one-control-step joint-velocity delay.
+  It did not restore forward response. It is not a production inference change.
+  Evidence: `outputs/baselines/cpu-command-lag-0908-01`.
+- At 32 equal recorded states with noise, delay and IMU randomization disabled
+  only for the diagnostic, all 61 raw actor inputs matched to maximum error
+  7.45e-9. With synthetic nonzero root velocity, actor error was 8.94e-8 and
+  body-frame linear velocity error was 6.29e-8. This rejects a simple observation
+  ordering/frame mismatch in these cases; it does not establish full temporal
+  or physics equivalence. Evidence: `cpu-observation-parity-0908-02` and
+  `cpu-velocity-parity-0908-01` under `outputs/baselines`.
+
+The first observation diagnostic (`cpu-observation-parity-0908-01`) is invalid:
+its observation manager reused cached observations and retained IMU misalignment.
+Its measurement note explicitly excludes it. The corrected attempt refreshes
+history and removes that diagnostic-only corruption; both attempts are preserved.
+
+## Both original full controls active
+
+Original Walking also passed 64-env/5-iteration smoke, finite scalar/penalty audit,
+official export, 4096-env/5-iteration capacity, and native normalized export
+parity (32 samples; ordinary error 1.19e-6, stress normalized error 8.99e-7).
+Its initial CPU execution gate predates the load correction above. It is training
+from scratch at seed 42, 4096 environments and the official 50,000-iteration
+budget, alongside original StandUp's 15,000-iteration budget. Evidence:
+`outputs/baselines/official-walking-full-0908-01/{plan,launch,result}.json`.
+
+There are now **four active MuJoCo learners** on GPU 7: original and owned for
+each representative task. The three Newton groups remain SIGSTOP-suspended;
+the three previously stopped SB3 attempts remain separate. A brief single-learner
+measurement restored every temporarily suspended MuJoCo group in its finalizer:
+original StandUp averaged 9.046 s with four learners and 3.143 s alone. This is a
+per-learner speed comparison, not a 2.88× aggregate training-throughput claim.
+Evidence: `official-standup-full-0908-01/single-learner-measurement.json`.
+
+The matched checkpoint-250 CPU comparison completed on the second attempt. Its first export
+attempt failed before evaluation because selecting OSMesa in the isolated
+original environment could not initialize OpenGL. The original training process
+was unaffected. The new attempt uses its working headless EGL import and a new
+output directory: `outputs/baselines/matched-iteration-250-0908-02`; the failed
+`...-01` remains preserved. This early checkpoint control does not replace
+long-run behavior evaluation.
+
+
+At checkpoint 250, both original and owned Walking completed the 14-second CPU
+battery but failed command tracking (forward means −0.0150/−0.00414 m/s; yaw means
+0.0892/0.1485 rad/s). Both StandUp policies passed only the standing-start case;
+sitting, face-down and face-up failed. The four export/scalar/penalty audits passed.
+Original normalized export parity passed 32 samples per task (ordinary maximum
+errors 1.31e-6 Walking / 2.09e-6 StandUp). These CPU diagnostics intentionally
+omit rendering; later video acceptance remains required.
+
+At matched training iterations 200–250, original/owned mean rewards were
+95.67/96.22 for Walking and 34.01/33.43 for StandUp. Linear tracking weighted reward
+was 0.989/0.979; StandUp standing-composite reward 1.537/1.468. Early behavior and
+learning curves therefore provide no measured evidence that refactoring caused
+the missing early skill; this is a single training seed and does **not** establish
+long-run equivalence. Source/checkpoint hashes, all four corrected CPU traces and
+export results are in `outputs/baselines/matched-iteration-250-0908-02`.
+
+The 05:59 UTC live snapshot shows original Walking/StandUp at 301/385, with latest
+50-record rewards 98.04/39.99 versus previous 95.95/37.59. Owned Walking/StandUp at
+2443/2873 are nearly flat or slightly lower (114.08/40.40 versus 114.73/41.15).
+Their main task terms are also approximately flat, so no new skill claim is made.
+StandUp has just passed the 2500 recovery-spawn curriculum stage; a small window
+change alone is not evidence of irreversible divergence. Full context is recorded
+in `reward-comparison.json`; further checkpoint behavior determines continuation
+or diagnosis under the user's instruction to stop unpromising runs.

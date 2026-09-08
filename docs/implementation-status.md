@@ -5,6 +5,16 @@ Implementation proceeds by domain, with interfaces for later capabilities and
 explicit evidence for implemented functionality. Task-family organization, single-GPU pipeline fixes and full-training campaigns
 are merged into `main` at `5ef433b`. Submitted training keeps source `1f45996`. No public policy upload has occurred.
 
+Current official-first goal: four MuJoCo learners are active on GPU 7 (original
+and owned Walking/StandUp); three Newton learners are suspended, and three earlier
+SB3 attempts were stopped. Learned behavior remains unverified. Corrected CPU BAM
+A/B is complete for Walking 2000, StandUp 2500 and published alpha; Walking still
+fails command response and StandUp passes only standing/sitting. Historical CPU
+matrix execution below predates the DOF-load correction and needs revalidation.
+Matched checkpoint-250 original/owned CPU comparison also completed: both fail
+Walking and pass only standing-start StandUp; early rewards are close, with
+long-run equivalence unverified. See the [current baseline audit](reports/official-baseline-audit-2026-09-08.md).
+
 | Component | Current state |
 |---|---|
 | Source organization | First-party code consolidated under `src/oh_my_duck`; obsolete `training/` packages removed |
@@ -17,7 +27,7 @@ are merged into `main` at `5ef433b`. Submitted training keeps source `1f45996`. 
 | Newton physics | Actual solver, canonical state/sensors, precise collisions, BAM cadence, DR and penalties audited |
 | Task behavior | All five-iteration policies fail behavior gates; long training and convergence acceptance remain |
 | Task replay | All 24 replay contexts completed; 60 videos and finite 61/14 traces checked |
-| CPU rehearsal/sim2sim/local packages | All eight policies exported/packaged and replayed in both backends plus CPU/BAM |
+| CPU rehearsal/sim2sim/local packages | Eight historical execution checks completed; corrected CPU load semantics require matrix revalidation; no learned behavior acceptance |
 | Multi-GPU | Native RSL MuJoCo DDP previously passed; Newton DDP acceptance pending; old job `a52ff51b` no longer exists in the platform API; no distributed SB3 gradient claim |
 | Hardware | Unavailable; all hardware acceptance deferred |
 
@@ -154,5 +164,5 @@ matched DOF-friction constraints by joint ids, unlike the training Warp path.
 The owned CPU adapter now uses actual DOFs while retaining native motor/sag and
 friction formulas. Three real-physics/reset tests pass, including independent
 Jacobian-force projection and unchanged motor torque. Old traces remain preserved;
-corrected policy replay is pending. This is an evaluation/CPU-load correction,
+corrected policy replay has since completed without restoring the missing behavior (see current baseline audit). This is an evaluation/CPU-load correction,
 not evidence that training converged. See the baseline audit.

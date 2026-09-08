@@ -127,7 +127,7 @@
       "local_manifest": "outputs/experiments/shared-gpu7-0908-01/campaign.json",
       "execution": "direct_development_host",
       "gpu_model": "NVIDIA H200",
-      "updated_at": "2026-09-08T05:07:48.925628+00:00",
+      "updated_at": "2026-09-08T05:56:27.995050+00:00",
       "reward_snapshot": "docs/reports/reward-trends-2026-09-08.md",
       "gpu_indices": [
         7
@@ -168,25 +168,54 @@
         "published_policy_cpu_reference": "behavior_failed_after_rescoring",
         "reason": "stationary policies passed the previous global RMSE gate"
       },
-      "original_full_control": {
-        "task": "Mjlab-StandUp-Flat-MicroDuck",
-        "status": "training",
-        "num_envs": 4096,
-        "seed": 42,
-        "iterations": 15000,
-        "active_runs": 1,
-        "gpu": 7,
-        "manifest": "outputs/baselines/official-standup-full-0908-01/result.json",
-        "native_normalized_export_parity": "passed_32_samples",
-        "learned_behavior": "unverified"
+      "original_full_controls": {
+        "stand_up": {
+          "task": "Mjlab-StandUp-Flat-MicroDuck",
+          "status": "training",
+          "num_envs": 4096,
+          "seed": 42,
+          "iterations": 15000,
+          "active_runs": 1,
+          "gpu": 7,
+          "manifest": "outputs/baselines/official-standup-full-0908-01/result.json",
+          "native_normalized_export_parity": "passed_32_samples",
+          "learned_behavior": "unverified"
+        },
+        "walking": {
+          "task": "Mjlab-Velocity-Flat-MicroDuck",
+          "status": "training",
+          "num_envs": 4096,
+          "seed": 42,
+          "iterations": 50000,
+          "active_runs": 1,
+          "gpu": 7,
+          "manifest": "outputs/baselines/official-walking-full-0908-01/result.json",
+          "native_normalized_export_parity": "passed_32_samples",
+          "learned_behavior": "unverified"
+        }
+      },
+      "clean_cpu_actor_parity": {
+        "states": 32,
+        "max_abs_error": 7.450580596923828e-09,
+        "root_velocity_max_abs_error": 6.288423098910201e-08,
+        "scope": "Equal states; diagnostic corruption and delay disabled, not temporal physics equivalence"
+      },
+      "matched_checkpoint_250": {
+        "status": "completed",
+        "exports": "4_passed",
+        "cpu_behavior": "both_walking_fail; both_standup_pass_standing_only",
+        "training_seed": 42,
+        "report": "outputs/baselines/matched-iteration-250-0908-02/result.json",
+        "interpretation": "similar early learning and behavior; long-run reproduction remains unverified"
       }
     },
     "cpu_rehearsal": {
-      "state": "revalidation_required_after_cpu_bam_dof_index_fix",
+      "state": "corrected_ab_completed_full_matrix_revalidation_pending",
       "controller": "oh_my_duck.robotics.microduck.actuators.cpu_bam.MicroduckMujocoController",
       "tests": "3_passed_real_jacobian_load_motor_and_reset_checks",
-      "behavior": "pending_corrected_replay",
-      "report": "docs/reports/official-baseline-audit-2026-09-08.md"
+      "behavior": "walking_2000_and_published_fail_command_response; standup_2500_passes_standing_sitting_only",
+      "report": "docs/reports/official-baseline-audit-2026-09-08.md",
+      "corrected_ab": "outputs/baselines/cpu-bam-dof-0908-01/comparison.json"
     }
   }
 }

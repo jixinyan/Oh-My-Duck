@@ -745,37 +745,26 @@ recording:
 
 ### 2026-09-08：当前目标为官方效果复现，再验证扩展效果
 
-先复现 MuJoCo/native RSL-RL 的 Walking 与 StandUp 行为，再让 Newton 与 SB3
-达到相同任务标准；不以 smoke、reward 上升或流程完成替代策略效果。官方固定
-commit 的独立对照环境已按原 lock 离线安装；它仅用于实验对照，不成为项目运行时依赖。
-真实 MuJoCo 中 15 个 reset 对照的 qpos/qvel 与 CUDA RNG 消耗完全一致，编译模型
-468 个数组完全一致。两边 StandUp 64-env/5-iteration PPO smoke 已完成；官方导出
-及 51 个 scalar / 9 个 penalty 检查通过。长训练行为尚未复现完成，Walking 对照
-和后续视频、CPU/BAM 验收继续进行。只用 GPU 7，W&B offline，保留失败产物。
-详见 [baseline audit](reports/official-baseline-audit-2026-09-08.md)。
+先复现 MuJoCo/native RSL-RL 的 Walking 与 StandUp，再让 Newton 与 SB3 达到
+相同任务标准；不以 smoke、reward 上升或流程完成替代策略效果。官方固定 commit
+的独立对照环境仅用于实验，不成为项目运行时依赖。两任务原版/重构版的编译模型、
+初始观测和 reset 状态已对照，四个 64-env/5-iteration PPO smoke 已完成。
 
+GPU 7 上现有四条 MuJoCo 长训练：原版与重构版各训练两个代表任务。原版使用
+seed 42、4096 环境和官方完整预算（Walking 50,000 / StandUp 15,000 轮）；
+归一化导出与数值对照已通过。三个 Newton 学习器用 SIGSTOP 暂挂，保留进程及
+checkpoint，后续验证身份再 SIGCONT；三个此前停止的 SB3 尝试单独保留。
+所有训练 headless、W&B offline，尚未达到长期行为验收标准。
 
-**行为验收修正（2026-09-08）**：Walking 原有全程 RMSE 门槛会把原地站立误判为成功。
-现采用 scoring v2：保留原有稳定性/误差检查，并要求每个运动指令阶段至少有 50%
-同方向平均响应。该检查是排除无响应的项目验收下限，不改变官方 reward/训练配方，
-也不单独代表步态质量达标。已发布 alpha policy 在当前 CPU/BAM 回放的前进/转向
-响应仅为指令的 0.17%/3.25%，旧通过结果已保留并用独立文件重评分为失败。
-Walking 的原版/重构版编译模型、reset 状态及 actor/critic 初始观测一致；两任务
-四个原版/重构 PPO smoke 已完成。长期效果仍待复现，不能把发布文件名或 smoke
-当作官方效果的实证。详细证据见 baseline audit。
+Walking scoring v2 保留稳定性/误差检查，并要求每个运动指令阶段至少 50%
+同方向平均响应，排除原地站立误判；它不改变官方 reward，也不单独代表步态达标。
+CPU BAM 已修正 joint/DOF 摩擦约束索引并通过 3 项真实物理/reset 测试。
+修正后 A/B 回放完成，但 Walking 2000 和已发布 alpha 仍基本不前进，StandUp
+2500 仍只通过站姿/坐姿，未通过俯卧/仰卧起立。不能把该修复当作收敛问题已解决。
+相同状态的干净 61 维观测与速度坐标数值对照通过。250 轮原版/重构版对照已完成，
+两边均未通过完整任务，早期 reward 接近；没有证据将早期不足归因于重构，
+但长期效果与多 seed 行为仍待验证。
 
-
-**官方长期对照与资源优先级（2026-09-08）**：原版 StandUp 已通过 4096-env/5-iteration
-容量、导出及归一化数值对照，现以 seed 42 执行 15,000 轮完整原生 PPO。GPU 7 上
-同时继续两个项目内 MuJoCo 训练；三个活跃 Newton 学习器用 SIGSTOP 暂挂，保留内存
-与 checkpoint，完成基线后验证 PID/命令身份再用 SIGCONT 恢复，不能重复启动替代进程。
-基线实测每轮耗时由约 11–12 秒降到 7–8 秒。已终止的三个 SB3 尝试与本次暂停分开
-记录。所有长训练效果仍未验收通过。实验配置、进程及恢复记录见 baseline audit。
-
-
-**CPU/BAM 重验（2026-09-08）**：发现 pinned BAM 的 CPU 控制器用 joint id 匹配
-DOF 摩擦约束；Microduck 对应编号为 1–14 与 6–19，导致外部负载及摩擦预算计算
-不等价于训练端。项目 CPU 扩展已按真实 DOF 修正，保留原生电机/电压及摩擦公式，
-通过真实 MuJoCo 约束 Jacobian 投影、转矩不变和 reset 测试，共 3 项。旧 CPU
-行为结论保留但须重验；修正后的 policy A/B 回放尚待完成。训练端 Warp 不使用
-此错误索引，当前训练继续，不能将本修正当作策略收敛。详见 baseline audit。
+详细诊断、失败尝试、资源测量和视频证据集中在
+[baseline audit](reports/official-baseline-audit-2026-09-08.md)；当前优先完成
+官方与重构版同训练轮数的行为对照，再推进扩展验收。
