@@ -1,0 +1,18 @@
+{
+  "schema_version": 1,
+  "description": "Official MuJoCo RSL StandUp recipe with seed 43; controlled follow-up to seed-42 supine recovery failure. No reward, curriculum or optimizer changes.",
+  "checkpoint_interval": 1000,
+  "smoke_iterations": 5,
+  "runs": [
+    {
+      "id": "mujoco-rsl-rl-stand_up-seed43",
+      "backend": "mujoco",
+      "framework": "rsl-rl",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "experiment": "microduck_stand",
+      "num_envs": 8192,
+      "iterations": 15000,
+      "seed": 43
+    }
+  ]
+}

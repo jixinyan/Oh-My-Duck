@@ -156,3 +156,13 @@ value/advantage loss conventions and timeout bootstrap conventions differ across
 frameworks and remain explicit; native PPO has not been replaced with a shared
 custom optimizer. A no-reward-change RSL seed control is the next diagnostic,
 not another unverified reward ablation.
+
+## Integration and additional seed control
+
+The verified SB3 repair milestone is merged and pushed to main at `49b56de`.
+Follow-up uses `feat/rl-transfer-validation`, created from that main revision.
+`configs/experiments/mujoco-recovery-seed43.json` repeats only MuJoCo RSL StandUp
+with seed 43, retaining 8192 environments and the official 15000-update budget.
+It will pass fresh smoke/export/CPU-video/resume/capacity gates before training;
+its purpose is to test exploration sensitivity, not to establish a backend-wide
+success rate from one extra seed. GPU 1 became free and is allocated explicitly.

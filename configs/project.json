@@ -177,7 +177,7 @@
       "learned behavior validation"
     ],
     "architecture_merge": "6303ca4",
-    "validation_branch": "main",
+    "validation_branch": "feat/rl-transfer-validation",
     "export_and_local_package": "8_of_8_passed; RSL revalidated at 6303ca4",
     "task_layout": "14 task families with environment.py and ppo.py; 33 semantic catalog entries preserved",
     "full_training_campaign": {
@@ -221,7 +221,7 @@
       "preview_gallery": "outputs/previews/shared-gpu7-0908-02/index.html",
       "historical_snapshot": true
     },
-    "latest_merge": "6902943d7230746c20b159f54ecaabbf8397561e",
+    "latest_merge": "49b56de945328ccb8fd2fa58997f81a5714cbc6d",
     "official_baseline_reproduction": {
       "state": "learned_behavior_unverified",
       "baseline": "mujoco_rsl_rl",
@@ -534,7 +534,8 @@
       },
       "behavior": "new_full_training_pending",
       "tests": "29_passed_9_subtests",
-      "runtime_audit": "outputs/experiments/sb3-repair-0909-01/repair-runtime-audit.json"
+      "runtime_audit": "outputs/experiments/sb3-repair-0909-01/repair-runtime-audit.json",
+      "integration_merge": "49b56de945328ccb8fd2fa58997f81a5714cbc6d"
     },
     "newton_policy_transfer": {
       "standup_checkpoint": 13000,
