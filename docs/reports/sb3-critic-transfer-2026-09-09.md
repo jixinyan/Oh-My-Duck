@@ -200,3 +200,38 @@ of every gate. The preview worker records checkpoints starting at update 1000
 in `outputs/previews/mujoco-recovery-seed43-0909-01/index.html`. There is no new
 seed-control behavior claim. Repaired SB3 learned convergence, seed sensitivity
 and CPU/BAM transfer remain open; full-run diagnosis follows training completion.
+
+
+## User-directed retirement of unpromising old runs
+
+On 2026-09-09, four old Walking learners were intentionally stopped with
+identity-checked SIGTERM after reviewing saved behavior evaluations. No reward
+changes or new evaluation runs were introduced for this decision.
+
+| Run | Recent completed forward responses / command | Last preserved checkpoint |
+|---|---|---|
+| Owned MuJoCo RSL, 8192 envs | 45%, 42%, 46%, 29% at updates 12000–15000; prior no-push diagnostic only ~1.7% | model_16000.pt |
+| Old MuJoCo SB3, 8192 envs | 27%, 25%, 26%, 33%, 35% at updates 14000–18000 | update 18000 bundle |
+| Old Newton SB3, 8192 envs | 14%, 17%, 12%, 27%, 26% at updates 6000–10000 | update 10000 bundle |
+| Pinned original MuJoCo RSL, 4096 envs | 46%, 59%, 42%, 43%, 24% at updates 26000–30000; final evaluated yaw response also 24% | model_31000.pt |
+
+The SB3 runs show some forward improvement, but remain below the 50% response
+gate after repeated snapshots and have been superseded by the repaired recipe.
+The original control also shows persistent lateral errors and recent behavior
+regression. These are resource-retirement decisions, not claims that an entire
+framework or the official task can never learn. The latest saved checkpoints
+may be newer than the last completed behavior evaluations listed above.
+
+All four learner exits were confirmed. Checkpoint hashes, process identity,
+reviewed results and stop reasons are saved in `intentional-stop-20260909.json`
+inside each run directory. The three owned runs are under
+`outputs/experiments/fixed-8192-0908-01`; the original is under
+`outputs/baselines/official-walking-full-0908-01`. Raw supervisor nonzero-exit
+records remain intact and must be interpreted alongside these intentional-stop
+records, rather than reported as unexplained crashes. No existing artifacts
+were deleted. Pending preview/final-evaluation work can finish independently.
+
+Six learners remain: Newton RSL Walking, four repaired SB3 combinations, and
+MuJoCo RSL StandUp seed 43. All six processes were checked alive after stopping
+the old runs. Newton RSL StandUp completed 15000 updates; its final native
+four-pose preview passed, while final deployment acceptance remains open.

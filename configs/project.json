@@ -589,7 +589,7 @@
       "gallery": "outputs/diagnostics/newton-transfer-0909-03/index.html"
     },
     "mujoco_rsl_seed_control": {
-      "state": "startup_gates_running",
+      "state": "full_training_running",
       "source_commit": "1cb77380b7f97183851f21f771603822651922d3",
       "seed": 43,
       "num_envs": 8192,
@@ -600,12 +600,38 @@
         "smoke": "completed",
         "smoke-export": "completed",
         "smoke-rehearsal": "completed",
-        "resume-check": "running"
+        "resume-check": "completed",
+        "capacity": "completed",
+        "capacity-export": "completed",
+        "full": "running"
       },
-      "reviewed_at": "2026-09-09T03:38:56.769375+00:00",
+      "reviewed_at": "2026-09-09T04:27:50.244005+00:00",
       "preview": "outputs/previews/mujoco-recovery-seed43-0909-01/index.html",
       "behavior": "pending",
       "interpretation": "seed-only control; no reward, curriculum or optimizer changes; one additional seed cannot establish backend-wide success rates"
+    },
+    "retired_old_runs": {
+      "date": "2026-09-09",
+      "reason": "user_requested_stop_of_unpromising_old_training",
+      "learner_exits_verified": true,
+      "runs": [
+        "fixed-8192-0908-01/mujoco-rsl-rl-walking",
+        "fixed-8192-0908-01/mujoco-sb3-walking",
+        "fixed-8192-0908-01/isaac-newton-sb3-walking",
+        "official-walking-full-0908-01"
+      ],
+      "record_filename": "intentional-stop-20260909.json",
+      "artifacts": "preserved_with_checkpoint_sha256",
+      "report": "docs/reports/sb3-critic-transfer-2026-09-09.md",
+      "remaining_learners": 6,
+      "remaining_runs": [
+        "fixed-8192-0908-01/isaac-newton-rsl-rl-walking",
+        "sb3-repair-0909-01/mujoco-sb3-walking",
+        "sb3-repair-0909-01/mujoco-sb3-stand_up",
+        "sb3-repair-0909-01/isaac-newton-sb3-walking",
+        "sb3-repair-0909-01/isaac-newton-sb3-stand_up",
+        "mujoco-recovery-seed43-0909-01/mujoco-rsl-rl-stand_up-seed43"
+      ]
     }
   }
 }

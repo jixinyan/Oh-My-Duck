@@ -5,6 +5,15 @@ Implementation proceeds by domain, with interfaces for later capabilities and
 explicit evidence for implemented functionality. Task-family organization, single-GPU pipeline fixes and full-training campaigns
 are merged into `main` at `5ef433b`. Submitted training keeps source `1f45996`. No public policy upload has occurred. The accumulated RL operations, fixes and September 9 behavior diagnosis are now merged into `main` at `6902943`; active training retains source `3070b71`.
 
+Latest operational update (2026-09-09): four old Walking learners were
+intentionally stopped after repeated behavior failures: owned MuJoCo RSL, old
+MuJoCo SB3, old Newton SB3, and the original 4096-env MuJoCo RSL control. All
+artifacts and checkpoint hashes are preserved with intentional-stop records.
+Six learners continue: Newton RSL Walking, the four repaired SB3 runs and the
+MuJoCo RSL StandUp seed-43 control (now in full training). Newton RSL StandUp
+finished 15000 updates and passed its final native 4/4 pose preview; final
+transfer acceptance remains open. The paragraphs below are earlier snapshots.
+
 Latest repair: native SB3 now has separate official critic observations (74D
 StandUp / 76D Walking), serialized KL learning-rate feedback, randomized initial
 episode phases and matching terminal/normalizer/export/resume paths. 29 tests
