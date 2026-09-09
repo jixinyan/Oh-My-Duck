@@ -41,3 +41,26 @@ selected OSMesa before loading its optional library. Attempt 02 keeps EGL in
 the parent and selects OSMesa only in the existing isolated MuJoCo video worker;
 both attempts and their logs are retained. No training physics changed.
 Results and remaining causal uncertainty will be recorded after completion.
+
+## Native SB3 learning-rate feedback
+
+A separate serializable callable schedule and rollout-boundary callback now
+reduce/increase the learning rate from SB3's preceding logged approximate KL.
+The native PPO update and early-stop implementation remain unchanged. Bounds
+1e-5–1e-2 and factor 1.5 match the official RSL controller's bounds, but timing
+and KL estimator differ: this is not numerically identical RSL PPO. Fresh runs
+default to adaptive; resume preserves the saved mode. Explicit constant mode
+supports matched comparisons, including legacy checkpoints. Both schedule state
+and native optimizer learning rate survive save/reload in the tests.
+
+16 SB3 CPU tests pass. A real checkpoint comparison of constant versus adaptive
+updates is still required before claiming the observed KL instability is fixed.
+The critic-only gates run from source `c897d10` and retain constant learning rate;
+the new controller is a separate change, not silently added to those runs.
+
+Transfer evidence so far: Newton StandUp 13000 in CPU/BAM passes standing,
+sitting and supine at all 17 tested base seeds; prone passes only 3/17. Native
+4/4 preview success is therefore not full transfer success. Native paired tests
+use each backend's registered interpreter in attempt 03; attempt 02 incorrectly
+attempted MuJoCo inside Newton's isolated dependency environment and failed
+before a native rollout. CPU attempt 02 remains valid and continues independently.

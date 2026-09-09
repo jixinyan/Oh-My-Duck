@@ -25,6 +25,7 @@ from oh_my_duck.rl.training.tasks import project_tasks
 from oh_my_duck.rl.training.runtime import create_environment
 from oh_my_duck.rl.tasks.recipes import build_environment
 from oh_my_duck.rl.learners.sb3.environment import MjlabSb3VecEnv, TerminalObservationRecorder
+from oh_my_duck.rl.learners.sb3.learning_rate import KLAdaptiveLearningRate, KLFeedback
 
 from oh_my_duck.core.paths import project_root
 ROOT = project_root()
@@ -82,6 +83,7 @@ def main():
     parser.add_argument("--iterations", type=int, default=5)
     parser.add_argument("--checkpoint-interval", type=int, help="PPO updates between native checkpoint bundles; default: task save interval")
     parser.add_argument("--learning-rate", type=float, help="Explicit native SB3 learning rate; on resume overrides the saved schedule")
+    parser.add_argument("--learning-rate-mode", choices=("constant", "adaptive"), help="Fresh default: KL-adaptive native SB3 schedule; resume preserves saved mode")
     parser.add_argument("--critic-observations", choices=("official", "actor"), help="Default: official critic for fresh runs; preserve saved layout on resume")
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--device", default="cuda:0")
@@ -113,13 +115,16 @@ def main():
     critic_observations = args.critic_observations or saved_layout
     if previous and critic_observations != saved_layout:
         raise ValueError("Resume cannot change critic inputs; start a fresh controlled experiment")
+    learning_rate_mode = args.learning_rate_mode or (previous.get("learning_rate_mode", "constant") if previous else "adaptive")
+    initial_rate = args.learning_rate if args.learning_rate is not None else official_agent.algorithm.learning_rate
+    learning_rate = KLAdaptiveLearningRate(initial_rate, official_agent.algorithm.desired_kl) if learning_rate_mode == "adaptive" else initial_rate
     adapter = tracking = None
     started = time.monotonic()
     try:
         tracking = start_run(backend=args.backend, framework="sb3", task=args.task, directory=args.output,
             config={"num_envs": args.num_envs, "iterations": args.iterations, "seed": args.seed,
                     "resume_source": str(args.resume) if args.resume else None, "learning_rate_override": args.learning_rate,
-                    "official_agent": asdict(official_agent), "provenance":provenance, "critic_observations": critic_observations})
+                    "official_agent": asdict(official_agent), "provenance":provenance, "critic_observations": critic_observations, "learning_rate_mode": learning_rate_mode})
         adapter = MjlabSb3VecEnv(create_environment(task,cfg,backend=args.backend,device=args.device), critic_observations=critic_observations)
         progress_source = "fresh_environment"
         if args.resume:
@@ -127,8 +132,15 @@ def main():
             if previous["backend"] != args.backend or previous["task"] != args.task or previous["upstream"] != json.loads((ROOT / "configs/upstream.json").read_text())["repositories"]:
                 raise ValueError("Resume task or upstream pin differs")
             normalized = VecNormalize.load(args.resume / "vecnormalize.pkl", adapter)
-            model = PPO.load(args.resume / "model.zip", env=normalized, device=args.device,
-                             **({"learning_rate": args.learning_rate} if args.learning_rate is not None else {}))
+            overrides = {}
+            if args.learning_rate is not None or args.learning_rate_mode is not None:
+                if args.learning_rate is None:
+                    saved = PPO.load(args.resume / "model.zip", device="cpu")
+                    rate = float(saved.lr_schedule(saved._current_progress_remaining))
+                    learning_rate = KLAdaptiveLearningRate(rate, official_agent.algorithm.desired_kl) if learning_rate_mode == "adaptive" else rate
+                    del saved
+                overrides["learning_rate"] = learning_rate
+            model = PPO.load(args.resume / "model.zip", env=normalized, device=args.device, **overrides)
             from .checkpoint import restore_progress
             adapter.env.common_step_counter, progress_source = restore_progress(previous, model.num_timesteps)
         else:
@@ -138,7 +150,7 @@ def main():
             model = PPO(policy_cfg.policy, normalized, n_steps=official_agent.num_steps_per_env,
                 batch_size=args.num_envs * official_agent.num_steps_per_env // algorithm.num_mini_batches,
                 n_epochs=algorithm.num_learning_epochs,
-                learning_rate=args.learning_rate if args.learning_rate is not None else algorithm.learning_rate,
+                learning_rate=learning_rate,
                 gamma=algorithm.gamma, gae_lambda=algorithm.lam, clip_range=algorithm.clip_param,
                 ent_coef=algorithm.entropy_coef, vf_coef=algorithm.value_loss_coef,
                 max_grad_norm=algorithm.max_grad_norm, target_kl=algorithm.desired_kl,
@@ -152,7 +164,7 @@ def main():
         from .snapshots import PeriodicCheckpoint
         snapshots = PeriodicCheckpoint(args.output / 'checkpoints', checkpoint_interval, adapter, {
             'task': args.task, 'backend': args.backend, 'framework': 'sb3',
-            'critic_observations': critic_observations,
+            'critic_observations': critic_observations, 'learning_rate_mode': learning_rate_mode,
             'num_envs': args.num_envs, 'timesteps_before': before,
             'upstream': json.loads((ROOT / 'configs/upstream.json').read_text())['repositories'],
             'provenance': provenance, 'official_agent': asdict(official_agent),
@@ -161,7 +173,7 @@ def main():
             'effective_learning_rate_at_save_start': float(model.lr_schedule(1.0)),
         })
         model.learn(total_timesteps=args.iterations * args.num_envs * official_agent.num_steps_per_env,
-                    callback=[callback, snapshots], reset_num_timesteps=not bool(args.resume))
+                    callback=[callback, KLFeedback(), snapshots], reset_num_timesteps=not bool(args.resume))
         model.save(args.output / "model.zip")
         normalized.save(args.output / "vecnormalize.pkl")
         # Verify native reload including normalization, not just ZIP existence.
@@ -181,7 +193,7 @@ def main():
         np.testing.assert_allclose(actual, expected, atol=1e-5, rtol=1e-5)
         report = {"framework": "sb3", "backend": args.backend, "task": args.task,
             "num_envs": args.num_envs, "iterations": args.iterations,
-            "critic_observations": critic_observations,
+            "critic_observations": critic_observations, "learning_rate_mode": learning_rate_mode,
             "observation_dimensions": {key: value.shape[0] for key, value in adapter.observation_space.spaces.items()} if critic_observations == "official" else {"actor": 61},
             "learning_rate_override": args.learning_rate,
             "effective_learning_rate": float(model.lr_schedule(model._current_progress_remaining)),
@@ -196,7 +208,7 @@ def main():
             "upstream": json.loads((ROOT / "configs/upstream.json").read_text())["repositories"],
             "project_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
             "official_agent": asdict(official_agent),
-            "differences": ["SB3 PPO implementation and optimizer; constant learning rate with target-KL stop",
+            "differences": ["Native SB3 PPO, optimizer and KL early stop; " + ("previous-rollout approximate-KL learning-rate feedback (RSL adjusts per minibatch using analytic KL)" if learning_rate_mode == "adaptive" else "constant learning rate"),
                 "Separate official critic group with native DictRolloutBuffer" if critic_observations == "official" else "Legacy actor-only critic retained for controlled comparison/resume",
                 "SB3 VecNormalize running statistics and clipping (100); reward normalization disabled",
                 "Finite float32 action-space bounds, no additional action filter",
