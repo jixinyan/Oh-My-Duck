@@ -558,8 +558,54 @@
         "mujoco": 0.62657,
         "newton": 0.57181
       },
-      "walking_behavior_gate": "failed_lateral_instantaneous_rmse; cpu_forward_failed",
-      "report": "docs/reports/sb3-critic-transfer-2026-09-09.md"
+      "walking_behavior_gate": "standard play: both fail lateral instantaneous RMSE, MuJoCo also fails forward response; no-push: both fail lateral RMSE only; CPU forward failed",
+      "report": "docs/reports/sb3-critic-transfer-2026-09-09.md",
+      "native_battery": {
+        "status": "completed",
+        "groups": 14,
+        "result": "outputs/diagnostics/newton-transfer-0909-03/summary.json",
+        "seeds": [
+          42,
+          100,
+          101
+        ]
+      },
+      "walking_standard_play": {
+        "seed": 42,
+        "external_pushes": true,
+        "mujoco": {
+          "forward_response": 0.4544008151,
+          "yaw_response": 0.6255689859,
+          "lateral_rmse": 0.1238681335,
+          "status": "behavior_failed"
+        },
+        "newton": {
+          "forward_response": 0.6618519872,
+          "yaw_response": 1.0343459845,
+          "lateral_rmse": 0.126343655,
+          "status": "behavior_failed"
+        }
+      },
+      "gallery": "outputs/diagnostics/newton-transfer-0909-03/index.html"
+    },
+    "mujoco_rsl_seed_control": {
+      "state": "startup_gates_running",
+      "source_commit": "1cb77380b7f97183851f21f771603822651922d3",
+      "seed": 43,
+      "num_envs": 8192,
+      "iterations": 15000,
+      "gpu": 1,
+      "campaign": "outputs/experiments/mujoco-recovery-seed43-0909-01/campaign.json",
+      "stages_at_review": {
+        "smoke": "completed",
+        "smoke-export": "completed",
+        "smoke-rehearsal": "completed",
+        "resume-check": "running"
+      },
+      "reviewed_at": "2026-09-09T03:38:56.769375+00:00",
+      "preview": "outputs/previews/mujoco-recovery-seed43-0909-01/index.html",
+      "behavior": "pending",
+      "interpretation": "seed-only control; no reward, curriculum or optimizer changes; one additional seed cannot establish backend-wide success rates"
     }
   }
 }

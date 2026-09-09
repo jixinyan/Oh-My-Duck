@@ -166,3 +166,37 @@ with seed 43, retaining 8192 environments and the official 15000-update budget.
 It will pass fresh smoke/export/CPU-video/resume/capacity gates before training;
 its purpose is to test exploration sensitivity, not to establish a backend-wide
 success rate from one extra seed. GPU 1 became free and is allocated explicitly.
+
+
+## Completed frozen-policy battery
+
+`newton-transfer-0909-03/result.json` completed all 14 groups. Each StandUp
+policy was evaluated from four poses at seeds 42, 100 and 101 in both backends;
+Walking used seed 42 and the 700-tick hold/forward/stop/turn schedule. Policy
+hashes were checked against the same frozen exports. Newton StandUp 13000 passed
+12/12 in each backend. MuJoCo StandUp final passed 9/12 in each backend, failing
+all three supine cases: its missing recovery skill follows the policy across
+backends. This is evidence against an inability of MuJoCo to execute recovery,
+not a proof of the cause of unsuccessful learning.
+
+Standard native Walking retains external pushes and gives these measured
+responses for Newton checkpoint 14000:
+
+| Evaluation | Forward / command | Yaw / command | Lateral RMSE | Result |
+|---|---:|---:|---:|---|
+| Newton | 66.2% | 103.4% | 0.1263 m/s | Lateral gate fails |
+| MuJoCo | 45.4% | 62.6% | 0.1239 m/s | Forward and lateral gates fail |
+
+The no-push comparison above isolates the effect of perturbations; it does not
+replace standard acceptance. The native success of StandUp and partial Walking
+transfer do not close the separate CPU/BAM deployment gap. The gallery now
+contains nine native/CPU clips, with contact sheets `recovery-transfer.jpg` and
+`walking-transfer.jpg` beside it. Videos use seed 42; numerical multi-seed
+results are retained in `summary.json` and the full result files.
+
+The additional seed-43 campaign was launched from `1cb7738` on GPU 1. Its fresh
+startup pipeline is in progress; full training must await successful completion
+of every gate. The preview worker records checkpoints starting at update 1000
+in `outputs/previews/mujoco-recovery-seed43-0909-01/index.html`. There is no new
+seed-control behavior claim. Repaired SB3 learned convergence, seed sensitivity
+and CPU/BAM transfer remain open; full-run diagnosis follows training completion.

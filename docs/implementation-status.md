@@ -15,6 +15,13 @@ Newton StandUp 13000 passes 12/12 scenarios in each native backend, but CPU/BAM
 prone recovery passes only 3/17. No-push Walking 14000 retains forward/turn
 response in both native backends; deployment forward motion fails. Details:
 [repair and transfer](reports/sb3-critic-transfer-2026-09-09.md).
+The SB3 repair milestone is merged and pushed to main `49b56de`; follow-up is
+on `feat/rl-transfer-validation`. The complete 14-group frozen-policy battery
+confirms MuJoCo StandUp final remains 9/12 in each backend (all supine failures).
+Standard Walking with pushes fails acceptance in both backends; no-push results
+are diagnostic only. The seed-43 MuJoCo RSL control (`1cb7738`, GPU 1) is running
+fresh startup gates before its unchanged 8192-env/15000-update official recipe.
+It has a background checkpoint preview worker starting at update 1000.
 The following review and operational notes are earlier snapshots.
 
 Latest behavior review (2026-09-09 02:29 UTC): five of the new 8192-env learners
