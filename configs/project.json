@@ -41,7 +41,7 @@
     },
     "training": {
       "module": "oh_my_duck.rl.training",
-      "state": "representative_single_gpu_pipeline_verified_behavior_failed_smoke",
+      "state": "representative_pipeline_verified_partial_learned_behavior",
       "role": "Independent simulation-backend and RL-framework selection, offline training and evaluation"
     },
     "perception": {
@@ -116,7 +116,7 @@
       }
     },
     "environment_selection": {
-      "state": "all_eight_fixed_8192_full_training_verified",
+      "state": "fixed_8192_five_running_two_completed_one_diagnostic_stop",
       "config": "configs/experiments/representative-8192.json",
       "module": "oh_my_duck.rl.experiments.throughput",
       "scope": "two_tasks_two_backends_two_frameworks",
@@ -124,7 +124,7 @@
       "vram_fraction": 0.85,
       "warmup_updates": 10,
       "measured_updates": 30,
-      "learned_behavior": "unverified",
+      "learned_behavior": "newton_rsl_standup_native_pass_only_final_transfer_pending",
       "campaign": "outputs/experiments/fixed-8192-0908-01",
       "source_commit": "3070b71a4561618fc96363c0eb71f3365a4fe56c",
       "allocated_gpus": [
@@ -217,7 +217,8 @@
         "mujoco-rsl-rl-stand_up"
       ],
       "pause_mechanism": "SIGSTOP; verify recorded PID and command identity before SIGCONT",
-      "preview_gallery": "outputs/previews/shared-gpu7-0908-02/index.html"
+      "preview_gallery": "outputs/previews/shared-gpu7-0908-02/index.html",
+      "historical_snapshot": true
     },
     "latest_merge": "5ef433b",
     "official_baseline_reproduction": {
@@ -488,6 +489,31 @@
       "tests": "4_passed_9_subtests_command_routing_defaults_validation_recovery",
       "native_cli_smoke": "earlier_64_env_5_iteration_mujoco_standup_passed",
       "behavior": "unverified"
+    },
+    "latest_behavior_review": {
+      "reviewed_at_utc": "2026-09-09T02:29:00+00:00",
+      "report": "docs/reports/rl-framework-status-2026-09-09.md",
+      "evidence": "outputs/diagnostics/framework-status-0909-01",
+      "new_learners_running": 5,
+      "new_learners_completed": 2,
+      "intentionally_stopped": [
+        "isaac-newton-sb3-stand_up"
+      ],
+      "newton_rsl_standup": "native_seed42_four_pose_pass_repeated_final_transfer_pending",
+      "newton_rsl_walking": "command_response_present_lateral_rmse_failed",
+      "mujoco_rsl_standup": "final_three_of_four_native_both_backends_and_cpu",
+      "mujoco_sb3_standup": "final_zero_of_four_native_both_backends_and_cpu",
+      "framework_equivalence": "open_sb3_61d_critic_vs_rsl_74d_and_native_ppo_normalizer_differences"
+    },
+    "current_full_training_campaign": {
+      "config": "configs/experiments/representative-8192.json",
+      "manifest": "outputs/experiments/fixed-8192-0908-01/campaign.json",
+      "source_commit": "3070b71a4561618fc96363c0eb71f3365a4fe56c",
+      "num_envs": 8192,
+      "running": 5,
+      "completed": 2,
+      "intentionally_stopped": 1,
+      "review": "docs/reports/rl-framework-status-2026-09-09.md"
     }
   }
 }

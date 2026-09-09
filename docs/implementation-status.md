@@ -1,9 +1,21 @@
 # Implementation status
 
-Updated 2026-09-08. The product scope remains the Agentic Microduck Project Design.
+Updated 2026-09-09. The product scope remains the Agentic Microduck Project Design.
 Implementation proceeds by domain, with interfaces for later capabilities and
 explicit evidence for implemented functionality. Task-family organization, single-GPU pipeline fixes and full-training campaigns
 are merged into `main` at `5ef433b`. Submitted training keeps source `1f45996`. No public policy upload has occurred.
+
+Latest behavior review (2026-09-09 02:29 UTC): five of the new 8192-env learners
+continue, two MuJoCo StandUp runs completed (RSL 3/4, SB3 0/4), and Newton SB3
+StandUp was intentionally stopped after ten consecutive 0/4 previews and
+persistent excessive KL. Its update-10000 bundle is preserved and hash-verified.
+Newton RSL StandUp repeatedly passes its native four-pose battery; final
+sim2sim/CPU and multi-seed acceptance remain open. Newton RSL Walking responds
+to forward/yaw commands but misses the lateral RMSE gate. Current SB3 critic
+input is actor-only 61D versus official RSL's separate 74D input, alongside
+native PPO/normalizer differences. Learner equivalence has not been established.
+See [behavior and framework review](reports/rl-framework-status-2026-09-09.md).
+The following September 8 operational paragraphs are historical snapshots.
 
 Unused-process cleanup completed: all 26 processes in the old paused
 `shared-gpu7-0908-01` tree exited, releasing 23.2 GiB on GPU 7. Current eight

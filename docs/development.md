@@ -28,15 +28,26 @@ Keep training dependencies out of agentic, voice, recording and CLI imports.
 
 ## Version control
 
-Local `main` is initialized with `origin=https://github.com/jixinyan/Oh-My-Duck.git`. Remote inspection failed with the current credentials; no remote history is assumed and no force-push is allowed. When access becomes available, inspect/fetch remote history and reconcile it before pushing local commits.
+`main` tracks `origin/main` at `git@github.com:jixinyan/Oh-My-Duck.git`.
+Remote fetch and push access are verified. Fetch and inspect remote history before
+merging; never force-push or change the user's Git identity.
 
-Create a branch before an independent feature, fix or substantial investigation: `feat/<topic>`, `fix/<topic>` or `docs/<topic>`. Keep `main` at a reviewed baseline. A completed branch can be merged locally after its relevant checks pass; inspect remote history before any eventual push.
+Use one focused active development branch: `feat/<topic>`, `fix/<topic>` or
+`docs/<topic>`. At each completed, reviewable milestone, run relevant checks,
+merge the branch into `main`, and push `main` before starting the next feature
+branch from the updated `main`. Do not stack new work on an older feature branch
+or leave completed fixes spread across branches. Merge verified infrastructure
+independently of long-running training; document pending behavioral acceptance.
+
+Check remaining branch tips for unmerged commits before cleanup. Delete local
+branches only after their tips are contained in `main`; retain immutable training
+worktrees, commits and experiment artifacts. Running training uses its pinned
+source snapshot and does not follow the working branch.
 
 Commit at coherent, reviewable checkpoints: interfaces/scaffolding, working behavior with its relevant checks, and measured validation evidence. Do not accumulate an entire feature into one final commit or make empty commits merely to increase frequency. Keep documentation describing a behavior in the same commit as that behavior. Record incomplete implementations explicitly rather than implying validation.
 
 Before committing, inspect the staged diff and ensure no ignored artifacts or credentials entered the index. After committing, check `git status` and `git log`, and report the branch, commit IDs and whether they are local or pushed. Do not change the user's Git identity.
 
-History at the start of the Isaac reference review: local `main` already contained `bca0a90` (whole-project framework). The reference review uses `docs/isaac-newton-reference-review`; no commits have been pushed. Local commits are visible through `git log --all --oneline --decorate`, independently of GitHub access.
 
 ## Progress
 
