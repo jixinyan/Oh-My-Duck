@@ -28,8 +28,12 @@ class NormalizedSB3Actor(torch.nn.Module):
         self.policy = deepcopy(policy).cpu().eval()
         if not normalizer.norm_obs or normalizer.norm_reward:
             raise ValueError("Expected observation normalization ON, reward normalization OFF")
-        self.register_buffer("mean", torch.as_tensor(normalizer.obs_rms.mean, dtype=torch.float64))
-        self.register_buffer("variance", torch.as_tensor(normalizer.obs_rms.var, dtype=torch.float64))
+        statistics = normalizer.obs_rms["actor"] if isinstance(normalizer.obs_rms, dict) else normalizer.obs_rms
+        self.register_buffer("mean", torch.as_tensor(statistics.mean, dtype=torch.float64))
+        self.register_buffer("variance", torch.as_tensor(statistics.var, dtype=torch.float64))
+        self.asymmetric = isinstance(normalizer.obs_rms, dict)
+        if self.asymmetric and (not hasattr(policy, "actor_mean") or policy.use_sde):
+            raise ValueError("Asymmetric export requires the registered Gaussian actor")
         self.epsilon = float(normalizer.epsilon)
         self.clip = float(normalizer.clip_obs)
 
@@ -38,7 +42,7 @@ class NormalizedSB3Actor(torch.nn.Module):
         # float32. Preserve that order, including the clip, in the ONNX graph.
         normalized = ((obs.to(torch.float64) - self.mean) / torch.sqrt(self.variance + self.epsilon))
         normalized = torch.clamp(normalized, -self.clip, self.clip).to(torch.float32)
-        return self.policy._predict(normalized, deterministic=True)
+        return self.policy.actor_mean(normalized) if self.asymmetric else self.policy._predict(normalized, deterministic=True)
 
     def as_onnx(self, verbose=False):
         return self
@@ -102,7 +106,11 @@ def main():
     batch[:, 3:6] = (0, 0, -1)
     # Include outliers to exercise the normalization clip boundary explicitly.
     batch[16:] *= 1000
-    expected, _ = model.predict(normalizer.normalize_obs(batch.copy()), deterministic=True)
+    observations = batch.copy()
+    if isinstance(normalizer.obs_rms, dict):
+        observations = {"actor": observations, "critic": np.random.default_rng(43).normal(
+            size=(len(batch), len(normalizer.obs_rms["critic"].mean))).astype(np.float32)}
+    expected, _ = model.predict(normalizer.normalize_obs(observations), deterministic=True)
     session = cpu_session(str(result.onnx_path), providers=["CPUExecutionProvider"])
     actual = np.concatenate([session.run(None, {session.get_inputs()[0].name: row[None]})[0] for row in batch])
     np.testing.assert_allclose(actual, expected, atol=2e-5, rtol=1e-5)

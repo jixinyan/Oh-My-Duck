@@ -82,6 +82,7 @@ def main():
     parser.add_argument("--iterations", type=int, default=5)
     parser.add_argument("--checkpoint-interval", type=int, help="PPO updates between native checkpoint bundles; default: task save interval")
     parser.add_argument("--learning-rate", type=float, help="Explicit native SB3 learning rate; on resume overrides the saved schedule")
+    parser.add_argument("--critic-observations", choices=("official", "actor"), help="Default: official critic for fresh runs; preserve saved layout on resume")
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--device", default="cuda:0")
     parser.add_argument("--output", type=Path, required=True)
@@ -107,17 +108,21 @@ def main():
         cfg.episode_length_s = args.episode_length_s
     cfg.recorders["sb3_terminal"] = RecorderTermCfg(func=TerminalObservationRecorder)
     args.output.mkdir(parents=True, exist_ok=False)
+    previous = json.loads((args.resume / "run.json").read_text()) if args.resume else None
+    saved_layout = previous.get("critic_observations", "actor") if previous else "official"
+    critic_observations = args.critic_observations or saved_layout
+    if previous and critic_observations != saved_layout:
+        raise ValueError("Resume cannot change critic inputs; start a fresh controlled experiment")
     adapter = tracking = None
     started = time.monotonic()
     try:
         tracking = start_run(backend=args.backend, framework="sb3", task=args.task, directory=args.output,
             config={"num_envs": args.num_envs, "iterations": args.iterations, "seed": args.seed,
                     "resume_source": str(args.resume) if args.resume else None, "learning_rate_override": args.learning_rate,
-                    "official_agent": asdict(official_agent), "provenance":provenance})
-        adapter = MjlabSb3VecEnv(create_environment(task,cfg,backend=args.backend,device=args.device))
+                    "official_agent": asdict(official_agent), "provenance":provenance, "critic_observations": critic_observations})
+        adapter = MjlabSb3VecEnv(create_environment(task,cfg,backend=args.backend,device=args.device), critic_observations=critic_observations)
         progress_source = "fresh_environment"
         if args.resume:
-            previous = json.loads((args.resume / "run.json").read_text())
             validate_resume(previous,task=args.task,backend=args.backend,framework="sb3")
             if previous["backend"] != args.backend or previous["task"] != args.task or previous["upstream"] != json.loads((ROOT / "configs/upstream.json").read_text())["repositories"]:
                 raise ValueError("Resume task or upstream pin differs")
@@ -129,7 +134,7 @@ def main():
         else:
             normalized = VecNormalize(adapter, norm_obs=True, norm_reward=False, clip_obs=100.0)
             algorithm = official_agent.algorithm
-            policy_cfg = task.policy_configs["sb3"].build(task_id=args.task,agent_cfg=official_agent)
+            policy_cfg = task.policy_configs["sb3"].build(task_id=args.task,agent_cfg=official_agent,critic_observations=critic_observations)
             model = PPO(policy_cfg.policy, normalized, n_steps=official_agent.num_steps_per_env,
                 batch_size=args.num_envs * official_agent.num_steps_per_env // algorithm.num_mini_batches,
                 n_epochs=algorithm.num_learning_epochs,
@@ -147,6 +152,7 @@ def main():
         from .snapshots import PeriodicCheckpoint
         snapshots = PeriodicCheckpoint(args.output / 'checkpoints', checkpoint_interval, adapter, {
             'task': args.task, 'backend': args.backend, 'framework': 'sb3',
+            'critic_observations': critic_observations,
             'num_envs': args.num_envs, 'timesteps_before': before,
             'upstream': json.loads((ROOT / 'configs/upstream.json').read_text())['repositories'],
             'provenance': provenance, 'official_agent': asdict(official_agent),
@@ -161,6 +167,9 @@ def main():
         # Verify native reload including normalization, not just ZIP existence.
         batch = np.random.default_rng(args.seed).normal(size=(16, 61)).astype(np.float32)
         batch[:, 3:6] = (0, 0, -1)
+        if critic_observations == "official":
+            batch = {"actor": batch, "critic": np.random.default_rng(args.seed + 1).normal(
+                size=(16, adapter.observation_space["critic"].shape[0])).astype(np.float32)}
         # Official configure_torch_backends enables TF32 for training. Compare
         # reload in FP32 so GPU tensor-core rounding is not mistaken for lost state.
         torch.backends.cuda.matmul.allow_tf32 = False
@@ -172,6 +181,8 @@ def main():
         np.testing.assert_allclose(actual, expected, atol=1e-5, rtol=1e-5)
         report = {"framework": "sb3", "backend": args.backend, "task": args.task,
             "num_envs": args.num_envs, "iterations": args.iterations,
+            "critic_observations": critic_observations,
+            "observation_dimensions": {key: value.shape[0] for key, value in adapter.observation_space.spaces.items()} if critic_observations == "official" else {"actor": 61},
             "learning_rate_override": args.learning_rate,
             "effective_learning_rate": float(model.lr_schedule(model._current_progress_remaining)),
             "timesteps_before": before, "timesteps_after": model.num_timesteps,
@@ -186,7 +197,7 @@ def main():
             "project_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
             "official_agent": asdict(official_agent),
             "differences": ["SB3 PPO implementation and optimizer; constant learning rate with target-KL stop",
-                "SB3 critic uses actor observations; official privileged critic is not consumed",
+                "Separate official critic group with native DictRolloutBuffer" if critic_observations == "official" else "Legacy actor-only critic retained for controlled comparison/resume",
                 "SB3 VecNormalize running statistics and clipping (100); reward normalization disabled",
                 "Finite float32 action-space bounds, no additional action filter",
                 "Terminal observation sampled before reset from copied delay/history buffers"],

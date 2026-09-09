@@ -14,9 +14,12 @@ class Sb3PolicyCfg:
     kwargs: dict[str, Any] = field(default_factory=dict)
 
 
-def make_policy_cfg(task_id: str, agent_cfg) -> Sb3PolicyCfg:
+def make_policy_cfg(task_id: str, agent_cfg, critic_observations="official") -> Sb3PolicyCfg:
     """Override by task_id here; defaults preserve the established ELU policy."""
-    return Sb3PolicyCfg(kwargs={
+    from .sb3_asymmetric import AsymmetricActorCriticPolicy
+    if critic_observations not in {"official", "actor"}:
+        raise ValueError("Unknown critic observation layout")
+    return Sb3PolicyCfg(policy=AsymmetricActorCriticPolicy if critic_observations == "official" else "MlpPolicy", kwargs={
         "activation_fn": torch.nn.ELU,
         "net_arch": {"pi": list(agent_cfg.actor.hidden_dims),
                      "vf": list(agent_cfg.critic.hidden_dims)},
