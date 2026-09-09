@@ -11,7 +11,7 @@ tags:
   - sim-to-real
 ---
 
-> 最新行为复查（2026-09-09 02:29 UTC）：八组 8192 环境训练中，两组 MuJoCo StandUp 已完成（RSL 3/4、SB3 0/4），Newton RSL StandUp 在 6000–13000 的多个 checkpoint 原生四姿态通过，跨后端/CPU 与多种子验收仍待最终评估；Newton RSL Walking 已有前进/转向响应但横向 RMSE 未通过。Newton SB3 StandUp 连续十次 0/4 且 KL 仍过冲，按用户既有要求停止并保留完整 10000 轮 checkpoint；其余五组继续。SB3 当前 critic 仅用 61D actor 观测，官方 RSL critic 为 74D；PPO 更新与归一化也有差异，尚未实现训练条件等价，不能将失败归因于框架本身。见 [行为与框架诊断](reports/rl-framework-status-2026-09-09.md)。以下 2026-09-08 条目为历史快照，已被本条最新状态覆盖。
+> 最新行为复查（2026-09-09 02:29 UTC）：八组 8192 环境训练中，两组 MuJoCo StandUp 已完成（RSL 3/4、SB3 0/4），Newton RSL StandUp 在 6000–13000 的多个 checkpoint 原生四姿态通过，跨后端/CPU 与多种子验收仍待最终评估；Newton RSL Walking 已有前进/转向响应但横向 RMSE 未通过。Newton SB3 StandUp 连续十次 0/4 且 KL 仍过冲，按用户既有要求停止并保留完整 10000 轮 checkpoint；其余五组继续。SB3 当前 critic 仅用 61D actor 观测，官方 RSL critic 为 74D；PPO 更新与归一化也有差异，尚未实现训练条件等价，不能将失败归因于框架本身。见 [行为与框架诊断](reports/rl-framework-status-2026-09-09.md)。相关实现与诊断已合入 main（`6902943`），后续从 main 开独立修复分支。以下 2026-09-08 条目为历史快照，已被本条最新状态覆盖。
 
 > 进程清理（2026-09-08）：已结束旧 `shared-gpu7-0908-01` 的五个暂停训练及其附属服务，共 26 个进程，释放 GPU 7 约 23.2 GiB 显存。当前八组训练、两组原版对照及有效视频任务继续；保留 checkpoint/normalizer 的哈希未变。审计：`outputs/maintenance/process-cleanup-0908-01/result.json`。
 

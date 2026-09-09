@@ -118,8 +118,8 @@ runtime snapshot, checkpoint history, TensorBoard scalar summaries, inspected
 video contact sheets and `stop-newton-sb3-standup.json`.
 Videos: `outputs/previews/fixed-8192-0908-01/index.html`.
 
-Version-control handoff: the accumulated RL operations branch is being integrated
-into `main` before a fresh `fix/sb3-official-critic` branch. Merge checks passed:
+Version-control handoff: the accumulated RL operations branch is integrated
+into `main` at `6902943` before a fresh `fix/sb3-official-critic` branch. Merge checks passed:
 26 tests and 9 subtests covering campaign options, preparation/recovery, GPU
 staging, previews, scaling, CPU BAM, evaluation scoring and SB3 checkpointing.
 No new SB3 critic implementation is included in this status review.

@@ -3,7 +3,7 @@
 Updated 2026-09-09. The product scope remains the Agentic Microduck Project Design.
 Implementation proceeds by domain, with interfaces for later capabilities and
 explicit evidence for implemented functionality. Task-family organization, single-GPU pipeline fixes and full-training campaigns
-are merged into `main` at `5ef433b`. Submitted training keeps source `1f45996`. No public policy upload has occurred.
+are merged into `main` at `5ef433b`. Submitted training keeps source `1f45996`. No public policy upload has occurred. The accumulated RL operations, fixes and September 9 behavior diagnosis are now merged into `main` at `6902943`; active training retains source `3070b71`.
 
 Latest behavior review (2026-09-09 02:29 UTC): five of the new 8192-env learners
 continue, two MuJoCo StandUp runs completed (RSL 3/4, SB3 0/4), and Newton SB3

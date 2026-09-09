@@ -220,7 +220,7 @@
       "preview_gallery": "outputs/previews/shared-gpu7-0908-02/index.html",
       "historical_snapshot": true
     },
-    "latest_merge": "5ef433b",
+    "latest_merge": "6902943d7230746c20b159f54ecaabbf8397561e",
     "official_baseline_reproduction": {
       "state": "learned_behavior_unverified",
       "baseline": "mujoco_rsl_rl",
@@ -503,7 +503,8 @@
       "newton_rsl_walking": "command_response_present_lateral_rmse_failed",
       "mujoco_rsl_standup": "final_three_of_four_native_both_backends_and_cpu",
       "mujoco_sb3_standup": "final_zero_of_four_native_both_backends_and_cpu",
-      "framework_equivalence": "open_sb3_61d_critic_vs_rsl_74d_and_native_ppo_normalizer_differences"
+      "framework_equivalence": "open_sb3_61d_critic_vs_rsl_74d_and_native_ppo_normalizer_differences",
+      "integration_merge": "6902943d7230746c20b159f54ecaabbf8397561e"
     },
     "current_full_training_campaign": {
       "config": "configs/experiments/representative-8192.json",
