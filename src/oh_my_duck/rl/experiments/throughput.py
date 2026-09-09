@@ -1,0 +1,135 @@
+"""Train each combination as soon as its own gates pass; CPU stages release GPUs."""
+import argparse
+import json
+import os
+from pathlib import Path
+import signal
+import subprocess
+import sys
+import time
+from oh_my_duck.core.paths import project_root
+from .campaign import load_plan, worker_environment
+
+
+def main():
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument('--config', type=Path, required=True)
+    parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--gpus', required=True)
+    parser.add_argument('--preview-gpu', required=True)
+    parser.add_argument('--pause-preview-launch', type=Path, help='Temporarily pause an identified background preview during isolated calibration')
+    args = parser.parse_args()
+    root = project_root()
+    plan = load_plan(args.config)
+    if 'environment_search' not in plan:
+        parser.error('An environment_search plan is required')
+    if not all(x.isdecimal() for x in args.gpus.split(',')) or not args.preview_gpu.isdecimal():
+        parser.error('Use explicit numeric GPU ordinals')
+    output = args.output.resolve()
+    output.mkdir(parents=True, exist_ok=False)
+    report = {'status': 'preparing', 'gpus': args.gpus, 'preview_gpu': args.preview_gpu,
+              'source_commit': subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=root, text=True).strip()}
+    environment = worker_environment(args.gpus, output.name)
+    children = []
+    paused = None
+    def resume_preview():
+        nonlocal paused
+        if paused is not None:
+            stat = Path(f'/proc/{paused["pid"]}/stat')
+            if stat.exists() and stat.read_text().rsplit(')', 1)[1].split()[19] == paused['start_ticks']:
+                os.killpg(paused['pid'], signal.SIGCONT)
+            report['preview_pause']['status'] = 'resumed'
+            paused = None
+
+    def save():
+        temporary = output / 'result.json.tmp'
+        temporary.write_text(json.dumps(report, indent=2) + '\n')
+        temporary.replace(output / 'result.json')
+    def stop(signum, frame):
+        # Campaign owns its worker process groups and forwards termination.
+        for child in children:
+            if child.poll() is None:
+                child.send_signal(signum)
+        resume_preview()
+        report['status'] = 'interrupted'
+        save()
+        raise SystemExit(128 + signum)
+    for sig in (signal.SIGINT, signal.SIGTERM):
+        signal.signal(sig, stop)
+    def launch(name, command):
+        with (output / (name + '.log')).open('x') as log:
+            child = subprocess.Popen(command, cwd=root, env=environment, stdout=log,
+                                     stderr=subprocess.STDOUT, start_new_session=True)
+        children.append(child)
+        report[name] = {'pid': child.pid, 'command': command}
+        save()
+        return child
+    save()
+    try:
+        from oh_my_duck.rl.backends.isaac_newton.paths import require_asset
+        from oh_my_duck.rl.training.tasks import project_tasks
+        models = {project_tasks().get(spec['task']).model for spec in plan['runs'] if spec['backend'] == 'isaac-newton'}
+        report['verified_newton_assets'] = {model: str(require_asset(model)) for model in sorted(models)}
+        save()
+        if args.pause_preview_launch:
+            identity = json.loads(args.pause_preview_launch.read_text())
+            pid = identity['pid']
+            stat = Path(f'/proc/{pid}/stat').read_text().rsplit(')', 1)[1].split()
+            command = Path(f'/proc/{pid}/cmdline').read_bytes().replace(b'\0', b' ').decode()
+            if stat[19] != str(identity['start_ticks']) or os.getpgid(pid) != pid or '/outputs/previews/' not in command:
+                raise RuntimeError('Preview process identity does not match; refusing to signal')
+            paused = {'pid': pid, 'start_ticks': str(identity['start_ticks'])}
+            os.kill(pid, signal.SIGSTOP)
+            report['preview_pause'] = {**paused, 'status': 'paused_for_isolated_calibration'}
+            save()
+            # Pause only the controller. Its already-started export/video must
+            # finish normally, releasing CUDA before any benchmark can start.
+            while True:
+                active = []
+                for proc in Path('/proc').iterdir():
+                    if not proc.name.isdecimal() or int(proc.name) == pid:
+                        continue
+                    try:
+                        fields = (proc/'stat').read_text().rsplit(')', 1)[1].split()
+                        if int(fields[2]) == pid and fields[0] not in ('Z', 'X'):
+                            active.append(int(proc.name))
+                    except (FileNotFoundError, ProcessLookupError):
+                        pass
+                if not active:
+                    break
+                report['preview_pause']['draining_children'] = active
+                save()
+                time.sleep(2)
+            report['preview_pause']['draining_children'] = []
+            save()
+        report['status'] = 'preparing_and_training_independently'
+        full = launch('full', [sys.executable, '-m', 'oh_my_duck.rl.experiments.campaign',
+            '--config', str(args.config.resolve()), '--output', str(output/'full'), '--gpu-stage-pool'])
+        while not (output/'full/campaign.json').exists():
+            if full.poll() is not None:
+                raise RuntimeError('Campaign exited before writing its manifest')
+            time.sleep(1)
+        previews = launch('previews', [sys.executable, '-m', 'oh_my_duck.rl.experiments.preview',
+            '--campaign', str(output/'full'), '--output', str(output/'previews'),
+            '--gpu', args.preview_gpu, '--watch'])
+        while full.poll() is None:
+            # Scheduling only: no intermediate policy/reward diagnosis.
+            progress = [output/'full'/spec['id']/'result.json' for spec in plan['runs']]
+            rows = [json.loads(p.read_text()) for p in progress if p.exists()]
+            if len(rows) == len(progress) and all('full' in row['stages'] or row['status'] == 'execution_failed' for row in rows):
+                resume_preview()
+            time.sleep(5)
+        report['full_exit_code'] = full.wait()
+        report['preview_exit_code'] = previews.wait()
+        report['status'] = json.loads((output/'full/campaign.json').read_text())['status']
+    except Exception as error:
+        report.update(status='execution_failed', error=repr(error))
+        raise
+    finally:
+        resume_preview()
+        save()
+    return report['full_exit_code']
+
+
+if __name__ == '__main__':
+    raise SystemExit(main())

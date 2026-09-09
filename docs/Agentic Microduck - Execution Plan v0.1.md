@@ -4,16 +4,34 @@ title: Agentic Microduck — 分步执行计划
 version: 0.2
 status: In progress
 created: 2026-09-06
-updated: 2026-09-07
+updated: 2026-09-09
 tags:
   - microduck
   - implementation-plan
   - sim-to-real
 ---
 
-> 当前实现状态（2026-09-07）：源码按 `src/oh_my_duck/{rl,agentic,robotics,core,perception,voice,experience,infrastructure,cli}` 分域，旧 `training/` 包已移除。两个代表任务、两个仿真后端与两个原生 PPO 已有 smoke/恢复/导出证据；行为、sim2sim 和最终统一验收单独记录。单卡本机运行，多卡才提交 job；W&B 离线。采用“模块成批实现 → 静态/CPU 检查 → 必要物理门槛 → 统一端到端验收”的开发节奏。结构重构、单卡 pipeline 修复和完整训练编排已合入 main（5ef433b）：8/8 短训练、恢复、导出与本地打包通过；全部 8 个组合已完成单卡训练/恢复/导出/打包及双后端、CPU/BAM 回放；60 段 720p 视频和 61/14 轨迹已检查。MuJoCo 显式使用 OSMesa 渲染，Isaac 保持原生 Newton；SB3 课程进度恢复已补齐并验证。短训练策略均未通过行为标准，长训练收敛与已启动运行的 Newton 多卡任务（a52ff51b）验收尚未完成。详见 [当前状态](implementation-status.md) 与 [端到端证据](reports/rl-pipeline-acceptance.md)。
+> 最新行为复查（2026-09-09 02:29 UTC）：八组 8192 环境训练中，两组 MuJoCo StandUp 已完成（RSL 3/4、SB3 0/4），Newton RSL StandUp 在 6000–13000 的多个 checkpoint 原生四姿态通过，跨后端/CPU 与多种子验收仍待最终评估；Newton RSL Walking 已有前进/转向响应但横向 RMSE 未通过。Newton SB3 StandUp 连续十次 0/4 且 KL 仍过冲，按用户既有要求停止并保留完整 10000 轮 checkpoint；其余五组继续。SB3 当前 critic 仅用 61D actor 观测，官方 RSL critic 为 74D；PPO 更新与归一化也有差异，尚未实现训练条件等价，不能将失败归因于框架本身。见 [行为与框架诊断](reports/rl-framework-status-2026-09-09.md)。以下 2026-09-08 条目为历史快照，已被本条最新状态覆盖。
 
-> RL 组织与训练计划（2026-09-07）：任务按家族目录组织，每个目录分离 `environment.py` 与 `ppo.py`；共享 MDP、仿真后端和原生 learner 保持独立。完整训练使用单节点 8 GPU，每卡独立训练一个 Walking/StandUp × MuJoCo/Newton × RSL-RL/SB3 组合，4096 环境/卡，采用任务默认 50,000/15,000 轮；每 250 轮保存 checkpoint。完整训练已提交：`omd-rl-full-0907-01`（队列 `local-662cf40c7dfb`，提交时 Pending），固定源码 `1f45996`。提交前检查、实际 job 状态和行为验收见 [训练计划](rl-campaigns.md) 与 [当前进度](implementation-status.md)。
+> 进程清理（2026-09-08）：已结束旧 `shared-gpu7-0908-01` 的五个暂停训练及其附属服务，共 26 个进程，释放 GPU 7 约 23.2 GiB 显存。当前八组训练、两组原版对照及有效视频任务继续；保留 checkpoint/normalizer 的哈希未变。审计：`outputs/maintenance/process-cleanup-0908-01/result.json`。
+
+> 最新决定（2026-09-08）：按用户要求，八个代表性训练组合统一使用 **8192 环境**，停止进一步扩容测速。复用已完成且配置一致的 64-env/5-update、导出、CPU 视频和 8192 容量证据；不足的门槛逐组补齐后立即完整训练。新八组分配到八张卡，原有对照在 0/7 保留并共享资源；W&B offline，每 1000 更新保存 checkpoint。配置：`configs/experiments/representative-8192.json`。`fixed-8192-0908-01` 已启动；八组均已通过所需门槛并产生完整 PPO 训练更新；实际 GPU 进程和 W&B offline 已核验。见 [固定规模训练记录](reports/rl-fixed-8192-2026-09-08.md)。
+
+> 最新训练矩阵与环境选档（2026-09-08）：按用户要求，两个代表任务 × MuJoCo/Isaac-Newton × RSL-RL/SB3 都进入训练计划。每个组合按预热后的实际 PPO 吞吐选择环境数，保留 15% VRAM 余量，不统一锁死为 8192，也不盲目填满显存。已有原版对照保留；空闲卡分批准备和训练，其他项目占用的卡不动。`measured-env-0908-03`（固定源码 `f9fcf80`）已在 1/6/2/3/4/5 六卡通过首批六组 64-env/5-update 训练检查，其余两个 Newton+SB3 组合等空闲卡。导出、回放及吞吐选档继续；编排已改为每组通过自己的门槛即进入完整训练，取消八组等齐；新 worker 的 CPU 回放释放 GPU 名额。当前在运行的准备保留，`independent-full-0908-01`（源码 `392776a`）已启动衔接编排，每组准备完成即可接入长训练，不重复测量；交接检查时尚无新组进入 full。前两次启动问题及产物保留；20 项测试及 9 个子测试通过，行为复现仍待验收。见 [环境选档记录](reports/rl-environment-selection-2026-09-08.md)。
+
+> 最新训练观察方式（2026-09-08）：不再由助手持续轮询/分析训练；后台每 1000 次原生 PPO 更新（每环境 24000 个控制 steps）保存 checkpoint 视频，并保留最终 checkpoint 视频。中途不再执行多种子诊断；两组原版训练结束后统一做 CPU/BAM 视频和 16 组重置评估。已有训练继续，原中途诊断和旧预览 watcher 已由新后台视频 worker 替换。视频画廊：`outputs/previews/official-periodic-0908-01/index.html`。
+
+> 最新资源授权（2026-09-08）：用户重新开放空闲 GPU。Walking 保持 GPU 7；StandUp 已从 2000 轮完整 checkpoint 在 GPU 0 原生续训，配置/课程恢复检查通过；评估使用 GPU 1。GPU 0 后续进入其他用户任务，吞吐受干扰。Walking 的 4096/8192/16384 环境吞吐测试有效，其中 8192 最好；32768 受后来进入的其他用户八卡任务干扰，后续 StandUp 扩容测试已停止，尚未改变长训练规模。两组仍各 4096 环境、headless、W&B offline。按同课程阶段的任务趋势和固定姿态回放决定继续或停止，不凭总 reward 或预算盲目续训。见 [资源与训练评审](reports/official-training-resource-review-2026-09-08.md)。
+
+> 最新官方核查（2026-09-08）：历史 Velocity2 与当前固定 Velocity 的六组 train/play 配置仅日志命名不同，StandUp 配置一致；发布 Walking/StandUp 的字节哈希已追溯到官方 runtime 提交，但确切训练 run 仍未知。CAD 重导出未发现大幅接触凸包变化。原版与 owned 的 1500 轮回放都未通过完整任务；目前仅两组官方原版在 GPU 7、4096 环境/组、W&B offline 继续训练。owned/部分 Newton 保持暂停，第二项调参实验未启动。检查器已修正续训 checkpoint 路径并独立跟踪两项原版任务。以下较早日期的状态为历史记录；最新证据见 [官方历史核查](reports/official-source-history-2026-09-08.md) 和 [实现状态](implementation-status.md)。
+
+> 当前实现状态（2026-09-07）：源码按 `src/oh_my_duck/{rl,agentic,robotics,core,perception,voice,experience,infrastructure,cli}` 分域，旧 `training/` 包已移除。两个代表任务、两个仿真后端与两个原生 PPO 已有 smoke/恢复/导出证据；行为、sim2sim 和最终统一验收单独记录。单卡本机运行，多卡才提交 job；W&B 离线。采用“模块成批实现 → 静态/CPU 检查 → 必要物理门槛 → 统一端到端验收”的开发节奏。结构重构、单卡 pipeline 修复和完整训练编排已合入 main（5ef433b）：8/8 短训练、恢复、导出与本地打包通过；全部 8 个组合已完成单卡训练/恢复/导出/打包及双后端、CPU/BAM 回放；60 段 720p 视频和 61/14 轨迹已检查。MuJoCo 显式使用 OSMesa 渲染，Isaac 保持原生 Newton；SB3 课程进度恢复已补齐并验证。短训练策略均未通过行为标准，长训练收敛与 Newton 多卡验收尚未完成；旧任务 a52ff51b 于 2026-09-08 查询时已不存在于平台 API，不能作为通过证据。详见 [当前状态](implementation-status.md) 与 [端到端证据](reports/rl-pipeline-acceptance.md)。
+
+> RL 组织与训练计划（2026-09-07）：任务按家族目录组织，每个目录分离 `environment.py` 与 `ppo.py`；共享 MDP、仿真后端和原生 learner 保持独立。完整训练使用单节点 8 GPU，每卡独立训练一个 Walking/StandUp × MuJoCo/Newton × RSL-RL/SB3 组合，4096 环境/卡，采用任务默认 50,000/15,000 轮；每 250 轮保存 checkpoint。完整训练状态更新（2026-09-08）：`omd-rl-full-0907-01`（平台 ID `b2bab260`）已 Failed；日志为空、无可查询 pod，原因未确定，未生成训练 manifest。按用户最新指示，已在本机 8 张 H200 启动独立尝试 `full-local-0908-01`，沿用固定源码 `1f45996` 和原训练预算；截至 2026-09-08 02:08 UTC，8/8 已进入正式训练，初期 reward 有提升，但 SB3 StandUp 存在明显回撤；完整训练与行为验收尚未完成。见 [reward 记录](reports/reward-trends-2026-09-08.md)。提交前检查、实际 job 状态和行为验收见 [训练计划](rl-campaigns.md) 与 [当前进度](implementation-status.md)。
+
+> 训练处置更新（2026-09-08）：已停止退化的 MuJoCo SB3 两组，保留全部产物；其余六组从 native checkpoint 集中到 GPU 7 续训，其他卡留给用户项目。新增 `omd preview` 周期 checkpoint 视频画廊；初期视频只显示部分能力，未通过完整行为验收。SB3 固定学习率的 KL 过冲已有对照证据，新增显式学习率参数用于独立实验，未改动保留训练或官方任务语义。见 [处置与诊断记录](reports/rl-recovery-2026-09-08.md)。 04:04 UTC 复查后，Newton SB3 StandUp 因回报回落、高 KL 和回放四种姿态均未通过，也已暂停诊断；现在五组在 GPU 7 继续。
+
+> 官方复现边界：MuJoCo + RSL-RL 才是官方基线，SB3/Newton 属于扩展。流程验证不等于学到官方能力；原版与重构版的同条件训练/评估对照尚未完成。静态审计还发现 StandUp reset 的跨后端写入改写待数值验证，不能先断言它等价或是失败原因。见 [官方基线审计](reports/official-baseline-audit-2026-09-08.md)。
 
 # Agentic Microduck · 分步执行计划 v0.2
 
@@ -431,3 +449,75 @@ tags:
 **执行方式更新（2026-09-06，用户最新指示）**：单 GPU 开发、验证和训练直接在开发机 headless 运行；涉及多 GPU 的实验再提交 job。此前已提交任务保留其独立证据记录。
 
 **Newton 任务接入更新（2026-09-06）**：Walking/StandUp 已通过实际物理与 MDP 门槛并注册共用运行时；StandUp 使用项目内 Isaac manager 在 graph 捕获前精确编译官方接触规则。两个原生 PPO 共用任务入口，恢复、导出及行为验收继续按独立门槛记录。导出的官方 MuJoCo 元数据参考与策略训练后端分别标注。详见 `docs/reports/domain-refactor.md`。
+
+
+### 2026-09-08：当前目标为官方效果复现，再验证扩展效果
+
+先复现 MuJoCo/native RSL-RL 的 Walking 与 StandUp，再让 Newton 与 SB3 达到
+相同任务标准；不以 smoke、reward 上升或流程完成替代策略效果。官方固定 commit
+的独立对照环境仅用于实验，不成为项目运行时依赖。两任务原版/重构版的编译模型、
+初始观测和 reset 状态已对照，四个 64-env/5-iteration PPO smoke 已完成。
+
+GPU 7 上现有四条 MuJoCo 长训练：原版与重构版各训练两个代表任务。原版使用
+seed 42、4096 环境和官方完整预算（Walking 50,000 / StandUp 15,000 轮）；
+归一化导出与数值对照已通过。三个 Newton 学习器用 SIGSTOP 暂挂，保留进程及
+checkpoint，后续验证身份再 SIGCONT；三个此前停止的 SB3 尝试单独保留。
+所有训练 headless、W&B offline，尚未达到长期行为验收标准。
+
+Walking scoring v2 保留稳定性/误差检查，并要求每个运动指令阶段至少 50%
+同方向平均响应，排除原地站立误判；它不改变官方 reward，也不单独代表步态达标。
+CPU BAM 已修正 joint/DOF 摩擦约束索引并通过 3 项真实物理/reset 测试。
+修正后 A/B 回放完成，但 Walking 2000 和已发布 alpha 仍基本不前进，StandUp
+2500 仍只通过站姿/坐姿，未通过俯卧/仰卧起立。不能把该修复当作收敛问题已解决。
+相同状态的干净 61 维观测与速度坐标数值对照通过。250 轮原版/重构版对照已完成，
+两边均未通过完整任务，早期 reward 接近；没有证据将早期不足归因于重构，
+但长期效果与多 seed 行为仍待验证。
+
+详细诊断、失败尝试、资源测量和视频证据集中在
+[baseline audit](reports/official-baseline-audit-2026-09-08.md)；当前优先完成
+官方与重构版同训练轮数的行为对照，再推进扩展验收。
+
+
+**当前诊断更新（2026-09-08）**：修正后的 CPU/BAM 八组合执行重验已完成，20 个
+720p 视频及有限 61/14 轨迹通过检查；短策略的行为仍全部失败。StandUp 在相同
+16 组 reset 样本中的坐姿起立通过数由 2000/2250 轮的 13 降到 2500/2750 轮的
+10/8，俯卧及仰卧始终为 0。项目内该训练已在 2985 轮暂停并保留进程，原版双任务
+和项目内 Walking 继续。课程恢复计数与实际阶段对照正常。另开受控实验遵循官方
+源码建议，只将身体角速度惩罚减半；原版及默认配方不变。2250 轮中间评估的
+坐姿起立由 13/16 改善为 16/16，但俯卧/仰卧仍各为 0/16，尚未复现恢复能力。
+实验继续到固定的 2500 轮，再完成成对采样及视频验证。
+详见 [StandUp recovery diagnosis](reports/standup-recovery-diagnosis-2026-09-08.md)。
+
+
+**SB3 实验入口补充**：campaign 可逐 run 声明原生 SB3 `learning_rate`，所有训练
+阶段一致传递；恢复时不能用不同学习率的旧检查结果跳过前置验证。四组合 1e-4
+配置已准备并通过 dry run，但尚未启动或验证收敛。官方任务配方和 RSL 原生自适应
+PPO 保持不变。详见 [RL campaigns](rl-campaigns.md)。
+
+
+**成功策略参照（2026-09-08）**：官方发布的 `alpha_stand` 在项目 CPU/BAM 中通过
+16 组起始采样 × 4 姿态（64/64）及四个视频回放，原生 MuJoCo 与 Isaac/Newton 各四场景也通过。
+这证明当前接口/CPU 模型能够执行真实恢复动作，但该发布文件缺少具体训练
+checkpoint 来源，不能替代我们自己的训练复现。两后端共八个原生视频已通过检查；
+Newton 使用已约定的 `SolverMuJoCo` 路径。
+轨迹、接触与视频证据见 [published-policy reference](reports/published-policy-reference-2026-09-08.md)。
+
+
+**行为验收补充（2026-09-08）**：Walking 3000 在普通原生回放中前进响应为 36.4%，
+只把推力设为零便降到 0.98%；转向仍有 83.4%。固定条件的原生回放和 CPU/BAM
+都近乎静止，因此不能把受推后的运动算作自主步行。40 组同输入 BAM 计算对照通过，
+积分器及固定延迟对照均未恢复步态。项目内 Walking 已在 3299 轮暂停，保留 3250
+checkpoint；原版双任务继续。角速度惩罚减半的 StandUp 实验完成 2500 轮，
+成对坐姿起立由默认 10/16 提高为 15/16，但俯卧/仰卧仍各 0/16，尚未达到目标。
+原版/重构版 1000 轮对照也均未通过完整任务。详见
+[Walking diagnosis](reports/walking-transfer-diagnosis-2026-09-08.md) 和
+[StandUp diagnosis](reports/standup-recovery-diagnosis-2026-09-08.md)。
+
+
+**优先级确认**：用户再次明确先复现官方配方的训练能力，再验证项目内相同配方，
+然后完成 Newton/SB3 等价扩展。准备中的第二个 StandUp 动作变化惩罚实验未启动，
+暂缓调参支线；不将诊断配方写入默认任务。已有角速度诊断的八个最终视频和本地
+策略包检查完成，但恢复能力仍不合格。可查看本地视频对照页
+`outputs/previews/review-0908-01/index.html`，其中明确区分默认自训练、官方发布参照
+和调参诊断。官方发布权重对应的具体训练 run 来源仍需查清，不能假定它与当前
+固定版本默认配方相同。

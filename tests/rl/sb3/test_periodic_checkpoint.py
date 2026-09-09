@@ -44,5 +44,12 @@ def test_periodic_bundle_is_resumable_with_normalizer_and_progress(tmp_path):
     assert restored_norm.obs_rms.count > 16
     restored.learn(8, reset_num_timesteps=False)
     assert restored.num_timesteps == 24
+    # Native resume loads optimizer state too; the explicit new schedule must
+    # take effect on the next actual update rather than retain the saved rate.
+    retuned = PPO.load(last/'model.zip', env=restored_norm, device='cpu', learning_rate=1e-4)
+    retuned.learn(8, reset_num_timesteps=False)
+    assert retuned.num_timesteps == 24
+    assert all(group['lr'] == 1e-4 for group in retuned.policy.optimizer.param_groups)
+    assert retuned.lr_schedule(0.5) == 1e-4
     restored_norm.close()
     vector.close()

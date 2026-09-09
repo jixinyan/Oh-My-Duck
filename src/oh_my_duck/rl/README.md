@@ -1,7 +1,7 @@
 # Reinforcement learning
 
 Choose the task first, then the simulation backend and native PPO framework.
-Use `python omd.py tasks`, `train`, `campaign`, `export`, `compare`, `rehearsal`
+Use `python omd.py tasks`, `train`, `campaign`, `preview`, `export`, `compare`, `rehearsal`
 and `package` from the repository root. Generic simulators and PPO remain dependencies;
 Microduck environment definitions, motors and policy contracts are owned source.
 
@@ -21,7 +21,7 @@ rl/
 ├── backends/              MuJoCo and Isaac/Newton simulation adapters
 ├── learners/              native RSL-RL and SB3 training/checkpoints
 ├── training/              task/runtime/framework registration
-├── experiments/           independent per-GPU campaign orchestration
+├── experiments/           campaigns, checkpoint recovery and video previews
 ├── artifacts/             normalization-aware export and local packaging
 └── evaluation/            task batteries, sim2sim, CPU/BAM and video
 ```
@@ -49,3 +49,14 @@ not alternate reward definitions.
 See the repository's `docs/rl-task-extension.md` and `docs/rl-campaigns.md` for
 extension details, full training and checkpoint recovery. Registration and a
 completed process do not prove that a policy learned the requested behavior.
+
+
+For pinned-original reproduction controls, run `experiments/baseline_probe.py`
+with each isolated environment's Python. It records compiled model arrays,
+configs, resets and action traces; `--reference-reset` checks the exact original
+reset function against owned Entity writes in a real MuJoCo environment. Original
+sources must come from an isolated pinned archive, never a runtime cache import.
+The export audit supports `--implementation official` only in an environment
+without the owned package. Use Python `-P` when invoking its file directly to
+avoid shadowing the installed MuJoCo package. These diagnostics do not certify
+learned behavior. See the baseline audit report for the current controls.

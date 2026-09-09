@@ -1,9 +1,89 @@
 # Implementation status
 
-Updated 2026-09-07. The product scope remains the Agentic Microduck Project Design.
+Updated 2026-09-09. The product scope remains the Agentic Microduck Project Design.
 Implementation proceeds by domain, with interfaces for later capabilities and
 explicit evidence for implemented functionality. Task-family organization, single-GPU pipeline fixes and full-training campaigns
 are merged into `main` at `5ef433b`. Submitted training keeps source `1f45996`. No public policy upload has occurred.
+
+Latest behavior review (2026-09-09 02:29 UTC): five of the new 8192-env learners
+continue, two MuJoCo StandUp runs completed (RSL 3/4, SB3 0/4), and Newton SB3
+StandUp was intentionally stopped after ten consecutive 0/4 previews and
+persistent excessive KL. Its update-10000 bundle is preserved and hash-verified.
+Newton RSL StandUp repeatedly passes its native four-pose battery; final
+sim2sim/CPU and multi-seed acceptance remain open. Newton RSL Walking responds
+to forward/yaw commands but misses the lateral RMSE gate. Current SB3 critic
+input is actor-only 61D versus official RSL's separate 74D input, alongside
+native PPO/normalizer differences. Learner equivalence has not been established.
+See [behavior and framework review](reports/rl-framework-status-2026-09-09.md).
+The following September 8 operational paragraphs are historical snapshots.
+
+Unused-process cleanup completed: all 26 processes in the old paused
+`shared-gpu7-0908-01` tree exited, releasing 23.2 GiB on GPU 7. Current eight
+learners, original controls and preview workers remain active; retained checkpoint
+hashes are unchanged. See the fixed-size training report for the cleanup audit.
+
+Latest user decision supersedes environment sweeps: all eight new combinations
+use 8192 environments. Scaling and the old handover were explicitly stopped;
+completed matching gates will be reused, with missing gates run independently.
+`configs/experiments/representative-8192.json` keeps native PPO and task budgets,
+SB3 learning rate 1e-4, and offline W&B. All eight full learners have produced PPO updates and passed startup checks;
+each uses 8192 environments. Live process checks confirm offline W&B. Campaign `fixed-8192-0908-01`, source `3070b71`.
+See [fixed-size launch evidence](reports/rl-fixed-8192-2026-09-08.md).
+
+Latest scope: train both tasks across both owned backends and both native PPO
+frameworks. `measured-env-0908-03` (source `f9fcf80`) is preparing on GPUs
+1/6/2/3/4/5: six initial 64-env/5-update training smokes passed; Newton SB3
+Walking/StandUp are queued for the next free card. All eight environment counts
+remain to be selected from measured PPO throughput with 15% VRAM headroom.
+Full training now starts per combination after its own gates pass. The old
+global-barrier supervisor is paused while its live preparations continue.
+`independent-full-0908-01` (source `392776a`) now adopts each completed
+preparation independently; at startup, all new full learners still awaited their
+own remaining gates. New campaigns release GPU slots during CPU stages. Original controls continue on 0/7. Their preview controller is temporarily
+paused and will automatically resume after isolated calibration. Prior failed
+startup artifacts are preserved. See [selection and startup evidence](reports/rl-environment-selection-2026-09-08.md).
+
+Latest user preference: no continuous LLM training polling. A background worker
+saves native videos every 1000 PPO updates (24000 control steps per environment)
+and at the final checkpoint; unified CPU video/16-reset diagnosis runs after both
+original learners end. Earlier intermediate milestone and paused-owned preview
+watchers were replaced. Gallery: `outputs/previews/official-periodic-0908-01/index.html`.
+
+Earlier official-first phase: original MuJoCo Walking/StandUp continue. The user
+reopened idle GPUs: Walking remains on GPU 7; StandUp migrates from checkpoint
+2000 to GPU 0 through native resume; configuration/curriculum audit passed.
+GPU 0 later became shared with a foreign process. Diagnostics use GPU 1; a separate
+Walking throughput benchmark measured 4096/8192/16384 on GPU 3, with 8192 best
+at 98k samples/s. A foreign eight-GPU job confounded the 32768 case and stopped
+the sweep before StandUp. Long learners retain 4096. Original StandUp sitting
+success remains 15/16 at checkpoint 2500; prone/supine remain 0/16. Eight original
+checkpoint-2000 CPU/native StandUp videos are checked. See [resource/progress review](reports/official-training-resource-review-2026-09-08.md).
+Owned default Walking (3299) and StandUp (2985) are paused for diagnosis; three
+Newton learners remain suspended and three earlier SB3 attempts stopped. Walking
+3000 has only 0.98% forward response when native pushes are zeroed, despite 36.4%
+in its standard preview; it also nearly stops in nominal native and CPU replay.
+The official-guided StandUp angular-penalty diagnostic completed 2500: paired
+sitting improves from default 10/16 to 15/16, but prone/supine remain 0/16 each.
+All eight final CPU/native videos and local packaging are checked; own-policy
+behavior reproduction remains open. The user reaffirmed official-recipe-first
+reproduction; the prepared second tuning experiment is deferred and was not launched.
+
+Official history audit confirms six historical/current train/play configurations
+differ only in Walking logging names. Published policy bytes are traced to official
+runtime commits; their exact training run remains unknown. At checkpoint 1500,
+both original/owned Walking nearly stand still in CPU replay; neither StandUp
+recovers from prone/supine. A replacement observer fixes resumed checkpoint lookup
+and advances original task assessments independently while owned runs are paused.
+See [source-history evidence](reports/official-source-history-2026-09-08.md).
+
+The corrected CPU/BAM matrix now completes all eight preserved acceptance policies
+with finite 61/14 traces and 20 checked videos; all short policies still fail
+behavior. Native previews use scoring v2 (`outputs/previews/shared-gpu7-0908-02`).
+See [baseline audit](reports/official-baseline-audit-2026-09-08.md) and
+[StandUp diagnosis](reports/standup-recovery-diagnosis-2026-09-08.md), and
+[Walking condition/transfer diagnosis](reports/walking-transfer-diagnosis-2026-09-08.md).
+SB3 campaign learning-rate routing is tested; a four-combination 1e-4 configuration
+is prepared but not launched. Default task recipes and native PPO algorithms remain unchanged.
 
 | Component | Current state |
 |---|---|
@@ -15,10 +95,11 @@ are merged into `main` at `5ef433b`. Submitted training keeps source `1f45996`. 
 | MuJoCo RL | Both representative tasks × both native PPO frameworks passed the single-GPU lifecycle and completed replay |
 | Isaac/Newton RL | Both representative tasks × both native PPO frameworks passed the single-GPU lifecycle and completed replay |
 | Newton physics | Actual solver, canonical state/sensors, precise collisions, BAM cadence, DR and penalties audited |
+| Published StandUp reference | Official frozen policy passes 64/64 CPU reset samples and 4/4 cases in each native backend; 12 videos checked; own training reproduction remains open |
 | Task behavior | All five-iteration policies fail behavior gates; long training and convergence acceptance remain |
 | Task replay | All 24 replay contexts completed; 60 videos and finite 61/14 traces checked |
-| CPU rehearsal/sim2sim/local packages | All eight policies exported/packaged and replayed in both backends plus CPU/BAM |
-| Multi-GPU | Native RSL MuJoCo DDP previously passed; Newton DDP running (job `a52ff51b`), acceptance pending; no distributed SB3 gradient claim |
+| CPU rehearsal/sim2sim/local packages | All eight corrected CPU/BAM executions revalidated; 20 videos checked; learned behavior remains unverified |
+| Multi-GPU | Native RSL MuJoCo DDP previously passed; Newton DDP acceptance pending; old job `a52ff51b` no longer exists in the platform API; no distributed SB3 gradient claim |
 | Hardware | Unavailable; all hardware acceptance deferred |
 
 The consolidated batch at `5971dca` passed training and resume for all eight
@@ -40,8 +121,9 @@ checks passed seven Isaac and two Newton binding tests. Wheel resources/licenses
 bytecode exclusion, three environment locks and local Markdown links were checked.
 See [complete acceptance evidence](reports/rl-pipeline-acceptance.md).
 
-Single-GPU work runs directly on the development host; only multi-GPU experiments
-use scheduler jobs. W&B remains offline. Current host workloads contend for GPUs,
+Single-GPU work runs directly on the development host. Following the scheduled
+campaign failure, the user also authorized the eight-GPU campaign on the local
+H200 host on 2026-09-08; multi-GPU scheduler submission remains available. W&B remains offline. Current host workloads contend for GPUs,
 so observed throughput is not an isolated hardware benchmark.
 
 See [domain refactor evidence](reports/domain-refactor.md),
@@ -72,7 +154,95 @@ checks also passed (two tests). Source/config provenance now includes nested
 experiment manifests. Full submission follows from the committed snapshot.
 
 
-Full training has been submitted as `omd-rl-full-0907-01`, queue ID
-`local-662cf40c7dfb`, source `1f45996`; latest submission state is Pending.
-The single eight-GPU node runs all eight task/backend/framework combinations.
+The scheduled attempt `omd-rl-full-0907-01` (platform ID `b2bab260`, original
+queue ID `local-662cf40c7dfb`) is **Failed**. Its log is empty, the platform exposes
+no log pods, and no campaign manifest exists; the root cause remains unknown.
+A separate local attempt `full-local-0908-01` started on eight H200 GPUs using
+the same immutable source `1f45996` and training budgets. All eight smoke stages
+completed; subsequent gates and full training remain in progress. Failed scheduler
+evidence is preserved; local launch metadata is in
+`outputs/jobs/omd-rl-local-0908-01/launch.json`.
 See [the allocation and evidence record](reports/full-training-2026-09-07.md).
+
+
+At 2026-09-08 02:08 UTC all eight local runs had entered full training. Early
+returns improved relative to initial records; SB3 StandUp shows substantial
+regression from its early peak. No learned behavior acceptance is claimed.
+See [the measured reward snapshot](reports/reward-trends-2026-09-08.md).
+
+
+## Triage and one-GPU continuation — 2026-09-08
+
+The two regressing MuJoCo SB3 runs are stopped with artifacts preserved. Six
+retained runs resumed native checkpoints on GPU 7 at source `b0fa5fe`; the other
+GPUs are released from this campaign. Checkpoint video previews are available at
+`outputs/previews/shared-gpu7-0908-01/index.html`. Early RSL task videos show
+partial skill progress, with no complete behavior acceptance. A controlled native
+SB3 update comparison demonstrates substantially lower KL with smaller learning
+rates; stable long-training convergence is still unvalidated. See the
+[recovery, diagnosis and video report](reports/rl-recovery-2026-09-08.md).
+
+
+At the 2026-09-08 04:04 UTC status review, Newton SB3 StandUp also showed
+return decline (last 50 logged records 11.95 versus 14.45 previously), elevated
+KL (recent values 0.13–0.29) and failure of all four spawn checks on its preceding
+preview. It was paused for diagnosis under the user’s standing instruction. Its
+latest complete checkpoint at cumulative iteration 1500 is preserved with an
+operator-stop record. Five runs continue on GPU 7; this is a triage decision,
+not proof that the stopped configuration could never converge.
+
+
+Official MuJoCo/RSL learned-behavior reproduction remains **unverified**. The
+2026-09-08 static audit aligns task/PPO configuration, 228/229 MDP definitions
+modulo local imports, BAM and core dependency pins, and the subsequent real-runtime audit verifies the Entity-based StandUp reset
+state writes in 15 cases. Matched original/refactor learned-behavior comparison
+remains outstanding. See [baseline audit](reports/official-baseline-audit-2026-09-08.md).
+
+
+Current goal: reproduce official MuJoCo/native RSL learned behavior first, then
+match it in Newton and SB3. Isolated pinned-original StandUp PPO smoke and official
+export/scalar audit passed; both implementations passed 64-env/5-iteration smoke.
+Compiled-model equality, exact reset state/RNG parity and first-reset actor
+observation equality are verified. Repeated original runs also show contact-force
+and trajectory nondeterminism; long-run behavior is still unverified. Walking
+controls and the complete sensor-refresh comparison are in progress. See the
+[baseline audit](reports/official-baseline-audit-2026-09-08.md) for evidence and limits.
+
+
+Walking runtime controls now also match compiled arrays and initial/subset actor
+and critic observations; all four original/owned representative PPO smoke runs
+completed. A published-policy rehearsal exposed a Walking scoring false positive:
+standing almost still met the global RMSE threshold. Scoring v2 now requires signed
+motion response in every commanded segment; the preserved published-policy trace
+is reclassified `behavior_failed`. This changes acceptance scoring, not training
+semantics. Six focused protocol/reset tests pass. See the baseline audit for the
+measured commands, responses and remaining interpretation limits.
+
+
+Official-first resource priority is now active: two owned MuJoCo learners and one
+isolated original StandUp control are training on GPU 7. Three live Newton
+learners are suspended with SIGSTOP, retaining process/checkpoint state for later
+SIGCONT; they are separate from the three earlier stopped SB3 attempts. The
+original control passed 4096-env capacity/export and normalized numerical parity
+before this status update and is running its 15,000-iteration budget. Baseline
+iteration time improved by about 1.5× after suspending extensions. No long-run
+behavior success is claimed. Evidence and safe resumption identity records are
+linked in the [baseline audit](reports/official-baseline-audit-2026-09-08.md).
+
+
+CPU/BAM behavioral acceptance requires revalidation: the pinned CPU controller
+matched DOF-friction constraints by joint ids, unlike the training Warp path.
+The owned CPU adapter now uses actual DOFs while retaining native motor/sag and
+friction formulas. Three real-physics/reset tests pass, including independent
+Jacobian-force projection and unchanged motor torque. Old traces remain preserved;
+corrected policy replay has since completed without restoring the missing behavior (see current baseline audit). This is an evaluation/CPU-load correction,
+not evidence that training converged. See the baseline audit.
+
+
+## Current video review
+
+`outputs/previews/review-0908-01/index.html` links six existing clips with explicit
+labels: default-recipe owned Walking/StandUp, the same Walking policy's CPU
+rehearsal, published StandUp in MuJoCo/Newton, and the separate angular-penalty
+diagnostic. The gallery does not conflate published-policy replay with own
+training success. All six local video targets were checked.

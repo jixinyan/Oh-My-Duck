@@ -4,21 +4,31 @@ import json
 from pathlib import Path
 import numpy as np
 from tensorboard.backend.event_processing.event_accumulator import EventAccumulator
-import mjlab.tasks
-from mjlab.tasks.registry import load_env_cfg
-from oh_my_duck.rl.backends.mujoco.registration import register_tasks
-register_tasks()
-from oh_my_duck.rl.artifacts.export import run_export, ExportConfig
-from oh_my_duck.rl.artifacts.publish.manifest import check_onnx, smoke_run_onnx
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('task')
+    parser.add_argument('--implementation', choices=('owned', 'official'), default='owned')
     parser.add_argument('--run', type=Path, required=True)
     parser.add_argument('--checkpoint', default='model_4.pt')
     parser.add_argument('--output', type=Path, required=True)
     args = parser.parse_args()
+    if args.implementation == 'official':
+        import importlib.util
+        if importlib.util.find_spec('oh_my_duck') is not None:
+            raise RuntimeError('Official audit requires an isolated original environment')
+        import mjlab_microduck
+        if '.cache/upstream' in str(Path(mjlab_microduck.__file__).resolve()):
+            raise RuntimeError('Use an isolated pinned source archive')
+        from mjlab_microduck.export import run_export, ExportConfig
+        from mjlab_microduck.publish.manifest import check_onnx, smoke_run_onnx
+    else:
+        from oh_my_duck.rl.backends.mujoco.registration import register_tasks
+        register_tasks()
+        from oh_my_duck.rl.artifacts.export import run_export, ExportConfig
+        from oh_my_duck.rl.artifacts.publish.manifest import check_onnx, smoke_run_onnx
+    from mjlab.tasks.registry import load_env_cfg
     args.output.mkdir(parents=True, exist_ok=False)
     cfg = load_env_cfg(args.task)
     accumulator = EventAccumulator(str(args.run), size_guidance={'scalars': 0}).Reload()
@@ -41,7 +51,7 @@ def main():
             if ranges[tag]['max'] > 1e-7:
                 raise AssertionError(f'Positive weighted penalty: {key}')
             penalties.append(key)
-    audit = {'status': 'passed', 'task': args.task, 'run': str(args.run.resolve()),
+    audit = {'status': 'passed', 'implementation': args.implementation, 'task': args.task, 'run': str(args.run.resolve()),
              'scalars': ranges, 'penalties_checked': penalties,
              'behavior_validation': 'pending'}
     (args.output / 'audit.json').write_text(json.dumps(audit, indent=2) + '\n')

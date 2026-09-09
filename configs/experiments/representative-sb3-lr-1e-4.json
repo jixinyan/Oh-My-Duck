@@ -1,0 +1,52 @@
+{
+  "schema_version": 1,
+  "description": "Prepared native SB3 learning-rate diagnostic; four independent runs with unchanged official task recipes. Not a convergence claim; launch only after baseline triage and resource allocation.",
+  "checkpoint_interval": 250,
+  "smoke_iterations": 5,
+  "runs": [
+    {
+      "id": "mujoco-sb3-walking",
+      "backend": "mujoco",
+      "framework": "sb3",
+      "task": "Mjlab-Velocity-Flat-MicroDuck",
+      "experiment": "velocity",
+      "num_envs": 4096,
+      "iterations": 50000,
+      "seed": 42,
+      "learning_rate": 0.0001
+    },
+    {
+      "id": "mujoco-sb3-stand_up",
+      "backend": "mujoco",
+      "framework": "sb3",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "experiment": "microduck_stand",
+      "num_envs": 4096,
+      "iterations": 15000,
+      "seed": 42,
+      "learning_rate": 0.0001
+    },
+    {
+      "id": "isaac-newton-sb3-walking",
+      "backend": "isaac-newton",
+      "framework": "sb3",
+      "task": "Mjlab-Velocity-Flat-MicroDuck",
+      "experiment": "velocity",
+      "num_envs": 4096,
+      "iterations": 50000,
+      "seed": 42,
+      "learning_rate": 0.0001
+    },
+    {
+      "id": "isaac-newton-sb3-stand_up",
+      "backend": "isaac-newton",
+      "framework": "sb3",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "experiment": "microduck_stand",
+      "num_envs": 4096,
+      "iterations": 15000,
+      "seed": 42,
+      "learning_rate": 0.0001
+    }
+  ]
+}

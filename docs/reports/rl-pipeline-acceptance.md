@@ -5,6 +5,11 @@ have completed execution validation. **This is not learned-task acceptance.**
 All evaluated five-iteration policies fail the behavior battery. No hardware
 validation or public policy upload has occurred.
 
+**2026-09-08 correction:** the CPU/BAM checks below used the earlier controller.
+`6460454` corrects DOF-friction load indexing. The historical execution/video
+counts remain valid, but all eight preserved policies have now completed corrected CPU revalidation, with
+20 checked videos and finite 61/14 traces. All still fail behavior acceptance. See [current baseline audit](official-baseline-audit-2026-09-08.md).
+
 | Training backend | PPO framework | Task | Train / resume / export / package | Both-backend replay + CPU/BAM video | Learned behavior |
 |---|---|---|---|---|---|
 | MuJoCo | RSL-RL | Walking | Passed | Completed | Failed |
