@@ -138,3 +138,22 @@ def test_terminal_recorder_copies_both_groups_without_mutating_live_history():
     assert final["actor"][0,0] == 2 and final["critic"][0,0] == 12
     for k,v in manager.compute(update_history=False).items():
         torch.testing.assert_close(v,cached[k])
+
+
+def test_official_initial_episode_phase_spreads_timeouts_reproducibly():
+    from oh_my_duck.rl.learners.sb3.environment import MjlabSb3VecEnv
+    n=64
+    env=SimpleNamespace(num_envs=n,device="cpu",max_episode_length=300,
+        single_observation_space=GroupEnv.observation_space,
+        single_action_space=GroupEnv.action_space,episode_length_buf=torch.zeros(n,dtype=torch.long))
+    def reset(seed):
+        torch.manual_seed(seed)
+        env.episode_length_buf.zero_()
+        return {"actor":torch.zeros(n,61),"critic":torch.zeros(n,74)},{}
+    env.reset=reset
+    wrapper=MjlabSb3VecEnv(env,critic_observations="official",initial_episode_phase="randomized")
+    wrapper.seed(42);wrapper.reset();first=env.episode_length_buf.clone()
+    assert len(first.unique())>32 and first.max()<300
+    wrapper.seed(42);wrapper.reset();torch.testing.assert_close(first,env.episode_length_buf)
+    wrapper.initial_episode_phase="synchronized";wrapper.seed(42);wrapper.reset()
+    assert env.episode_length_buf.count_nonzero()==0

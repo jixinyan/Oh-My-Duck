@@ -84,6 +84,7 @@ def main():
     parser.add_argument("--checkpoint-interval", type=int, help="PPO updates between native checkpoint bundles; default: task save interval")
     parser.add_argument("--learning-rate", type=float, help="Explicit native SB3 learning rate; on resume overrides the saved schedule")
     parser.add_argument("--learning-rate-mode", choices=("constant", "adaptive"), help="Fresh default: KL-adaptive native SB3 schedule; resume preserves saved mode")
+    parser.add_argument("--initial-episode-phase", choices=("randomized", "synchronized"), help="Fresh default matches official RSL randomized initial episode lengths")
     parser.add_argument("--critic-observations", choices=("official", "actor"), help="Default: official critic for fresh runs; preserve saved layout on resume")
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--device", default="cuda:0")
@@ -115,6 +116,7 @@ def main():
     critic_observations = args.critic_observations or saved_layout
     if previous and critic_observations != saved_layout:
         raise ValueError("Resume cannot change critic inputs; start a fresh controlled experiment")
+    initial_episode_phase = args.initial_episode_phase or (previous.get("initial_episode_phase", "synchronized") if previous else "randomized")
     learning_rate_mode = args.learning_rate_mode or (previous.get("learning_rate_mode", "constant") if previous else "adaptive")
     initial_rate = args.learning_rate if args.learning_rate is not None else official_agent.algorithm.learning_rate
     learning_rate = KLAdaptiveLearningRate(initial_rate, official_agent.algorithm.desired_kl) if learning_rate_mode == "adaptive" else initial_rate
@@ -124,8 +126,8 @@ def main():
         tracking = start_run(backend=args.backend, framework="sb3", task=args.task, directory=args.output,
             config={"num_envs": args.num_envs, "iterations": args.iterations, "seed": args.seed,
                     "resume_source": str(args.resume) if args.resume else None, "learning_rate_override": args.learning_rate,
-                    "official_agent": asdict(official_agent), "provenance":provenance, "critic_observations": critic_observations, "learning_rate_mode": learning_rate_mode})
-        adapter = MjlabSb3VecEnv(create_environment(task,cfg,backend=args.backend,device=args.device), critic_observations=critic_observations)
+                    "official_agent": asdict(official_agent), "provenance":provenance, "critic_observations": critic_observations, "learning_rate_mode": learning_rate_mode, "initial_episode_phase": initial_episode_phase})
+        adapter = MjlabSb3VecEnv(create_environment(task,cfg,backend=args.backend,device=args.device), critic_observations=critic_observations, initial_episode_phase=initial_episode_phase)
         progress_source = "fresh_environment"
         if args.resume:
             validate_resume(previous,task=args.task,backend=args.backend,framework="sb3")
@@ -164,7 +166,7 @@ def main():
         from .snapshots import PeriodicCheckpoint
         snapshots = PeriodicCheckpoint(args.output / 'checkpoints', checkpoint_interval, adapter, {
             'task': args.task, 'backend': args.backend, 'framework': 'sb3',
-            'critic_observations': critic_observations, 'learning_rate_mode': learning_rate_mode,
+            'critic_observations': critic_observations, 'learning_rate_mode': learning_rate_mode, 'initial_episode_phase': initial_episode_phase,
             'num_envs': args.num_envs, 'timesteps_before': before,
             'upstream': json.loads((ROOT / 'configs/upstream.json').read_text())['repositories'],
             'provenance': provenance, 'official_agent': asdict(official_agent),
@@ -193,7 +195,7 @@ def main():
         np.testing.assert_allclose(actual, expected, atol=1e-5, rtol=1e-5)
         report = {"framework": "sb3", "backend": args.backend, "task": args.task,
             "num_envs": args.num_envs, "iterations": args.iterations,
-            "critic_observations": critic_observations, "learning_rate_mode": learning_rate_mode,
+            "critic_observations": critic_observations, "learning_rate_mode": learning_rate_mode, "initial_episode_phase": initial_episode_phase,
             "observation_dimensions": {key: value.shape[0] for key, value in adapter.observation_space.spaces.items()} if critic_observations == "official" else {"actor": 61},
             "learning_rate_override": args.learning_rate,
             "effective_learning_rate": float(model.lr_schedule(model._current_progress_remaining)),

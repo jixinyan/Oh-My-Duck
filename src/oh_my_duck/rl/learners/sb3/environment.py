@@ -34,10 +34,13 @@ class TerminalObservationRecorder(RecorderTerm):
 
 
 class MjlabSb3VecEnv(VecEnv):
-    def __init__(self, env, *, critic_observations="actor"):
+    def __init__(self, env, *, critic_observations="actor", initial_episode_phase="synchronized"):
         if critic_observations not in {"actor", "official"}:
             raise ValueError("Unknown critic observation layout")
         self.env = env
+        if initial_episode_phase not in {"randomized", "synchronized"}:
+            raise ValueError("Unknown initial episode phase")
+        self.initial_episode_phase = initial_episode_phase
         self.critic_observations = critic_observations
         env._sb3_observation_groups = ("actor", "critic") if critic_observations == "official" else ("actor",)
         self.render_mode = None
@@ -62,6 +65,11 @@ class MjlabSb3VecEnv(VecEnv):
 
     def reset(self):
         obs, _ = self.env.reset(seed=self._seeds[0])
+        if self.initial_episode_phase == "randomized":
+            # Official RSL learn(init_at_random_ep_len=True) uses the same
+            # one-time phase initialization. Normal subsequent resets stay zero.
+            self.env.episode_length_buf[:] = torch.randint_like(
+                self.env.episode_length_buf, high=int(self.env.max_episode_length))
         self._reset_seeds()
         self._reset_options()
         self.episode_returns.fill(0)

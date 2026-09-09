@@ -64,3 +64,28 @@ sitting and supine at all 17 tested base seeds; prone passes only 3/17. Native
 use each backend's registered interpreter in attempt 03; attempt 02 incorrectly
 attempted MuJoCo inside Newton's isolated dependency environment and failed
 before a native rollout. CPU attempt 02 remains valid and continues independently.
+
+## Initial episode phases and RSL diagnosis
+
+The official RSL entry point calls `learn(init_at_random_ep_len=True)`. Fresh
+SB3 runs now use the same one-time uniform episode-length initialization, so
+thousands of worlds do not all time out on the same control step. Ordinary
+subsequent resets still reset their counters normally. Native SB3 PPO and vector
+stepping remain intact; this is not a decoupled actor implementation. Explicit
+`--initial-episode-phase synchronized` supports comparison; legacy resume keeps
+its previous setting. All three runtime choices are recorded in checkpoints.
+17 SB3 CPU tests passed, including deterministic randomized initial phases.
+
+The RSL source-668b661 reconstruction at 8192 environments/seed 42 finds exact
+initial actor tensor hashes across backends and identical recorded solver
+options. Saved full-run environment YAML is identical; agent YAML differs only
+in run_name. CUDA RNG state before runner construction differs despite the same
+seed; CPU RNG and initial actor weights match. This establishes different
+exploration streams, not proof that randomness alone explains the final gap.
+Evidence: `outputs/diagnostics/rsl-backend-initialization-0909-01`.
+
+Newton StandUp 13000 transfers to native MuJoCo at seeds 42/100/101 with 4/4
+successes each. MuJoCo can execute the complete behavior; its own final policy's
+missing supine skill is a learning outcome, not an inability of the simulator to
+represent it. CPU/BAM still exposes a prone-transfer gap. No official rewards,
+curricula, robot parameters or RSL defaults have been changed.
