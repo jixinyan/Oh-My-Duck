@@ -16,6 +16,13 @@ import threading
 from oh_my_duck.core.paths import project_root
 
 
+SB3_OPTIONS = {
+    'learning_rate_mode': ('constant', 'adaptive'),
+    'critic_observations': ('actor', 'official'),
+    'initial_episode_phase': ('synchronized', 'randomized'),
+}
+
+
 def load_plan(path):
     plan = json.loads(Path(path).read_text())
     if plan.get('schema_version') != 1 or not plan.get('runs'):
@@ -37,6 +44,9 @@ def load_plan(path):
             raise ValueError('Resource and iteration counts must be positive')
         if row['backend'] not in ('mujoco', 'isaac-newton') or row['framework'] not in ('rsl-rl', 'sb3'):
             raise ValueError('Unsupported native training combination')
+        for key, choices in SB3_OPTIONS.items():
+            if key in row and (row['framework'] != 'sb3' or row[key] not in choices):
+                raise ValueError(f'SB3 {key} must be one of {choices} and applies only to native SB3')
         if 'learning_rate' in row:
             rate = row['learning_rate']
             if row['framework'] != 'sb3':

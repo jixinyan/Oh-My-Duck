@@ -89,3 +89,31 @@ successes each. MuJoCo can execute the complete behavior; its own final policy's
 missing supine skill is a learning outcome, not an inability of the simulator to
 represent it. CPU/BAM still exposes a prone-transfer gap. No official rewards,
 curricula, robot parameters or RSL defaults have been changed.
+
+## Verified update comparison and next full runs
+
+The fixed-checkpoint comparison (`outputs/diagnostics/sb3-kl-feedback-0909-01`)
+completed with identical old update-10000 model/normalizer, 8192 environments,
+seed 42, synchronized initial phases and actor-only critic in both arms. Only
+KL feedback differs; initial learning rate is 1e-4. Each arm executed 32 native
+PPO rollouts. SB3 logs the preceding update, yielding 31 displayed KL samples.
+
+| Metric | Constant | Adaptive |
+|---|---:|---:|
+| Mean logged KL | 0.07300 | 0.01196 |
+| Last 16 mean KL | 0.05339 | 0.00858 |
+| Maximum logged KL | 0.19825 | 0.03440 |
+| Early-stop messages / 32 rollouts | 32 | 16 |
+| Final learning rate | 1e-4 | 2.963e-5 |
+
+This is evidence for improved update stability, not learned-skill recovery.
+The critic-only four-combination gates completed from `c897d10`: all native
+64-env/5-update runs, resumes, official-route normalized exports and CPU/BAM
+videos executed. Smoke behavior failures are retained and expected.
+
+`configs/experiments/sb3-official-critic.json` makes critic layout, learning-rate
+mode and initial episode phase explicit at every worker stage. The new campaign
+will rerun all gates from the combined committed implementation before fresh
+full training. No old gate is reused across changed policy/model source. Policy
+model sources are now included in preparation invalidation. Regression checks:
+29 tests and 9 subtests passed for SB3, campaign options, recovery and scheduling.

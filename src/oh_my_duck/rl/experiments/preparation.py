@@ -7,7 +7,7 @@ import subprocess
 REQUIRED = ('smoke', 'smoke-export', 'smoke-rehearsal', 'resume-check', 'capacity', 'capacity-export')
 CRITICAL = ('src/oh_my_duck/rl/tasks', 'src/oh_my_duck/rl/learners',
             'src/oh_my_duck/rl/backends', 'src/oh_my_duck/rl/evaluation',
-            'src/oh_my_duck/rl/artifacts', 'src/oh_my_duck/rl/training',
+            'src/oh_my_duck/rl/artifacts', 'src/oh_my_duck/rl/training', 'src/oh_my_duck/rl/models',
             'src/oh_my_duck/robotics', 'environments', 'configs/upstream.json',
             'configs/training.json', 'pyproject.toml')
 
@@ -35,7 +35,8 @@ def reuse_smoke(path, spec, root):
     path = Path(path)
     report = json.loads(path.read_text())
     previous = report['spec']
-    keys = ('id', 'backend', 'framework', 'task', 'experiment', 'seed', 'learning_rate')
+    keys = ('id', 'backend', 'framework', 'task', 'experiment', 'seed', 'learning_rate',
+            'learning_rate_mode', 'critic_observations', 'initial_episode_phase')
     if any(previous.get(k) != spec.get(k) for k in keys):
         raise ValueError('Smoke task, recipe, framework or seed differs')
     required = ('smoke', 'smoke-export', 'smoke-rehearsal', 'resume-check')

@@ -39,6 +39,8 @@ class CampaignLearningRate(unittest.TestCase):
                 plan = self.plan()
                 if not explicit:
                     del plan['runs'][0]['learning_rate']
+                if explicit:
+                    plan['runs'][0].update(learning_rate_mode='adaptive', critic_observations='official', initial_episode_phase='randomized')
                 config = root / 'plan.json'
                 config.write_text(json.dumps(plan))
                 output = root / 'run'
@@ -65,5 +67,7 @@ class CampaignLearningRate(unittest.TestCase):
                     self.assertEqual('--learning-rate' in command, explicit)
                     if explicit:
                         self.assertEqual(float(command[command.index('--learning-rate') + 1]), 0.0001)
+                        for key,value in [('learning-rate-mode','adaptive'),('critic-observations','official'),('initial-episode-phase','randomized')]:
+                            self.assertEqual(command[command.index('--'+key)+1],value)
                 saved = json.loads((output / 'result.json').read_text())
                 self.assertEqual(saved['spec'], plan['runs'][0])
