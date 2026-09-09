@@ -99,7 +99,8 @@
       "previous_galleries_retained": true,
       "pause_manifest": "outputs/experiments/measured-env-0908-03/result.json",
       "successor_gallery": "outputs/experiments/independent-full-0908-01/previews/index.html",
-      "first_update": 1000
+      "first_update": 1000,
+      "additional_gallery": "outputs/previews/sb3-repair-0909-01/index.html"
     },
     "local_rl_gpu_policy": "explicit_idle_gpu_allocation_authorized_2026_09_08",
     "local_rl_gpus": {
@@ -515,6 +516,49 @@
       "completed": 2,
       "intentionally_stopped": 1,
       "review": "docs/reports/rl-framework-status-2026-09-09.md"
+    },
+    "sb3_repair": {
+      "state": "four_full_learners_running_after_all_combined_gates",
+      "report": "docs/reports/sb3-critic-transfer-2026-09-09.md",
+      "campaign": "outputs/experiments/sb3-repair-0909-01/campaign.json",
+      "source_commit": "bea3eb1498bf145da9b7f3272fcbf4f25e2289ca",
+      "actor_dimension": 61,
+      "critic_dimensions": {
+        "stand_up": 74,
+        "walking": 76
+      },
+      "kl_comparison": {
+        "constant_mean": 0.07299837774,
+        "adaptive_mean": 0.01196050184,
+        "updates_per_arm": 32
+      },
+      "behavior": "new_full_training_pending",
+      "tests": "29_passed_9_subtests",
+      "runtime_audit": "outputs/experiments/sb3-repair-0909-01/repair-runtime-audit.json"
+    },
+    "newton_policy_transfer": {
+      "standup_checkpoint": 13000,
+      "native_mujoco": {
+        "passes": 12,
+        "scenarios": 12
+      },
+      "native_newton": {
+        "passes": 12,
+        "scenarios": 12
+      },
+      "cpu_bam_standup": {
+        "standing": "17/17",
+        "sitting": "17/17",
+        "face_down": "3/17",
+        "face_up": "17/17"
+      },
+      "walking_checkpoint": 14000,
+      "walking_no_push_forward_response": {
+        "mujoco": 0.62657,
+        "newton": 0.57181
+      },
+      "walking_behavior_gate": "failed_lateral_instantaneous_rmse; cpu_forward_failed",
+      "report": "docs/reports/sb3-critic-transfer-2026-09-09.md"
     }
   }
 }

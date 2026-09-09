@@ -50,11 +50,11 @@ causal comparison. The original Walking control continues separately on GPU 7.
 
 Both learners use the migrated official environment/reward factories and
 512/256/128 ELU actor/critic widths. Both actors retain the deployment 61D input
-and 14 actions. Equal task definitions do not make the learner recipes equal.
+and 14 actions. Equal task definitions do not make the learner recipes equal. Walking uses a 76D critic; the 74D figure below refers to StandUp.
 
 | Aspect | RSL-RL official recipe | Current SB3 mapping |
 |---|---|---|
-| Critic input | 74D separate critic group | Same 61D input as actor |
+| Critic input (StandUp) | 74D separate critic group | Same 61D input as actor |
 | Critic-only information | Linear velocity, foot air time/contact/forces; separate sensor view | Not consumed |
 | Learning rate | Native KL-adaptive, starting at 1e-3 | Explicit constant 1e-4 and native KL early stop |
 | Value loss | Clipped loss enabled | Default `clip_range_vf=None` |

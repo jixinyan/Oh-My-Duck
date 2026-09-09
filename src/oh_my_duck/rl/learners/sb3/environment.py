@@ -3,7 +3,7 @@ from copy import copy, deepcopy
 
 import numpy as np
 import torch
-from gymnasium.spaces import Box
+from gymnasium.spaces import Box, Dict
 from stable_baselines3.common.vec_env import VecEnv
 from mjlab.managers.recorder_manager import RecorderTerm
 
@@ -26,13 +26,23 @@ class TerminalObservationRecorder(RecorderTerm):
         with torch.random.fork_rng(devices=devices):
             env.sim.forward()
             env.sim.sense()
-            final = manager.compute_group("actor", update_history=True)
-        env._sb3_terminal = (env_ids.detach().clone(), final[env_ids].detach().clone())
+            groups = getattr(env, "_sb3_observation_groups", ("actor",))
+            final = {key: manager.compute_group(key, update_history=True)[env_ids].detach().clone()
+                     for key in groups}
+        states = final if "critic" in groups else final["actor"]
+        env._sb3_terminal = (env_ids.detach().clone(), states)
 
 
 class MjlabSb3VecEnv(VecEnv):
-    def __init__(self, env):
+    def __init__(self, env, *, critic_observations="actor", initial_episode_phase="synchronized"):
+        if critic_observations not in {"actor", "official"}:
+            raise ValueError("Unknown critic observation layout")
         self.env = env
+        if initial_episode_phase not in {"randomized", "synchronized"}:
+            raise ValueError("Unknown initial episode phase")
+        self.initial_episode_phase = initial_episode_phase
+        self.critic_observations = critic_observations
+        env._sb3_observation_groups = ("actor", "critic") if critic_observations == "official" else ("actor",)
         self.render_mode = None
         self._pending_actions = None
         self.terminal_count = self.timeout_count = 0
@@ -44,20 +54,38 @@ class MjlabSb3VecEnv(VecEnv):
         # Gym requires finite bounds. Use the float32 representable domain; no
         # additional practical action clamp or filter is introduced.
         limit = np.finfo(np.float32).max
-        super().__init__(env.num_envs, Box(-np.inf, np.inf, (61,), np.float32),
+        space = Box(-np.inf, np.inf, (61,), np.float32)
+        if critic_observations == "official":
+            critic = env.single_observation_space.spaces["critic"]
+            if len(critic.shape) != 1:
+                raise ValueError("SB3 expects a flat official critic group")
+            space = Dict({"actor": space, "critic": Box(-np.inf, np.inf, critic.shape, np.float32)})
+        super().__init__(env.num_envs, space,
                          Box(-limit, limit, (14,), np.float32))
 
     def reset(self):
         obs, _ = self.env.reset(seed=self._seeds[0])
+        if self.initial_episode_phase == "randomized":
+            # Official RSL learn(init_at_random_ep_len=True) uses the same
+            # one-time phase initialization. Normal subsequent resets stay zero.
+            self.env.episode_length_buf[:] = torch.randint_like(
+                self.env.episode_length_buf, high=int(self.env.max_episode_length))
         self._reset_seeds()
         self._reset_options()
         self.episode_returns.fill(0)
         self.episode_lengths.fill(0)
-        return self._numpy(obs["actor"])
+        return self._observations(obs)
 
     @staticmethod
     def _numpy(value):
+        if isinstance(value, dict):
+            return {key: MjlabSb3VecEnv._numpy(item) for key, item in value.items()}
         return value.detach().cpu().numpy().copy()
+
+    def _observations(self, obs):
+        if getattr(self, "critic_observations", "actor") == "official":
+            return self._numpy({key: obs[key] for key in ("actor", "critic")})
+        return self._numpy(obs["actor"])
 
     def step_async(self, actions):
         self._pending_actions = torch.as_tensor(actions, dtype=torch.float32, device=self.env.device)
@@ -66,9 +94,10 @@ class MjlabSb3VecEnv(VecEnv):
         self.env._sb3_terminal = None
         obs, reward, terminated, truncated, extras = self.env.step(self._pending_actions)
         self._pending_actions = None
-        obs, reward = self._numpy(obs["actor"]), self._numpy(reward)
+        obs, reward = self._observations(obs), self._numpy(reward)
         terminated, truncated = self._numpy(terminated), self._numpy(truncated)
-        if not np.isfinite(obs).all() or not np.isfinite(reward).all():
+        values = obs.values() if isinstance(obs, dict) else (obs,)
+        if not all(np.isfinite(value).all() for value in values) or not np.isfinite(reward).all():
             raise FloatingPointError("Non-finite SB3 transition")
         self.episode_returns += reward
         self.episode_lengths += 1
@@ -82,10 +111,13 @@ class MjlabSb3VecEnv(VecEnv):
                 raise RuntimeError("Missing pre-reset terminal observation")
             snapshot_ids, states = map(self._numpy, snapshot)
             np.testing.assert_array_equal(snapshot_ids, ids)
-            if states.shape != (len(ids), 61) or not np.isfinite(states).all():
-                raise FloatingPointError("Invalid terminal observation")
+            groups = states if isinstance(states, dict) else {"actor": states}
+            for key, value in groups.items():
+                dim = self.observation_space[key].shape[0] if isinstance(states, dict) else 61
+                if value.shape != (len(ids), dim) or not np.isfinite(value).all():
+                    raise FloatingPointError(f"Invalid terminal observation: {key}")
             for row, i in enumerate(ids):
-                infos[i].update(terminal_observation=states[row].copy(),
+                infos[i].update(terminal_observation={k: v[row].copy() for k, v in states.items()} if isinstance(states, dict) else states[row].copy(),
                     episode={"r": float(self.episode_returns[i]), "l": int(self.episode_lengths[i])})
             self.terminal_count += len(ids)
             self.timeout_count += sum(infos[i]["TimeLimit.truncated"] for i in ids)

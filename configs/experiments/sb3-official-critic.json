@@ -1,0 +1,64 @@
+{
+  "schema_version": 1,
+  "description": "Fresh SB3 repair validation: official critic, KL-adaptive native PPO, randomized initial episode phases; unchanged task rewards and budgets.",
+  "checkpoint_interval": 1000,
+  "smoke_iterations": 5,
+  "runs": [
+    {
+      "id": "mujoco-sb3-walking",
+      "backend": "mujoco",
+      "framework": "sb3",
+      "task": "Mjlab-Velocity-Flat-MicroDuck",
+      "experiment": "velocity",
+      "num_envs": 8192,
+      "iterations": 50000,
+      "seed": 42,
+      "learning_rate": 0.0001,
+      "learning_rate_mode": "adaptive",
+      "critic_observations": "official",
+      "initial_episode_phase": "randomized"
+    },
+    {
+      "id": "mujoco-sb3-stand_up",
+      "backend": "mujoco",
+      "framework": "sb3",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "experiment": "microduck_stand",
+      "num_envs": 8192,
+      "iterations": 15000,
+      "seed": 42,
+      "learning_rate": 0.0001,
+      "learning_rate_mode": "adaptive",
+      "critic_observations": "official",
+      "initial_episode_phase": "randomized"
+    },
+    {
+      "id": "isaac-newton-sb3-walking",
+      "backend": "isaac-newton",
+      "framework": "sb3",
+      "task": "Mjlab-Velocity-Flat-MicroDuck",
+      "experiment": "velocity",
+      "num_envs": 8192,
+      "iterations": 50000,
+      "seed": 42,
+      "learning_rate": 0.0001,
+      "learning_rate_mode": "adaptive",
+      "critic_observations": "official",
+      "initial_episode_phase": "randomized"
+    },
+    {
+      "id": "isaac-newton-sb3-stand_up",
+      "backend": "isaac-newton",
+      "framework": "sb3",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "experiment": "microduck_stand",
+      "num_envs": 8192,
+      "iterations": 15000,
+      "seed": 42,
+      "learning_rate": 0.0001,
+      "learning_rate_mode": "adaptive",
+      "critic_observations": "official",
+      "initial_episode_phase": "randomized"
+    }
+  ]
+}

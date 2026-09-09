@@ -60,3 +60,23 @@ The export audit supports `--implementation official` only in an environment
 without the owned package. Use Python `-P` when invoking its file directly to
 avoid shadowing the installed MuJoCo package. These diagnostics do not certify
 learned behavior. See the baseline audit report for the current controls.
+
+## SB3 policy and optimization controls
+
+Fresh SB3 runs consume separate registered actor/critic groups. The actor/export
+contract remains 61 inputs and 14 servo actions; critic width follows the task
+(StandUp 74, Walking 76). Edit `models/sb3.py` and `models/sb3_asymmetric.py` for
+policy architecture; `learners/sb3/learning_rate.py` provides KL feedback through
+native SB3's callable schedule. PPO itself remains the installed SB3 algorithm.
+
+After `omd.py train --backend <backend> --rl-framework sb3 -- <task>`, use
+`--critic-observations official|actor`, `--learning-rate-mode adaptive|constant`,
+`--learning-rate <initial-rate>` and
+`--initial-episode-phase randomized|synchronized` for explicit comparisons.
+Fresh defaults are official/adaptive/randomized; resume preserves recorded
+settings and rejects a changed critic layout. Legacy actor-only artifacts still
+load and export. The corresponding snake_case fields in a campaign apply to
+smoke, resume, capacity and full stages. See
+`configs/experiments/sb3-official-critic.json` for a complete representative plan.
+Native framework normalization, advantage/value loss and KL estimation still
+have documented differences; shared rewards do not establish equal learning.

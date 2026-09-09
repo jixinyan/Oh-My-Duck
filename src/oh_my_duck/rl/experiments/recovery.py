@@ -22,8 +22,11 @@ def validate_checkpoint(spec, root):
     for key in ('task', 'backend', 'framework', 'num_envs'):
         if source['spec'][key] != spec[key]:
             raise ValueError(f'Recovery source differs: {key}')
-    if spec['framework'] == 'sb3' and source['spec'].get('learning_rate') != spec.get('learning_rate'):
-        raise ValueError('Recovery learning_rate differs; run fresh gates for the new configuration')
+    from .campaign import SB3_OPTIONS
+    if spec['framework'] == 'sb3':
+        for key in ('learning_rate', *SB3_OPTIONS):
+            if source['spec'].get(key) != spec.get(key):
+                raise ValueError(f'Recovery {key} differs; run fresh gates for the new configuration')
     for stage in ('smoke', 'smoke-export', 'smoke-rehearsal', 'resume-check', 'capacity', 'capacity-export'):
         if source['stages'][stage]['status'] != 'completed':
             raise ValueError(f'Recovery requires completed {stage}')

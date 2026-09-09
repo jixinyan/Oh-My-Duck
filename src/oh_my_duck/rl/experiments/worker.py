@@ -9,7 +9,7 @@ import subprocess
 import sys
 import time
 from oh_my_duck.core.paths import project_root
-from .campaign import load_plan
+from .campaign import load_plan, SB3_OPTIONS
 from .gpu_pool import gpu_lease
 
 
@@ -64,6 +64,9 @@ def main():
                         '--checkpoint-interval', str(2 if name == 'smoke' else plan['checkpoint_interval']), '--output', str(run)]
             if 'learning_rate' in spec:
                 command += ['--learning-rate', str(spec['learning_rate'])]
+            for key in SB3_OPTIONS:
+                if key in spec:
+                    command += ['--' + key.replace('_', '-'), spec[key]]
             if resume is not None:
                 bundles = sorted((resume/'checkpoints').glob('step_*'))
                 command += ['--resume', str(bundles[-1] if bundles else resume)]

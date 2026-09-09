@@ -5,6 +5,18 @@ Implementation proceeds by domain, with interfaces for later capabilities and
 explicit evidence for implemented functionality. Task-family organization, single-GPU pipeline fixes and full-training campaigns
 are merged into `main` at `5ef433b`. Submitted training keeps source `1f45996`. No public policy upload has occurred. The accumulated RL operations, fixes and September 9 behavior diagnosis are now merged into `main` at `6902943`; active training retains source `3070b71`.
 
+Latest repair: native SB3 now has separate official critic observations (74D
+StandUp / 76D Walking), serialized KL learning-rate feedback, randomized initial
+episode phases and matching terminal/normalizer/export/resume paths. 29 tests
+and 9 subtests pass. A paired 32-update continuation reduces mean KL from 0.073
+to 0.012; this does not prove learned behavior. All four fresh 8192-env runs passed their individual gates and produced full PPO
+updates in `sb3-repair-0909-01`, source `bea3eb1`; offline GPU processes verified.
+Newton StandUp 13000 passes 12/12 scenarios in each native backend, but CPU/BAM
+prone recovery passes only 3/17. No-push Walking 14000 retains forward/turn
+response in both native backends; deployment forward motion fails. Details:
+[repair and transfer](reports/sb3-critic-transfer-2026-09-09.md).
+The following review and operational notes are earlier snapshots.
+
 Latest behavior review (2026-09-09 02:29 UTC): five of the new 8192-env learners
 continue, two MuJoCo StandUp runs completed (RSL 3/4, SB3 0/4), and Newton SB3
 StandUp was intentionally stopped after ten consecutive 0/4 previews and
