@@ -1,9 +1,17 @@
 # Implementation status
 
-Updated 2026-09-09. The product scope remains the Agentic Microduck Project Design.
-Implementation proceeds by domain, with interfaces for later capabilities and
-explicit evidence for implemented functionality. Task-family organization, single-GPU pipeline fixes and full-training campaigns
-are merged into `main` at `5ef433b`. Submitted training keeps source `1f45996`. No public policy upload has occurred. The accumulated RL operations, fixes and September 9 behavior diagnosis are now merged into `main` at `6902943`; active training retains source `3070b71`.
+Updated 2026-09-09. Product scope remains the Agentic Microduck Project Design.
+
+**Training paused by user; zero project RL processes remain.** Five remaining
+learners and both live preview workers were stopped with preserved checkpoints,
+logs, videos and identity/hash records. No automatic resume is scheduled.
+Newton RSL StandUp final passes 4/4 at seed 42 in Newton, MuJoCo and CPU/BAM;
+final multi-seed robustness is open. MuJoCo RSL StandUp seed 43 completed with
+2/4. Repaired SB3 has stable updates but incomplete learned behavior; Walking
+also remains below acceptance. Next priority is causal debugging, not additional
+long training. See [current state and debugging handoff](reports/rl-debug-handoff-2026-09-09.md)
+for exact saved steps, evidence and the investigation sequence. CLI maturity
+reflects partial behavior with training paused. All notes below are historical.
 
 Latest operational update (2026-09-09): four old Walking learners were
 intentionally stopped after repeated behavior failures: owned MuJoCo RSL, old

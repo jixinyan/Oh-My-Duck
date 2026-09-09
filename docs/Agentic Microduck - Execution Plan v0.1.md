@@ -11,6 +11,8 @@ tags:
   - sim-to-real
 ---
 
+> 当前状态：训练已暂停（2026-09-09）。按用户要求，所有剩余训练与后台预览已停止，已确认本项目 RL 进程为 0；checkpoint/日志/视频保留，不自动恢复。Newton RSL 起身最终策略在 seed=42 的 Newton、MuJoCo、CPU/BAM 三处均 4/4，但多 seed 稳定性尚未验收；MuJoCo RSL seed=43 起身为 2/4，修复版 SB3 与 Walking 尚未达到目标。下一阶段优先 debug 无效策略的原因，先定位训练/评估/奖励课程/框架适配差异，再决定是否恢复完整训练。详见 [暂停状态与调试交接](reports/rl-debug-handoff-2026-09-09.md)。下方均为历史快照，项目整体 scope 不变。
+
 > 旧训练清理（2026-09-09）：按用户要求，依据连续行为评估主动停止旧 MuJoCo RSL 行走、两后端旧 SB3 行走，以及原始官方 4096 环境行走对照；四组 checkpoint/日志/视频和停止原因均保留。六组训练继续：Newton RSL 行走、四组修复版 SB3、MuJoCo RSL 起身 seed=43（已完成启动检查并进入完整训练）。Newton RSL 起身已完成 15000 轮，最终原生四姿态通过；部署验收仍未完成。详见 [停止依据与记录](reports/sb3-critic-transfer-2026-09-09.md)。下方为较早快照。
 
 > SB3 修复与迁移验证（2026-09-09）：SB3 已补齐独立 official critic（StandUp 74D / Walking 76D，actor 仍为 61D）、原生 PPO 的 KL 学习率反馈、随机初始 episode phase，以及对应 terminal/normalizer/导出/恢复。29 项测试和 9 个子测试通过；旧 checkpoint 的 32-update 对照中平均 KL 从 0.073 降至 0.012。新四组 `sb3-repair-0909-01` 使用固定源码 `bea3eb1`、8192 环境，四组均已重新通过门槛并产生完整 PPO 更新，实际进程 W&B offline 已核验；尚未宣称行为收敛。Newton 起身 13000 在两种原生后端均 12/12 通过；CPU/BAM 趴倒仅 3/17。Walking 14000 去推力后两后端仍能前进/转向，但 CPU 前进失败。RSL 两后端配置和初始 actor 相同，GPU 探索随机流不同；MuJoCo 学习差异尚不能归为单一原因。详见 [修复与迁移记录](reports/sb3-critic-transfer-2026-09-09.md)。 已完成 14 组固定策略交叉测试：MuJoCo 自训练起身在两后端均 9/12（仰卧均失败），Newton 起身均 12/12。保留推力的 Walking 标准测试仍未通过；去推力结果仅作诊断。SB3 修复已合入并推送 main `49b56de`；后续分支 `feat/rl-transfer-validation` 的 seed=43 对照已在 GPU 1 启动检查，源码 `1cb7738`，保持官方奖励/PPO/8192 环境不变。

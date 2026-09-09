@@ -41,7 +41,7 @@
     },
     "training": {
       "module": "oh_my_duck.rl.training",
-      "state": "representative_pipeline_verified_partial_learned_behavior",
+      "state": "pipeline_verified_partial_behavior_training_paused",
       "role": "Independent simulation-backend and RL-framework selection, offline training and evaluation"
     },
     "perception": {
@@ -89,7 +89,7 @@
     "mujoco_video": "explicit_osmesa_on_current_host; native_newton_video_unchanged",
     "representative_videos_verified": 60,
     "checkpoint_previews": {
-      "state": "fixed_8192_background_worker_running",
+      "state": "stopped_by_user_galleries_preserved",
       "gallery": "outputs/previews/fixed-8192-0908-01/index.html",
       "manifest": "outputs/previews/fixed-8192-0908-01/previews.json",
       "mode": "fixed_checkpoint_intervals_without_llm_polling",
@@ -100,7 +100,8 @@
       "pause_manifest": "outputs/experiments/measured-env-0908-03/result.json",
       "successor_gallery": "outputs/experiments/independent-full-0908-01/previews/index.html",
       "first_update": 1000,
-      "additional_gallery": "outputs/previews/sb3-repair-0909-01/index.html"
+      "additional_gallery": "outputs/previews/sb3-repair-0909-01/index.html",
+      "auto_resume": false
     },
     "local_rl_gpu_policy": "explicit_idle_gpu_allocation_authorized_2026_09_08",
     "local_rl_gpus": {
@@ -114,10 +115,11 @@
       "capacity_benchmark": {
         "last_gpu": 3,
         "state": "stopped_due_to_foreign_gpu_load"
-      }
+      },
+      "historical_allocation": true
     },
     "environment_selection": {
-      "state": "fixed_8192_five_running_two_completed_one_diagnostic_stop",
+      "state": "training_paused_by_user",
       "config": "configs/experiments/representative-8192.json",
       "module": "oh_my_duck.rl.experiments.throughput",
       "scope": "two_tasks_two_backends_two_frameworks",
@@ -125,25 +127,13 @@
       "vram_fraction": 0.85,
       "warmup_updates": 10,
       "measured_updates": 30,
-      "learned_behavior": "newton_rsl_standup_native_pass_only_final_transfer_pending",
+      "learned_behavior": "newton_rsl_standup_final_seed42_pass_in_both_backends_and_cpu_bam_other_acceptance_open",
       "campaign": "outputs/experiments/fixed-8192-0908-01",
       "source_commit": "3070b71a4561618fc96363c0eb71f3365a4fe56c",
-      "allocated_gpus": [
-        0,
-        1,
-        2,
-        3,
-        4,
-        5,
-        6,
-        7
-      ],
-      "original_controls_gpus": [
-        0,
-        7
-      ],
-      "queue": "next_available_gpu",
-      "final_training": "immediately_after_each_missing_gate",
+      "allocated_gpus": [],
+      "original_controls_gpus": [],
+      "queue": "paused_no_automatic_launch",
+      "final_training": "paused_pending_causal_debugging",
       "periodic_video_updates": 1000,
       "scheduling": "eight_independent_gpu_workers",
       "existing_preparation": "reuse_completed_matching_gates_only",
@@ -164,20 +154,22 @@
       "gpu_memory_released_mib": 23732,
       "current_eight_learners_verified_alive": true,
       "retained_checkpoint_hashes_unchanged": true,
-      "audit": "outputs/maintenance/process-cleanup-0908-01/result.json"
+      "audit": "outputs/maintenance/process-cleanup-0908-01/result.json",
+      "historical_snapshot": true
     }
   },
   "rl_framework_registry": "oh_my_duck.rl.training.frameworks:default_framework_registry",
   "rl_acceptance": {
-    "state": "validation_in_progress",
+    "state": "training_paused_causal_debugging_next",
     "smoke_and_resume": "8_of_8_passed_at_5971dca",
     "open_items": [
-      "Newton native DDP acceptance; old job a52ff51b no longer exists in platform API",
-      "full representative training and convergence; SB3 StandUp stability",
-      "learned behavior validation"
+      "Diagnose ineffective task learning from preserved official/owned/framework comparisons",
+      "Verify final Newton RSL StandUp robustness across seeds in native backends and CPU/BAM",
+      "Resolve Walking response regression and SB3 StandUp recovery plateau before resumed full training",
+      "Newton native DDP acceptance remains deferred"
     ],
     "architecture_merge": "6303ca4",
-    "validation_branch": "feat/rl-transfer-validation",
+    "validation_branch": null,
     "export_and_local_package": "8_of_8_passed; RSL revalidated at 6303ca4",
     "task_layout": "14 task families with environment.py and ppo.py; 33 semantic catalog entries preserved",
     "full_training_campaign": {
@@ -223,7 +215,7 @@
     },
     "latest_merge": "49b56de945328ccb8fd2fa58997f81a5714cbc6d",
     "official_baseline_reproduction": {
-      "state": "learned_behavior_unverified",
+      "state": "training_stopped_behavior_diagnosis_pending",
       "baseline": "mujoco_rsl_rl",
       "static_audit": "docs/reports/official-baseline-audit-2026-09-08.md",
       "open_items": [
@@ -471,13 +463,15 @@
         "standup": "not_started",
         "figure": "docs/reports/figures/official-walking-environment-scaling.svg"
       },
-      "monitoring_policy": "background_periodic_videos_only_during_training; unified_diagnosis_after_completion; no_continuous_llm_polling"
+      "monitoring_policy": "background_periodic_videos_only_during_training; unified_diagnosis_after_completion; no_continuous_llm_polling",
+      "operational_details_are_historical": true,
+      "current_report": "docs/reports/rl-debug-handoff-2026-09-09.md"
     },
     "cpu_rehearsal": {
       "state": "corrected_matrix_execution_verified_8_of_8",
       "controller": "oh_my_duck.robotics.microduck.actuators.cpu_bam.MicroduckMujocoController",
       "tests": "3_passed_real_jacobian_load_motor_and_reset_checks",
-      "behavior": "all_short_matrix_policies_fail; learned-policy recovery diagnosis remains open",
+      "behavior": "short_matrix_failures_preserved; final_newton_rsl_standup_passes_seed42_4_of_4; multi_seed_robustness_open",
       "report": "docs/reports/official-baseline-audit-2026-09-08.md",
       "corrected_ab": "outputs/baselines/cpu-bam-dof-0908-01/comparison.json",
       "matrix": "outputs/baselines/corrected-cpu-matrix-0908-01/result.json",
@@ -489,36 +483,21 @@
       "learning_rate": 0.0001,
       "tests": "4_passed_9_subtests_command_routing_defaults_validation_recovery",
       "native_cli_smoke": "earlier_64_env_5_iteration_mujoco_standup_passed",
-      "behavior": "unverified"
-    },
-    "latest_behavior_review": {
-      "reviewed_at_utc": "2026-09-09T02:29:00+00:00",
-      "report": "docs/reports/rl-framework-status-2026-09-09.md",
-      "evidence": "outputs/diagnostics/framework-status-0909-01",
-      "new_learners_running": 5,
-      "new_learners_completed": 2,
-      "intentionally_stopped": [
-        "isaac-newton-sb3-stand_up"
-      ],
-      "newton_rsl_standup": "native_seed42_four_pose_pass_repeated_final_transfer_pending",
-      "newton_rsl_walking": "command_response_present_lateral_rmse_failed",
-      "mujoco_rsl_standup": "final_three_of_four_native_both_backends_and_cpu",
-      "mujoco_sb3_standup": "final_zero_of_four_native_both_backends_and_cpu",
-      "framework_equivalence": "open_sb3_61d_critic_vs_rsl_74d_and_native_ppo_normalizer_differences",
-      "integration_merge": "6902943d7230746c20b159f54ecaabbf8397561e"
+      "behavior": "unverified",
+      "historical_snapshot": true
     },
     "current_full_training_campaign": {
       "config": "configs/experiments/representative-8192.json",
       "manifest": "outputs/experiments/fixed-8192-0908-01/campaign.json",
       "source_commit": "3070b71a4561618fc96363c0eb71f3365a4fe56c",
       "num_envs": 8192,
-      "running": 5,
-      "completed": 2,
-      "intentionally_stopped": 1,
-      "review": "docs/reports/rl-framework-status-2026-09-09.md"
+      "running": 0,
+      "completed": 3,
+      "intentionally_stopped": 5,
+      "review": "docs/reports/rl-debug-handoff-2026-09-09.md"
     },
     "sb3_repair": {
-      "state": "four_full_learners_running_after_all_combined_gates",
+      "state": "four_learners_intentionally_stopped_by_user",
       "report": "docs/reports/sb3-critic-transfer-2026-09-09.md",
       "campaign": "outputs/experiments/sb3-repair-0909-01/campaign.json",
       "source_commit": "bea3eb1498bf145da9b7f3272fcbf4f25e2289ca",
@@ -532,10 +511,11 @@
         "adaptive_mean": 0.01196050184,
         "updates_per_arm": 32
       },
-      "behavior": "new_full_training_pending",
+      "behavior": "stable_kl_but_task_behavior_incomplete",
       "tests": "29_passed_9_subtests",
       "runtime_audit": "outputs/experiments/sb3-repair-0909-01/repair-runtime-audit.json",
-      "integration_merge": "49b56de945328ccb8fd2fa58997f81a5714cbc6d"
+      "integration_merge": "49b56de945328ccb8fd2fa58997f81a5714cbc6d",
+      "latest_review": "docs/reports/rl-debug-handoff-2026-09-09.md"
     },
     "newton_policy_transfer": {
       "standup_checkpoint": 13000,
@@ -586,10 +566,21 @@
           "status": "behavior_failed"
         }
       },
-      "gallery": "outputs/diagnostics/newton-transfer-0909-03/index.html"
+      "gallery": "outputs/diagnostics/newton-transfer-0909-03/index.html",
+      "final_standup": {
+        "checkpoint": 14999,
+        "training_updates_completed": 15000,
+        "policy_sha256": "0333bb741bdd4536769c3052a3da456080a26c06401ba8a682d93bee2e9a51f1",
+        "evaluation_seed": 42,
+        "native_mujoco": "4/4",
+        "native_newton": "4/4",
+        "cpu_bam": "4/4",
+        "multi_seed_robustness": "unverified",
+        "report": "docs/reports/rl-debug-handoff-2026-09-09.md"
+      }
     },
     "mujoco_rsl_seed_control": {
-      "state": "full_training_running",
+      "state": "completed_behavior_failed",
       "source_commit": "1cb77380b7f97183851f21f771603822651922d3",
       "seed": 43,
       "num_envs": 8192,
@@ -603,11 +594,15 @@
         "resume-check": "completed",
         "capacity": "completed",
         "capacity-export": "completed",
-        "full": "running"
+        "full": "completed",
+        "export": "completed",
+        "package": "completed",
+        "sim2sim": "completed",
+        "rehearsal": "completed"
       },
-      "reviewed_at": "2026-09-09T04:27:50.244005+00:00",
+      "reviewed_at": "2026-09-09T14:56:51.475870+00:00",
       "preview": "outputs/previews/mujoco-recovery-seed43-0909-01/index.html",
-      "behavior": "pending",
+      "behavior": "two_of_four_in_both_native_backends_and_cpu_bam",
       "interpretation": "seed-only control; no reward, curriculum or optimizer changes; one additional seed cannot establish backend-wide success rates"
     },
     "retired_old_runs": {
@@ -631,7 +626,67 @@
         "sb3-repair-0909-01/isaac-newton-sb3-walking",
         "sb3-repair-0909-01/isaac-newton-sb3-stand_up",
         "mujoco-recovery-seed43-0909-01/mujoco-rsl-rl-stand_up-seed43"
-      ]
+      ],
+      "historical_snapshot": true
+    },
+    "latest_behavior_review_snapshot": {
+      "reviewed_at_utc": "2026-09-09T02:29:00+00:00",
+      "report": "docs/reports/rl-framework-status-2026-09-09.md",
+      "evidence": "outputs/diagnostics/framework-status-0909-01",
+      "new_learners_running": 5,
+      "new_learners_completed": 2,
+      "intentionally_stopped": [
+        "isaac-newton-sb3-stand_up"
+      ],
+      "newton_rsl_standup": "native_seed42_four_pose_pass_repeated_final_transfer_pending",
+      "newton_rsl_walking": "command_response_present_lateral_rmse_failed",
+      "mujoco_rsl_standup": "final_three_of_four_native_both_backends_and_cpu",
+      "mujoco_sb3_standup": "final_zero_of_four_native_both_backends_and_cpu",
+      "framework_equivalence": "open_sb3_61d_critic_vs_rsl_74d_and_native_ppo_normalizer_differences",
+      "integration_merge": "6902943d7230746c20b159f54ecaabbf8397561e",
+      "historical_snapshot": true
+    },
+    "latest_behavior_review": {
+      "reviewed_at_utc": "2026-09-09T14:56:51.475870+00:00",
+      "report": "docs/reports/rl-debug-handoff-2026-09-09.md",
+      "evidence": "outputs/diagnostics/rl-pause-0909-01/status-summary.json",
+      "running": 0,
+      "newton_rsl_standup_final": "seed42_4_of_4_each_native_backend_and_cpu_bam",
+      "mujoco_rsl_standup_seed43_final": "2_of_4_each_native_backend_and_cpu_bam",
+      "sb3": "update_stability_improved_behavior_incomplete",
+      "walking": "behavior_failed_and_regression_in_recent_newton_rsl_previews"
+    },
+    "debug_handoff": {
+      "state": "paused_by_user",
+      "active_rl_processes": 0,
+      "auto_resume": false,
+      "report": "docs/reports/rl-debug-handoff-2026-09-09.md",
+      "stop_record": "outputs/diagnostics/rl-pause-0909-01/stop-record.json",
+      "status_summary": "outputs/diagnostics/rl-pause-0909-01/status-summary.json",
+      "confirmed_at": "2026-09-09T14:56:51.475870+00:00",
+      "next_priority": "causal_debugging_before_further_full_training",
+      "resume_checkpoints": {
+        "fixed-8192-0908-01/isaac-newton-rsl-rl-walking": {
+          "observed_logged_update": 22990,
+          "saved_checkpoint_update": 22000
+        },
+        "sb3-repair-0909-01/mujoco-sb3-walking": {
+          "observed_logged_update": 12278,
+          "saved_checkpoint_update": 12000
+        },
+        "sb3-repair-0909-01/mujoco-sb3-stand_up": {
+          "observed_logged_update": 11478,
+          "saved_checkpoint_update": 11000
+        },
+        "sb3-repair-0909-01/isaac-newton-sb3-walking": {
+          "observed_logged_update": 4563,
+          "saved_checkpoint_update": 4000
+        },
+        "sb3-repair-0909-01/isaac-newton-sb3-stand_up": {
+          "observed_logged_update": 6054,
+          "saved_checkpoint_update": 6000
+        }
+      }
     }
   }
 }
