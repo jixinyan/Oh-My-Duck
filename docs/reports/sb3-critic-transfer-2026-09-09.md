@@ -117,3 +117,42 @@ will rerun all gates from the combined committed implementation before fresh
 full training. No old gate is reused across changed policy/model source. Policy
 model sources are now included in preparation invalidation. Regression checks:
 29 tests and 9 subtests passed for SB3, campaign options, recovery and scheduling.
+
+## Combined recipe startup verification
+
+All four `sb3-repair-0909-01` learners now produced full PPO updates after their
+own fresh 64/5 smoke, normalized export, CPU video, native resume, 8192/5
+capacity and export gates. Training snapshot: `bea3eb1`. GPU allocation is
+0/2/4/5, explicitly shared with existing project runs; GPU 1/3 foreign workloads
+are untouched. Native process checks confirm 8192 environments, official critic,
+adaptive rate, randomized initial phases and offline W&B in all four learners.
+`outputs/experiments/sb3-repair-0909-01/repair-runtime-audit.json` records this.
+The preview worker saves snapshots starting at update 1000 in
+`outputs/previews/sb3-repair-0909-01/index.html`. No convergence claim is made.
+
+## Walking transfer and metric interpretation
+
+The no-push intervention zeros only velocity-push amplitudes, leaving event
+sampling and other play settings intact. Newton-trained Walking 14000 produces
+0.0572 m/s in Newton and 0.0627 m/s in MuJoCo for a 0.1 m/s command; yaw response
+is 92.3% and 91.1% respectively. Both miss the existing whole-episode lateral
+RMSE gate (~0.124 vs 0.1 m/s). This primarily measures periodic sway: during the
+forward segment mean lateral velocity is 0.00242/0.00169 m/s, and one-second
+averaged lateral error RMS is 0.00979/0.00499 m/s. Do not label it persistent
+sideways drift or silently relax the acceptance threshold. The MuJoCo-trained
+checkpoint in the same diagnostic has only 1.7–1.8% forward response across
+backends, so external pushes do not explain Newton's superior forward response.
+
+CPU/BAM Walking 14000 stays upright but averages -0.00118 m/s forward and
+0.3004 rad/s yaw. Its deployment forward transfer fails. Native recovery videos
+show actual rise and hold; the same policy in CPU/BAM settles into a lean after
+prone reset. Inspected frames: `newton-transfer-0909-03/recovery-transfer.jpg`.
+Video gallery: `outputs/diagnostics/newton-transfer-0909-03/index.html`.
+Evidence: `outputs/diagnostics/walking-no-push-0909-01/{result,segment-diagnosis}.json`.
+
+Remaining work is learned convergence of the repaired SB3 runs and causal
+isolation of the MuJoCo learning/CPU-transfer gaps. Native normalizer updates,
+value/advantage loss conventions and timeout bootstrap conventions differ across
+frameworks and remain explicit; native PPO has not been replaced with a shared
+custom optimizer. A no-reward-change RSL seed control is the next diagnostic,
+not another unverified reward ablation.
