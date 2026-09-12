@@ -4,12 +4,14 @@ title: Agentic Microduck — 分步执行计划
 version: 0.2
 status: In progress
 created: 2026-09-06
-updated: 2026-09-09
+updated: 2026-09-12
 tags:
   - microduck
   - implementation-plan
   - sim-to-real
 ---
+
+> 2026-09-12 恢复迭代：用户授权继续打通 RL，并使用单节点多 GPU 调度 job。先对保留的成功/失败策略进行奖励、课程阶段、训练/验收条件和 CPU 稳定性诊断，再按证据修复；不盲目重启旧长训练。已准备 49 个固定策略诊断案例，任务清单与扩展边界见 [RL 任务目录](../docs/rl-task-catalog.md)。下方暂停记录为历史快照。
 
 > 当前状态：训练已暂停（2026-09-09）。按用户要求，所有剩余训练与后台预览已停止，已确认本项目 RL 进程为 0；checkpoint/日志/视频保留，不自动恢复。Newton RSL 起身最终策略在 seed=42 的 Newton、MuJoCo、CPU/BAM 三处均 4/4，但多 seed 稳定性尚未验收；MuJoCo RSL seed=43 起身为 2/4，修复版 SB3 与 Walking 尚未达到目标。下一阶段优先 debug 无效策略的原因，先定位训练/评估/奖励课程/框架适配差异，再决定是否恢复完整训练。详见 [暂停状态与调试交接](reports/rl-debug-handoff-2026-09-09.md)。下方均为历史快照，项目整体 scope 不变。
 

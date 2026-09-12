@@ -1,0 +1,590 @@
+{
+  "schema_version": 1,
+  "description": "Frozen successful/failed policies; standard acceptance versus frozen final training recipe with zero pushes (diagnostic, not acceptance); CPU final-policy robustness. No learners.",
+  "cases": [
+    {
+      "id": "newton-stand-final-mujoco-standard",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "policy": "outputs/experiments/fixed-8192-0908-01/isaac-newton-rsl-rl-stand_up/export/policy.onnx",
+      "policy_sha256": "0333bb741bdd4536769c3052a3da456080a26c06401ba8a682d93bee2e9a51f1",
+      "backend": "mujoco",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "standard"
+      ]
+    },
+    {
+      "id": "newton-stand-final-mujoco-training-stage",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "policy": "outputs/experiments/fixed-8192-0908-01/isaac-newton-rsl-rl-stand_up/export/policy.onnx",
+      "policy_sha256": "0333bb741bdd4536769c3052a3da456080a26c06401ba8a682d93bee2e9a51f1",
+      "backend": "mujoco",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "training-stage",
+        "--curriculum-step",
+        "360000",
+        "--push-scale",
+        "0"
+      ]
+    },
+    {
+      "id": "newton-stand-final-isaac-newton-standard",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "policy": "outputs/experiments/fixed-8192-0908-01/isaac-newton-rsl-rl-stand_up/export/policy.onnx",
+      "policy_sha256": "0333bb741bdd4536769c3052a3da456080a26c06401ba8a682d93bee2e9a51f1",
+      "backend": "isaac-newton",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "standard"
+      ]
+    },
+    {
+      "id": "newton-stand-final-isaac-newton-training-stage",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "policy": "outputs/experiments/fixed-8192-0908-01/isaac-newton-rsl-rl-stand_up/export/policy.onnx",
+      "policy_sha256": "0333bb741bdd4536769c3052a3da456080a26c06401ba8a682d93bee2e9a51f1",
+      "backend": "isaac-newton",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "training-stage",
+        "--curriculum-step",
+        "360000",
+        "--push-scale",
+        "0"
+      ]
+    },
+    {
+      "id": "mujoco-stand-seed43-mujoco-standard",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "policy": "outputs/experiments/mujoco-recovery-seed43-0909-01/mujoco-rsl-rl-stand_up-seed43/export/policy.onnx",
+      "policy_sha256": "b8fd67d4794bd1ee3565305a4c8d3076fc710199c0f13698e8ec6244e766639e",
+      "backend": "mujoco",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "standard"
+      ]
+    },
+    {
+      "id": "mujoco-stand-seed43-mujoco-training-stage",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "policy": "outputs/experiments/mujoco-recovery-seed43-0909-01/mujoco-rsl-rl-stand_up-seed43/export/policy.onnx",
+      "policy_sha256": "b8fd67d4794bd1ee3565305a4c8d3076fc710199c0f13698e8ec6244e766639e",
+      "backend": "mujoco",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "training-stage",
+        "--curriculum-step",
+        "360000",
+        "--push-scale",
+        "0"
+      ]
+    },
+    {
+      "id": "mujoco-stand-seed43-isaac-newton-standard",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "policy": "outputs/experiments/mujoco-recovery-seed43-0909-01/mujoco-rsl-rl-stand_up-seed43/export/policy.onnx",
+      "policy_sha256": "b8fd67d4794bd1ee3565305a4c8d3076fc710199c0f13698e8ec6244e766639e",
+      "backend": "isaac-newton",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "standard"
+      ]
+    },
+    {
+      "id": "mujoco-stand-seed43-isaac-newton-training-stage",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "policy": "outputs/experiments/mujoco-recovery-seed43-0909-01/mujoco-rsl-rl-stand_up-seed43/export/policy.onnx",
+      "policy_sha256": "b8fd67d4794bd1ee3565305a4c8d3076fc710199c0f13698e8ec6244e766639e",
+      "backend": "isaac-newton",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "training-stage",
+        "--curriculum-step",
+        "360000",
+        "--push-scale",
+        "0"
+      ]
+    },
+    {
+      "id": "sb3-mujoco-stand-mujoco-standard",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "policy": "outputs/previews/sb3-repair-0909-01/mujoco-sb3-stand_up/model-8008781ced44/export/policy.onnx",
+      "policy_sha256": "5c5a69043bfc50836d228dd41d973804154e7b72076adf7750cb087c1d11b3d9",
+      "backend": "mujoco",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "standard"
+      ]
+    },
+    {
+      "id": "sb3-mujoco-stand-mujoco-training-stage",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "policy": "outputs/previews/sb3-repair-0909-01/mujoco-sb3-stand_up/model-8008781ced44/export/policy.onnx",
+      "policy_sha256": "5c5a69043bfc50836d228dd41d973804154e7b72076adf7750cb087c1d11b3d9",
+      "backend": "mujoco",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "training-stage",
+        "--curriculum-step",
+        "360000",
+        "--push-scale",
+        "0"
+      ]
+    },
+    {
+      "id": "sb3-mujoco-stand-isaac-newton-standard",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "policy": "outputs/previews/sb3-repair-0909-01/mujoco-sb3-stand_up/model-8008781ced44/export/policy.onnx",
+      "policy_sha256": "5c5a69043bfc50836d228dd41d973804154e7b72076adf7750cb087c1d11b3d9",
+      "backend": "isaac-newton",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "standard"
+      ]
+    },
+    {
+      "id": "sb3-mujoco-stand-isaac-newton-training-stage",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "policy": "outputs/previews/sb3-repair-0909-01/mujoco-sb3-stand_up/model-8008781ced44/export/policy.onnx",
+      "policy_sha256": "5c5a69043bfc50836d228dd41d973804154e7b72076adf7750cb087c1d11b3d9",
+      "backend": "isaac-newton",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "training-stage",
+        "--curriculum-step",
+        "360000",
+        "--push-scale",
+        "0"
+      ]
+    },
+    {
+      "id": "sb3-newton-stand-mujoco-standard",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "policy": "outputs/previews/sb3-repair-0909-01/isaac-newton-sb3-stand_up/model-d4e26431c471/export/policy.onnx",
+      "policy_sha256": "0e12249bc31528d7d86caa0dcb6a619fbdd26070e39cdb9a859fd457769fc504",
+      "backend": "mujoco",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "standard"
+      ]
+    },
+    {
+      "id": "sb3-newton-stand-mujoco-training-stage",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "policy": "outputs/previews/sb3-repair-0909-01/isaac-newton-sb3-stand_up/model-d4e26431c471/export/policy.onnx",
+      "policy_sha256": "0e12249bc31528d7d86caa0dcb6a619fbdd26070e39cdb9a859fd457769fc504",
+      "backend": "mujoco",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "training-stage",
+        "--curriculum-step",
+        "360000",
+        "--push-scale",
+        "0"
+      ]
+    },
+    {
+      "id": "sb3-newton-stand-isaac-newton-standard",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "policy": "outputs/previews/sb3-repair-0909-01/isaac-newton-sb3-stand_up/model-d4e26431c471/export/policy.onnx",
+      "policy_sha256": "0e12249bc31528d7d86caa0dcb6a619fbdd26070e39cdb9a859fd457769fc504",
+      "backend": "isaac-newton",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "standard"
+      ]
+    },
+    {
+      "id": "sb3-newton-stand-isaac-newton-training-stage",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "policy": "outputs/previews/sb3-repair-0909-01/isaac-newton-sb3-stand_up/model-d4e26431c471/export/policy.onnx",
+      "policy_sha256": "0e12249bc31528d7d86caa0dcb6a619fbdd26070e39cdb9a859fd457769fc504",
+      "backend": "isaac-newton",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "training-stage",
+        "--curriculum-step",
+        "360000",
+        "--push-scale",
+        "0"
+      ]
+    },
+    {
+      "id": "sb3-mujoco-walk-mujoco-standard",
+      "task": "Mjlab-Velocity-Flat-MicroDuck",
+      "policy": "outputs/previews/sb3-repair-0909-01/mujoco-sb3-walking/model-1019d39a625d/export/policy.onnx",
+      "policy_sha256": "c2745402316fe72e9e20d988ae93d07b9dd218573088e1aa03aae7ba029a2810",
+      "backend": "mujoco",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "standard"
+      ]
+    },
+    {
+      "id": "sb3-mujoco-walk-mujoco-training-stage",
+      "task": "Mjlab-Velocity-Flat-MicroDuck",
+      "policy": "outputs/previews/sb3-repair-0909-01/mujoco-sb3-walking/model-1019d39a625d/export/policy.onnx",
+      "policy_sha256": "c2745402316fe72e9e20d988ae93d07b9dd218573088e1aa03aae7ba029a2810",
+      "backend": "mujoco",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "training-stage",
+        "--curriculum-step",
+        "360000",
+        "--push-scale",
+        "0"
+      ]
+    },
+    {
+      "id": "sb3-mujoco-walk-isaac-newton-standard",
+      "task": "Mjlab-Velocity-Flat-MicroDuck",
+      "policy": "outputs/previews/sb3-repair-0909-01/mujoco-sb3-walking/model-1019d39a625d/export/policy.onnx",
+      "policy_sha256": "c2745402316fe72e9e20d988ae93d07b9dd218573088e1aa03aae7ba029a2810",
+      "backend": "isaac-newton",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "standard"
+      ]
+    },
+    {
+      "id": "sb3-mujoco-walk-isaac-newton-training-stage",
+      "task": "Mjlab-Velocity-Flat-MicroDuck",
+      "policy": "outputs/previews/sb3-repair-0909-01/mujoco-sb3-walking/model-1019d39a625d/export/policy.onnx",
+      "policy_sha256": "c2745402316fe72e9e20d988ae93d07b9dd218573088e1aa03aae7ba029a2810",
+      "backend": "isaac-newton",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "training-stage",
+        "--curriculum-step",
+        "360000",
+        "--push-scale",
+        "0"
+      ]
+    },
+    {
+      "id": "sb3-newton-walk-mujoco-standard",
+      "task": "Mjlab-Velocity-Flat-MicroDuck",
+      "policy": "outputs/previews/sb3-repair-0909-01/isaac-newton-sb3-walking/model-b697858eb601/export/policy.onnx",
+      "policy_sha256": "6dfd580d439f3a292e62e76fcdea597d39f5b13c3fff55dc3e5f314f555387a7",
+      "backend": "mujoco",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "standard"
+      ]
+    },
+    {
+      "id": "sb3-newton-walk-mujoco-training-stage",
+      "task": "Mjlab-Velocity-Flat-MicroDuck",
+      "policy": "outputs/previews/sb3-repair-0909-01/isaac-newton-sb3-walking/model-b697858eb601/export/policy.onnx",
+      "policy_sha256": "6dfd580d439f3a292e62e76fcdea597d39f5b13c3fff55dc3e5f314f555387a7",
+      "backend": "mujoco",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "training-stage",
+        "--curriculum-step",
+        "360000",
+        "--push-scale",
+        "0"
+      ]
+    },
+    {
+      "id": "sb3-newton-walk-isaac-newton-standard",
+      "task": "Mjlab-Velocity-Flat-MicroDuck",
+      "policy": "outputs/previews/sb3-repair-0909-01/isaac-newton-sb3-walking/model-b697858eb601/export/policy.onnx",
+      "policy_sha256": "6dfd580d439f3a292e62e76fcdea597d39f5b13c3fff55dc3e5f314f555387a7",
+      "backend": "isaac-newton",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "standard"
+      ]
+    },
+    {
+      "id": "sb3-newton-walk-isaac-newton-training-stage",
+      "task": "Mjlab-Velocity-Flat-MicroDuck",
+      "policy": "outputs/previews/sb3-repair-0909-01/isaac-newton-sb3-walking/model-b697858eb601/export/policy.onnx",
+      "policy_sha256": "6dfd580d439f3a292e62e76fcdea597d39f5b13c3fff55dc3e5f314f555387a7",
+      "backend": "isaac-newton",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "training-stage",
+        "--curriculum-step",
+        "360000",
+        "--push-scale",
+        "0"
+      ]
+    },
+    {
+      "id": "newton-walk-late-mujoco-standard",
+      "task": "Mjlab-Velocity-Flat-MicroDuck",
+      "policy": "outputs/previews/fixed-8192-0908-01/isaac-newton-rsl-rl-walking/model_22000-33bbe6fd4c7e/export/policy.onnx",
+      "policy_sha256": "452cc6f4e1b2c398cf4a970a54e9db431473c1ed8f68eafd0061d02b4acfa95b",
+      "backend": "mujoco",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "standard"
+      ]
+    },
+    {
+      "id": "newton-walk-late-mujoco-training-stage",
+      "task": "Mjlab-Velocity-Flat-MicroDuck",
+      "policy": "outputs/previews/fixed-8192-0908-01/isaac-newton-rsl-rl-walking/model_22000-33bbe6fd4c7e/export/policy.onnx",
+      "policy_sha256": "452cc6f4e1b2c398cf4a970a54e9db431473c1ed8f68eafd0061d02b4acfa95b",
+      "backend": "mujoco",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "training-stage",
+        "--curriculum-step",
+        "360000",
+        "--push-scale",
+        "0"
+      ]
+    },
+    {
+      "id": "newton-walk-late-isaac-newton-standard",
+      "task": "Mjlab-Velocity-Flat-MicroDuck",
+      "policy": "outputs/previews/fixed-8192-0908-01/isaac-newton-rsl-rl-walking/model_22000-33bbe6fd4c7e/export/policy.onnx",
+      "policy_sha256": "452cc6f4e1b2c398cf4a970a54e9db431473c1ed8f68eafd0061d02b4acfa95b",
+      "backend": "isaac-newton",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "standard"
+      ]
+    },
+    {
+      "id": "newton-walk-late-isaac-newton-training-stage",
+      "task": "Mjlab-Velocity-Flat-MicroDuck",
+      "policy": "outputs/previews/fixed-8192-0908-01/isaac-newton-rsl-rl-walking/model_22000-33bbe6fd4c7e/export/policy.onnx",
+      "policy_sha256": "452cc6f4e1b2c398cf4a970a54e9db431473c1ed8f68eafd0061d02b4acfa95b",
+      "backend": "isaac-newton",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "training-stage",
+        "--curriculum-step",
+        "360000",
+        "--push-scale",
+        "0"
+      ]
+    },
+    {
+      "id": "newton-walk-14000-mujoco-standard",
+      "task": "Mjlab-Velocity-Flat-MicroDuck",
+      "policy": "outputs/previews/fixed-8192-0908-01/isaac-newton-rsl-rl-walking/model_14000-6eb14e9fdb33/export/policy.onnx",
+      "policy_sha256": "a22c6a7979ddd830c4cf8313ac7666089ba831dfe113b951e9e80874bb890ed7",
+      "backend": "mujoco",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "standard"
+      ]
+    },
+    {
+      "id": "newton-walk-14000-mujoco-training-stage",
+      "task": "Mjlab-Velocity-Flat-MicroDuck",
+      "policy": "outputs/previews/fixed-8192-0908-01/isaac-newton-rsl-rl-walking/model_14000-6eb14e9fdb33/export/policy.onnx",
+      "policy_sha256": "a22c6a7979ddd830c4cf8313ac7666089ba831dfe113b951e9e80874bb890ed7",
+      "backend": "mujoco",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "training-stage",
+        "--curriculum-step",
+        "360000",
+        "--push-scale",
+        "0"
+      ]
+    },
+    {
+      "id": "newton-walk-14000-isaac-newton-standard",
+      "task": "Mjlab-Velocity-Flat-MicroDuck",
+      "policy": "outputs/previews/fixed-8192-0908-01/isaac-newton-rsl-rl-walking/model_14000-6eb14e9fdb33/export/policy.onnx",
+      "policy_sha256": "a22c6a7979ddd830c4cf8313ac7666089ba831dfe113b951e9e80874bb890ed7",
+      "backend": "isaac-newton",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "standard"
+      ]
+    },
+    {
+      "id": "newton-walk-14000-isaac-newton-training-stage",
+      "task": "Mjlab-Velocity-Flat-MicroDuck",
+      "policy": "outputs/previews/fixed-8192-0908-01/isaac-newton-rsl-rl-walking/model_14000-6eb14e9fdb33/export/policy.onnx",
+      "policy_sha256": "a22c6a7979ddd830c4cf8313ac7666089ba831dfe113b951e9e80874bb890ed7",
+      "backend": "isaac-newton",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "training-stage",
+        "--curriculum-step",
+        "360000",
+        "--push-scale",
+        "0"
+      ]
+    },
+    {
+      "id": "newton-stand-final-cpu-42",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "policy": "outputs/experiments/fixed-8192-0908-01/isaac-newton-rsl-rl-stand_up/export/policy.onnx",
+      "policy_sha256": "0333bb741bdd4536769c3052a3da456080a26c06401ba8a682d93bee2e9a51f1",
+      "backend": "cpu-bam",
+      "seed": 42
+    },
+    {
+      "id": "newton-stand-final-cpu-100",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "policy": "outputs/experiments/fixed-8192-0908-01/isaac-newton-rsl-rl-stand_up/export/policy.onnx",
+      "policy_sha256": "0333bb741bdd4536769c3052a3da456080a26c06401ba8a682d93bee2e9a51f1",
+      "backend": "cpu-bam",
+      "seed": 100
+    },
+    {
+      "id": "newton-stand-final-cpu-101",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "policy": "outputs/experiments/fixed-8192-0908-01/isaac-newton-rsl-rl-stand_up/export/policy.onnx",
+      "policy_sha256": "0333bb741bdd4536769c3052a3da456080a26c06401ba8a682d93bee2e9a51f1",
+      "backend": "cpu-bam",
+      "seed": 101
+    },
+    {
+      "id": "newton-stand-final-cpu-102",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "policy": "outputs/experiments/fixed-8192-0908-01/isaac-newton-rsl-rl-stand_up/export/policy.onnx",
+      "policy_sha256": "0333bb741bdd4536769c3052a3da456080a26c06401ba8a682d93bee2e9a51f1",
+      "backend": "cpu-bam",
+      "seed": 102
+    },
+    {
+      "id": "newton-stand-final-cpu-103",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "policy": "outputs/experiments/fixed-8192-0908-01/isaac-newton-rsl-rl-stand_up/export/policy.onnx",
+      "policy_sha256": "0333bb741bdd4536769c3052a3da456080a26c06401ba8a682d93bee2e9a51f1",
+      "backend": "cpu-bam",
+      "seed": 103
+    },
+    {
+      "id": "newton-stand-final-cpu-104",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "policy": "outputs/experiments/fixed-8192-0908-01/isaac-newton-rsl-rl-stand_up/export/policy.onnx",
+      "policy_sha256": "0333bb741bdd4536769c3052a3da456080a26c06401ba8a682d93bee2e9a51f1",
+      "backend": "cpu-bam",
+      "seed": 104
+    },
+    {
+      "id": "newton-stand-final-cpu-105",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "policy": "outputs/experiments/fixed-8192-0908-01/isaac-newton-rsl-rl-stand_up/export/policy.onnx",
+      "policy_sha256": "0333bb741bdd4536769c3052a3da456080a26c06401ba8a682d93bee2e9a51f1",
+      "backend": "cpu-bam",
+      "seed": 105
+    },
+    {
+      "id": "newton-stand-final-cpu-106",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "policy": "outputs/experiments/fixed-8192-0908-01/isaac-newton-rsl-rl-stand_up/export/policy.onnx",
+      "policy_sha256": "0333bb741bdd4536769c3052a3da456080a26c06401ba8a682d93bee2e9a51f1",
+      "backend": "cpu-bam",
+      "seed": 106
+    },
+    {
+      "id": "newton-stand-final-cpu-107",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "policy": "outputs/experiments/fixed-8192-0908-01/isaac-newton-rsl-rl-stand_up/export/policy.onnx",
+      "policy_sha256": "0333bb741bdd4536769c3052a3da456080a26c06401ba8a682d93bee2e9a51f1",
+      "backend": "cpu-bam",
+      "seed": 107
+    },
+    {
+      "id": "newton-stand-final-cpu-108",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "policy": "outputs/experiments/fixed-8192-0908-01/isaac-newton-rsl-rl-stand_up/export/policy.onnx",
+      "policy_sha256": "0333bb741bdd4536769c3052a3da456080a26c06401ba8a682d93bee2e9a51f1",
+      "backend": "cpu-bam",
+      "seed": 108
+    },
+    {
+      "id": "newton-stand-final-cpu-109",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "policy": "outputs/experiments/fixed-8192-0908-01/isaac-newton-rsl-rl-stand_up/export/policy.onnx",
+      "policy_sha256": "0333bb741bdd4536769c3052a3da456080a26c06401ba8a682d93bee2e9a51f1",
+      "backend": "cpu-bam",
+      "seed": 109
+    },
+    {
+      "id": "newton-stand-final-cpu-110",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "policy": "outputs/experiments/fixed-8192-0908-01/isaac-newton-rsl-rl-stand_up/export/policy.onnx",
+      "policy_sha256": "0333bb741bdd4536769c3052a3da456080a26c06401ba8a682d93bee2e9a51f1",
+      "backend": "cpu-bam",
+      "seed": 110
+    },
+    {
+      "id": "newton-stand-final-cpu-111",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "policy": "outputs/experiments/fixed-8192-0908-01/isaac-newton-rsl-rl-stand_up/export/policy.onnx",
+      "policy_sha256": "0333bb741bdd4536769c3052a3da456080a26c06401ba8a682d93bee2e9a51f1",
+      "backend": "cpu-bam",
+      "seed": 111
+    },
+    {
+      "id": "newton-stand-final-cpu-112",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "policy": "outputs/experiments/fixed-8192-0908-01/isaac-newton-rsl-rl-stand_up/export/policy.onnx",
+      "policy_sha256": "0333bb741bdd4536769c3052a3da456080a26c06401ba8a682d93bee2e9a51f1",
+      "backend": "cpu-bam",
+      "seed": 112
+    },
+    {
+      "id": "newton-stand-final-cpu-113",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "policy": "outputs/experiments/fixed-8192-0908-01/isaac-newton-rsl-rl-stand_up/export/policy.onnx",
+      "policy_sha256": "0333bb741bdd4536769c3052a3da456080a26c06401ba8a682d93bee2e9a51f1",
+      "backend": "cpu-bam",
+      "seed": 113
+    },
+    {
+      "id": "newton-stand-final-cpu-114",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "policy": "outputs/experiments/fixed-8192-0908-01/isaac-newton-rsl-rl-stand_up/export/policy.onnx",
+      "policy_sha256": "0333bb741bdd4536769c3052a3da456080a26c06401ba8a682d93bee2e9a51f1",
+      "backend": "cpu-bam",
+      "seed": 114
+    },
+    {
+      "id": "newton-stand-final-cpu-115",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "policy": "outputs/experiments/fixed-8192-0908-01/isaac-newton-rsl-rl-stand_up/export/policy.onnx",
+      "policy_sha256": "0333bb741bdd4536769c3052a3da456080a26c06401ba8a682d93bee2e9a51f1",
+      "backend": "cpu-bam",
+      "seed": 115
+    }
+  ]
+}

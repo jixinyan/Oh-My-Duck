@@ -1,5 +1,14 @@
 # Implementation status
 
+Updated 2026-09-12. RL iteration resumed by user instruction; single-node,
+multi-GPU scheduler jobs are authorized. A 49-case frozen-policy diagnostic
+matrix is prepared, including weighted reward traces and 17-seed CPU/BAM checks
+of the final Newton StandUp policy. Diagnostic training-stage/push interventions
+are explicitly ineligible for standard acceptance. Ten protocol/profile tests
+pass; GPU execution is pending submission. New tasks remain inventory entries
+until their own validation, evaluation and packaging gates are implemented.
+See [task catalog](../docs/rl-task-catalog.md). The pause below is historical.
+
 Updated 2026-09-09. Product scope remains the Agentic Microduck Project Design.
 
 **Training paused by user; zero project RL processes remain.** Five remaining

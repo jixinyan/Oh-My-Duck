@@ -23,7 +23,16 @@ def main():
     parser.add_argument("--width", type=int, default=1280)
     parser.add_argument("--height", type=int, default=720)
     parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--profile", choices=("standard", "training-stage"), default="standard")
+    parser.add_argument("--curriculum-step", type=int, help="Freeze the official curriculum at this control-step count (diagnostic only)")
+    parser.add_argument("--push-scale", type=float, default=1.0, help="Explicit diagnostic push amplitude multiplier; timing remains unchanged")
+    parser.add_argument("--record-rewards", action="store_true")
     args = parser.parse_args()
+    import math
+    if (args.profile == "training-stage") != (args.curriculum_step is not None):
+        parser.error("training-stage requires --curriculum-step; standard forbids it")
+    if (args.curriculum_step is not None and args.curriculum_step < 0) or not math.isfinite(args.push_scale) or args.push_scale < 0:
+        parser.error("Use nonnegative finite diagnostic parameters")
     args.output.mkdir(parents=True, exist_ok=False)
     import numpy as np
     import torch
@@ -40,11 +49,12 @@ def main():
     if task.evaluation is None:
         raise ValueError(f"Task {task.id} has no evaluation protocol")
     protocol = task.evaluation.build()
-    cfg = build_environment(task.binding(args.backend), play=True)
+    cfg = build_environment(task.binding(args.backend), play=args.profile == "standard")
     cfg.scene.num_envs = 1
     cfg.seed = args.seed
     cfg.auto_reset = False
-    cfg.curriculum = {}
+    from .diagnostics import prepare_recipe, apply_stage, summarize_rewards
+    stages = prepare_recipe(cfg, profile=args.profile, curriculum_step=args.curriculum_step)
     cfg.episode_length_s = 1 + max(len(s.commands) for s in protocol.scenarios) * 0.02
     cfg.viewer.width, cfg.viewer.height = args.width, args.height
     cfg.viewer.distance, cfg.viewer.azimuth, cfg.viewer.elevation = 0.85, 135.0, -20.0
@@ -62,6 +72,11 @@ def main():
         "renderer": "isolated-native-mujoco" if args.backend == "mujoco" else "native-newton",
         "seed": args.seed,
         "scenarios": {},
+        "evaluation_profile": args.profile,
+        "curriculum_step": args.curriculum_step,
+        "push_scale": args.push_scale,
+        "acceptance_eligible": args.profile == "standard" and args.push_scale == 1.0,
+        "reward_trace_units": "weighted rate before policy-dt integration" if args.record_rewards else None,
     }
     env = writer = video = None
     try:
@@ -72,6 +87,16 @@ def main():
             device="cuda:0",
             render_mode="rgb_array" if args.video and args.backend != "mujoco" else None,
         )
+        # Standard defaults retain the original evaluation behavior. Diagnostic
+        # stage configuration is applied before forced-pose resets.
+        if stages or args.push_scale != 1.0:
+            weights = apply_stage(env, stages, args.curriculum_step, args.push_scale)
+        else:
+            weights = {name: env.reward_manager.get_term_cfg(name).weight
+                       for name in env.reward_manager.active_terms}
+        if args.record_rewards:
+            report["reward_weights"] = weights
+            report["reward_term_order"] = list(env.reward_manager.active_terms)
         if args.video and args.backend == "mujoco":
             video = MujocoVideo(
                 env.sim.mj_model, width=args.width, height=args.height, renderer=args.mujoco_renderer
@@ -116,6 +141,14 @@ def main():
                     "command": command,
                 }.items():
                     trace[key].append(value)
+                if args.record_rewards:
+                    for key, value in {
+                        "joint_position": robot.joint_pos[0],
+                        "joint_velocity": robot.joint_vel[0],
+                        "base_position": robot.root_link_pos_w[0] - env.scene.env_origins[0],
+                        "base_quaternion": robot.root_link_quat_w[0],
+                    }.items():
+                        trace[key].append(value.detach().cpu().numpy().copy())
                 if writer is not None and step % 2 == 0:
                     if video is not None:
                         frame = video.render(
@@ -141,6 +174,9 @@ def main():
                     obs, reward, terminated, truncated, info = env.step(
                         torch.from_numpy(action).to(env.device)
                     )
+                if args.record_rewards:
+                    trace["weighted_reward_rate"].append(env.reward_manager._step_reward[0].detach().cpu().numpy().copy())
+                    trace["transition_reward"].append(float(reward[0]))
                 if not torch.isfinite(reward).all() or not all(torch.isfinite(x).all() for x in obs.values()):
                     raise FloatingPointError("Nonfinite replay state")
                 if terminated.any() or truncated.any():
@@ -158,9 +194,12 @@ def main():
                 "completed": completed,
                 **protocol.score(trace, completed),
             }
-        report["status"] = (
-            "passed" if all(s["success"] for s in report["scenarios"].values()) else "behavior_failed"
-        )
+            if args.record_rewards:
+                report["scenarios"][scenario.name]["reward_terms"] = summarize_rewards(trace, report["reward_term_order"])
+        passed = all(s["success"] for s in report["scenarios"].values())
+        report["status"] = "passed" if passed else "behavior_failed"
+        if not report["acceptance_eligible"]:
+            report["status"] = "diagnostic_" + report["status"]
     except Exception as error:
         import traceback
 
@@ -182,7 +221,7 @@ def main():
         finally:
             (args.output / "result.json").write_text(json.dumps(report, indent=2) + "\n")
     print(json.dumps(report, indent=2))
-    return 0 if report["status"] == "passed" else 2
+    return 0 if report["status"] in {"passed", "diagnostic_passed"} else 2
 
 
 if __name__ == "__main__":

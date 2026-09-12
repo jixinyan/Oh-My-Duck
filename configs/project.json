@@ -41,7 +41,7 @@
     },
     "training": {
       "module": "oh_my_duck.rl.training",
-      "state": "pipeline_verified_partial_behavior_training_paused",
+      "state": "pipeline_verified_partial_behavior_causal_debugging",
       "role": "Independent simulation-backend and RL-framework selection, offline training and evaluation"
     },
     "perception": {
@@ -160,7 +160,7 @@
   },
   "rl_framework_registry": "oh_my_duck.rl.training.frameworks:default_framework_registry",
   "rl_acceptance": {
-    "state": "training_paused_causal_debugging_next",
+    "state": "causal_diagnostics_prepared",
     "smoke_and_resume": "8_of_8_passed_at_5971dca",
     "open_items": [
       "Diagnose ineffective task learning from preserved official/owned/framework comparisons",
@@ -169,7 +169,7 @@
       "Newton native DDP acceptance remains deferred"
     ],
     "architecture_merge": "6303ca4",
-    "validation_branch": null,
+    "validation_branch": "fix/rl-learning-diagnostics",
     "export_and_local_package": "8_of_8_passed; RSL revalidated at 6303ca4",
     "task_layout": "14 task families with environment.py and ppo.py; 33 semantic catalog entries preserved",
     "full_training_campaign": {
@@ -686,7 +686,19 @@
           "observed_logged_update": 6054,
           "saved_checkpoint_update": 6000
         }
-      }
+      },
+      "historical_snapshot": true
+    },
+    "current_iteration": {
+      "date": "2026-09-12",
+      "state": "diagnostics_prepared_submission_pending",
+      "plan": "configs/experiments/learning-diagnostics.json",
+      "cases": 49,
+      "nodes": 1,
+      "gpus_per_node": 4,
+      "learners_launched": 0,
+      "tests": "10_profile_and_protocol_tests_passed",
+      "task_catalog": "docs/rl-task-catalog.md"
     }
   }
 }
