@@ -11,19 +11,19 @@ Flat Walking 与 Flat StandUp。只有这两个入口目前绑定了 Newton 后�
 
 | 任务家族 | 代表任务 ID | 含地形/Backlash 的入口数 | 当前后端绑定 |
 |---|---|---:|---|
-| environment:make_microduck_velocity_env_cfg | `Mjlab-Velocity-Flat-MicroDuck` | 4 | isaac-newton, mujoco |
-| environment:make_microduck_velstand_env_cfg | `Mjlab-VelStand-Flat-MicroDuck` | 4 | mujoco |
-| environment:make_microduck_standup_env_cfg | `Mjlab-StandUp-Flat-MicroDuck` | 4 | isaac-newton, mujoco |
-| environment:make_microduck_sitstand_env_cfg | `Mjlab-SitStand-Flat-MicroDuck` | 4 | mujoco |
-| environment:make_microduck_ground_pick_env_cfg | `Mjlab-GroundPick-Flat-MicroDuck` | 4 | mujoco |
-| environment:make_microduck_ball_kick_env_cfg | `Mjlab-BallKick-Flat-MicroDuck` | 2 | mujoco |
-| environment:make_microduck_velocity_rollers_env_cfg | `Mjlab-Velocity-Flat-MicroDuck-Rollers` | 2 | mujoco |
-| environment:make_microduck_velocity_swizzle_env_cfg | `Mjlab-Velocity-Swizzle-MicroDuck` | 2 | mujoco |
-| environment:make_microduck_roller_crouch_env_cfg | `Mjlab-RollerCrouch-Flat-MicroDuck` | 2 | mujoco |
-| environment:make_microduck_roller_slope_env_cfg | `Mjlab-RollerSlope-Flat-MicroDuck` | 2 | mujoco |
-| environment:make_microduck_roller_standup_env_cfg | `Mjlab-RollerStandUp-Flat-MicroDuck` | 1 | mujoco |
-| environment:make_microduck_spin_env_cfg | `Mjlab-Spin-Flat-MicroDuck` | 1 | mujoco |
-| environment:make_microduck_roulade_env_cfg | `Mjlab-Roulade-Flat-MicroDuck` | 1 | mujoco |
+| 平地/粗糙地面速度跟踪 | `Mjlab-Velocity-Flat-MicroDuck` | 4 | isaac-newton, mujoco |
+| 站立姿态与速度控制 | `Mjlab-VelStand-Flat-MicroDuck` | 4 | mujoco |
+| 从坐姿、俯卧、仰卧起身 | `Mjlab-StandUp-Flat-MicroDuck` | 4 | isaac-newton, mujoco |
+| 按命令坐下与站起 | `Mjlab-SitStand-Flat-MicroDuck` | 4 | mujoco |
+| 低头触地/拾取动作 | `Mjlab-GroundPick-Flat-MicroDuck` | 4 | mujoco |
+| 踢球 | `Mjlab-BallKick-Flat-MicroDuck` | 2 | mujoco |
+| 轮脚行走 | `Mjlab-Velocity-Flat-MicroDuck-Rollers` | 2 | mujoco |
+| 轮脚摆动滑行 | `Mjlab-Velocity-Swizzle-MicroDuck` | 2 | mujoco |
+| 轮脚蹲伏 | `Mjlab-RollerCrouch-Flat-MicroDuck` | 2 | mujoco |
+| 轮脚斜坡 | `Mjlab-RollerSlope-Flat-MicroDuck` | 2 | mujoco |
+| 轮脚起身 | `Mjlab-RollerStandUp-Flat-MicroDuck` | 1 | mujoco |
+| 旋转动作 | `Mjlab-Spin-Flat-MicroDuck` | 1 | mujoco |
+| 翻滚动作 | `Mjlab-Roulade-Flat-MicroDuck` | 1 | mujoco |
 
 Backlash 是同一任务的关节回差变体，不是新的技能。轮脚任务需要对应的
 轮脚模型；无真机阶段只能声明仿真结果。`motor_testbench` 是诊断模块，

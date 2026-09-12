@@ -7,7 +7,7 @@ of the final Newton StandUp policy. Diagnostic training-stage/push interventions
 are explicitly ineligible for standard acceptance. Ten protocol/profile tests
 pass; GPU execution is pending submission. New tasks remain inventory entries
 until their own validation, evaluation and packaging gates are implemented.
-See [task catalog](../docs/rl-task-catalog.md). The pause below is historical.
+See [task catalog](rl-task-catalog.md). The pause below is historical.
 
 Updated 2026-09-09. Product scope remains the Agentic Microduck Project Design.
 
