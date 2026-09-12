@@ -160,7 +160,7 @@
   },
   "rl_framework_registry": "oh_my_duck.rl.training.frameworks:default_framework_registry",
   "rl_acceptance": {
-    "state": "causal_diagnostics_prepared",
+    "state": "causal_diagnostics_queued_waiting_project_quota",
     "smoke_and_resume": "8_of_8_passed_at_5971dca",
     "open_items": [
       "Diagnose ineffective task learning from preserved official/owned/framework comparisons",
@@ -691,14 +691,21 @@
     },
     "current_iteration": {
       "date": "2026-09-12",
-      "state": "diagnostics_prepared_submission_pending",
+      "state": "diagnostics_queued_waiting_project_quota",
       "plan": "configs/experiments/learning-diagnostics.json",
       "cases": 49,
       "nodes": 1,
       "gpus_per_node": 4,
       "learners_launched": 0,
-      "tests": "10_profile_and_protocol_tests_passed",
-      "task_catalog": "docs/rl-task-catalog.md"
+      "tests": "10_profile_protocol_tests_and_3_native_export_tests_passed",
+      "task_catalog": "docs/rl-task-catalog.md",
+      "report": "docs/reports/rl-learning-diagnostics-2026-09-12.md",
+      "job": "omd-rl-diagnose-0912-02",
+      "queue_id": "local-4a0ab8eebdb0",
+      "source_commit": "4ffb970bfa9f41f09232b901bc75ac796448998f",
+      "output": "outputs/diagnostics/learning-0912-02",
+      "first_submission": "failed_scheduler_shared_lock_timeout",
+      "newton_periodic_export": "metadata_indexing_fixed_cpu_native_onnx_parity_passed_gpu_integration_pending"
     }
   }
 }

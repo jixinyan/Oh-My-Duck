@@ -4,8 +4,11 @@ Updated 2026-09-12. RL iteration resumed by user instruction; single-node,
 multi-GPU scheduler jobs are authorized. A 49-case frozen-policy diagnostic
 matrix is prepared, including weighted reward traces and 17-seed CPU/BAM checks
 of the final Newton StandUp policy. Diagnostic training-stage/push interventions
-are explicitly ineligible for standard acceptance. Ten protocol/profile tests
-pass; GPU execution is pending submission. New tasks remain inventory entries
+are explicitly ineligible for standard acceptance. Ten protocol/profile tests and three native export-metadata/callback tests
+pass. Newton periodic export metadata indexing is repaired; GPU callback
+integration remains pending. Diagnostic job `omd-rl-diagnose-0912-02` is accepted
+(1 node, 4 GPUs) and waiting for project quota; attempt 01 failed on a shared lock.
+See [current diagnosis](reports/rl-learning-diagnostics-2026-09-12.md). New tasks remain inventory entries
 until their own validation, evaluation and packaging gates are implemented.
 See [task catalog](rl-task-catalog.md). The pause below is historical.
 

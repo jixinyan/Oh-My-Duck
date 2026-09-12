@@ -80,3 +80,20 @@ smoke, resume, capacity and full stages. See
 `configs/experiments/sb3-official-critic.json` for a complete representative plan.
 Native framework normalization, advantage/value loss and KL estimation still
 have documented differences; shared rewards do not establish equal learning.
+
+
+Frozen-policy diagnosis is available through `python omd.py diagnose --config
+configs/experiments/learning-diagnostics.json --output <new-directory>`. Use
+`--dry-run` to verify every frozen policy hash without starting simulation.
+Submit GPU execution with `omd.py submit` using explicit resources. This runs
+independent evaluation cases, not PPO updates or distributed SB3 learning.
+
+`omd.py eval --backend <backend> -- --task <task> --policy <onnx> --output <new-directory>
+--record-rewards` retains standard acceptance while saving weighted reward rates
+and physical state traces. `--profile training-stage --curriculum-step <control-step>`
+and `--push-scale <factor>` are explicit diagnostic interventions; altered cases
+are labeled ineligible for standard acceptance. A training stage is frozen before
+forced-pose resets so curriculum reset logic cannot silently replace the selected
+pose. Reward traces use weighted rates before policy-dt integration; the actual
+transition reward is saved separately. See [task catalog](../../../docs/rl-task-catalog.md)
+and [September 12 diagnosis](../../../docs/reports/rl-learning-diagnostics-2026-09-12.md).
