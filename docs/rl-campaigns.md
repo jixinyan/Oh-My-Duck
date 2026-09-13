@@ -1,5 +1,14 @@
 # Full representative training campaigns
 
+Current scheduling policy (2026-09-13): submit the complete workflow in one job:
+required startup gates → full declared training budget → final evaluation/videos.
+Reuse configuration-matched gates where verified, and continue automatically
+after remaining gates pass. Routine submissions must not use `--prepare-only`;
+a failed gate still stops its run. The current environment choice is 8192 per
+learner (`configs/experiments/representative-8192.json`). The 4096 configuration
+and September 8 local-host instructions below describe historical campaigns;
+new GPU work uses the scheduler under the September 12 authorization.
+
 `configs/experiments/representative-full.json` runs two tasks across MuJoCo and
 Isaac/Newton, using native RSL-RL PPO and native SB3 PPO. Eight independent learners
 share one eight-GPU node, with one learner and 4096 simulated environments per GPU.

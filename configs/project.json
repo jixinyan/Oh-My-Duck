@@ -156,7 +156,9 @@
       "retained_checkpoint_hashes_unchanged": true,
       "audit": "outputs/maintenance/process-cleanup-0908-01/result.json",
       "historical_snapshot": true
-    }
+    },
+    "scheduler_workflow": "required_gates_then_full_training_then_final_evaluation_in_one_job",
+    "standalone_short_validation_jobs": "avoid_for_routine_submissions_per_user_2026_09_13"
   },
   "rl_framework_registry": "oh_my_duck.rl.training.frameworks:default_framework_registry",
   "rl_acceptance": {
@@ -691,7 +693,7 @@
     },
     "current_iteration": {
       "date": "2026-09-13",
-      "state": "running_on_scheduler",
+      "state": "32_replays_completed_walking_prepared_standup_capacity_running",
       "report": "docs/reports/rl-causal-replay-2026-09-13.md",
       "completed_diagnostic_cases": 49,
       "newton_final_stand_cpu_pose_passes": {
@@ -719,7 +721,7 @@
       "output": "outputs/diagnostics/push-causal-0913-01",
       "gate_output": "outputs/diagnostics/newton-export-gates-0913-01",
       "tests": "24_tests_and_9_subtests_passed_across_targeted_CPU_suites",
-      "newton_periodic_export": "gate_now_requires_native_callback_parity_gpu_execution_pending",
+      "newton_periodic_export": "both_native_smoke_callbacks_passed_65_input_parity_max_error_0_walking_capacity_also_passed",
       "job_id": "c33528a5-a6ca-4fba-8484-5c5a0f96eba6",
       "gpu_model": "H800",
       "scheduler_started_at": "2026-09-13 10:28:16 (scheduler display)"

@@ -108,3 +108,21 @@ Startup verification: scheduler now reports **Running**, platform ID
 `c33528a5-a6ca-4fba-8484-5c5a0f96eba6`, one node / four H800 GPUs.
 Displayed start time: `2026-09-13 10:28:16` (scheduler timezone).
 Results remain pending; no ongoing assistant polling is scheduled.
+
+
+## User-requested status check and scheduling correction
+
+At this check, `omd-rl-causal-0913-01` is Running. All 32 paired replays
+completed without execution errors. Walking preparation is complete; StandUp
+has completed smoke, export, CPU rehearsal and native resume and is running
+8192-env capacity validation. Both actual Newton smoke callback exports match
+separate official-route exports on 65 inputs with maximum absolute error 0;
+Walking's capacity callback also passes. CPU smoke rehearsal exit 2 is expected
+unlearned behavior, not task acceptance. No full learner is running in this job.
+
+The user requested complete training submissions instead of separate short
+validation jobs. Future routine jobs combine required gates, automatic full
+training after passing gates, and final evaluation/video. Existing verified gates
+are reused when configuration-matched. This immutable, already-running
+preparation-only job remains accurately labeled and does not become a full run
+by changing the working tree. Failed gates still stop their affected run.
