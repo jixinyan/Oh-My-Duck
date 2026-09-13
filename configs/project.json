@@ -162,7 +162,7 @@
   },
   "rl_framework_registry": "oh_my_duck.rl.training.frameworks:default_framework_registry",
   "rl_acceptance": {
-    "state": "causal_followup_running_partial_behavior",
+    "state": "causal_replay_completed_full_pacing_experiment_prepared",
     "smoke_and_resume": "8_of_8_passed_at_5971dca",
     "open_items": [
       "Diagnose ineffective task learning from preserved official/owned/framework comparisons",
@@ -171,7 +171,7 @@
       "Newton native DDP acceptance remains deferred"
     ],
     "architecture_merge": "6303ca4",
-    "validation_branch": "main",
+    "validation_branch": "feat/rl-walking-curriculum-trial",
     "export_and_local_package": "8_of_8_passed; RSL revalidated at 6303ca4",
     "task_layout": "14 task families with environment.py and ppo.py; 33 semantic catalog entries preserved",
     "full_training_campaign": {
@@ -693,7 +693,43 @@
     },
     "current_iteration": {
       "date": "2026-09-13",
-      "state": "32_replays_completed_walking_prepared_standup_capacity_running",
+      "state": "full_walking_pacing_experiment_prepared",
+      "config": "configs/experiments/walking-smoothing-delay.json",
+      "report": "docs/reports/rl-walking-pacing-2026-09-13.md",
+      "nodes": 1,
+      "gpus_per_node": 8,
+      "independent_learners": 8,
+      "num_envs_per_learner": 8192,
+      "updates_per_learner": 50000,
+      "task": "Mjlab-Velocity-Flat-MicroDuck",
+      "paired_intervention": "action_rate_weight_positive_stages_delayed_4500_updates",
+      "training_seed": 42,
+      "checkpoint_interval_updates": 1000,
+      "full_training_runs_launched": 0,
+      "acceptance": "unvalidated_hypothesis_not_official_recipe_replacement"
+    },
+    "previous_iteration": {
+      "date": "2026-09-12",
+      "state": "completed_49_cases_no_execution_errors",
+      "plan": "configs/experiments/learning-diagnostics.json",
+      "cases": 49,
+      "nodes": 1,
+      "gpus_per_node": 4,
+      "learners_launched": 0,
+      "tests": "10_profile_protocol_tests_and_3_native_export_tests_passed",
+      "task_catalog": "docs/rl-task-catalog.md",
+      "report": "docs/reports/rl-learning-diagnostics-2026-09-12.md",
+      "job": "omd-rl-diagnose-0912-02",
+      "queue_id": "local-4a0ab8eebdb0",
+      "source_commit": "4ffb970bfa9f41f09232b901bc75ac796448998f",
+      "output": "outputs/diagnostics/learning-0912-02",
+      "first_submission": "failed_scheduler_shared_lock_timeout",
+      "newton_periodic_export": "metadata_indexing_fixed_cpu_native_onnx_parity_passed_gpu_integration_pending",
+      "job_id": "d0c14f4b-03f9-45cd-83ed-52d7559cd505"
+    },
+    "causal_replay_iteration": {
+      "date": "2026-09-13",
+      "state": "completed_32_replays_and_both_newton_preparations",
       "report": "docs/reports/rl-causal-replay-2026-09-13.md",
       "completed_diagnostic_cases": 49,
       "newton_final_stand_cpu_pose_passes": {
@@ -721,29 +757,10 @@
       "output": "outputs/diagnostics/push-causal-0913-01",
       "gate_output": "outputs/diagnostics/newton-export-gates-0913-01",
       "tests": "24_tests_and_9_subtests_passed_across_targeted_CPU_suites",
-      "newton_periodic_export": "both_native_smoke_callbacks_passed_65_input_parity_max_error_0_walking_capacity_also_passed",
+      "newton_periodic_export": "four_actual_callbacks_passed_65_input_parity_max_error_0",
       "job_id": "c33528a5-a6ca-4fba-8484-5c5a0f96eba6",
       "gpu_model": "H800",
       "scheduler_started_at": "2026-09-13 10:28:16 (scheduler display)"
-    },
-    "previous_iteration": {
-      "date": "2026-09-12",
-      "state": "completed_49_cases_no_execution_errors",
-      "plan": "configs/experiments/learning-diagnostics.json",
-      "cases": 49,
-      "nodes": 1,
-      "gpus_per_node": 4,
-      "learners_launched": 0,
-      "tests": "10_profile_protocol_tests_and_3_native_export_tests_passed",
-      "task_catalog": "docs/rl-task-catalog.md",
-      "report": "docs/reports/rl-learning-diagnostics-2026-09-12.md",
-      "job": "omd-rl-diagnose-0912-02",
-      "queue_id": "local-4a0ab8eebdb0",
-      "source_commit": "4ffb970bfa9f41f09232b901bc75ac796448998f",
-      "output": "outputs/diagnostics/learning-0912-02",
-      "first_submission": "failed_scheduler_shared_lock_timeout",
-      "newton_periodic_export": "metadata_indexing_fixed_cpu_native_onnx_parity_passed_gpu_integration_pending",
-      "job_id": "d0c14f4b-03f9-45cd-83ed-52d7559cd505"
     }
   }
 }
