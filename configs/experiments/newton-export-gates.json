@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "description": "Preparation only: revalidate repaired native Newton RSL periodic export, 64-env/5-update smoke, official export/sign audit, CPU BAM video, native resume, 8192-env/5-update capacity. No full learning authorized by this gate plan.",
+  "checkpoint_interval": 1000,
+  "smoke_iterations": 5,
+  "runs": [
+    {
+      "id": "newton-rsl-walking",
+      "backend": "isaac-newton",
+      "framework": "rsl-rl",
+      "task": "Mjlab-Velocity-Flat-MicroDuck",
+      "experiment": "velocity",
+      "num_envs": 8192,
+      "iterations": 5,
+      "seed": 42
+    },
+    {
+      "id": "newton-rsl-stand-up",
+      "backend": "isaac-newton",
+      "framework": "rsl-rl",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "experiment": "microduck_stand",
+      "num_envs": 8192,
+      "iterations": 5,
+      "seed": 42
+    }
+  ]
+}

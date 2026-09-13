@@ -98,6 +98,8 @@ def main():
             checkpoint = latest_checkpoint(run)
             command = [str(root/'.envs/mujoco/bin/python'), '-m', 'oh_my_duck.rl.evaluation.verify_rsl',
                 spec['task'], '--run', str(run), '--checkpoint', checkpoint.name, '--output', str(dest)]
+            if spec['backend'] == 'isaac-newton':
+                command += ['--periodic-export']
         else:
             checkpoint = run/'model.zip'
             command = prefix+['export', '--backend', spec['backend'], '--rl-framework', 'sb3', '--',

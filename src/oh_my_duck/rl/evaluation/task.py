@@ -53,7 +53,7 @@ def main():
     cfg.scene.num_envs = 1
     cfg.seed = args.seed
     cfg.auto_reset = False
-    from .diagnostics import prepare_recipe, apply_stage, summarize_rewards
+    from .diagnostics import prepare_recipe, apply_stage, summarize_rewards, summarize_motion
     stages = prepare_recipe(cfg, profile=args.profile, curriculum_step=args.curriculum_step)
     cfg.episode_length_s = 1 + max(len(s.commands) for s in protocol.scenarios) * 0.02
     cfg.viewer.width, cfg.viewer.height = args.width, args.height
@@ -196,6 +196,8 @@ def main():
             }
             if args.record_rewards:
                 report["scenarios"][scenario.name]["reward_terms"] = summarize_rewards(trace, report["reward_term_order"])
+                if protocol.kind == "walking":
+                    report["scenarios"][scenario.name]["motion_diagnostics"] = summarize_motion(trace)
         passed = all(s["success"] for s in report["scenarios"].values())
         report["status"] = "passed" if passed else "behavior_failed"
         if not report["acceptance_eligible"]:

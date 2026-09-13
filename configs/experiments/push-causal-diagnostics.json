@@ -1,0 +1,499 @@
+{
+  "schema_version": 1,
+  "description": "Complete the frozen-policy 2x2 recipe/push matrix. Pair only within the same profile/backend/seed/hash; change push amplitude only. Existing 0912-02 cells preserved. Selected 1280x720 videos. No learners or acceptance changes.",
+  "reference_output": "outputs/diagnostics/learning-0912-02",
+  "cases": [
+    {
+      "id": "newton-stand-final-mujoco-standard-no-push",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "policy": "outputs/experiments/fixed-8192-0908-01/isaac-newton-rsl-rl-stand_up/export/policy.onnx",
+      "policy_sha256": "0333bb741bdd4536769c3052a3da456080a26c06401ba8a682d93bee2e9a51f1",
+      "backend": "mujoco",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "standard",
+        "--push-scale",
+        "0",
+        "--video",
+        "--mujoco-renderer",
+        "osmesa"
+      ]
+    },
+    {
+      "id": "newton-stand-final-mujoco-training-stage-with-push",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "policy": "outputs/experiments/fixed-8192-0908-01/isaac-newton-rsl-rl-stand_up/export/policy.onnx",
+      "policy_sha256": "0333bb741bdd4536769c3052a3da456080a26c06401ba8a682d93bee2e9a51f1",
+      "backend": "mujoco",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "training-stage",
+        "--curriculum-step",
+        "360000",
+        "--push-scale",
+        "1"
+      ]
+    },
+    {
+      "id": "newton-stand-final-isaac-newton-standard-no-push",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "policy": "outputs/experiments/fixed-8192-0908-01/isaac-newton-rsl-rl-stand_up/export/policy.onnx",
+      "policy_sha256": "0333bb741bdd4536769c3052a3da456080a26c06401ba8a682d93bee2e9a51f1",
+      "backend": "isaac-newton",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "standard",
+        "--push-scale",
+        "0"
+      ]
+    },
+    {
+      "id": "newton-stand-final-isaac-newton-training-stage-with-push",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "policy": "outputs/experiments/fixed-8192-0908-01/isaac-newton-rsl-rl-stand_up/export/policy.onnx",
+      "policy_sha256": "0333bb741bdd4536769c3052a3da456080a26c06401ba8a682d93bee2e9a51f1",
+      "backend": "isaac-newton",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "training-stage",
+        "--curriculum-step",
+        "360000",
+        "--push-scale",
+        "1"
+      ]
+    },
+    {
+      "id": "mujoco-stand-seed43-mujoco-standard-no-push",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "policy": "outputs/experiments/mujoco-recovery-seed43-0909-01/mujoco-rsl-rl-stand_up-seed43/export/policy.onnx",
+      "policy_sha256": "b8fd67d4794bd1ee3565305a4c8d3076fc710199c0f13698e8ec6244e766639e",
+      "backend": "mujoco",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "standard",
+        "--push-scale",
+        "0"
+      ]
+    },
+    {
+      "id": "mujoco-stand-seed43-mujoco-training-stage-with-push",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "policy": "outputs/experiments/mujoco-recovery-seed43-0909-01/mujoco-rsl-rl-stand_up-seed43/export/policy.onnx",
+      "policy_sha256": "b8fd67d4794bd1ee3565305a4c8d3076fc710199c0f13698e8ec6244e766639e",
+      "backend": "mujoco",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "training-stage",
+        "--curriculum-step",
+        "360000",
+        "--push-scale",
+        "1"
+      ]
+    },
+    {
+      "id": "mujoco-stand-seed43-isaac-newton-standard-no-push",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "policy": "outputs/experiments/mujoco-recovery-seed43-0909-01/mujoco-rsl-rl-stand_up-seed43/export/policy.onnx",
+      "policy_sha256": "b8fd67d4794bd1ee3565305a4c8d3076fc710199c0f13698e8ec6244e766639e",
+      "backend": "isaac-newton",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "standard",
+        "--push-scale",
+        "0"
+      ]
+    },
+    {
+      "id": "mujoco-stand-seed43-isaac-newton-training-stage-with-push",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "policy": "outputs/experiments/mujoco-recovery-seed43-0909-01/mujoco-rsl-rl-stand_up-seed43/export/policy.onnx",
+      "policy_sha256": "b8fd67d4794bd1ee3565305a4c8d3076fc710199c0f13698e8ec6244e766639e",
+      "backend": "isaac-newton",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "training-stage",
+        "--curriculum-step",
+        "360000",
+        "--push-scale",
+        "1"
+      ]
+    },
+    {
+      "id": "sb3-mujoco-stand-mujoco-standard-no-push",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "policy": "outputs/previews/sb3-repair-0909-01/mujoco-sb3-stand_up/model-8008781ced44/export/policy.onnx",
+      "policy_sha256": "5c5a69043bfc50836d228dd41d973804154e7b72076adf7750cb087c1d11b3d9",
+      "backend": "mujoco",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "standard",
+        "--push-scale",
+        "0",
+        "--video",
+        "--mujoco-renderer",
+        "osmesa"
+      ]
+    },
+    {
+      "id": "sb3-mujoco-stand-mujoco-training-stage-with-push",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "policy": "outputs/previews/sb3-repair-0909-01/mujoco-sb3-stand_up/model-8008781ced44/export/policy.onnx",
+      "policy_sha256": "5c5a69043bfc50836d228dd41d973804154e7b72076adf7750cb087c1d11b3d9",
+      "backend": "mujoco",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "training-stage",
+        "--curriculum-step",
+        "360000",
+        "--push-scale",
+        "1"
+      ]
+    },
+    {
+      "id": "sb3-mujoco-stand-isaac-newton-standard-no-push",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "policy": "outputs/previews/sb3-repair-0909-01/mujoco-sb3-stand_up/model-8008781ced44/export/policy.onnx",
+      "policy_sha256": "5c5a69043bfc50836d228dd41d973804154e7b72076adf7750cb087c1d11b3d9",
+      "backend": "isaac-newton",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "standard",
+        "--push-scale",
+        "0"
+      ]
+    },
+    {
+      "id": "sb3-mujoco-stand-isaac-newton-training-stage-with-push",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "policy": "outputs/previews/sb3-repair-0909-01/mujoco-sb3-stand_up/model-8008781ced44/export/policy.onnx",
+      "policy_sha256": "5c5a69043bfc50836d228dd41d973804154e7b72076adf7750cb087c1d11b3d9",
+      "backend": "isaac-newton",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "training-stage",
+        "--curriculum-step",
+        "360000",
+        "--push-scale",
+        "1"
+      ]
+    },
+    {
+      "id": "sb3-newton-stand-mujoco-standard-no-push",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "policy": "outputs/previews/sb3-repair-0909-01/isaac-newton-sb3-stand_up/model-d4e26431c471/export/policy.onnx",
+      "policy_sha256": "0e12249bc31528d7d86caa0dcb6a619fbdd26070e39cdb9a859fd457769fc504",
+      "backend": "mujoco",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "standard",
+        "--push-scale",
+        "0"
+      ]
+    },
+    {
+      "id": "sb3-newton-stand-mujoco-training-stage-with-push",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "policy": "outputs/previews/sb3-repair-0909-01/isaac-newton-sb3-stand_up/model-d4e26431c471/export/policy.onnx",
+      "policy_sha256": "0e12249bc31528d7d86caa0dcb6a619fbdd26070e39cdb9a859fd457769fc504",
+      "backend": "mujoco",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "training-stage",
+        "--curriculum-step",
+        "360000",
+        "--push-scale",
+        "1"
+      ]
+    },
+    {
+      "id": "sb3-newton-stand-isaac-newton-standard-no-push",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "policy": "outputs/previews/sb3-repair-0909-01/isaac-newton-sb3-stand_up/model-d4e26431c471/export/policy.onnx",
+      "policy_sha256": "0e12249bc31528d7d86caa0dcb6a619fbdd26070e39cdb9a859fd457769fc504",
+      "backend": "isaac-newton",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "standard",
+        "--push-scale",
+        "0"
+      ]
+    },
+    {
+      "id": "sb3-newton-stand-isaac-newton-training-stage-with-push",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "policy": "outputs/previews/sb3-repair-0909-01/isaac-newton-sb3-stand_up/model-d4e26431c471/export/policy.onnx",
+      "policy_sha256": "0e12249bc31528d7d86caa0dcb6a619fbdd26070e39cdb9a859fd457769fc504",
+      "backend": "isaac-newton",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "training-stage",
+        "--curriculum-step",
+        "360000",
+        "--push-scale",
+        "1"
+      ]
+    },
+    {
+      "id": "sb3-mujoco-walk-mujoco-standard-no-push",
+      "task": "Mjlab-Velocity-Flat-MicroDuck",
+      "policy": "outputs/previews/sb3-repair-0909-01/mujoco-sb3-walking/model-1019d39a625d/export/policy.onnx",
+      "policy_sha256": "c2745402316fe72e9e20d988ae93d07b9dd218573088e1aa03aae7ba029a2810",
+      "backend": "mujoco",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "standard",
+        "--push-scale",
+        "0",
+        "--video",
+        "--mujoco-renderer",
+        "osmesa"
+      ]
+    },
+    {
+      "id": "sb3-mujoco-walk-mujoco-training-stage-with-push",
+      "task": "Mjlab-Velocity-Flat-MicroDuck",
+      "policy": "outputs/previews/sb3-repair-0909-01/mujoco-sb3-walking/model-1019d39a625d/export/policy.onnx",
+      "policy_sha256": "c2745402316fe72e9e20d988ae93d07b9dd218573088e1aa03aae7ba029a2810",
+      "backend": "mujoco",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "training-stage",
+        "--curriculum-step",
+        "360000",
+        "--push-scale",
+        "1"
+      ]
+    },
+    {
+      "id": "sb3-mujoco-walk-isaac-newton-standard-no-push",
+      "task": "Mjlab-Velocity-Flat-MicroDuck",
+      "policy": "outputs/previews/sb3-repair-0909-01/mujoco-sb3-walking/model-1019d39a625d/export/policy.onnx",
+      "policy_sha256": "c2745402316fe72e9e20d988ae93d07b9dd218573088e1aa03aae7ba029a2810",
+      "backend": "isaac-newton",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "standard",
+        "--push-scale",
+        "0"
+      ]
+    },
+    {
+      "id": "sb3-mujoco-walk-isaac-newton-training-stage-with-push",
+      "task": "Mjlab-Velocity-Flat-MicroDuck",
+      "policy": "outputs/previews/sb3-repair-0909-01/mujoco-sb3-walking/model-1019d39a625d/export/policy.onnx",
+      "policy_sha256": "c2745402316fe72e9e20d988ae93d07b9dd218573088e1aa03aae7ba029a2810",
+      "backend": "isaac-newton",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "training-stage",
+        "--curriculum-step",
+        "360000",
+        "--push-scale",
+        "1"
+      ]
+    },
+    {
+      "id": "sb3-newton-walk-mujoco-standard-no-push",
+      "task": "Mjlab-Velocity-Flat-MicroDuck",
+      "policy": "outputs/previews/sb3-repair-0909-01/isaac-newton-sb3-walking/model-b697858eb601/export/policy.onnx",
+      "policy_sha256": "6dfd580d439f3a292e62e76fcdea597d39f5b13c3fff55dc3e5f314f555387a7",
+      "backend": "mujoco",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "standard",
+        "--push-scale",
+        "0"
+      ]
+    },
+    {
+      "id": "sb3-newton-walk-mujoco-training-stage-with-push",
+      "task": "Mjlab-Velocity-Flat-MicroDuck",
+      "policy": "outputs/previews/sb3-repair-0909-01/isaac-newton-sb3-walking/model-b697858eb601/export/policy.onnx",
+      "policy_sha256": "6dfd580d439f3a292e62e76fcdea597d39f5b13c3fff55dc3e5f314f555387a7",
+      "backend": "mujoco",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "training-stage",
+        "--curriculum-step",
+        "360000",
+        "--push-scale",
+        "1"
+      ]
+    },
+    {
+      "id": "sb3-newton-walk-isaac-newton-standard-no-push",
+      "task": "Mjlab-Velocity-Flat-MicroDuck",
+      "policy": "outputs/previews/sb3-repair-0909-01/isaac-newton-sb3-walking/model-b697858eb601/export/policy.onnx",
+      "policy_sha256": "6dfd580d439f3a292e62e76fcdea597d39f5b13c3fff55dc3e5f314f555387a7",
+      "backend": "isaac-newton",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "standard",
+        "--push-scale",
+        "0"
+      ]
+    },
+    {
+      "id": "sb3-newton-walk-isaac-newton-training-stage-with-push",
+      "task": "Mjlab-Velocity-Flat-MicroDuck",
+      "policy": "outputs/previews/sb3-repair-0909-01/isaac-newton-sb3-walking/model-b697858eb601/export/policy.onnx",
+      "policy_sha256": "6dfd580d439f3a292e62e76fcdea597d39f5b13c3fff55dc3e5f314f555387a7",
+      "backend": "isaac-newton",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "training-stage",
+        "--curriculum-step",
+        "360000",
+        "--push-scale",
+        "1"
+      ]
+    },
+    {
+      "id": "newton-walk-late-mujoco-standard-no-push",
+      "task": "Mjlab-Velocity-Flat-MicroDuck",
+      "policy": "outputs/previews/fixed-8192-0908-01/isaac-newton-rsl-rl-walking/model_22000-33bbe6fd4c7e/export/policy.onnx",
+      "policy_sha256": "452cc6f4e1b2c398cf4a970a54e9db431473c1ed8f68eafd0061d02b4acfa95b",
+      "backend": "mujoco",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "standard",
+        "--push-scale",
+        "0",
+        "--video",
+        "--mujoco-renderer",
+        "osmesa"
+      ]
+    },
+    {
+      "id": "newton-walk-late-mujoco-training-stage-with-push",
+      "task": "Mjlab-Velocity-Flat-MicroDuck",
+      "policy": "outputs/previews/fixed-8192-0908-01/isaac-newton-rsl-rl-walking/model_22000-33bbe6fd4c7e/export/policy.onnx",
+      "policy_sha256": "452cc6f4e1b2c398cf4a970a54e9db431473c1ed8f68eafd0061d02b4acfa95b",
+      "backend": "mujoco",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "training-stage",
+        "--curriculum-step",
+        "360000",
+        "--push-scale",
+        "1"
+      ]
+    },
+    {
+      "id": "newton-walk-late-isaac-newton-standard-no-push",
+      "task": "Mjlab-Velocity-Flat-MicroDuck",
+      "policy": "outputs/previews/fixed-8192-0908-01/isaac-newton-rsl-rl-walking/model_22000-33bbe6fd4c7e/export/policy.onnx",
+      "policy_sha256": "452cc6f4e1b2c398cf4a970a54e9db431473c1ed8f68eafd0061d02b4acfa95b",
+      "backend": "isaac-newton",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "standard",
+        "--push-scale",
+        "0"
+      ]
+    },
+    {
+      "id": "newton-walk-late-isaac-newton-training-stage-with-push",
+      "task": "Mjlab-Velocity-Flat-MicroDuck",
+      "policy": "outputs/previews/fixed-8192-0908-01/isaac-newton-rsl-rl-walking/model_22000-33bbe6fd4c7e/export/policy.onnx",
+      "policy_sha256": "452cc6f4e1b2c398cf4a970a54e9db431473c1ed8f68eafd0061d02b4acfa95b",
+      "backend": "isaac-newton",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "training-stage",
+        "--curriculum-step",
+        "360000",
+        "--push-scale",
+        "1"
+      ]
+    },
+    {
+      "id": "newton-walk-14000-mujoco-standard-no-push",
+      "task": "Mjlab-Velocity-Flat-MicroDuck",
+      "policy": "outputs/previews/fixed-8192-0908-01/isaac-newton-rsl-rl-walking/model_14000-6eb14e9fdb33/export/policy.onnx",
+      "policy_sha256": "a22c6a7979ddd830c4cf8313ac7666089ba831dfe113b951e9e80874bb890ed7",
+      "backend": "mujoco",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "standard",
+        "--push-scale",
+        "0"
+      ]
+    },
+    {
+      "id": "newton-walk-14000-mujoco-training-stage-with-push",
+      "task": "Mjlab-Velocity-Flat-MicroDuck",
+      "policy": "outputs/previews/fixed-8192-0908-01/isaac-newton-rsl-rl-walking/model_14000-6eb14e9fdb33/export/policy.onnx",
+      "policy_sha256": "a22c6a7979ddd830c4cf8313ac7666089ba831dfe113b951e9e80874bb890ed7",
+      "backend": "mujoco",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "training-stage",
+        "--curriculum-step",
+        "360000",
+        "--push-scale",
+        "1"
+      ]
+    },
+    {
+      "id": "newton-walk-14000-isaac-newton-standard-no-push",
+      "task": "Mjlab-Velocity-Flat-MicroDuck",
+      "policy": "outputs/previews/fixed-8192-0908-01/isaac-newton-rsl-rl-walking/model_14000-6eb14e9fdb33/export/policy.onnx",
+      "policy_sha256": "a22c6a7979ddd830c4cf8313ac7666089ba831dfe113b951e9e80874bb890ed7",
+      "backend": "isaac-newton",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "standard",
+        "--push-scale",
+        "0"
+      ]
+    },
+    {
+      "id": "newton-walk-14000-isaac-newton-training-stage-with-push",
+      "task": "Mjlab-Velocity-Flat-MicroDuck",
+      "policy": "outputs/previews/fixed-8192-0908-01/isaac-newton-rsl-rl-walking/model_14000-6eb14e9fdb33/export/policy.onnx",
+      "policy_sha256": "a22c6a7979ddd830c4cf8313ac7666089ba831dfe113b951e9e80874bb890ed7",
+      "backend": "isaac-newton",
+      "seed": 42,
+      "arguments": [
+        "--profile",
+        "training-stage",
+        "--curriculum-step",
+        "360000",
+        "--push-scale",
+        "1"
+      ]
+    }
+  ]
+}

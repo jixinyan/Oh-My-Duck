@@ -4,7 +4,7 @@ title: Agentic Microduck — 项目概览与详细设计
 version: 0.2
 status: Implementation in progress
 created: 2026-09-05
-updated: 2026-09-12
+updated: 2026-09-13
 tags:
   - microduck
   - embodied-ai
@@ -12,6 +12,8 @@ tags:
   - sim-to-real
   - project-design
 ---
+
+> 2026-09-13 诊断完成：`omd-rl-diagnose-0912-02` 的 49 个用例全部执行，不能等同于行为通过。Newton RSL 最终起身在两后端 seed=42 均 4/4；CPU/BAM 17 个种子中趴倒 14/17，其余三种姿态各 17/17。其他起身策略仍为 2/4，Walking 未完成验收；Newton Walking 有前进/转向能力，但横向摆动与跨后端前进失败需分开诊断。下一轮补齐只改变推扰强度的配对对照和视频，并验证 Newton 周期导出的真实训练回调；暂不盲目恢复完整训练。下一轮 `omd-rl-causal-0913-01` 已接受、等待调度（1 节点 4 GPU，32 个回放对照后执行两任务短训练门槛）；24 项 CPU 测试与 9 个子测试通过。详见 [因果回放记录](reports/rl-causal-replay-2026-09-13.md)。以下为历史快照。
 
 > 2026-09-12 恢复迭代：用户授权继续打通 RL，并使用单节点多 GPU 调度 job。先对保留的成功/失败策略进行奖励、课程阶段、训练/验收条件和 CPU 稳定性诊断，再按证据修复；不盲目重启旧长训练。已准备 49 个固定策略诊断案例，任务清单与扩展边界见 [RL 任务目录](rl-task-catalog.md)。下方暂停记录为历史快照。 第二次诊断提交已接受（`omd-rl-diagnose-0912-02`，1 节点 4 GPU），当前等待项目配额；第一次因共享锁超时失败。另修复 Newton 周期导出的 actuator 元数据索引错误，13 项 CPU 测试通过；这不是策略学习失败的已证实根因，GPU 回归仍待执行。详见 [本轮诊断记录](reports/rl-learning-diagnostics-2026-09-12.md)。
 
