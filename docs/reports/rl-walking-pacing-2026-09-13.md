@@ -130,3 +130,8 @@ campaign and no `--prepare-only`. Evidence:
 `outputs/jobs/omd-walk-pacing-0913-01/`; campaign output:
 `outputs/experiments/walking-delay-0913-01/`. Each run's saved video gallery is
 `<run-id>/previews/index.html`. Submission acceptance is not training completion.
+
+Startup verified: scheduler **Running**, platform ID
+`0367fb5b-34e5-40eb-9072-f5a081306253`, one node / eight H800 GPUs.
+All eight pipeline workers are running. This startup snapshot is not completion
+of their gates or full training; each proceeds automatically when its gates pass.

@@ -170,7 +170,7 @@
   },
   "rl_framework_registry": "oh_my_duck.rl.training.frameworks:default_framework_registry",
   "rl_acceptance": {
-    "state": "full_walking_pacing_job_submitted_partial_acceptance",
+    "state": "full_walking_pacing_job_running_partial_acceptance",
     "smoke_and_resume": "8_of_8_passed_at_5971dca",
     "open_items": [
       "Diagnose ineffective task learning from preserved official/owned/framework comparisons",
@@ -701,7 +701,7 @@
     },
     "current_iteration": {
       "date": "2026-09-13",
-      "state": "submitted_queued_waiting_dispatcher",
+      "state": "running_startup_gates_then_full_training",
       "config": "configs/experiments/walking-smoothing-delay.json",
       "report": "docs/reports/rl-walking-pacing-2026-09-13.md",
       "nodes": 1,
@@ -719,7 +719,89 @@
       "queue_id": "local-03542db01f8e",
       "source_commit": "6c4574327b0e4feec255efb2bd87fc97464544bc",
       "output": "outputs/experiments/walking-delay-0913-01",
-      "tests": "34_CPU_tests_and_9_subtests_passed"
+      "tests": "34_CPU_tests_and_9_subtests_passed",
+      "job_id": "0367fb5b-34e5-40eb-9072-f5a081306253",
+      "gpu_model": "H800",
+      "startup_snapshot": {
+        "isaac-newton-rsl-rl-walking-official": {
+          "status": "running",
+          "stages": {
+            "smoke": "completed",
+            "smoke-export": "completed",
+            "smoke-rehearsal": "completed",
+            "resume-check": "completed",
+            "capacity": "running"
+          }
+        },
+        "mujoco-rsl-rl-walking-official": {
+          "status": "running",
+          "stages": {
+            "smoke": "completed",
+            "smoke-export": "completed",
+            "smoke-rehearsal": "completed",
+            "resume-check": "completed",
+            "capacity": "running"
+          }
+        },
+        "mujoco-sb3-walking-official": {
+          "status": "running",
+          "stages": {
+            "smoke": "completed",
+            "smoke-export": "completed",
+            "smoke-rehearsal": "completed",
+            "resume-check": "completed",
+            "capacity": "running"
+          }
+        },
+        "isaac-newton-rsl-rl-walking-delayed": {
+          "status": "running",
+          "stages": {
+            "smoke": "completed",
+            "smoke-export": "completed",
+            "smoke-rehearsal": "completed",
+            "resume-check": "completed",
+            "capacity": "running"
+          }
+        },
+        "isaac-newton-sb3-walking-official": {
+          "status": "running",
+          "stages": {
+            "smoke": "completed",
+            "smoke-export": "completed",
+            "smoke-rehearsal": "completed",
+            "resume-check": "running"
+          }
+        },
+        "isaac-newton-sb3-walking-delayed": {
+          "status": "running",
+          "stages": {
+            "smoke": "completed",
+            "smoke-export": "completed",
+            "smoke-rehearsal": "completed",
+            "resume-check": "running"
+          }
+        },
+        "mujoco-sb3-walking-delayed": {
+          "status": "running",
+          "stages": {
+            "smoke": "completed",
+            "smoke-export": "completed",
+            "smoke-rehearsal": "completed",
+            "resume-check": "completed",
+            "capacity": "running"
+          }
+        },
+        "mujoco-rsl-rl-walking-delayed": {
+          "status": "running",
+          "stages": {
+            "smoke": "completed",
+            "smoke-export": "completed",
+            "smoke-rehearsal": "completed",
+            "resume-check": "completed",
+            "capacity": "running"
+          }
+        }
+      }
     },
     "previous_iteration": {
       "date": "2026-09-12",
