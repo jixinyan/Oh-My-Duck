@@ -101,7 +101,15 @@
       "successor_gallery": "outputs/experiments/independent-full-0908-01/previews/index.html",
       "first_update": 1000,
       "additional_gallery": "outputs/previews/sb3-repair-0909-01/index.html",
-      "auto_resume": false
+      "auto_resume": false,
+      "current_campaign": {
+        "state": "configured_waiting_full_training",
+        "root": "outputs/experiments/walking-delay-0913-01",
+        "per_run_gallery": "<run-id>/previews/index.html",
+        "interval_updates": 1000,
+        "worker": "same_scheduled_gpu_as_learner",
+        "llm_polling": false
+      }
     },
     "local_rl_gpu_policy": "explicit_idle_gpu_allocation_authorized_2026_09_08",
     "local_rl_gpus": {
@@ -162,7 +170,7 @@
   },
   "rl_framework_registry": "oh_my_duck.rl.training.frameworks:default_framework_registry",
   "rl_acceptance": {
-    "state": "causal_replay_completed_full_pacing_experiment_prepared",
+    "state": "full_walking_pacing_job_submitted_partial_acceptance",
     "smoke_and_resume": "8_of_8_passed_at_5971dca",
     "open_items": [
       "Diagnose ineffective task learning from preserved official/owned/framework comparisons",
@@ -171,7 +179,7 @@
       "Newton native DDP acceptance remains deferred"
     ],
     "architecture_merge": "6303ca4",
-    "validation_branch": "feat/rl-walking-curriculum-trial",
+    "validation_branch": "main",
     "export_and_local_package": "8_of_8_passed; RSL revalidated at 6303ca4",
     "task_layout": "14 task families with environment.py and ppo.py; 33 semantic catalog entries preserved",
     "full_training_campaign": {
@@ -693,7 +701,7 @@
     },
     "current_iteration": {
       "date": "2026-09-13",
-      "state": "full_walking_pacing_experiment_prepared",
+      "state": "submitted_queued_waiting_dispatcher",
       "config": "configs/experiments/walking-smoothing-delay.json",
       "report": "docs/reports/rl-walking-pacing-2026-09-13.md",
       "nodes": 1,
@@ -706,7 +714,12 @@
       "training_seed": 42,
       "checkpoint_interval_updates": 1000,
       "full_training_runs_launched": 0,
-      "acceptance": "unvalidated_hypothesis_not_official_recipe_replacement"
+      "acceptance": "unvalidated_hypothesis_not_official_recipe_replacement",
+      "job": "omd-walk-pacing-0913-01",
+      "queue_id": "local-03542db01f8e",
+      "source_commit": "6c4574327b0e4feec255efb2bd87fc97464544bc",
+      "output": "outputs/experiments/walking-delay-0913-01",
+      "tests": "34_CPU_tests_and_9_subtests_passed"
     },
     "previous_iteration": {
       "date": "2026-09-12",

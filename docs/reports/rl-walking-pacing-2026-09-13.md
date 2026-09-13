@@ -112,3 +112,21 @@ paired control and transfer evidence, not a larger total reward alone. Compare
 reward values within equivalent curriculum stages; after update 6000 both groups
 have the same objective. One training seed per pair does not establish robustness.
 StandUp, complete two-task acceptance and native Newton DDP remain open.
+
+
+## Validation and submission
+
+34 targeted CPU tests and nine subtests pass across native recipe invariance,
+actual live curriculum timing, resume identity, campaign propagation and paired
+budgets, preview lifetime, motion/reward/protocol and normalized ONNX regression
+checks. Both native CLI help paths expose the option; the full campaign dry-run
+resolves eight GPUs/eight learners at 50000 updates. GPU gates for this new
+training intervention remain inside the full job and are not yet claimed passed.
+
+`omd-walk-pacing-0913-01` was accepted with queue ID `local-03542db01f8e`, initially
+waiting for dispatcher, one node / eight GPUs. Immutable committed source:
+`6c4574327b0e4feec255efb2bd87fc97464544bc`. Submission command contains the full
+campaign and no `--prepare-only`. Evidence:
+`outputs/jobs/omd-walk-pacing-0913-01/`; campaign output:
+`outputs/experiments/walking-delay-0913-01/`. Each run's saved video gallery is
+`<run-id>/previews/index.html`. Submission acceptance is not training completion.
