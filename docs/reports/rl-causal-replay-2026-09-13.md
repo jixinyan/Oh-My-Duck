@@ -87,3 +87,19 @@ remain unchanged. Reward/curriculum interventions will be separate experiments
 once single-factor evidence supports them. W&B stays offline; no local-host GPU
 fallback and no automatic failed-case retry. Submission status is recorded below
 once accepted; a prepared plan is not execution evidence.
+
+## Submission and validation record
+
+`omd-rl-causal-0913-01` was accepted, queue ID `local-de066dd84a81`, initially
+waiting for the dispatcher. Source snapshot: `e804d6ce9570e925d4f1d5e9a8b2f73ba3569eb3`.
+One node / four GPUs, with 32 diagnostic cases followed by two preparation-only
+pipelines. Outputs: `outputs/diagnostics/push-causal-0913-01` and
+`outputs/diagnostics/newton-export-gates-0913-01`. Scheduler evidence is retained
+in `outputs/jobs/omd-rl-causal-0913-01/`. GPU validation is pending execution;
+no full training has restarted.
+
+Across targeted CPU suites, 24 tests and nine subtests pass: motion/protocol/
+frozen-curriculum checks, actual native normalized ONNX callback checks including
+rejection of stale weights, and campaign/options validation. Both plans pass
+CLI dry-run and all frozen policy hashes are verified. No acceptance threshold
+or official recipe was changed.

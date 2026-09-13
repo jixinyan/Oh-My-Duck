@@ -160,7 +160,7 @@
   },
   "rl_framework_registry": "oh_my_duck.rl.training.frameworks:default_framework_registry",
   "rl_acceptance": {
-    "state": "frozen_diagnostics_completed_causal_followup_prepared",
+    "state": "causal_followup_queued_partial_behavior",
     "smoke_and_resume": "8_of_8_passed_at_5971dca",
     "open_items": [
       "Diagnose ineffective task learning from preserved official/owned/framework comparisons",
@@ -691,7 +691,7 @@
     },
     "current_iteration": {
       "date": "2026-09-13",
-      "state": "push_causal_and_export_gates_prepared",
+      "state": "submitted_queued_waiting_dispatcher",
       "report": "docs/reports/rl-causal-replay-2026-09-13.md",
       "completed_diagnostic_cases": 49,
       "newton_final_stand_cpu_pose_passes": {
@@ -710,7 +710,16 @@
       "walking": "partial_newton_rsl_gait_no_full_acceptance",
       "next_plan": "configs/experiments/push-causal-diagnostics.json",
       "gate_plan": "configs/experiments/newton-export-gates.json",
-      "full_training_runs_launched": 0
+      "full_training_runs_launched": 0,
+      "job": "omd-rl-causal-0913-01",
+      "queue_id": "local-de066dd84a81",
+      "source_commit": "e804d6ce9570e925d4f1d5e9a8b2f73ba3569eb3",
+      "nodes": 1,
+      "gpus_per_node": 4,
+      "output": "outputs/diagnostics/push-causal-0913-01",
+      "gate_output": "outputs/diagnostics/newton-export-gates-0913-01",
+      "tests": "24_tests_and_9_subtests_passed_across_targeted_CPU_suites",
+      "newton_periodic_export": "gate_now_requires_native_callback_parity_gpu_execution_pending"
     },
     "previous_iteration": {
       "date": "2026-09-12",
