@@ -13,6 +13,7 @@ def main():
     parser.add_argument('--run', type=Path, required=True)
     parser.add_argument('--checkpoint', default='model_4.pt')
     parser.add_argument('--output', type=Path, required=True)
+    parser.add_argument('--periodic-export', action='store_true', help='Require the native Newton save callback ONNX and parity with the latest official-route export')
     args = parser.parse_args()
     if args.implementation == 'official':
         import importlib.util
@@ -59,6 +60,10 @@ def main():
         onnx_file=str(args.output / 'policy.onnx'), num_envs=1, device='cuda:0'))
     check_onnx(result.onnx_path)
     smoke_run_onnx(result.onnx_path)
+    if args.periodic_export:
+        from oh_my_duck.rl.artifacts.metadata import verify_periodic_export
+        parity = verify_periodic_export(args.run / (args.run.name + '.onnx'), result.onnx_path)
+        (args.output / 'periodic-export.json').write_text(json.dumps(parity, indent=2) + '\n')
     (args.output / 'result.json').write_text(json.dumps({'status': 'passed', 'task': args.task,
         'export': str(result.onnx_path), 'scalar_tags': len(ranges), 'penalties': len(penalties),
         'behavior_validation': 'pending'}, indent=2) + '\n')

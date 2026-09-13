@@ -76,3 +76,14 @@ def test_newton_save_keeps_native_checkpoint_and_normalized_onnx(tmp_path,capsys
     np.testing.assert_allclose(actual,expected,atol=1e-6,rtol=1e-5)
     assert all(torch.equal(before[key],value) for key,value in actor.state_dict().items())
     assert 'ONNX export failed' not in capsys.readouterr().out
+
+    # Exercise the gate with a separate native export, and reject a stale actor.
+    from oh_my_duck.rl.artifacts.metadata import verify_periodic_export
+    runner.export_policy_to_onnx(str(tmp_path), 'reference.onnx')
+    parity = verify_periodic_export(exported, tmp_path / 'reference.onnx')
+    assert parity['samples'] == 65 and parity['max_abs_error'] < 1e-6
+    with torch.no_grad():
+        next(actor.parameters()).add_(.5)
+    runner.export_policy_to_onnx(str(tmp_path), 'stale.onnx')
+    with pytest.raises(AssertionError):
+        verify_periodic_export(exported, tmp_path / 'stale.onnx')
