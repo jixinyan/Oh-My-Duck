@@ -1,5 +1,9 @@
 # RL learning diagnosis — 2026-09-12
 
+**Completed 2026-09-13:** all 49 cases executed; behavior remains partial. See
+[results and causal follow-up](rl-causal-replay-2026-09-13.md). Queue statements
+below are the September 12 historical record.
+
 User instruction resumed iteration toward both representative tasks across both
 simulation backends and both native PPO frameworks. New GPU work uses scheduled
 single-node, multiple-GPU jobs; the development host's GPUs are occupied by other

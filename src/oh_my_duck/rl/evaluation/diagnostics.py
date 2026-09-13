@@ -48,3 +48,32 @@ def summarize_rewards(trace, names):
                    'final_second_mean_rate': float(rates[-50:, i].mean()),
                    'min_rate': float(rates[:, i].min()), 'max_rate': float(rates[:, i].max())}
             for i, name in enumerate(names)}
+
+
+def summarize_motion(trace, window_ticks=50):
+    """Separate sustained tracking error from oscillation without rescoring acceptance.
+
+    Windows stay inside constant-command segments, so stop/turn boundaries never
+    dilute one another. Partial windows are excluded and their count is reported.
+    """
+    import numpy as np
+    twist, command = np.asarray(trace['twist']), np.asarray(trace['command'])
+    if (type(window_ticks) is not int or window_ticks < 1 or twist.ndim != 2
+            or twist.shape[1] != 3 or twist.shape != command.shape or not len(twist)
+            or not np.isfinite(twist).all() or not np.isfinite(command).all()):
+        raise ValueError('Expected finite aligned Nx3 motion and command traces')
+    boundaries = np.r_[0, np.flatnonzero(np.any(np.diff(command, axis=0), axis=1)) + 1, len(command)]
+    segments = []
+    for start, end in zip(boundaries[:-1], boundaries[1:]):
+        velocity, requested = twist[start:end], command[start]
+        count = len(velocity) // window_ticks
+        windows = velocity[:count * window_ticks].reshape(count, window_ticks, 3).mean(1)
+        segments.append({
+            'start_tick': int(start), 'end_tick': int(end), 'command': requested.tolist(),
+            'mean_twist': velocity.mean(0).tolist(),
+            'instantaneous_rmse': np.sqrt(np.mean((velocity - requested) ** 2, axis=0)).tolist(),
+            'velocity_std': velocity.std(0).tolist(),
+            'window_mean_rmse': np.sqrt(np.mean((windows - requested) ** 2, axis=0)).tolist() if count else None,
+            'complete_windows': count, 'excluded_tail_ticks': len(velocity) % window_ticks,
+        })
+    return {'diagnostic_only': True, 'window_ticks': window_ticks, 'segments': segments}
