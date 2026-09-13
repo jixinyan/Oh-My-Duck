@@ -103,3 +103,8 @@ frozen-curriculum checks, actual native normalized ONNX callback checks includin
 rejection of stale weights, and campaign/options validation. Both plans pass
 CLI dry-run and all frozen policy hashes are verified. No acceptance threshold
 or official recipe was changed.
+
+Startup verification: scheduler now reports **Running**, platform ID
+`c33528a5-a6ca-4fba-8484-5c5a0f96eba6`, one node / four H800 GPUs.
+Displayed start time: `2026-09-13 10:28:16` (scheduler timezone).
+Results remain pending; no ongoing assistant polling is scheduled.

@@ -160,7 +160,7 @@
   },
   "rl_framework_registry": "oh_my_duck.rl.training.frameworks:default_framework_registry",
   "rl_acceptance": {
-    "state": "causal_followup_queued_partial_behavior",
+    "state": "causal_followup_running_partial_behavior",
     "smoke_and_resume": "8_of_8_passed_at_5971dca",
     "open_items": [
       "Diagnose ineffective task learning from preserved official/owned/framework comparisons",
@@ -169,7 +169,7 @@
       "Newton native DDP acceptance remains deferred"
     ],
     "architecture_merge": "6303ca4",
-    "validation_branch": "fix/rl-causal-replay",
+    "validation_branch": "main",
     "export_and_local_package": "8_of_8_passed; RSL revalidated at 6303ca4",
     "task_layout": "14 task families with environment.py and ppo.py; 33 semantic catalog entries preserved",
     "full_training_campaign": {
@@ -691,7 +691,7 @@
     },
     "current_iteration": {
       "date": "2026-09-13",
-      "state": "submitted_queued_waiting_dispatcher",
+      "state": "running_on_scheduler",
       "report": "docs/reports/rl-causal-replay-2026-09-13.md",
       "completed_diagnostic_cases": 49,
       "newton_final_stand_cpu_pose_passes": {
@@ -719,7 +719,10 @@
       "output": "outputs/diagnostics/push-causal-0913-01",
       "gate_output": "outputs/diagnostics/newton-export-gates-0913-01",
       "tests": "24_tests_and_9_subtests_passed_across_targeted_CPU_suites",
-      "newton_periodic_export": "gate_now_requires_native_callback_parity_gpu_execution_pending"
+      "newton_periodic_export": "gate_now_requires_native_callback_parity_gpu_execution_pending",
+      "job_id": "c33528a5-a6ca-4fba-8484-5c5a0f96eba6",
+      "gpu_model": "H800",
+      "scheduler_started_at": "2026-09-13 10:28:16 (scheduler display)"
     },
     "previous_iteration": {
       "date": "2026-09-12",
