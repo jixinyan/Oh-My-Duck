@@ -23,3 +23,25 @@ class PreviewCheckpointSelection(unittest.TestCase):
             root=Path(directory); run=root/'source'
             spec={'id':'walking','framework':'rsl-rl','resume':{'run':str(run),'checkpoint':'model_250.pt'}}
             self.assertEqual(checkpoint_source(spec,root/'new',root),(run,run/'model_250.pt'))
+
+
+def test_training_preview_stops_with_its_worker_even_if_training_raises(tmp_path):
+    from unittest.mock import patch, MagicMock
+    import pytest
+    from oh_my_duck.rl.experiments.preview import training_preview
+    child = MagicMock(pid=123)
+    child.wait.return_value = 0
+    output = tmp_path / 'run'
+    output.mkdir()
+    with patch('oh_my_duck.rl.experiments.preview.subprocess.Popen', return_value=child) as spawn:
+        with pytest.raises(RuntimeError, match='training failure'):
+            with training_preview(tmp_path, output, {'id':'walker'}, '3', 1000) as record:
+                assert record['gpu'] == '3'
+                raise RuntimeError('training failure')
+    assert (output / 'preview-training-finished').exists()
+    assert record['status'] == 'completed'
+    child.wait.assert_called_once()
+    command = spawn.call_args.args[0]
+    assert command[command.index('--gpu')+1] == '3'
+    assert command[command.index('--minimum-updates')+1] == '1000'
+    assert not spawn.call_args.kwargs.get('start_new_session',False)

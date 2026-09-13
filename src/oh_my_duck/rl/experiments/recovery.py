@@ -22,6 +22,8 @@ def validate_checkpoint(spec, root):
     for key in ('task', 'backend', 'framework', 'num_envs'):
         if source['spec'][key] != spec[key]:
             raise ValueError(f'Recovery source differs: {key}')
+    if source['spec'].get('action_rate_delay_iterations', 0) != spec.get('action_rate_delay_iterations', 0):
+        raise ValueError('Recovery intervention differs; use a fresh paired run')
     from .campaign import SB3_OPTIONS
     if spec['framework'] == 'sb3':
         for key in ('learning_rate', *SB3_OPTIONS):

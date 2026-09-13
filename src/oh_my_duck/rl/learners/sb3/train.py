@@ -79,6 +79,7 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("task", choices=[t.id for t in project_tasks().list("mujoco")])
     parser.add_argument("--backend", default="mujoco")
+    parser.add_argument("--action-rate-delay-iterations", type=int, default=0, help="Explicit Flat Walking smoothing curriculum experiment; zero preserves the official recipe")
     parser.add_argument("--num-envs", type=int, default=64)
     parser.add_argument("--iterations", type=int, default=5)
     parser.add_argument("--checkpoint-interval", type=int, help="PPO updates between native checkpoint bundles; default: task save interval")
@@ -102,6 +103,9 @@ def main():
     task = project_tasks().get(args.task)
     binding = task.binding(args.backend)
     cfg, official_agent = build_environment(binding), binding.rsl_config.build()
+    from oh_my_duck.rl.tasks.interventions import apply_action_rate_delay, validate_intervention_resume
+    intervention = apply_action_rate_delay(cfg, task=args.task, iterations=args.action_rate_delay_iterations,
+                                           steps_per_iteration=official_agent.num_steps_per_env)
     checkpoint_interval = args.checkpoint_interval or official_agent.save_interval
     if args.checkpoint_interval is not None and args.checkpoint_interval < 1:
         parser.error("checkpoint-interval must be positive")
@@ -112,6 +116,8 @@ def main():
     cfg.recorders["sb3_terminal"] = RecorderTermCfg(func=TerminalObservationRecorder)
     args.output.mkdir(parents=True, exist_ok=False)
     previous = json.loads((args.resume / "run.json").read_text()) if args.resume else None
+    if previous:
+        validate_intervention_resume(previous, intervention)
     saved_layout = previous.get("critic_observations", "actor") if previous else "official"
     critic_observations = args.critic_observations or saved_layout
     if previous and critic_observations != saved_layout:
@@ -126,7 +132,7 @@ def main():
         tracking = start_run(backend=args.backend, framework="sb3", task=args.task, directory=args.output,
             config={"num_envs": args.num_envs, "iterations": args.iterations, "seed": args.seed,
                     "resume_source": str(args.resume) if args.resume else None, "learning_rate_override": args.learning_rate,
-                    "official_agent": asdict(official_agent), "provenance":provenance, "critic_observations": critic_observations, "learning_rate_mode": learning_rate_mode, "initial_episode_phase": initial_episode_phase})
+                    "official_agent": asdict(official_agent), "provenance":provenance, "training_intervention": intervention, "critic_observations": critic_observations, "learning_rate_mode": learning_rate_mode, "initial_episode_phase": initial_episode_phase})
         adapter = MjlabSb3VecEnv(create_environment(task,cfg,backend=args.backend,device=args.device), critic_observations=critic_observations, initial_episode_phase=initial_episode_phase)
         progress_source = "fresh_environment"
         if args.resume:
@@ -169,7 +175,7 @@ def main():
             'critic_observations': critic_observations, 'learning_rate_mode': learning_rate_mode, 'initial_episode_phase': initial_episode_phase,
             'num_envs': args.num_envs, 'timesteps_before': before,
             'upstream': json.loads((ROOT / 'configs/upstream.json').read_text())['repositories'],
-            'provenance': provenance, 'official_agent': asdict(official_agent),
+            'provenance': provenance, 'official_agent': asdict(official_agent), 'training_intervention': intervention,
             'resume': str(args.resume) if args.resume else None,
             'learning_rate_override': args.learning_rate,
             'effective_learning_rate_at_save_start': float(model.lr_schedule(1.0)),
@@ -210,6 +216,7 @@ def main():
             "upstream": json.loads((ROOT / "configs/upstream.json").read_text())["repositories"],
             "project_commit": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip(),
             "official_agent": asdict(official_agent),
+            "training_intervention": intervention,
             "differences": ["Native SB3 PPO, optimizer and KL early stop; " + ("previous-rollout approximate-KL learning-rate feedback (RSL adjusts per minibatch using analytic KL)" if learning_rate_mode == "adaptive" else "constant learning rate"),
                 "Separate official critic group with native DictRolloutBuffer" if critic_observations == "official" else "Legacy actor-only critic retained for controlled comparison/resume",
                 "SB3 VecNormalize running statistics and clipping (100); reward normalization disabled",

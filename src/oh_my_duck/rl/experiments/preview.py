@@ -1,5 +1,6 @@
 """Render periodic checkpoint snapshots; training itself stays headless."""
 import argparse
+from contextlib import contextmanager
 import hashlib
 import html
 import json
@@ -70,6 +71,33 @@ Refresh to see newly completed previews. Behavior scores are separate from train
     temporary.replace(output / 'index.html')
 
 
+@contextmanager
+def training_preview(root, output, spec, device, checkpoint_interval):
+    """Follow one learner on its allocated GPU; finish with that training stage.
+
+    The follower inherits the worker process group so scheduler cancellation
+    reaches rendering/export subprocesses too. A stop marker avoids waiting for
+    the whole campaign (which would deadlock workers waiting for previews).
+    """
+    stop_file = output / 'preview-training-finished'
+    destination = output / 'previews'
+    command = [sys.executable, str(root / 'omd.py'), 'preview',
+               '--campaign', str(output.parent), '--output', str(destination),
+               '--run-id', spec['id'], '--gpu', str(device), '--watch',
+               '--minimum-updates', str(checkpoint_interval), '--stop-file', str(stop_file)]
+    record = {'status': 'running', 'output': str(destination), 'command': command,
+              'checkpoint_interval_updates': checkpoint_interval, 'gpu': device}
+    with (output / 'preview.log').open('x') as stream:
+        follower = subprocess.Popen(command, cwd=root, stdout=stream, stderr=subprocess.STDOUT)
+        record['pid'] = follower.pid
+        try:
+            yield record
+        finally:
+            stop_file.write_text('Full training stage ended; final evaluation is a separate pipeline stage.\n')
+            record['exit_code'] = follower.wait()
+            record['status'] = 'completed' if record['exit_code'] == 0 else 'preview_error'
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--campaign', type=Path, required=True)
@@ -77,6 +105,7 @@ def main():
     parser.add_argument('--gpu', default='7')
     parser.add_argument('--run-id', action='append')
     parser.add_argument('--watch', action='store_true')
+    parser.add_argument('--stop-file', type=Path, help='Stop the follower when its own training stage finishes')
     parser.add_argument('--interval', type=float, default=60)
     parser.add_argument('--minimum-updates', type=int, default=0, help='Skip initial untrained checkpoints')
     args = parser.parse_args()
@@ -98,6 +127,8 @@ def main():
         return code
     save()
     while True:
+        if args.stop_file and args.stop_file.exists():
+            break
         manifest = json.loads((args.campaign / 'campaign.json').read_text())
         specs = manifest['plan']['runs']
         if args.run_id:
@@ -141,7 +172,7 @@ def main():
             else:
                 entry['status'] = 'export_error'
             save()
-        if not args.watch or manifest['status'] != 'running':
+        if not args.watch or manifest['status'] != 'running' or (args.stop_file and args.stop_file.exists()):
             break
         time.sleep(args.interval)
     return int(any(row['status'].endswith('_error') for row in report['runs'].values()))
