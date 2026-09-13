@@ -1,5 +1,9 @@
 # Frozen-policy diagnosis and causal follow-up — 2026-09-13
 
+**Final update:** the causal job Succeeded and both complete Newton preparations
+passed. See [paired results and the next full training experiment](rl-walking-pacing-2026-09-13.md).
+Earlier Running/Queued statements below are historical snapshots.
+
 Job `omd-rl-diagnose-0912-02` succeeded on one node / four H800 GPUs. Platform
 ID: `d0c14f4b-03f9-45cd-83ed-52d7559cd505`; immutable source: `4ffb970`.
 All **49 cases executed**, with no execution errors. This does not mean 49

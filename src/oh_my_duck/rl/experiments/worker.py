@@ -44,7 +44,12 @@ def main():
         with nullcontext() if cpu_only else gpu_lease() as device:
             report['stages'][name]['gpu'] = None if cpu_only else device
             save()
-            with (output/(name+'.log')).open('w') as stream:
+            from .preview import training_preview
+            previews = training_preview(root, output, spec, device, plan['checkpoint_interval']) if name == 'full' and plan.get('record_previews') else nullcontext()
+            with previews as preview, (output/(name+'.log')).open('w') as stream:
+                if preview is not None:
+                    report['previews'] = preview
+                    save()
                 if cpu_only:
                     code = subprocess.call(command, cwd=root, stdout=stream, stderr=subprocess.STDOUT,
                                            env={**os.environ, 'CUDA_VISIBLE_DEVICES': ''})
@@ -78,6 +83,8 @@ def main():
             if resume is not None:
                 command += ['--agent.resume', 'True', '--agent.load-run', resume.name,
                             '--agent.load-checkpoint', resume_checkpoint or latest_checkpoint(resume).name]
+        if 'action_rate_delay_iterations' in spec:
+            command += ['--action-rate-delay-iterations', str(spec['action_rate_delay_iterations'])]
         stage(name, command)
         if spec['framework'] == 'rsl-rl':
             matches = list((root/'logs/rsl_rl'/spec['experiment']).glob('*_'+tag))
@@ -175,7 +182,14 @@ def main():
         comparison = stage('sim2sim', prefix+['compare', '--', '--task', spec['task'], '--policy', str(policy),
             '--output', str(output/'sim2sim'), '--video', '--mujoco-renderer', 'osmesa'], allowed=(0, 2))
         deployment = rehearsal('rehearsal', policy)
-        report['status'] = 'passed' if comparison == deployment == 0 else 'behavior_failed'
+        unforced = []
+        if plan.get('unforced_evaluation'):
+            for backend in ('mujoco', 'isaac-newton'):
+                name = 'unforced-' + backend
+                unforced.append(stage(name, prefix+['eval', '--backend', backend, '--',
+                    '--task', spec['task'], '--policy', str(policy), '--output', str(output/name),
+                    '--push-scale', '0', '--record-rewards', '--video', '--mujoco-renderer', 'osmesa'], allowed=(0, 2)))
+        report['status'] = 'passed' if comparison == deployment == 0 and all(code == 0 for code in unforced) else 'behavior_failed'
     except Exception as error:
         report.update(status='execution_failed', error=repr(error))
         raise

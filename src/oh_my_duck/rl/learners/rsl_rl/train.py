@@ -21,6 +21,7 @@ class TrainConfig:
     agent: RslRlBaseRunnerCfg
     gpu_ids: list[int] | Literal['all'] | None = field(default_factory=lambda: [0])
     backend: str = 'mujoco'
+    action_rate_delay_iterations: int = 0
     torchrunx_log_dir: str | None = None
 
 
@@ -48,6 +49,9 @@ def run_train(task_id, cfg, log_dir):
     cfg.env.seed = cfg.agent.seed
     task = project_tasks(ROOT).get(task_id)
     binding = task.binding(cfg.backend)
+    from oh_my_duck.rl.tasks.interventions import apply_action_rate_delay, validate_intervention_resume
+    intervention = apply_action_rate_delay(cfg.env, task=task_id, iterations=cfg.action_rate_delay_iterations,
+                                           steps_per_iteration=cfg.agent.num_steps_per_env)
     print(f'[INFO] Training task={task_id} backend={cfg.backend} device={device} seed={cfg.agent.seed} rank={rank}', flush=True)
     from oh_my_duck.rl.training.runtime import create_environment
     env = create_environment(task,cfg.env,backend=cfg.backend,device=device)
@@ -57,7 +61,7 @@ def run_train(task_id, cfg, log_dir):
         if rank == 0:
             dump_yaml(log_dir / 'params/env.yaml', asdict(cfg.env))
             dump_yaml(log_dir / 'params/agent.yaml', agent_cfg)
-        agent_cfg['omd'] = {'task':task_id, 'backend':cfg.backend, 'provenance':provenance}
+        agent_cfg['omd'] = {'task':task_id, 'backend':cfg.backend, 'provenance':provenance, 'training_intervention':intervention}
         runner = binding.runner.resolve()(native_env, agent_cfg, str(log_dir), device)
         runner.add_git_repo_to_log(__file__)
         resume = None
@@ -65,6 +69,7 @@ def run_train(task_id, cfg, log_dir):
             resume = get_checkpoint_path(log_dir.parent, cfg.agent.load_run, cfg.agent.load_checkpoint)
             previous = json.loads((Path(resume).parent/'run.json').read_text())
             validate_resume(previous,task=task_id,backend=cfg.backend,framework='rsl-rl')
+            validate_intervention_resume(previous, intervention)
             if previous.get('provenance',{}).get('upstream',provenance['upstream']) != provenance['upstream']:
                 raise ValueError('Resume upstream pins differ')
             print(f'[INFO] Loading native checkpoint {resume}', flush=True)
@@ -79,7 +84,7 @@ def run_train(task_id, cfg, log_dir):
                 'status': 'running', 'iteration_before': before,
                 'num_envs_per_rank': cfg.env.scene.num_envs,
                 'world_size': int(os.environ.get('WORLD_SIZE', 1)),
-                'provenance': provenance, 'behavior': 'unvalidated',
+                'provenance': provenance, 'behavior': 'unvalidated', 'training_intervention': intervention,
             }, indent=2) + '\n')
         runner.learn(num_learning_iterations=cfg.agent.max_iterations, init_at_random_ep_len=True)
         if rank == 0:
@@ -91,7 +96,7 @@ def run_train(task_id, cfg, log_dir):
                 'iteration_before': before, 'iteration_after': runner.current_learning_iteration,
                 'resume': str(resume) if resume else None, 'wandb_mode': settings()['mode'],
                 'project_commit': subprocess.check_output(['git','rev-parse','HEAD'], cwd=ROOT, text=True).strip(),
-                'behavior': 'unvalidated', 'provenance':provenance, 'wall_time_s':time.monotonic()-started}, indent=2)+'\n')
+                'behavior': 'unvalidated', 'provenance':provenance, 'training_intervention': intervention, 'wall_time_s':time.monotonic()-started}, indent=2)+'\n')
     finally:
         env.close()
         if rank == 0:

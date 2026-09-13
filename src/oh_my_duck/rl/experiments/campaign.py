@@ -36,6 +36,8 @@ def load_plan(path):
         if not re.fullmatch(r'[a-z0-9_-]+', row['id']) or row['id'] in seen:
             raise ValueError('Run IDs must be unique, filesystem-safe names')
         seen.add(row['id'])
+        from oh_my_duck.rl.tasks.interventions import validate_action_rate_delay
+        validate_action_rate_delay(row['task'], row.get('action_rate_delay_iterations', 0))
         task = tasks.get(row['task'])
         task.binding(row['backend'])
         if task.evaluation is None or task.policy_package is None:
@@ -53,6 +55,9 @@ def load_plan(path):
                 raise ValueError('Campaign learning_rate applies only to native SB3')
             if isinstance(rate, bool) or not isinstance(rate, (int, float)) or not math.isfinite(rate) or rate <= 0:
                 raise ValueError('SB3 learning_rate must be a finite positive number')
+    for option in ('record_previews', 'unforced_evaluation'):
+        if option in plan and type(plan[option]) is not bool:
+            raise ValueError(f'{option} must be a boolean')
     if search := plan.get('environment_search'):
         candidates = search.get('candidates', [])
         if not candidates or any(type(n) is not int or n < 64 for n in candidates) or candidates != sorted(set(candidates)):
@@ -100,6 +105,8 @@ def main():
     args = parser.parse_args()
     root = project_root()
     plan = load_plan(args.config)
+    if plan.get('record_previews') and (args.runs_per_gpu != 1 or args.gpu_stage_pool):
+        parser.error('Checkpoint previews require one learner per GPU without a shared stage pool')
     if args.runs_per_gpu < 1:
         parser.error('--runs-per-gpu must be positive')
     if args.dry_run:
