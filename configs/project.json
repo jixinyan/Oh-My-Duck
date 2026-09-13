@@ -103,7 +103,7 @@
       "additional_gallery": "outputs/previews/sb3-repair-0909-01/index.html",
       "auto_resume": false,
       "current_campaign": {
-        "state": "configured_waiting_full_training",
+        "state": "active_eight_scheduled_followers",
         "root": "outputs/experiments/walking-delay-0913-01",
         "per_run_gallery": "<run-id>/previews/index.html",
         "interval_updates": 1000,
@@ -170,7 +170,7 @@
   },
   "rl_framework_registry": "oh_my_duck.rl.training.frameworks:default_framework_registry",
   "rl_acceptance": {
-    "state": "full_walking_pacing_job_running_partial_acceptance",
+    "state": "eight_full_walking_runs_active_behavior_unaccepted",
     "smoke_and_resume": "8_of_8_passed_at_5971dca",
     "open_items": [
       "Diagnose ineffective task learning from preserved official/owned/framework comparisons",
@@ -701,7 +701,7 @@
     },
     "current_iteration": {
       "date": "2026-09-13",
-      "state": "running_startup_gates_then_full_training",
+      "state": "all_eight_full_training_runs_active",
       "config": "configs/experiments/walking-smoothing-delay.json",
       "report": "docs/reports/rl-walking-pacing-2026-09-13.md",
       "nodes": 1,
@@ -713,7 +713,7 @@
       "paired_intervention": "action_rate_weight_positive_stages_delayed_4500_updates",
       "training_seed": 42,
       "checkpoint_interval_updates": 1000,
-      "full_training_runs_launched": 0,
+      "full_training_runs_launched": 8,
       "acceptance": "unvalidated_hypothesis_not_official_recipe_replacement",
       "job": "omd-walk-pacing-0913-01",
       "queue_id": "local-03542db01f8e",
@@ -722,86 +722,19 @@
       "tests": "34_CPU_tests_and_9_subtests_passed",
       "job_id": "0367fb5b-34e5-40eb-9072-f5a081306253",
       "gpu_model": "H800",
-      "startup_snapshot": {
-        "isaac-newton-rsl-rl-walking-official": {
-          "status": "running",
-          "stages": {
-            "smoke": "completed",
-            "smoke-export": "completed",
-            "smoke-rehearsal": "completed",
-            "resume-check": "completed",
-            "capacity": "running"
-          }
-        },
-        "mujoco-rsl-rl-walking-official": {
-          "status": "running",
-          "stages": {
-            "smoke": "completed",
-            "smoke-export": "completed",
-            "smoke-rehearsal": "completed",
-            "resume-check": "completed",
-            "capacity": "running"
-          }
-        },
-        "mujoco-sb3-walking-official": {
-          "status": "running",
-          "stages": {
-            "smoke": "completed",
-            "smoke-export": "completed",
-            "smoke-rehearsal": "completed",
-            "resume-check": "completed",
-            "capacity": "running"
-          }
-        },
-        "isaac-newton-rsl-rl-walking-delayed": {
-          "status": "running",
-          "stages": {
-            "smoke": "completed",
-            "smoke-export": "completed",
-            "smoke-rehearsal": "completed",
-            "resume-check": "completed",
-            "capacity": "running"
-          }
-        },
-        "isaac-newton-sb3-walking-official": {
-          "status": "running",
-          "stages": {
-            "smoke": "completed",
-            "smoke-export": "completed",
-            "smoke-rehearsal": "completed",
-            "resume-check": "running"
-          }
-        },
-        "isaac-newton-sb3-walking-delayed": {
-          "status": "running",
-          "stages": {
-            "smoke": "completed",
-            "smoke-export": "completed",
-            "smoke-rehearsal": "completed",
-            "resume-check": "running"
-          }
-        },
-        "mujoco-sb3-walking-delayed": {
-          "status": "running",
-          "stages": {
-            "smoke": "completed",
-            "smoke-export": "completed",
-            "smoke-rehearsal": "completed",
-            "resume-check": "completed",
-            "capacity": "running"
-          }
-        },
-        "mujoco-rsl-rl-walking-delayed": {
-          "status": "running",
-          "stages": {
-            "smoke": "completed",
-            "smoke-export": "completed",
-            "smoke-rehearsal": "completed",
-            "resume-check": "completed",
-            "capacity": "running"
-          }
-        }
-      }
+      "latest_status_report": "docs/reports/rl-walking-pacing-status-2026-09-13.md",
+      "latest_status_checked_at_utc": "2026-09-13T14:31:58.578216+00:00",
+      "latest_logged_rollout_updates": {
+        "mujoco-rsl-rl-walking-official": 9019,
+        "mujoco-rsl-rl-walking-delayed": 9085,
+        "mujoco-sb3-walking-official": 6008,
+        "mujoco-sb3-walking-delayed": 5899,
+        "isaac-newton-rsl-rl-walking-official": 6734,
+        "isaac-newton-rsl-rl-walking-delayed": 6837,
+        "isaac-newton-sb3-walking-official": 4443,
+        "isaac-newton-sb3-walking-delayed": 4370
+      },
+      "latest_preview_acceptance": "0_of_8_latest_completed_previews_passed"
     },
     "previous_iteration": {
       "date": "2026-09-12",
