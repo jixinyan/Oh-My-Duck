@@ -13,6 +13,8 @@ tags:
   - project-design
 ---
 
+> 2026-09-14 策略复盘：231 份已完成周期预览均未通过完整行走标准。最近五个 checkpoint 中，MuJoCo SB3 官方课程、MuJoCo RSL 延后课程相对更值得做无推扰验证；Newton RSL 延后课程后期前进退步，Newton SB3 两组前进仍弱。延后平滑没有通用收益。横向瞬时误差包含快速摆动，不能直接等同持续侧滑；暂停状态和验收标准不变，本次仅分析既有视频与轨迹。见 [策略表现复盘](reports/rl-walking-policy-assessment-2026-09-14.md)。
+
 > 2026-09-14 暂停状态：调度器将 `omd-walk-pacing-0913-01` 标记为 **Suspended**，八组日志均停止在 07:38 UTC 左右，本地 `running` 为滞后记录。暂停原因未返回，不能归因于代码或调度抢占。各组最后日志约 19803–41043 / 50000 更新；最近 checkpoint、normalizer、日志及视频保留，最终验收未执行。本次查询未重启或重新提交任务。见 [暂停与 checkpoint 记录](reports/rl-walking-suspension-2026-09-14.md)。
 
 > 2026-09-13 完整训练迭代：前轮因果 job 已 Succeeded，32 个回放及两个 Newton 任务的全部门槛完成，四份周期导出与官方路径数值误差均为 0。无推扰对照确认 SB3 主动行走很弱；Newton RSL 在两后端的 play 配置下均有前进/转向响应，训练配置差异仍待定位。下一轮已提交单节点 8 GPU 的 Walking 配对完整训练（`omd-walk-pacing-0913-01`，已 Running，八组流水线已启动）：四种后端/框架组合，各比较官方任务课程和延后动作平滑课程，8192 环境、50000 更新；同一 job 内检查通过自动训练，定期视频与最终无推扰/跨后端/CPU 验收。该课程调整是待检验假设，不是已证实修复；StandUp 后续验收仍开放。见 [完整实验记录](reports/rl-walking-pacing-2026-09-13.md)。

@@ -735,7 +735,7 @@
         "isaac-newton-sb3-walking-delayed": 19803
       },
       "latest_preview_acceptance": "0_of_8_latest_completed_previews_passed",
-      "completed_checkpoint_previews": 167,
+      "completed_checkpoint_previews": 231,
       "scheduler_status": "Suspended",
       "suspension_reason": "not_provided",
       "active_training_runs": 0,
@@ -748,7 +748,10 @@
         "isaac-newton-rsl-rl-walking-delayed": 30000,
         "isaac-newton-sb3-walking-official": 20000,
         "isaac-newton-sb3-walking-delayed": 19000
-      }
+      },
+      "behavior_review": "docs/reports/rl-walking-policy-assessment-2026-09-14.md",
+      "all_saved_preview_acceptance": "0_of_231_completed_checkpoints_single_eval_seed",
+      "late_response_assessment": "mujoco_sb3_official_and_mujoco_rsl_delayed_candidates_newton_rsl_delayed_regresses_newton_sb3_weak_forward"
     },
     "previous_iteration": {
       "date": "2026-09-12",
