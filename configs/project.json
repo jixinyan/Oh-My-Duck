@@ -722,19 +722,20 @@
       "tests": "34_CPU_tests_and_9_subtests_passed",
       "job_id": "0367fb5b-34e5-40eb-9072-f5a081306253",
       "gpu_model": "H800",
-      "latest_status_report": "docs/reports/rl-walking-pacing-status-2026-09-13.md",
-      "latest_status_checked_at_utc": "2026-09-13T14:31:58.578216+00:00",
+      "latest_status_report": "docs/reports/rl-walking-pacing-status-2026-09-14.md",
+      "latest_status_checked_at_utc": "2026-09-14T01:33:18.959563+00:00",
       "latest_logged_rollout_updates": {
-        "mujoco-rsl-rl-walking-official": 9019,
-        "mujoco-rsl-rl-walking-delayed": 9085,
-        "mujoco-sb3-walking-official": 6008,
-        "mujoco-sb3-walking-delayed": 5899,
-        "isaac-newton-rsl-rl-walking-official": 6734,
-        "isaac-newton-rsl-rl-walking-delayed": 6837,
-        "isaac-newton-sb3-walking-official": 4443,
-        "isaac-newton-sb3-walking-delayed": 4370
+        "mujoco-rsl-rl-walking-official": 29427,
+        "mujoco-rsl-rl-walking-delayed": 29647,
+        "mujoco-sb3-walking-official": 19383,
+        "mujoco-sb3-walking-delayed": 19333,
+        "isaac-newton-rsl-rl-walking-official": 21973,
+        "isaac-newton-rsl-rl-walking-delayed": 22356,
+        "isaac-newton-sb3-walking-official": 14565,
+        "isaac-newton-sb3-walking-delayed": 14299
       },
-      "latest_preview_acceptance": "0_of_8_latest_completed_previews_passed"
+      "latest_preview_acceptance": "0_of_8_latest_completed_previews_passed",
+      "completed_checkpoint_previews": 167
     },
     "previous_iteration": {
       "date": "2026-09-12",
