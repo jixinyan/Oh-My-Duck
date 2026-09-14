@@ -103,7 +103,7 @@
       "additional_gallery": "outputs/previews/sb3-repair-0909-01/index.html",
       "auto_resume": false,
       "current_campaign": {
-        "state": "active_eight_scheduled_followers",
+        "state": "inactive_scheduler_suspended_artifacts_preserved",
         "root": "outputs/experiments/walking-delay-0913-01",
         "per_run_gallery": "<run-id>/previews/index.html",
         "interval_updates": 1000,
@@ -170,7 +170,7 @@
   },
   "rl_framework_registry": "oh_my_duck.rl.training.frameworks:default_framework_registry",
   "rl_acceptance": {
-    "state": "eight_full_walking_runs_active_behavior_unaccepted",
+    "state": "walking_campaign_scheduler_suspended_partial_acceptance",
     "smoke_and_resume": "8_of_8_passed_at_5971dca",
     "open_items": [
       "Diagnose ineffective task learning from preserved official/owned/framework comparisons",
@@ -701,7 +701,7 @@
     },
     "current_iteration": {
       "date": "2026-09-13",
-      "state": "all_eight_full_training_runs_active",
+      "state": "scheduler_suspended_local_running_records_stale",
       "config": "configs/experiments/walking-smoothing-delay.json",
       "report": "docs/reports/rl-walking-pacing-2026-09-13.md",
       "nodes": 1,
@@ -722,20 +722,33 @@
       "tests": "34_CPU_tests_and_9_subtests_passed",
       "job_id": "0367fb5b-34e5-40eb-9072-f5a081306253",
       "gpu_model": "H800",
-      "latest_status_report": "docs/reports/rl-walking-pacing-status-2026-09-14.md",
-      "latest_status_checked_at_utc": "2026-09-14T01:33:18.959563+00:00",
+      "latest_status_report": "docs/reports/rl-walking-suspension-2026-09-14.md",
+      "latest_status_checked_at_utc": "2026-09-14T11:53:34.409451+00:00",
       "latest_logged_rollout_updates": {
-        "mujoco-rsl-rl-walking-official": 29427,
-        "mujoco-rsl-rl-walking-delayed": 29647,
-        "mujoco-sb3-walking-official": 19383,
-        "mujoco-sb3-walking-delayed": 19333,
-        "isaac-newton-rsl-rl-walking-official": 21973,
-        "isaac-newton-rsl-rl-walking-delayed": 22356,
-        "isaac-newton-sb3-walking-official": 14565,
-        "isaac-newton-sb3-walking-delayed": 14299
+        "mujoco-rsl-rl-walking-official": 40703,
+        "mujoco-rsl-rl-walking-delayed": 41043,
+        "mujoco-sb3-walking-official": 26783,
+        "mujoco-sb3-walking-delayed": 26791,
+        "isaac-newton-rsl-rl-walking-official": 30378,
+        "isaac-newton-rsl-rl-walking-delayed": 30925,
+        "isaac-newton-sb3-walking-official": 20162,
+        "isaac-newton-sb3-walking-delayed": 19803
       },
       "latest_preview_acceptance": "0_of_8_latest_completed_previews_passed",
-      "completed_checkpoint_previews": 167
+      "completed_checkpoint_previews": 167,
+      "scheduler_status": "Suspended",
+      "suspension_reason": "not_provided",
+      "active_training_runs": 0,
+      "latest_saved_rollout_updates": {
+        "mujoco-rsl-rl-walking-official": 40000,
+        "mujoco-rsl-rl-walking-delayed": 41000,
+        "mujoco-sb3-walking-official": 26000,
+        "mujoco-sb3-walking-delayed": 26000,
+        "isaac-newton-rsl-rl-walking-official": 30000,
+        "isaac-newton-rsl-rl-walking-delayed": 30000,
+        "isaac-newton-sb3-walking-official": 20000,
+        "isaac-newton-sb3-walking-delayed": 19000
+      }
     },
     "previous_iteration": {
       "date": "2026-09-12",
