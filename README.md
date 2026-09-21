@@ -4,6 +4,12 @@
 
 # Oh My Duck 🦆
 
+[![Status: active development](https://img.shields.io/badge/status-active_development-blue)](docs/implementation-status.md)
+[![RL acceptance: partial](https://img.shields.io/badge/RL_acceptance-partial-orange)](docs/implementation-status.md)
+[![Recorded CPU checks: 53 passed on 2026-09-21](https://img.shields.io/badge/recorded_CPU_checks-53_passed-2ea44f)](docs/reports/project-review-2026-09-21.md)
+[![Voice: interfaces only](https://img.shields.io/badge/voice-interfaces_only-lightgrey)](docs/implementation-status.md)
+[![Hardware validation: pending](https://img.shields.io/badge/hardware_validation-pending-orange)](docs/implementation-status.md)
+
 **An interactive, extensible Microduck—with a persistent voice, shared experiences, and skills you can train.**
 
 Oh My Duck is the implementation of **Agentic Microduck**: a robotics foundation that connects an external embodied AI harness to a small biped robot. It brings together simulation, locomotion training, robot skills, active perception, voice interaction, and evidence of what the duck actually did.
