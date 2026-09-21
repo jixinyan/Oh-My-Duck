@@ -701,7 +701,7 @@
     },
     "current_iteration": {
       "date": "2026-09-13",
-      "state": "scheduler_suspended_local_running_records_stale",
+      "state": "scheduler_task_missing_local_artifacts_preserved",
       "config": "configs/experiments/walking-smoothing-delay.json",
       "report": "docs/reports/rl-walking-pacing-2026-09-13.md",
       "nodes": 1,
@@ -736,7 +736,7 @@
       },
       "latest_preview_acceptance": "0_of_8_latest_completed_previews_passed",
       "completed_checkpoint_previews": 231,
-      "scheduler_status": "Suspended",
+      "scheduler_status": "Deleted_task_no_longer_exists_in_API",
       "suspension_reason": "not_provided",
       "active_training_runs": 0,
       "latest_saved_rollout_updates": {
@@ -807,5 +807,13 @@
       "gpu_model": "H800",
       "scheduler_started_at": "2026-09-13 10:28:16 (scheduler display)"
     }
+  },
+  "migration": {
+    "date": "2026-09-21",
+    "handoff": "docs/server-migration-2026-09-21.md",
+    "state": "full_project_backup_preparing_destination_pending",
+    "backup_directory": "/mnt/data/users/heyang/workspace/migration-backups/oh-my-duck-20260921",
+    "scope": "whole_project_including_ignored_artifacts_environments_cache_git_and_worktrees",
+    "destination_transfer_verified": false
   }
 }
