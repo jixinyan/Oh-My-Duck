@@ -811,9 +811,12 @@
   "migration": {
     "date": "2026-09-21",
     "handoff": "docs/server-migration-2026-09-21.md",
-    "state": "full_project_backup_preparing_destination_pending",
-    "backup_directory": "/mnt/data/users/heyang/workspace/migration-backups/oh-my-duck-20260921",
-    "scope": "whole_project_including_ignored_artifacts_environments_cache_git_and_worktrees",
-    "destination_transfer_verified": false
+    "state": "code_only_github_main",
+    "scope": "git_tracked_source_assets_configs_locks_tests_and_docs",
+    "destination": "https://github.com/jixinyan/Oh-My-Duck",
+    "training_artifact_transfer_requested": false,
+    "full_data_backup": "cancelled_per_user_scope_clarification",
+    "original_training_artifacts": "retained_on_old_filesystem_not_in_git",
+    "optional_git_bundle_directory": "/mnt/data/users/heyang/workspace/migration-backups/oh-my-duck-20260921"
   }
 }
