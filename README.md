@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="docs/assets/oh-my-duck.png" alt="Oh My Duck project logo" width="320" />
+</p>
+
 # Oh My Duck 🦆
 
 **An interactive, extensible Microduck—with a persistent voice, shared experiences, and skills you can train.**
