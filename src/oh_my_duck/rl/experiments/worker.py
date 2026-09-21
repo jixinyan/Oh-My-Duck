@@ -18,6 +18,21 @@ def native_run_tag(output, identity, stage):
     return f'{output.parent.name}-{campaign_key}_{identity}_{stage}'
 
 
+def sb3_training_arguments(spec, run, count, iterations, checkpoint_interval,
+                           resume=None, resume_checkpoint=None):
+    command = ['--num-envs', str(count), '--iterations', str(iterations), '--seed', str(spec['seed']),
+               '--checkpoint-interval', str(checkpoint_interval), '--output', str(run)]
+    if 'learning_rate' in spec:
+        command += ['--learning-rate', str(spec['learning_rate'])]
+    for key in SB3_OPTIONS:
+        if key in spec:
+            command += ['--' + key.replace('_', '-'), spec[key]]
+    if resume is not None:
+        from oh_my_duck.rl.learners.sb3.checkpoint import resume_directory
+        command += ['--resume', str(resume_directory(resume, resume_checkpoint or 'model.zip'))]
+    return command
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument('--config', type=Path, required=True)
@@ -65,16 +80,9 @@ def main():
         command = prefix+['train', '--backend', spec['backend'], '--rl-framework', spec['framework'], '--', spec['task']]
         if spec['framework'] == 'sb3':
             run = output/name
-            command += ['--num-envs', str(count), '--iterations', str(iterations), '--seed', str(spec['seed']),
-                        '--checkpoint-interval', str(2 if name == 'smoke' else plan['checkpoint_interval']), '--output', str(run)]
-            if 'learning_rate' in spec:
-                command += ['--learning-rate', str(spec['learning_rate'])]
-            for key in SB3_OPTIONS:
-                if key in spec:
-                    command += ['--' + key.replace('_', '-'), spec[key]]
-            if resume is not None:
-                bundles = sorted((resume/'checkpoints').glob('step_*'))
-                command += ['--resume', str(bundles[-1] if bundles else resume)]
+            command += sb3_training_arguments(
+                spec, run, count, iterations, 2 if name == 'smoke' else plan['checkpoint_interval'],
+                resume, resume_checkpoint)
         else:
             tag = native_run_tag(output, spec['id'], name)
             command += ['--env.scene.num-envs', str(count), '--agent.max-iterations', str(iterations),

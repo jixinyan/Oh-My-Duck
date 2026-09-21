@@ -13,7 +13,11 @@ def validate_checkpoint(spec, root):
         raise ValueError('Checkpoint must be a filename within the run')
     if hashlib.sha256(checkpoint.read_bytes()).hexdigest() != recovery['checkpoint_sha256']:
         raise ValueError('Recovery checkpoint hash changed')
-    metadata = json.loads((run / 'run.json').read_text())
+    if spec['framework'] == 'sb3':
+        from oh_my_duck.rl.learners.sb3.checkpoint import load_resume_metadata
+        metadata = load_resume_metadata(run, recovery['checkpoint'])
+    else:
+        metadata = json.loads((run / 'run.json').read_text())
     for key in ('task', 'backend', 'framework'):
         if metadata.get(key) != spec[key]:
             raise ValueError(f'Recovery identity differs: {key}')
@@ -33,9 +37,6 @@ def validate_checkpoint(spec, root):
         if source['stages'][stage]['status'] != 'completed':
             raise ValueError(f'Recovery requires completed {stage}')
     if spec['framework'] == 'sb3':
-        for name in ('model.zip', 'vecnormalize.pkl'):
-            if hashlib.sha256((run / name).read_bytes()).hexdigest() != metadata['files'][name]:
-                raise ValueError(f'Recovery bundle hash changed: {name}')
         steps = metadata['timesteps_after']
         block = spec['num_envs'] * 24
         if steps % block:

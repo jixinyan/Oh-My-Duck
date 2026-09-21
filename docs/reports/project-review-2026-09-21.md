@@ -1,82 +1,59 @@
-# 项目检查 · 2026-09-21
+# 训练检查与恢复验证 · 2026-09-21
 
-## 检查范围
+## Walking 验收标准
 
-检查的源码版本为 `cb3c994`。本次阅读 README、开发说明、当前状态、服务器迁移说明、近期训练报告，以及训练调度、检查结果复用、checkpoint 恢复、策略来源检查、行为评分和应用接口的相关实现。
+`EvaluationProtocol.score` 使用 `scoring_version=3`。14 秒测试包含静止、前进、停止、转向、停止五个阶段，控制频率为 50 Hz。
 
-本次执行环境为 macOS，使用 Python 3.12.12 运行 CPU 检查。GPU 训练和仿真结果依据仓库中的历史报告；本次没有重新执行这些实验。旧服务器的 checkpoint、视频和原始轨迹没有包含在当前仓库中。
+每个阶段允许 0.5 秒转换时间，其后检查所有连续 0.5 秒窗口，窗口每次前进一个时间步，覆盖阶段末尾。阶段必须具有至少一个完整评分窗口。
 
-## 已确认的问题
-
-### P1：Walking 评分允许持续运动通过停止场景
-
-位置：`src/oh_my_duck/rl/evaluation/protocols.py`，`EvaluationProtocol.score`，第 28–53 行。
-
-评分针对非零命令计算响应比例，停止命令只参与整个测试过程的 RMSE。当前 RMSE 上限无法充分约束停止时的运动，也无法充分约束前进时的转向。
-
-对现有评分函数执行数学反例：保持身体高度 0.115 m、倾角 0，整个 14 秒过程的速度始终为 `vx=0.06 m/s`、`vy=0`、`yaw_rate=0.25 rad/s`。无论命令要求前进、停止还是转向，输入速度均保持不变。
-
-函数返回：
-
-| 字段 | 结果 |
+| 检查项目 | 通过条件 |
 |---|---|
-| `success` | `true` |
-| `twist_rmse` | `[0.05503245795502379, 0.0, 0.25]` |
-| 前进响应比例 | 0.6 |
-| 转向响应比例 | 0.5 |
+| 前进或转向 | 每个窗口的平均速度与对应非零命令之比位于 `[0.5, 1.5]` |
+| 运动阶段的零命令方向 | 每个窗口的平均速度绝对值不超过 `vx=0.02 m/s`、`vy=0.02 m/s`、`yaw_rate=0.1 rad/s` |
+| 静止与停止 | 每个窗口三个方向的 RMS 分别不超过 `0.02 m/s`、`0.02 m/s`、`0.1 rad/s` |
+| 全程跟踪 | 三个方向的 RMSE 分别不超过 `0.1 m/s`、`0.1 m/s`、`0.5 rad/s` |
+| 身体姿态 | 全程高度至少 `0.065 m`，倾角不超过 `π/3` |
+| 完整性 | 运行完成、全部阶段通过；输入尺寸一致且全部数值有限 |
 
-这项检查验证评分逻辑，输入没有来自机器人运行。它证明持续运动可以通过当前评分，不表示已有策略产生了这种轨迹。
+这些数值定义项目的行为验收条件，尚未经过真机测量。运动阶段按窗口平均值判断持续运动，停止阶段使用 RMS 计入往复运动。全程 RMSE 和身体姿态检查包含转换期间。
 
-影响：同一个评分函数用于原生仿真评估和 CPU/BAM 回放，停止失败的策略可能被判定为通过。
+评分输出保存阶段起止时间步、实际评分起点、命令、窗口数量、各方向指标和通过结果；`command_response` 保存转换时间之后的阶段平均响应，最终判定使用全部窗口。
 
-修复要求：为每个命令阶段定义独立指标，明确转换期间允许的响应时间、停止阶段的速度与转速限制，以及前进或转向阶段其他方向的运动限制。各项指标必须进入最终通过判定。
+## 训练前检查复用
 
-### P1：复用训练前检查时，没有检查 `rl/mdp` 的源码变化
+`validate_preparation` 与 `reuse_smoke` 共用 `validate_critical_inputs`，检查范围为：
 
-位置：`src/oh_my_duck/rl/experiments/preparation.py`，`CRITICAL`，第 8–12 行；使用位置为第 23、50 行。
+- `src/oh_my_duck` 全部源码，包括 MDP、机器人配置、训练、评估和公共基础模块。
+- `environments` 中的环境配置与依赖锁文件。
+- `configs` 全部配置，以及 `pyproject.toml`、`omd.py`。
 
-`validate_preparation` 和 `reuse_smoke` 使用 `CRITICAL` 限定 Git 差异检查范围。当前列表没有包含 `src/oh_my_duck/rl/mdp`。该目录中的 13 个受版本管理的文件均未被覆盖，其中包括观测、奖励、课程、reset 事件和终止条件实现。
+检查从原检查记录的 `source_commit` 比较到当前工作目录，同时检查未被 Git 跟踪且未被忽略的文件。范围内已经提交、暂存、尚未暂存、新增和删除的变化均要求重新执行检查。仅修改 `docs` 允许复用。缺失来源 commit 时立即报告错误。
 
-例如，只修改 `rl/mdp/observations.py`，同时保留相同的任务配置，当前源码差异检查仍允许复用旧检查结果。`worker.py` 在复用通过后会继续启动完整训练。
+## SB3 恢复流程
 
-影响：训练关键行为已经改变时，旧的启动检查仍可能被当作当前版本的有效依据。
+`resume.run` 指定包含 `model.zip`、`vecnormalize.pkl`、`run.json` 的准确目录，`resume.checkpoint` 必须为 `model.zip`。最终训练目录和具体的 `checkpoints/step_N` 目录均可直接指定。
 
-修复要求：检查范围包含完整的训练与评估依赖，并验证仅修改观测或奖励实现时，旧检查结果会被拒绝。
+Campaign 校验和训练入口共用文件 hash 检查。训练入口加载该目录的原生模型与 normalizer，通过 `restore_progress` 核对模型时间步数与 metadata，并恢复课程进度。训练结束时检查实际时间步数等于起始值加上声明的训练预算，随后保存输出。
 
-### P2：SB3 恢复时可能加载另一个 checkpoint
+CPU 集成测试在 Gymnasium `Pendulum-v1` 中运行原生 PPO，产生实际模型、optimizer 与 VecNormalize 数据：
 
-位置：`src/oh_my_duck/rl/experiments/worker.py`，第 75–77 行；恢复调用位于第 134–140 行。
+| 指定目录 | 恢复时间步数 | 继续更新次数 | 最终时间步数 |
+|---|---:|---:|---:|
+| 最终训练目录 | 72 | 2 | 120 |
+| 明确指定的周期目录 | 48 | 3 | 120 |
 
-`validate_checkpoint` 根据配置指定目录中的 `model.zip` 和 `run.json` 检查 hash、进度并计算剩余更新次数。`train` 收到该目录后，只要其中存在 `checkpoints/step_*`，就会改用最后一个周期保存目录；SB3 分支没有使用传入的 `resume_checkpoint`。
+每次更新采集 24 个时间步。最终模型与周期模型同时存在，测试通过 Campaign 使用的参数构造函数选择目录，然后实际加载并继续训练。加载后的模型参数、optimizer 数据、normalizer 统计量和更新次数均经过断言检查。文件缺失、文件 hash 不符、checkpoint 名称错误或 metadata 进度不符时报告错误。
 
-触发条件：恢复配置指向一个完整训练输出目录，该目录同时保存最终 `model.zip` 和周期 checkpoint。
+## 已执行验证
 
-例如，指定文件完成 100 次更新，最后一个周期 checkpoint 完成 90 次更新，目标为 200 次更新。恢复校验计算还需 100 次更新，训练却从 90 次开始，最终只有 190 次，同时使用了与已校验文件不同的模型和 normalizer。
+环境：macOS、Python 3.12.12、PyTorch 2.9.1、Stable-Baselines3 2.7.1。PyTorch 和 SB3 版本与项目 MuJoCo 环境声明一致。
 
-这个问题通过调用路径与保存逻辑确认；本次没有运行完整 GPU 恢复流程。配置直接指向没有嵌套 `checkpoints` 的周期保存目录时，不触发这一分支。
+以下测试共 **53 项通过**：
 
-修复要求：恢复训练使用已经校验的准确路径，加载后核对模型、normalizer、时间步数和剩余预算。
+- `tests/rl/tasks/test_evaluation_protocols.py`：Walking 数学输入，包括恒定运动、停止时移动、其他方向持续运动、超速、转换时间、持续响应、停止振荡、末尾样本和无效数据；同时检查 StandUp 的持续姿态条件。
+- `tests/test_rl_preparation_inputs.py`：在实际 Git 仓库中验证来源版本与文件变化检查。
+- `tests/rl/sb3/test_resume_selection.py`：原生 PPO 保存、加载、继续训练及错误输入检查。
+- `tests/rl/sb3/test_checkpoint_progress.py`：课程进度恢复。
+- `tests/rl/tasks/test_motion_diagnostics.py` 和 `tests/test_protocol.py`：相关诊断与接口检查。
 
-## 当前项目进展
-
-| 部分 | 仓库提供的证据 |
-|---|---|
-| RL 工程 | MuJoCo / Newton 与 RSL-RL / SB3 的训练、恢复、导出、回放和打包路径已存在；历史报告记录相关运行结果 |
-| Walking | 最近报告记录 231 次 checkpoint 预览，完整行为验收通过数量为零；这些预览使用同一个评估 seed |
-| StandUp | Newton RSL 的已保存策略在两个原生后端 seed 42 均通过四种姿态；CPU/BAM 的完整姿态测试在 17 个 seed 中通过 14 个 |
-| 机器人应用 | `ToolCatalog` 和 JSONL 记录器已有实现；执行后端、技能运行、Harness、语音和感知主要为接口定义 |
-| 服务器迁移 | 源码、配置和依赖锁文件已进入仓库；历史训练文件保存在旧文件系统 |
-| 真机 | 文档记录设备尚未可用，真机验收尚未完成 |
-
-进展依据：`docs/implementation-status.md`、`docs/server-migration-2026-09-21.md`、`docs/reports/rl-walking-policy-assessment-2026-09-14.md` 和 `docs/reports/rl-causal-replay-2026-09-13.md`。
-
-## 本次执行的检查
-
-- `tests/test_protocol.py`、`tests/rl/sb3/test_checkpoint_progress.py`、`tests/rl/tasks/test_evaluation_protocols.py`、`tests/rl/tasks/test_motion_diagnostics.py`：共 16 项测试通过。
-- `omd tasks` 与 `omd frameworks`：执行成功。
-- `CRITICAL` 与受版本管理的 MDP 文件路径比较：确认 13 个文件均未覆盖。
-- Walking 评分数学反例：确认持续运动被判定通过。
-- logo：PNG 完整解码通过，尺寸为 1254 × 1254；复制前后的 SHA-256 一致，README 引用指向项目内文件。
-- `git diff --check`：通过。
-
-本次项目修改包括 README 中的 logo、原始 PNG 文件和本检查报告。以上三个代码问题保持待修复状态。
+评分数学输入用于检查判定逻辑。Pendulum 用于检查原生 SB3 保存与恢复。本次没有运行 Microduck GPU 仿真、完整训练、ONNX 导出或真机测试；当前环境没有历史训练 checkpoint 和原始轨迹，历史策略尚未按版本 3 重新评分。

@@ -1,5 +1,5 @@
-"""Behavior gates must reject reset shortcuts and transient target crossings."""
 import numpy as np
+import pytest
 from oh_my_duck.rl.evaluation.protocols import standup, walking
 
 
@@ -52,3 +52,80 @@ def test_walking_requires_each_commanded_segment_and_correct_direction():
     assert not protocol.score(trace, True)['success']
     trace['twist'] = .75 * trace['command']
     assert protocol.score(trace, True)['success']
+
+
+def test_walking_rejects_constant_motion_across_commands():
+    protocol, trace = walking_trace()
+    trace['twist'][:] = [.06, 0., .25]
+    result = protocol.score(trace, True)
+    assert np.all(np.asarray(result['twist_rmse']) <= [.1, .1, .5])
+    assert not result['success']
+    assert result['scoring_version'] == 3
+    assert len(result['stages']) == 5
+    assert all(not stage['success'] for stage in result['stages'])
+
+
+@pytest.mark.parametrize('start,end,axis,value', [
+    (300, 400, 0, .03), (600, 700, 2, .15),
+    (100, 300, 2, .15), (400, 600, 0, .03),
+    (100, 300, 1, .03), (100, 300, 0, .16),
+])
+def test_walking_checks_stop_cross_axis_motion_and_overspeed(start, end, axis, value):
+    protocol, trace = walking_trace()
+    trace['twist'][start:end, axis] = value
+    result = protocol.score(trace, True)
+    assert np.all(np.asarray(result['twist_rmse']) <= [.1, .1, .5])
+    assert not result['success']
+
+
+def test_walking_allows_transition_then_requires_sustained_response():
+    protocol, trace = walking_trace()
+    for start in (100, 300, 400, 600):
+        trace['twist'][start:start + 25] = trace['command'][start - 1]
+    result = protocol.score(trace, True)
+    assert result['success']
+    assert [stage['scoring_start_tick'] for stage in result['stages']] == [25, 125, 325, 425, 625]
+    trace['twist'][200:225, 0] = 0.
+    result = protocol.score(trace, True)
+    assert result['command_response'][0]['response_fraction'] > .5
+    assert not result['success']
+
+
+def test_walking_stop_rms_rejects_canceling_oscillation():
+    protocol, trace = walking_trace()
+    trace['twist'][600:700, 0] = np.tile([.06, -.06], 50)
+    result = protocol.score(trace, True)
+    assert not result['success']
+    assert result['stages'][-1]['window_rms_max'][0] == pytest.approx(.06)
+
+
+def test_walking_scores_the_last_sample():
+    protocol, trace = walking_trace()
+    trace['twist'][-1, 2] = .6
+    result = protocol.score(trace, True)
+    assert not result['success']
+    assert result['stages'][-1]['window_count'] == 51
+
+
+def test_walking_rejects_a_segment_without_a_full_scoring_window():
+    protocol, trace = walking_trace()
+    trace = {key: values[:630] for key, values in trace.items()}
+    result = protocol.score(trace, False)
+    assert not result['success']
+    assert not result['stages'][-1]['success']
+    assert result['stages'][-1]['window_count'] == 0
+
+
+@pytest.mark.parametrize('field', ['height', 'tilt', 'twist', 'command'])
+def test_walking_rejects_nonfinite_trace(field):
+    protocol, trace = walking_trace()
+    trace[field][-1] = np.nan
+    with pytest.raises(ValueError, match='non-finite'):
+        protocol.score(trace, True)
+
+
+def test_walking_rejects_inconsistent_trace_shapes():
+    protocol, trace = walking_trace()
+    trace['twist'] = trace['twist'][:-1]
+    with pytest.raises(ValueError, match='matching nonempty'):
+        protocol.score(trace, True)

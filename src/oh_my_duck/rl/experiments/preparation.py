@@ -1,15 +1,20 @@
-"""Reuse completed gates without repeating training or accepting partial evidence."""
 import hashlib
 import json
 from pathlib import Path
 import subprocess
 
 REQUIRED = ('smoke', 'smoke-export', 'smoke-rehearsal', 'resume-check', 'capacity', 'capacity-export')
-CRITICAL = ('src/oh_my_duck/rl/tasks', 'src/oh_my_duck/rl/learners',
-            'src/oh_my_duck/rl/backends', 'src/oh_my_duck/rl/evaluation',
-            'src/oh_my_duck/rl/artifacts', 'src/oh_my_duck/rl/training', 'src/oh_my_duck/rl/models',
-            'src/oh_my_duck/robotics', 'environments', 'configs/upstream.json',
-            'configs/training.json', 'pyproject.toml')
+CRITICAL = ('src/oh_my_duck', 'environments', 'configs', 'pyproject.toml', 'omd.py')
+
+
+def validate_critical_inputs(source, root):
+    changed = subprocess.check_output(
+        ['git', 'diff', '--name-only', source, '--', *CRITICAL], cwd=root, text=True)
+    untracked = subprocess.check_output(
+        ['git', 'ls-files', '--others', '--exclude-standard', '--', *CRITICAL], cwd=root, text=True)
+    if changed.strip() or untracked.strip():
+        raise ValueError('Training/evaluation inputs changed: ' + changed + untracked)
+    return changed.strip()
 
 
 def validate_preparation(path, spec, root):
@@ -20,9 +25,7 @@ def validate_preparation(path, spec, root):
     if any(report['stages'].get(name, {}).get('status') != 'completed' for name in REQUIRED):
         raise ValueError('Preparation is missing a required successful gate')
     source = json.loads((path.parent.parent/'campaign.json').read_text())['source_commit']
-    changed = subprocess.check_output(['git', 'diff', '--name-only', source, 'HEAD', '--', *CRITICAL], cwd=root, text=True)
-    if changed.strip():
-        raise ValueError('Training/evaluation inputs changed since preparation: ' + changed)
+    changed = validate_critical_inputs(source, root)
     for name in ('smoke-export', 'capacity-export'):
         if not (path.parent/name/'policy.onnx').is_file():
             raise ValueError('Prepared export missing: ' + name)
@@ -47,9 +50,7 @@ def reuse_smoke(path, spec, root):
     if command[command.index(count_option)+1] != '64' or int(command[command.index(updates_option)+1]) < 5:
         raise ValueError('Reused smoke must have 64 environments and at least five updates')
     source = json.loads((path.parent.parent/'campaign.json').read_text())['source_commit']
-    changed = subprocess.check_output(['git', 'diff', '--name-only', source, 'HEAD', '--', *CRITICAL], cwd=root, text=True)
-    if changed.strip():
-        raise ValueError('Training/evaluation inputs changed since smoke: ' + changed)
+    validate_critical_inputs(source, root)
     if not (path.parent/'smoke-export/policy.onnx').is_file() or not list((path.parent/'smoke-rehearsal').glob('*.mp4')):
         raise ValueError('Reused smoke export or CPU video missing')
     capacity_run = None

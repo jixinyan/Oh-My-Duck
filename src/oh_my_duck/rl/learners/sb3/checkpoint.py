@@ -1,4 +1,21 @@
-"""Environment progress accompanying a native SB3 checkpoint."""
+import hashlib
+import json
+from pathlib import Path
+
+
+def resume_directory(directory, checkpoint='model.zip'):
+    if checkpoint != 'model.zip':
+        raise ValueError('SB3 resume checkpoint must be model.zip within the specified bundle')
+    return Path(directory).resolve()
+
+
+def load_resume_metadata(directory, checkpoint='model.zip'):
+    directory = resume_directory(directory, checkpoint)
+    report = json.loads((directory / 'run.json').read_text())
+    for name in ('model.zip', 'vecnormalize.pkl'):
+        if hashlib.sha256((directory / name).read_bytes()).hexdigest() != report['files'][name]:
+            raise ValueError(f'SB3 resume bundle hash changed: {name}')
+    return report
 
 
 def restore_progress(report, native_timesteps):

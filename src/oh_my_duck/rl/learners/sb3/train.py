@@ -115,7 +115,8 @@ def main():
         cfg.episode_length_s = args.episode_length_s
     cfg.recorders["sb3_terminal"] = RecorderTermCfg(func=TerminalObservationRecorder)
     args.output.mkdir(parents=True, exist_ok=False)
-    previous = json.loads((args.resume / "run.json").read_text()) if args.resume else None
+    from .checkpoint import load_resume_metadata
+    previous = load_resume_metadata(args.resume) if args.resume else None
     if previous:
         validate_intervention_resume(previous, intervention)
     saved_layout = previous.get("critic_observations", "actor") if previous else "official"
@@ -182,6 +183,9 @@ def main():
         })
         model.learn(total_timesteps=args.iterations * args.num_envs * official_agent.num_steps_per_env,
                     callback=[callback, KLFeedback(), snapshots], reset_num_timesteps=not bool(args.resume))
+        expected_timesteps = before + args.iterations * args.num_envs * official_agent.num_steps_per_env
+        if model.num_timesteps != expected_timesteps:
+            raise ValueError(f'Native SB3 training budget differs: {model.num_timesteps} != {expected_timesteps}')
         model.save(args.output / "model.zip")
         normalized.save(args.output / "vecnormalize.pkl")
         # Verify native reload including normalization, not just ZIP existence.

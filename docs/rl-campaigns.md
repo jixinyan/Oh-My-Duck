@@ -87,6 +87,21 @@ original attempt and operator stop records. Native resume restores optimizer,
 normalizer and curriculum state but starts fresh simulation episodes. Checkpoint
 intervals bound lost work; native RSL iteration indexing remains unchanged.
 
+SB3 的 `resume.run` 必须直接指定包含 `model.zip`、`vecnormalize.pkl` 和
+`run.json` 的目录，`resume.checkpoint` 必须为 `model.zip`。指定最终输出目录
+即使用该目录中的最终模型；指定 `checkpoints/step_N` 即使用该周期模型。
+Campaign 校验与训练入口检查同一目录的文件 hash，加载后核对模型时间步数，
+训练结束时核对完整的剩余预算。恢复检查的 CPU 执行记录见
+[训练检查与恢复验证](reports/project-review-2026-09-21.md)。
+
+## 复用训练前检查
+
+`validate_preparation` 与 `reuse_smoke` 检查完整的 `src/oh_my_duck`、
+`environments`、`configs`、`pyproject.toml` 和 `omd.py`。来源 commit 与
+当前工作目录之间的变化，以及范围内未被 Git 跟踪且未被忽略的文件，均会
+阻止复用。检查覆盖 MDP、公共模块、依赖锁文件和训练入口。仅修改 `docs`
+允许复用。配置、阶段完成状态、导出文件和回放文件也必须满足各自检查要求。
+
 ## Checkpoint video previews
 
 `python omd.py preview --campaign outputs/experiments/RUN --output outputs/previews/NEW \
@@ -101,12 +116,11 @@ own directory and checkpoint hash; behavior failures remain visibly labelled.
 
 ## SB3 learning-rate diagnosis
 
-The current SB3 mapping uses a constant learning rate; RSL's native adaptive-KL
-schedule is not transferred into SB3. `omd train --rl-framework sb3 ... --
-TASK --learning-rate 0.0001 ...` explicitly sets native SB3's learning rate,
-including on resume. The default and retained runs are unchanged. Override and
-effective learning rate are recorded in run/checkpoint metadata. A small KL probe
-is not convergence evidence; retuned runs need their own gates and output paths.
+SB3 新训练默认使用基于前一次 rollout 的 KL 反馈学习率，恢复训练时读取
+已保存的 `learning_rate_mode`。`--learning-rate-mode constant` 可明确选择
+固定学习率，`--learning-rate 0.0001` 可设置学习率数值。RSL-RL 保持原生的
+每 minibatch adaptive-KL 更新方式。学习率设置和实际值写入 run/checkpoint
+metadata；调整配置的实验需要独立的检查记录和输出目录。
 
 
 Campaign run entries may set an optional numeric `learning_rate` for native SB3.

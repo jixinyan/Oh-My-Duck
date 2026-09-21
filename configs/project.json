@@ -171,6 +171,17 @@
   "rl_framework_registry": "oh_my_duck.rl.training.frameworks:default_framework_registry",
   "rl_acceptance": {
     "state": "walking_campaign_scheduler_suspended_partial_acceptance",
+    "evaluation_and_resume_validation": {
+      "date": "2026-09-21",
+      "walking_scoring_version": 3,
+      "preparation_inputs": "complete_project_source_configs_environments_and_entry_points",
+      "sb3_resume": "explicit_bundle_hash_native_progress_and_training_budget_checks",
+      "cpu_tests_passed": 53,
+      "native_resume_environment": "Gymnasium Pendulum-v1",
+      "microduck_gpu_validation": "not_run",
+      "historical_policies_rescored": false,
+      "report": "docs/reports/project-review-2026-09-21.md"
+    },
     "smoke_and_resume": "8_of_8_passed_at_5971dca",
     "open_items": [
       "Diagnose ineffective task learning from preserved official/owned/framework comparisons",

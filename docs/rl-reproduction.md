@@ -20,6 +20,14 @@ stop and turn commands; StandUp tests standing, sitting, face-down and face-up
 starts. Automatic resets are disabled. Videos default to 1280×720. Success metrics
 and terminated trajectories are preserved independently from training rewards.
 
+Walking 使用 `scoring_version=3`：每个命令阶段允许 0.5 秒转换时间，随后检查
+所有连续 0.5 秒窗口。运动方向的窗口平均响应比例必须位于 `[0.5, 1.5]`；
+零命令方向的窗口平均速度绝对值上限为 `[0.02, 0.02, 0.1]`，单位依次为
+`m/s`、`m/s`、`rad/s`。静止和停止阶段使用相同上限检查各窗口 RMS。
+全程 RMSE 上限 `[0.1, 0.1, 0.5]`、身体高度、倾角和运行完整性也参与判定。
+阶段结果与指标保存在 `stages`，详细标准和 CPU 验证见
+[训练检查与恢复验证](reports/project-review-2026-09-21.md)。历史策略尚未按版本 3 重新评分。
+
 ```bash
 python omd.py tasks
 python omd.py train --backend mujoco --rl-framework rsl-rl -- Mjlab-Velocity-Flat-MicroDuck --env.scene.num-envs 64 --agent.max-iterations 5 --agent.run-name smoke
@@ -48,8 +56,7 @@ source revisions, native reward audits, failed attempts and videos locally.
 ONNX export uses the official runner path and deployment metadata reference;
 SB3 bakes VecNormalize's mean, variance, epsilon and clipping. Numerical parity
 and behavior are separate gates. See [task/actor/reward extension](rl-task-extension.md)
-and [Newton integration](isaac-newton.md). Current work is on
-`feat/rl-pipeline-validation`; no commits have been pushed.
+and [Newton integration](isaac-newton.md).
 
 The [single-GPU execution matrix](reports/rl-pipeline-acceptance.md) is complete
 for all eight combinations. Learned behavior is not complete: all smoke policies
