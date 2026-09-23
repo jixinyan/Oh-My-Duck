@@ -1,5 +1,10 @@
 # Oh My Duck development constraints
 
+## 模型职责
+
+- `gpt-6-astra`：全局规划、架构设计、技术决策和验收审查。
+- `gpt-6-sol`：代码实现、测试、调试和相关文档更新。
+
 The product scope is `docs/Agentic Microduck - Project Design v0.1.md`. Keep that document, the execution plan, `docs/implementation-status.md`, and the CLI maturity matrix synchronized with verified results. README is the whole-project overview; detailed experiments belong in reports.
 
 This project extends the pinned official `pollen-robotics/microduck_rl` and `pollen-robotics/microduck` implementations. Read `third_party/microduck_rl/UPSTREAM_GUIDELINES.md` before changing RL tasks, actuators, export or publishing. Pins are in `configs/upstream.json`; cached upstream checkouts remain pristine. Reference implementations do not replace the official baseline.

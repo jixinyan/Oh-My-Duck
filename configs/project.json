@@ -118,7 +118,9 @@
       "gpu_model_reported": "NVIDIA H20G",
       "gpu_count": 8,
       "compute_capability": "10.3",
-      "state": "locked_environment_installation_in_progress",
+      "state": "cuda13_training_environments_validated_isaac_asset_environment_pending",
+      "cuda_warp_mujoco_probe": "passed_on_gpu_6_with_torchscript_quaternion_and_rgb_readback",
+      "headless_rendering": "egl_and_osmesa_passed",
       "historical_checkpoints_migrated": false,
       "report": "docs/reports/project-status-2026-09-23.md"
     },
@@ -181,11 +183,11 @@
   },
   "rl_framework_registry": "oh_my_duck.rl.training.frameworks:default_framework_registry",
   "rl_acceptance": {
-    "state": "partial_behavior_acceptance_jd_host_setup_in_progress",
+    "state": "partial_behavior_acceptance_jd_cuda13_runtime_validated",
     "latest_cpu_validation": {
       "date": "2026-09-23",
       "passed": 55,
-      "platform": "macOS",
+      "platforms": ["macOS", "Linux"],
       "scope": "evaluation_preparation_resume_progress_motion_protocol_and_source_entry",
       "report": "docs/reports/project-status-2026-09-23.md"
     },
@@ -730,7 +732,7 @@
     },
     "current_iteration": {
       "date": "2026-09-23",
-      "state": "environment_installation_training_not_started",
+      "state": "cuda13_runtime_validated_training_restart_pending_newton_assets_pending",
       "host": "jd_B300",
       "config": "configs/experiments/jd-reproduction-20260923.json",
       "report": "docs/reports/project-status-2026-09-23.md",

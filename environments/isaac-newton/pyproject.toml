@@ -33,7 +33,14 @@ environments = ["sys_platform == 'linux' and platform_machine == 'x86_64'"]
 [[tool.uv.index]]
 url = "https://pypi.nvidia.com"
 
+[[tool.uv.index]]
+name = "pytorch-cu130"
+url = "https://download.pytorch.org/whl/cu130"
+explicit = true
+
 [tool.uv.sources]
+torch = { index = "pytorch-cu130" }
+torchvision = { index = "pytorch-cu130" }
 oh-my-duck = { path = "../..", editable = true }
 better-actuator-models = { git = "https://github.com/Rhoban/bam", rev = "62bd8ce12154340be97e06f7f41a0ca8f116d967" }
 isaaclab = { path = "../../.cache/upstream/IsaacLab/source/isaaclab", editable = true }

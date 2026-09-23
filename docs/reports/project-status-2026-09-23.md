@@ -12,7 +12,7 @@ Walking 逐阶段评分版本 3、完整训练输入检查和 SB3 指定目录�
 |---|---|---|---|
 | P1 | Walking 行为验收 | 历史 231 份周期预览没有完整通过；MuJoCo SB3 官方课程具有相对稳定的前进响应 | 使用版本 3 完成前进、转向、停止、无推扰诊断、跨后端与 CPU/BAM 验证 |
 | P1 | StandUp 稳定性 | Newton RSL 最终策略在两个原生后端 seed 42 通过四种姿态；CPU/BAM 完整测试为 14/17 seed | 使用多个训练 seed 和评估 seed 验证，重点检查 face_down |
-| P1 | 新服务器训练环境 | Git 源码已经迁移，旧 checkpoint、normalizer、日志和视频未迁入当前仓库 | 完成锁定环境安装、资产转换、GPU 启动、导出、恢复和回放检查 |
+| P1 | 新服务器训练环境 | CUDA 13 训练环境与 MuJoCo GPU 检查通过；Isaac 资产环境尚未完成；旧训练产物未迁入 | 完成资产转换、训练启动、导出、恢复和回放检查 |
 | P2 | SB3 StandUp 与 Newton SB3 Walking | 历史起身停留在部分姿态成功，行走前进响应不足 | 根据无推扰轨迹和奖励记录定位原因，验证训练改动的效果 |
 | P2 | 仿真执行接口 | `RobotBackend`、`SkillRunner` 为 Protocol；`ToolCatalog` 已有实现 | 在仿真中执行速度命令、查询状态、取消任务并确认停止 |
 | P2 | 语音交互 | ASR、TTS、音色设计和音色保存已有接口定义 | 接入实际模型，实现录音、转写、音色确认与持久保存、合成与播放取消 |
@@ -25,7 +25,7 @@ Walking 逐阶段评分版本 3、完整训练输入检查和 SB3 指定目录�
 
 ## jd_B300 训练计划
 
-远端仓库为 `/mnt/data/users/jixin/workspace/code/Oh-My-Duck`。GPU 查询显示八张 `NVIDIA H20G`，每张约 268.6 GiB 显存，compute capability 为 10.3，driver 为 580.105.08。首次检查时 GPU 3–6 没有计算进程。启动训练前重新检查 GPU 使用情况。
+远端仓库为 `/mnt/data/users/jixin/workspace/code/Oh-My-Duck`。GPU 查询显示八张 `NVIDIA H20G`，每张约 268.6 GiB 显存，compute capability 为 10.3，driver 为 580.105.08。CUDA 13.0 GA 要求 Linux driver 至少为 580.65.06。训练启动时逐张检查使用情况并明确指定空闲设备；其他任务已占用的设备保持原状。
 
 配置：[jd-reproduction-20260923.json](../../configs/experiments/jd-reproduction-20260923.json)。配置已经通过 CLI dry-run，每个 learner 使用 8192 个环境。
 
@@ -41,8 +41,12 @@ Walking 逐阶段评分版本 3、完整训练输入检查和 SB3 指定目录�
 
 源码入口验证提交为 `743b6fb`，训练配置提交为 `47f1d17`。远端已获取这两个提交。
 
-环境安装记录位于远端 `outputs/setup-20260923/`。安装依赖与图形库的验证正在执行，训练尚未启动。
+环境安装记录位于远端 `outputs/setup-20260923/`。正式 `.envs/mujoco`、`.envs/mujoco-sb3`、`.envs/isaac-newton` 均通过 `uv sync --locked`。Linux x86_64 的 MuJoCo 环境使用 Torch 2.9.1+cu130、torchvision 0.24.1+cu130、MuJoCo 3.10.0、Warp 1.12.0；Newton 环境使用 Torch 2.10.0+cu130、torchvision 0.25.0+cu130、MuJoCo 3.8.0、Warp 1.13.0。MuJoCo 的 Linux aarch64 锁定官方 cu129 来源，当前没有该平台的运行验证。Isaac 资产转换环境的大型依赖仍在安装。
 
-本地 macOS、Python 3.12.12、Torch 2.9.1、SB3 2.7.1 环境执行 55 项 CPU 测试，全部通过。测试范围为 Walking/StandUp 评分、训练输入来源、SB3 指定目录保存与恢复、课程进度、运动诊断、公共接口和源码入口子进程。GPU 行为验证需要在新主机执行。
+本地 macOS、Python 3.12.12、Torch 2.9.1 和远端 Linux、Python 3.12.13 分别执行同组 55 项 CPU 测试，全部通过。Linux 的 MuJoCo SB3 环境使用 Torch 2.9.1+cu130，Newton 环境使用 Torch 2.10.0+cu130；测试记录为 `outputs/setup-20260923/linux-cpu-tests-cu130-mujoco-03.log` 和 `linux-cpu-tests-cu130-newton-02.log`。测试范围为 Walking/StandUp 评分、训练输入来源、SB3 指定目录保存与恢复、课程进度、运动诊断、公共接口和源码入口子进程。
 
-OSMesa、libglapi、LLVM 15 与 libdrm 已安装到项目的忽略目录；动态库加载检查和项目渲染依赖检查通过。实际仿真视频验证仍待执行。大型 wheel 使用锁文件地址和 SHA-256 校验；所有安装尝试保留各自日志。
+OSMesa、libglapi、LLVM 15、libdrm 与 GLVND 已安装到项目的忽略目录。GPU 6 上的正式 MuJoCo 环境通过 TorchScript quaternion 连续十次调用、Warp、MuJoCo 物理状态及 EGL 图像检查；图像读取使用零初始化缓冲区，并检查形状、数值和非空像素。证据为 `outputs/validation-20260923/mujoco-cu130-target-probe-03` 和 `mujoco-cu130-base-probe-04`。原生 RSL 与导出模块已成功导入；实际 policy 导出仍需训练 worker 完成对应阶段。Microduck 训练与视频检查仍待运行。大型 wheel 使用锁文件地址和 SHA-256 校验；安装尝试各自保留日志。
+
+CUDA 13 正式环境已通过检查。新的 Walking 完整训练使用独立目录，当前等待启动。旧服务器的 checkpoint、normalizer、日志和视频尚未迁入；本次训练从头开始。
+
+两组 Newton StandUp 等待 Isaac 资产环境安装完成，随后转换并验证 `walk`、`groundcontact` 资产。资产准备通过后，分别在启动时检查并指定不同的空闲 GPU。Newton learner 尚未启动；两个训练 seed 的结果仍需结合多个评估 seed 检查稳健性。
