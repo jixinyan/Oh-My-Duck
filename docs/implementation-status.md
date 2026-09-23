@@ -1,6 +1,6 @@
 # Implementation status
 
-> 2026-09-23：已连接 `jd_B300`，Linux x86_64 的 CUDA 13 正式环境通过实际 GPU 检查，macOS 和 Linux 分别通过同组 55 项 CPU 测试。W&B 账号和项目已完成在线验证，Isaac 资产环境已安装，`walk` 与 `groundcontact` 资产转换通过。Walking 在 GPU 6 完成启动检查与 policy 导出，回放和后续检查继续进行；两组 Newton StandUp 等待空闲 GPU。三组完整预算与行为验收尚未完成，语音与仿真执行仍待实现。GitHub 开放 Issues 和 Pull Requests 均为 0。见 [当前状态与未完成工作](reports/project-status-2026-09-23.md)。下方保留历史验证记录。
+> 2026-09-23：`jd_B300` 的 CUDA 13 正式环境通过实际 GPU 检查，macOS 和 Linux 分别通过同组 55 项 CPU 测试。Isaac 资产转换通过，三组训练均完成启动检查、导出、恢复与容量检查，并已进入完整预算：Walking 使用 GPU 6，Newton StandUp 的 seed 42、43 分别使用 GPU 2、1。三组在线 W&B 记录已开始并出现正常更新；短训练回放行为未达标（返回码 2），最终行为验收需要完整训练与评估。语音与仿真执行仍待实现。GitHub 开放 Issues 和 Pull Requests 均为 0。见 [当前状态与未完成工作](reports/project-status-2026-09-23.md)。下方保留历史验证记录。
 
 > 2026-09-21 CPU 验证：Walking 使用逐阶段评分版本 3；训练前检查复用覆盖完整源码、配置及依赖声明；SB3 按指定目录恢复并核对训练预算。53 项 CPU 测试通过，包括实际 Git 操作和原生 PPO 保存、加载、继续训练。Microduck GPU 仿真和历史策略重新评分尚未执行。见 [验证记录](reports/project-review-2026-09-21.md)。
 

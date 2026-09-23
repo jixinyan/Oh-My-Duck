@@ -118,7 +118,7 @@
       "gpu_model_reported": "NVIDIA H20G",
       "gpu_count": 8,
       "compute_capability": "10.3",
-      "state": "cuda13_environments_validated_walking_gates_running",
+      "state": "cuda13_three_full_budgets_running",
       "cuda_warp_mujoco_probe": "passed_on_gpu_6_with_torchscript_quaternion_and_rgb_readback",
       "headless_rendering": "egl_and_osmesa_passed",
       "historical_checkpoints_migrated": false,
@@ -183,7 +183,7 @@
   },
   "rl_framework_registry": "oh_my_duck.rl.training.frameworks:default_framework_registry",
   "rl_acceptance": {
-    "state": "partial_behavior_acceptance_jd_walking_gates_running",
+    "state": "partial_behavior_acceptance_jd_full_training_running",
     "latest_cpu_validation": {
       "date": "2026-09-23",
       "passed": 55,
@@ -732,7 +732,7 @@
     },
     "current_iteration": {
       "date": "2026-09-23",
-      "state": "walking_gates_running_newton_queued",
+      "state": "three_full_budgets_running_final_evaluation_pending",
       "host": "jd_B300",
       "config": "configs/experiments/jd-reproduction-20260923.json",
       "report": "docs/reports/project-status-2026-09-23.md",
@@ -742,13 +742,21 @@
       "stand_up_iterations": 15000,
       "stand_up_training_seeds": [42, 43],
       "checkpoint_interval_updates": 1000,
-      "full_training_runs_launched": 0,
-      "allocated_gpus": ["6"],
+      "full_training_runs_launched": 3,
+      "allocated_gpus": ["6", "2", "1"],
       "walking_worker_pid": 310920,
       "walking_source_commit": "c083476f1e4738e7d34d522fbb3b51be2b14a204",
       "walking_smoke_wandb_url": "https://wandb.ai/jixinyan831-northwestern-university/oh-my-duck/runs/rufx00sm",
+      "walking_full_wandb_url": "https://wandb.ai/jixinyan831-northwestern-university/oh-my-duck/runs/160mmca3",
+      "stand_up_worker_pids": {"42": 323284, "43": 323306},
+      "stand_up_source_commit": "16950745457d0af017a4f2d68f1fbd079f8fa2ac",
+      "stand_up_full_wandb_urls": {
+        "42": "https://wandb.ai/jixinyan831-northwestern-university/oh-my-duck/runs/6jbpfbfk",
+        "43": "https://wandb.ai/jixinyan831-northwestern-university/oh-my-duck/runs/jwh7tya2"
+      },
       "newton_assets_converted": ["walk", "groundcontact"],
-      "resource_wait_pid": 318849,
+      "smoke_rehearsal_exit_codes": {"walking": 2, "stand_up_seed42": 2, "stand_up_seed43": 2},
+      "resource_wait_status": "completed_all_workers_started",
       "resource_wait_log": "outputs/setup-20260923/resource-wait-online-07.log",
       "wandb_mode": "online",
       "wandb_online_validation_url": "https://wandb.ai/jixinyan831-northwestern-university/oh-my-duck/runs/cxxhmj25"
