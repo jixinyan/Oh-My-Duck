@@ -1,9 +1,10 @@
-#!/usr/bin/env python3
-"""Source-checkout entry point. Installed editable projects also expose the omd command."""
+import os
 from pathlib import Path
 import sys
 
-sys.path.insert(0, str(Path(__file__).resolve().parent / "src"))
+source = str(Path(__file__).resolve().parent / "src")
+sys.path.insert(0, source)
+os.environ["PYTHONPATH"] = os.pathsep.join(filter(None, (source, os.environ.get("PYTHONPATH"))))
 from oh_my_duck.cli import main
 
 if __name__ == "__main__":
