@@ -21,7 +21,7 @@ This project extends the pinned official `pollen-robotics/microduck_rl` and `pol
 
 - Current RL acceptance scope is the representative tasks in `configs/training.json` (Flat Walking and Flat StandUp), across both backends and both RL frameworks. The complete official registry is an inventory, not a requirement to reproduce every task. New tasks should enter through task registration and shared adapters.
 - Preserve each framework's native PPO semantics. RSL-RL uses its native distributed learner; SB3 uses native PPO/vector environments and independent parallel runs. Do not introduce decoupled asynchronous actors or claim SB3 supports distributed gradient updates. Measure throughput before selecting GPU/environment counts.
-- W&B must run OFFLINE. The current saved account belongs to someone else. Do not authenticate, upload or sync to it. Propagate offline mode to every distributed worker; keep local run directories and artifacts.
+- 当前训练使用已核对身份的 W&B 账号在线记录，项目为 `oh-my-duck`。训练入口读取 `configs/training.json` 的模式，允许明确设置 `WANDB_MODE`；将最终模式传递给所有分布式 worker，并保留本地记录与产物。诊断流程明确要求 offline 时继续使用 offline。
 
 - Microduck tasks, MDP functions, robot assets, BAM extensions, runner/policy configuration, export and rehearsal are owned source under `src/oh_my_duck/rl` and `src/oh_my_duck/robotics/microduck`. Edit these directly; never import them from `.cache/upstream/microduck_rl`. Preserve ancestry in `third_party/microduck_rl/UPSTREAM.json` and the Apache license. Generic simulator and PPO packages remain dependencies.
 
@@ -39,4 +39,4 @@ This project extends the pinned official `pollen-robotics/microduck_rl` and `pol
 
 - Latest user instruction (2026-09-13): scheduler submissions should normally run the complete training workflow, not standalone short validation jobs. Include required smoke/export/rehearsal gates in the same job, reuse valid configuration-matched gates, and automatically proceed to the full declared training budget after gates pass, followed by final evaluation/videos. Do not use `--prepare-only` for routine submissions. Failed gates must still stop the affected run; do not bypass them or blindly resume known ineffective recipes.
 
-- Latest user instruction (2026-09-23): connect to `jd_B300` over SSH and use its idle GPUs for training. Check live occupancy and assign devices explicitly. Direct multi-GPU campaigns are authorized on this host. Preserve the complete smoke/export/rehearsal/resume/training/evaluation workflow, immutable source snapshots, and offline W&B records. The current server contains migrated source; historical checkpoints remain on the previous filesystem.
+- 用户于 2026-09-23 授权通过 SSH 使用 `jd_B300` 的空闲 GPU，启动时检查使用情况并明确指定设备。保留完整的 smoke、导出、回放、恢复、训练与最终评估流程、不可变源码副本，以及已核对账号的 W&B 在线记录和本地产物。当前服务器已有源码，历史 checkpoint 仍在旧文件系统。

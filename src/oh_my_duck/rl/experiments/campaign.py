@@ -14,6 +14,7 @@ import subprocess
 import sys
 import threading
 from oh_my_duck.core.paths import project_root
+from oh_my_duck.infrastructure.tracking import settings
 
 
 SB3_OPTIONS = {
@@ -86,7 +87,7 @@ def assigned_devices(visible, count, runs_per_gpu=1):
 def worker_environment(device, group):
     environment = {k: v for k, v in os.environ.items() if k not in (
         'RANK', 'LOCAL_RANK', 'WORLD_SIZE', 'LOCAL_WORLD_SIZE', 'MASTER_ADDR', 'MASTER_PORT')}
-    environment.update(CUDA_VISIBLE_DEVICES=device, WANDB_MODE='offline',
+    environment.update(CUDA_VISIBLE_DEVICES=device, WANDB_MODE=settings()['mode'],
                        WANDB_RUN_GROUP=group, PYTHONUNBUFFERED='1',
                        OMP_NUM_THREADS='4', OPENBLAS_NUM_THREADS='1')
     return environment

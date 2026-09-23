@@ -1,12 +1,12 @@
 """RL framework selection independent of physics; safe to import without ML packages."""
 from dataclasses import dataclass, replace
-import json
 import os
 from pathlib import Path
 from typing import Callable, Sequence
 from oh_my_duck.rl.training.base import BackendCommand
 from oh_my_duck.rl.training.isaac_newton import is_diagnostic, require_task
 from oh_my_duck.rl.training.registry import BackendUnavailable, default_registry
+from oh_my_duck.infrastructure.tracking import settings
 
 CommandFactory = Callable[[str, Path, str, Sequence[str]], BackendCommand]
 
@@ -53,7 +53,7 @@ def _rsl_rl(backend, root, operation, arguments):
     # Preserve the official backend-specific RSL-RL launch/export integrations.
     arguments = list(arguments)
     if operation == "train":
-        defaults = json.loads((root / "configs/training.json").read_text())["logger"]
+        defaults = settings(root)
         options = {a.split("=", 1)[0] for a in arguments}
         logger_key, project_key = (("--agent.logger", "--agent.wandb-project") if backend == "mujoco" or not is_diagnostic(arguments)
                                    else ("--logger", "--log_project_name"))
@@ -77,7 +77,8 @@ def _sb3(backend, root, operation, arguments):
             raise BackendUnavailable(f'Run python omd.py setup --backend {backend} --rl-framework sb3 first')
         extras = ['--backend', backend] if operation == 'train' else []
         environment = {'PYTHONPATH': str(root/'src'), 'OMD_PROJECT_ROOT': str(root),
-                       'MUJOCO_GL': 'egl', 'MPLBACKEND': 'Agg', 'PYTHONUNBUFFERED': '1', 'WANDB_MODE': 'offline'}
+                       'MUJOCO_GL': 'egl', 'MPLBACKEND': 'Agg', 'PYTHONUNBUFFERED': '1',
+                       'WANDB_MODE': settings(root)['mode']}
         return BackendCommand((str(interpreter), '-m', ('oh_my_duck.rl.learners.sb3.train' if operation == 'train'
             else 'oh_my_duck.rl.artifacts.sb3_export'), *arguments, *extras), root, environment)
     command = default_registry().get(backend, root).command(operation, arguments)

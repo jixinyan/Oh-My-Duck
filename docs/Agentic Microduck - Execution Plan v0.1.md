@@ -11,7 +11,7 @@ tags:
   - sim-to-real
 ---
 
-> 2026-09-23：当前执行主机为 `jd_B300`，用户授权直接使用空闲 GPU。Linux x86_64 的 CUDA 13 训练环境与实际 GPU 检查通过；MuJoCo SB3 Walking 官方课程等待使用新源码启动，Newton RSL-RL StandUp 的 seed 42、43 等待 Isaac 资产准备。各组计划执行完整预算和最终评估。macOS 与 Linux 分别通过同组 55 项 CPU 测试。语音服务、仿真技能执行与 sensor tools 可以独立推进。见 [当前状态与完成条件](reports/project-status-2026-09-23.md)。下方保留历史验证记录。
+> 2026-09-23：当前执行主机为 `jd_B300`，用户授权直接使用空闲 GPU。Linux x86_64 的 CUDA 13 训练环境与实际 GPU 检查通过，W&B 在线账号和项目已验证；MuJoCo SB3 Walking 官方课程等待新源码启动。Isaac 资产环境已安装，Newton RSL-RL StandUp 的 seed 42、43 等待资产转换和检查。各组配置包含完整预算和最终评估，当前尚未进入完整预算。macOS 与 Linux 分别通过同组 55 项 CPU 测试。语音服务、仿真技能执行与 sensor tools 可以独立推进。见 [当前状态与完成条件](reports/project-status-2026-09-23.md)。下方保留历史验证记录。
 
 > 2026-09-21 验证进度：逐阶段 Walking 评分、训练前检查复用范围、SB3 指定目录恢复与预算检查已完成，53 项 CPU 测试通过。后续 Microduck 验收使用评分版本 3，历史策略需要使用保存的轨迹或重新执行评估进行评分。见 [验证记录](reports/project-review-2026-09-21.md)。
 

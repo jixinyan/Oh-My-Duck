@@ -1,6 +1,6 @@
 # Implementation status
 
-> 2026-09-23：已连接 `jd_B300`，Linux x86_64 训练环境使用 CUDA 13 构建。MuJoCo 正式环境通过实际 GPU 上的 TorchScript quaternion、MuJoCo 物理及 EGL 图像检查；macOS 和 Linux 分别通过同组 55 项 CPU 测试。Walking 的 CUDA 13 新运行等待启动，Newton StandUp 等待 Isaac 资产安装和转换。完整行为验收、语音与仿真执行实现仍待完成。GitHub 开放 Issues 和 Pull Requests 均为 0。见 [当前状态与未完成工作](reports/project-status-2026-09-23.md)。下方保留历史验证记录。
+> 2026-09-23：已连接 `jd_B300`，Linux x86_64 训练环境使用 CUDA 13 构建。MuJoCo 正式环境通过实际 GPU 上的 TorchScript quaternion、MuJoCo 物理及 EGL 图像检查；macOS 和 Linux 分别通过同组 55 项 CPU 测试。W&B 当前账号和项目已完成在线验证，新源码的 Walking 运行等待启动；Isaac 资产环境已安装，Newton StandUp 等待资产转换和检查。完整预算与行为验收尚未完成，语音与仿真执行仍待实现。GitHub 开放 Issues 和 Pull Requests 均为 0。见 [当前状态与未完成工作](reports/project-status-2026-09-23.md)。下方保留历史验证记录。
 
 > 2026-09-21 CPU 验证：Walking 使用逐阶段评分版本 3；训练前检查复用覆盖完整源码、配置及依赖声明；SB3 按指定目录恢复并核对训练预算。53 项 CPU 测试通过，包括实际 Git 操作和原生 PPO 保存、加载、继续训练。Microduck GPU 仿真和历史策略重新评分尚未执行。见 [验证记录](reports/project-review-2026-09-21.md)。
 

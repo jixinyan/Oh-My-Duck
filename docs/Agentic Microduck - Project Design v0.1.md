@@ -13,7 +13,7 @@ tags:
   - project-design
 ---
 
-> 2026-09-23：用户授权通过 SSH 使用 `jd_B300` 的空闲 GPU。Linux x86_64 的 CUDA 13 训练环境通过实际 GPU 检查，macOS 与 Linux 分别通过同组 55 项 CPU 测试；Walking 等待使用新源码启动，两组 Newton StandUp 等待 Isaac 资产准备。项目范围保持语音、机器人 tools、仿真执行、训练与经验记录；外部 Harness 负责通用 agent loop 和长期记忆。见 [当前状态](reports/project-status-2026-09-23.md)。下方保留历史验证记录。
+> 2026-09-23：用户授权通过 SSH 使用 `jd_B300` 的空闲 GPU。Linux x86_64 的 CUDA 13 训练环境通过实际 GPU 检查，macOS 与 Linux 分别通过同组 55 项 CPU 测试；W&B 在线账号和项目已验证，Walking 等待新源码启动。Isaac 资产环境已安装，两组 Newton StandUp 等待资产转换和检查。项目范围保持语音、机器人 tools、仿真执行、训练与经验记录；外部 Harness 负责通用 agent loop 和长期记忆。见 [当前状态](reports/project-status-2026-09-23.md)。下方保留历史验证记录。
 
 > 2026-09-21 验收与恢复：Walking 采用逐阶段评分版本 3；检查复用覆盖完整源码和配置；SB3 使用指定 checkpoint 目录并核对训练预算。53 项 CPU 测试通过，Microduck GPU 仿真和历史策略重新评分尚未执行。见 [验证记录](reports/project-review-2026-09-21.md)。
 

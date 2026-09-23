@@ -12,7 +12,7 @@
   "logger": {
     "project": "oh-my-duck",
     "entity": null,
-    "mode": "offline"
+    "mode": "online"
   },
   "parallelism": {
     "rsl-rl": "native_distributed_ppo",

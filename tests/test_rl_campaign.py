@@ -1,7 +1,11 @@
 import os
+import json
+import subprocess
+import sys
 import unittest
 from unittest.mock import patch
 from oh_my_duck.rl.experiments.campaign import assigned_devices, worker_environment
+from oh_my_duck.infrastructure.tracking import settings
 
 
 class CampaignIsolation(unittest.TestCase):
@@ -12,12 +16,18 @@ class CampaignIsolation(unittest.TestCase):
         for devices,count in [('0',2),('0,0',2),('GPU-uuid',1)]:
             with self.assertRaises(ValueError):assigned_devices(devices,count)
 
-    def test_workers_do_not_inherit_distributed_rank_or_online_logging(self):
-        with patch.dict(os.environ, {'WORLD_SIZE':'8','RANK':'7','LOCAL_RANK':'7','WANDB_MODE':'online'}):
-            env=worker_environment('3','test')
+    def test_worker_logging_uses_project_mode(self):
+        env=worker_environment('3','test')
         self.assertEqual(env['CUDA_VISIBLE_DEVICES'],'3')
-        self.assertEqual(env['WANDB_MODE'],'offline')
+        self.assertEqual(env['WANDB_MODE'],settings()['mode'])
         for key in ('WORLD_SIZE','RANK','LOCAL_RANK'):self.assertNotIn(key,env)
+        command = [sys.executable, '-c',
+                   'import json; from oh_my_duck.rl.experiments.campaign import worker_environment; print(json.dumps(worker_environment("3", "test")))']
+        result = subprocess.run(command, env={**os.environ, 'WANDB_MODE':'offline',
+            'WORLD_SIZE':'8', 'RANK':'7', 'LOCAL_RANK':'7'}, check=True, capture_output=True, text=True)
+        selected = json.loads(result.stdout)
+        self.assertEqual(selected['WANDB_MODE'], 'offline')
+        for key in ('WORLD_SIZE','RANK','LOCAL_RANK'):self.assertNotIn(key,selected)
 
     def test_gpu_sharing_requires_explicit_capacity(self):
         self.assertEqual(assigned_devices('7', 6, runs_per_gpu=6), ['7'] * 6)

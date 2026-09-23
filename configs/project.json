@@ -42,7 +42,7 @@
     "training": {
       "module": "oh_my_duck.rl.training",
       "state": "pipeline_verified_partial_behavior_causal_debugging",
-      "role": "Independent simulation-backend and RL-framework selection, offline training and evaluation"
+      "role": "Independent simulation-backend and RL-framework selection, configured W&B training and evaluation"
     },
     "perception": {
       "module": "oh_my_duck.perception",
@@ -118,7 +118,7 @@
       "gpu_model_reported": "NVIDIA H20G",
       "gpu_count": 8,
       "compute_capability": "10.3",
-      "state": "cuda13_training_environments_validated_isaac_asset_environment_pending",
+      "state": "cuda13_training_environments_validated_isaac_asset_environment_installed",
       "cuda_warp_mujoco_probe": "passed_on_gpu_6_with_torchscript_quaternion_and_rgb_readback",
       "headless_rendering": "egl_and_osmesa_passed",
       "historical_checkpoints_migrated": false,
@@ -183,7 +183,7 @@
   },
   "rl_framework_registry": "oh_my_duck.rl.training.frameworks:default_framework_registry",
   "rl_acceptance": {
-    "state": "partial_behavior_acceptance_jd_cuda13_runtime_validated",
+    "state": "partial_behavior_acceptance_jd_online_restart_pending",
     "latest_cpu_validation": {
       "date": "2026-09-23",
       "passed": 55,
@@ -732,7 +732,7 @@
     },
     "current_iteration": {
       "date": "2026-09-23",
-      "state": "cuda13_runtime_validated_training_restart_pending_newton_assets_pending",
+      "state": "online_restart_pending_newton_asset_conversion_pending",
       "host": "jd_B300",
       "config": "configs/experiments/jd-reproduction-20260923.json",
       "report": "docs/reports/project-status-2026-09-23.md",
@@ -744,7 +744,8 @@
       "checkpoint_interval_updates": 1000,
       "full_training_runs_launched": 0,
       "allocated_gpus": [],
-      "wandb_mode": "offline"
+      "wandb_mode": "online",
+      "wandb_online_validation_url": "https://wandb.ai/jixinyan831-northwestern-university/oh-my-duck/runs/cxxhmj25"
     },
     "walking_iteration_20260913": {
       "date": "2026-09-13",
