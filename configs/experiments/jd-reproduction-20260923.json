@@ -1,0 +1,45 @@
+{
+  "schema_version": 1,
+  "description": "jd_B300 训练计划：MuJoCo SB3 Walking 官方课程完成 50000 次更新；Newton RSL StandUp 使用 seed 42 和 43，各完成 15000 次更新。每个组合执行启动、导出、CPU 回放、恢复和容量检查，随后完整训练及最终评估。",
+  "checkpoint_interval": 1000,
+  "smoke_iterations": 5,
+  "record_previews": true,
+  "unforced_evaluation": true,
+  "runs": [
+    {
+      "id": "mujoco-sb3-walking-official",
+      "backend": "mujoco",
+      "framework": "sb3",
+      "task": "Mjlab-Velocity-Flat-MicroDuck",
+      "experiment": "velocity",
+      "num_envs": 8192,
+      "iterations": 50000,
+      "seed": 42,
+      "action_rate_delay_iterations": 0,
+      "learning_rate": 0.0001,
+      "learning_rate_mode": "adaptive",
+      "critic_observations": "official",
+      "initial_episode_phase": "randomized"
+    },
+    {
+      "id": "isaac-newton-rsl-rl-standup-seed42",
+      "backend": "isaac-newton",
+      "framework": "rsl-rl",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "experiment": "microduck_stand",
+      "num_envs": 8192,
+      "iterations": 15000,
+      "seed": 42
+    },
+    {
+      "id": "isaac-newton-rsl-rl-standup-seed43",
+      "backend": "isaac-newton",
+      "framework": "rsl-rl",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "experiment": "microduck_stand",
+      "num_envs": 8192,
+      "iterations": 15000,
+      "seed": 43
+    }
+  ]
+}
