@@ -82,7 +82,7 @@
   "execution": {
     "hardware_available": false,
     "harness": "external_with_planned_mock",
-    "server_jobs": "Alaya HTrain available for multi-GPU; local eight-GPU campaign authorized 2026-09-08",
+    "server_jobs": "Direct independent GPU learners on jd_B300 authorized 2026-09-23; explicit idle-device allocation",
     "headless": true,
     "video": "offscreen_1280x720",
     "single_gpu": "direct_development_host",
@@ -111,7 +111,17 @@
         "llm_polling": false
       }
     },
-    "local_rl_gpu_policy": "explicit_idle_gpu_allocation_authorized_2026_09_08",
+    "local_rl_gpu_policy": "explicit_idle_gpu_allocation_on_jd_B300_authorized_2026_09_23",
+    "current_host": {
+      "ssh": "jd_B300",
+      "repository": "/mnt/data/users/jixin/workspace/code/Oh-My-Duck",
+      "gpu_model_reported": "NVIDIA H20G",
+      "gpu_count": 8,
+      "compute_capability": "10.3",
+      "state": "locked_environment_installation_in_progress",
+      "historical_checkpoints_migrated": false,
+      "report": "docs/reports/project-status-2026-09-23.md"
+    },
     "local_rl_gpus": {
       "walking": 7,
       "standup": {
@@ -127,6 +137,7 @@
       "historical_allocation": true
     },
     "environment_selection": {
+      "historical_snapshot": true,
       "state": "training_paused_by_user",
       "config": "configs/experiments/representative-8192.json",
       "module": "oh_my_duck.rl.experiments.throughput",
@@ -170,7 +181,14 @@
   },
   "rl_framework_registry": "oh_my_duck.rl.training.frameworks:default_framework_registry",
   "rl_acceptance": {
-    "state": "walking_campaign_scheduler_suspended_partial_acceptance",
+    "state": "partial_behavior_acceptance_jd_host_setup_in_progress",
+    "latest_cpu_validation": {
+      "date": "2026-09-23",
+      "passed": 55,
+      "platform": "macOS",
+      "scope": "evaluation_preparation_resume_progress_motion_protocol_and_source_entry",
+      "report": "docs/reports/project-status-2026-09-23.md"
+    },
     "evaluation_and_resume_validation": {
       "date": "2026-09-21",
       "walking_scoring_version": 3,
@@ -711,6 +729,22 @@
       "historical_snapshot": true
     },
     "current_iteration": {
+      "date": "2026-09-23",
+      "state": "environment_installation_training_not_started",
+      "host": "jd_B300",
+      "config": "configs/experiments/jd-reproduction-20260923.json",
+      "report": "docs/reports/project-status-2026-09-23.md",
+      "independent_learners": 3,
+      "num_envs_per_learner": 8192,
+      "walking_iterations": 50000,
+      "stand_up_iterations": 15000,
+      "stand_up_training_seeds": [42, 43],
+      "checkpoint_interval_updates": 1000,
+      "full_training_runs_launched": 0,
+      "allocated_gpus": [],
+      "wandb_mode": "offline"
+    },
+    "walking_iteration_20260913": {
       "date": "2026-09-13",
       "state": "scheduler_task_missing_local_artifacts_preserved",
       "config": "configs/experiments/walking-smoothing-delay.json",

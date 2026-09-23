@@ -6,7 +6,7 @@
 
 [![Status: active development](https://img.shields.io/badge/status-active_development-blue)](docs/implementation-status.md)
 [![RL acceptance: partial](https://img.shields.io/badge/RL_acceptance-partial-orange)](docs/implementation-status.md)
-[![Recorded CPU checks: 53 passed on 2026-09-21](https://img.shields.io/badge/recorded_CPU_checks-53_passed-2ea44f)](docs/reports/project-review-2026-09-21.md)
+[![Recorded CPU checks: 55 passed on 2026-09-23](https://img.shields.io/badge/recorded_CPU_checks-55_passed-2ea44f)](docs/reports/project-status-2026-09-23.md)
 [![Voice: interfaces only](https://img.shields.io/badge/voice-interfaces_only-lightgrey)](docs/implementation-status.md)
 [![Hardware validation: pending](https://img.shields.io/badge/hardware_validation-pending-orange)](docs/implementation-status.md)
 
@@ -55,7 +55,7 @@ Representative RL tasks are flat-ground Walking and StandUp. Task recipes, MDP f
 
 Task families have separate environment and PPO configurations under `rl/tasks/<family>/`; see the [RL source map](src/oh_my_duck/rl/README.md). [Training campaigns](docs/rl-campaigns.md) assign independent task/framework runs to GPUs, with explicit sharing and checkpoint recovery when needed.
 
-Training and evaluation run headlessly. `omd preview` creates checkpoint videos and a local gallery for visual inspection alongside numerical metrics. Single-GPU development, validation and training run directly on the host; multi-GPU experiments use submitted jobs. W&B records runs offline.
+Training and evaluation run headlessly. `omd preview` creates checkpoint videos and a local gallery for visual inspection alongside numerical metrics. The current training host is `jd_B300`, where explicitly assigned idle GPUs can run independent learners directly. W&B records runs offline. See the [current status and open work](docs/reports/project-status-2026-09-23.md).
 
 ## A voice and history that persist
 

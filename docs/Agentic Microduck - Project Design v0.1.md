@@ -4,7 +4,7 @@ title: Agentic Microduck — 项目概览与详细设计
 version: 0.2
 status: Implementation in progress
 created: 2026-09-05
-updated: 2026-09-21
+updated: 2026-09-23
 tags:
   - microduck
   - embodied-ai
@@ -12,6 +12,8 @@ tags:
   - sim-to-real
   - project-design
 ---
+
+> 2026-09-23：用户授权通过 SSH 使用 `jd_B300` 的空闲 GPU。三组完整训练配置已准备，55 项 CPU 测试通过；新主机环境正在安装，训练尚未启动。项目范围保持语音、机器人 tools、仿真执行、训练与经验记录；外部 Harness 负责通用 agent loop 和长期记忆。见 [当前状态](reports/project-status-2026-09-23.md)。下方保留历史验证记录。
 
 > 2026-09-21 验收与恢复：Walking 采用逐阶段评分版本 3；检查复用覆盖完整源码和配置；SB3 使用指定 checkpoint 目录并核对训练预算。53 项 CPU 测试通过，Microduck GPU 仿真和历史策略重新评分尚未执行。见 [验证记录](reports/project-review-2026-09-21.md)。
 

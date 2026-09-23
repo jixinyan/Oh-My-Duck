@@ -1,5 +1,7 @@
 # Implementation status
 
+> 2026-09-23：已连接 `jd_B300`，用户授权直接使用空闲 GPU 训练。三组完整训练配置通过 CLI dry-run，55 项 CPU 测试通过。新主机的依赖安装正在进行，训练尚未启动。Walking 完整验收、StandUp 多个 seed 的稳定性、语音与仿真执行实现仍待完成。GitHub 开放 Issues 和 Pull Requests 均为 0。见 [当前状态与未完成工作](reports/project-status-2026-09-23.md)。下方保留历史验证记录。
+
 > 2026-09-21 CPU 验证：Walking 使用逐阶段评分版本 3；训练前检查复用覆盖完整源码、配置及依赖声明；SB3 按指定目录恢复并核对训练预算。53 项 CPU 测试通过，包括实际 Git 操作和原生 PPO 保存、加载、继续训练。Microduck GPU 仿真和历史策略重新评分尚未执行。见 [验证记录](reports/project-review-2026-09-21.md)。
 
 > 2026-09-21 服务器迁移：按用户最终决定，仅迁移 Git 管理的源码、配置、锁文件与文档，合入并推送 main；checkpoint、normalizer、日志、视频、离线 W&B 和本地环境不上传。完整数据归档已取消，原训练产物保留在旧文件系统。原 Walking job 已不在调度 API 中，不自动恢复；既有策略结论保留为历史证据，不代表重新训练必然复现。见 [迁移交接与恢复说明](server-migration-2026-09-21.md)。
