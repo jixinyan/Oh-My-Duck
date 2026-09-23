@@ -12,7 +12,7 @@ Walking 逐阶段评分版本 3、完整训练输入检查和 SB3 指定目录�
 |---|---|---|---|
 | P1 | Walking 行为验收 | 历史 231 份周期预览没有完整通过；MuJoCo SB3 官方课程具有相对稳定的前进响应 | 使用版本 3 完成前进、转向、停止、无推扰诊断、跨后端与 CPU/BAM 验证 |
 | P1 | StandUp 稳定性 | Newton RSL 最终策略在两个原生后端 seed 42 通过四种姿态；CPU/BAM 完整测试为 14/17 seed | 使用多个训练 seed 和评估 seed 验证，重点检查 face_down |
-| P1 | 新服务器训练环境 | CUDA 13 训练环境与 MuJoCo GPU 检查通过；W&B 在线账号和项目已验证；Isaac 资产环境已安装；旧训练产物未迁入 | 完成资产转换、训练导出、恢复和回放检查，并执行完整预算 |
+| P1 | 新服务器训练环境 | CUDA 13 训练环境与 MuJoCo GPU 检查通过；W&B 在线账号和项目已验证；Isaac 资产环境已安装；后台流程等待空闲 GPU | 完成资产转换、训练导出、恢复和回放检查，并执行完整预算 |
 | P2 | SB3 StandUp 与 Newton SB3 Walking | 历史起身停留在部分姿态成功，行走前进响应不足 | 根据无推扰轨迹和奖励记录定位原因，验证训练改动的效果 |
 | P2 | 仿真执行接口 | `RobotBackend`、`SkillRunner` 为 Protocol；`ToolCatalog` 已有实现 | 在仿真中执行速度命令、查询状态、取消任务并确认停止 |
 | P2 | 语音交互 | ASR、TTS、音色设计和音色保存已有接口定义 | 接入实际模型，实现录音、转写、音色确认与持久保存、合成与播放取消 |
@@ -47,6 +47,6 @@ Walking 逐阶段评分版本 3、完整训练输入检查和 SB3 指定目录�
 
 OSMesa、libglapi、LLVM 15、libdrm 与 GLVND 已安装到项目的忽略目录。GPU 6 上的正式 MuJoCo 环境通过 TorchScript quaternion 连续十次调用、Warp、MuJoCo 物理状态及 EGL 图像检查；图像读取使用零初始化缓冲区，并检查形状、数值和非空像素。证据为 `outputs/validation-20260923/mujoco-cu130-target-probe-03` 和 `mujoco-cu130-base-probe-04`。原生 RSL 与导出模块已成功导入；实际 policy 导出仍需训练 worker 完成对应阶段。Microduck 训练与视频检查仍待运行。大型 wheel 使用锁文件地址和 SHA-256 校验；安装尝试各自保留日志。
 
-新的 Walking 完整流程等待从更新后的不可变源码启动。旧服务器的 checkpoint、normalizer、日志和视频尚未迁入；本次训练从头开始。此前运行产物保持在独立目录，当前没有 Walking worker 占用 GPU。
+当前其他项目在全部八张 GPU 上有计算进程。后台等待流程 PID `304059` 每次重新查询计算进程与显存，取得空闲设备后启动新的 Walking 完整流程。等待日志为 `outputs/setup-20260923/resource-wait-online-05.log`，新运行使用独立目录 `outputs/experiments/jd-reproduction-20260923-04`；每次启动记录会写入 `outputs/launches/jd-reproduction-20260923-04/`。当前没有本项目训练 worker，完整预算尚未开始。旧服务器的 checkpoint、normalizer、日志和视频尚未迁入；本次训练从头开始。已停止的运行产物保留在各自目录。
 
-两组 Newton StandUp 的资产环境安装已完成，`artifacts/environments/isaac-assets/setup.json` 记录为 `installed_not_worker_validated`。新的后台流程将刷新环境记录，转换并验证 `walk`、`groundcontact` 资产，再分别检查并指定不同的空闲 GPU 启动两个 worker。转换或启动检查失败时，该流程会停止并保留日志。Newton learner 尚未启动；两个训练 seed 的结果仍需结合多个评估 seed 检查稳健性。
+两组 Newton StandUp 的资产环境安装已完成，`artifacts/environments/isaac-assets/setup.json` 记录为 `installed_not_worker_validated`。同一后台流程在 Walking 启动后等待另一张空闲 GPU，转换并验证 `walk`、`groundcontact` 资产；随后等待两张不同的空闲 GPU，分别启动两个 worker。转换、检查或启动失败时，流程记录错误并终止，不自动重试训练。Newton learner 尚未启动；两个训练 seed 的结果仍需结合多个评估 seed 检查稳健性。
