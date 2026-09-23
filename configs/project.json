@@ -744,8 +744,8 @@
       "checkpoint_interval_updates": 1000,
       "full_training_runs_launched": 0,
       "allocated_gpus": [],
-      "resource_wait_pid": 304059,
-      "resource_wait_log": "outputs/setup-20260923/resource-wait-online-05.log",
+      "resource_wait_pid": 307456,
+      "resource_wait_log": "outputs/setup-20260923/resource-wait-online-06.log",
       "wandb_mode": "online",
       "wandb_online_validation_url": "https://wandb.ai/jixinyan831-northwestern-university/oh-my-duck/runs/cxxhmj25"
     },
