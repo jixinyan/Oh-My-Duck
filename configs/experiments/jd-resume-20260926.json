@@ -1,0 +1,66 @@
+{
+  "schema_version": 1,
+  "description": "从 2026-09-24 保存的完整原生 checkpoint 接续三组训练，保留各自总更新预算和独立产物。",
+  "checkpoint_interval": 1000,
+  "smoke_iterations": 5,
+  "record_previews": true,
+  "unforced_evaluation": true,
+  "runs": [
+    {
+      "id": "mujoco-sb3-walking-official",
+      "backend": "mujoco",
+      "framework": "sb3",
+      "task": "Mjlab-Velocity-Flat-MicroDuck",
+      "experiment": "velocity",
+      "num_envs": 8192,
+      "iterations": 50000,
+      "seed": 42,
+      "action_rate_delay_iterations": 0,
+      "learning_rate": 0.0001,
+      "learning_rate_mode": "adaptive",
+      "critic_observations": "official",
+      "initial_episode_phase": "randomized",
+      "resume": {
+        "run": "/mnt/data/users/jixin/workspace/code/Oh-My-Duck/outputs/experiments/jd-reproduction-20260923-04/mujoco-sb3-walking-official/full/checkpoints/step_001179648000",
+        "checkpoint": "model.zip",
+        "checkpoint_sha256": "588ac75930b2bb1318ce8c7c5613c49e925d457b576adf6ce0535ff5f518c2de",
+        "completed_iterations": 6000,
+        "source_campaign": "/mnt/data/users/jixin/workspace/code/Oh-My-Duck/outputs/experiments/jd-reproduction-20260923-04"
+      }
+    },
+    {
+      "id": "isaac-newton-rsl-rl-standup-seed42",
+      "backend": "isaac-newton",
+      "framework": "rsl-rl",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "experiment": "microduck_stand",
+      "num_envs": 8192,
+      "iterations": 15000,
+      "seed": 42,
+      "resume": {
+        "run": "/mnt/data/users/jixin/workspace/code/Oh-My-Duck/logs/rsl_rl/microduck_stand/2026-09-24_04-06-44_jd-reproduction-20260923-04-0bed8e2426a9_isaac-newton-rsl-rl-standup-seed42_full",
+        "checkpoint": "model_5000.pt",
+        "checkpoint_sha256": "e5c8cea40a8d5876cf5418b1018213d72a522697fc739625b4a041f7d16a46e0",
+        "completed_iterations": 5001,
+        "source_campaign": "/mnt/data/users/jixin/workspace/code/Oh-My-Duck/outputs/experiments/jd-reproduction-20260923-04"
+      }
+    },
+    {
+      "id": "isaac-newton-rsl-rl-standup-seed43",
+      "backend": "isaac-newton",
+      "framework": "rsl-rl",
+      "task": "Mjlab-StandUp-Flat-MicroDuck",
+      "experiment": "microduck_stand",
+      "num_envs": 8192,
+      "iterations": 15000,
+      "seed": 43,
+      "resume": {
+        "run": "/mnt/data/users/jixin/workspace/code/Oh-My-Duck/logs/rsl_rl/microduck_stand/2026-09-24_04-06-44_jd-reproduction-20260923-04-0bed8e2426a9_isaac-newton-rsl-rl-standup-seed43_full",
+        "checkpoint": "model_5000.pt",
+        "checkpoint_sha256": "aced02d2dee2b1ce1ada89974238d5621d0e80b3b71c416f67d594e6c92203d2",
+        "completed_iterations": 5001,
+        "source_campaign": "/mnt/data/users/jixin/workspace/code/Oh-My-Duck/outputs/experiments/jd-reproduction-20260923-04"
+      }
+    }
+  ]
+}

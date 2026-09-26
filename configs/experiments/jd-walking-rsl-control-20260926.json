@@ -1,0 +1,21 @@
+{
+  "schema_version": 1,
+  "description": "MuJoCo RSL-RL Flat Walking 原生官方配置对照；seed 42，8192 环境，完整 50000 次更新。",
+  "checkpoint_interval": 1000,
+  "smoke_iterations": 5,
+  "record_previews": true,
+  "unforced_evaluation": true,
+  "runs": [
+    {
+      "id": "mujoco-rsl-rl-walking-official-seed42",
+      "backend": "mujoco",
+      "framework": "rsl-rl",
+      "task": "Mjlab-Velocity-Flat-MicroDuck",
+      "experiment": "velocity",
+      "num_envs": 8192,
+      "iterations": 50000,
+      "seed": 42,
+      "action_rate_delay_iterations": 0
+    }
+  ]
+}
