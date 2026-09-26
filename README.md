@@ -55,7 +55,7 @@ Representative RL tasks are flat-ground Walking and StandUp. Task recipes, MDP f
 
 Task families have separate environment and PPO configurations under `rl/tasks/<family>/`; see the [RL source map](src/oh_my_duck/rl/README.md). [Training campaigns](docs/rl-campaigns.md) assign independent task/framework runs to GPUs, with explicit sharing and checkpoint recovery when needed.
 
-Training and evaluation run headlessly. `omd preview` creates checkpoint videos and a local gallery for visual inspection alongside numerical metrics. The current training host is `jd_B300`, where explicitly assigned idle GPUs can run independent learners directly. W&B records training online under the verified project account and keeps local run artifacts. See the [current status and open work](docs/reports/project-status-2026-09-23.md).
+Training and evaluation run headlessly. `omd preview` creates checkpoint videos and a local gallery for visual inspection alongside numerical metrics. The current training host is `jd_B300`, where explicitly assigned idle GPUs can run independent learners directly. W&B records training online under the verified project account and keeps local run artifacts. Three September 23 learners stopped before their full budgets; saved checkpoints were evaluated and preserved. A native MuJoCo/RSL Walking control is running, while the two Newton StandUp continuations await exact progress verification. See the [training diagnosis](docs/reports/rl-jd-interrupted-2026-09-26.md) and [implementation status](docs/implementation-status.md).
 
 ## A voice and history that persist
 

@@ -1,33 +1,11 @@
 {
   "schema_version": 1,
-  "description": "从 2026-09-24 保存的完整原生 checkpoint 接续三组训练，保留各自总更新预算和独立产物。",
+  "description": "从 2026-09-24 保存的完整原生 checkpoint 接续 Newton StandUp 两组训练，保留各自 15000 次总更新预算和独立产物。",
   "checkpoint_interval": 1000,
   "smoke_iterations": 5,
   "record_previews": true,
   "unforced_evaluation": true,
   "runs": [
-    {
-      "id": "mujoco-sb3-walking-official",
-      "backend": "mujoco",
-      "framework": "sb3",
-      "task": "Mjlab-Velocity-Flat-MicroDuck",
-      "experiment": "velocity",
-      "num_envs": 8192,
-      "iterations": 50000,
-      "seed": 42,
-      "action_rate_delay_iterations": 0,
-      "learning_rate": 0.0001,
-      "learning_rate_mode": "adaptive",
-      "critic_observations": "official",
-      "initial_episode_phase": "randomized",
-      "resume": {
-        "run": "/mnt/data/users/jixin/workspace/code/Oh-My-Duck/outputs/experiments/jd-reproduction-20260923-04/mujoco-sb3-walking-official/full/checkpoints/step_001179648000",
-        "checkpoint": "model.zip",
-        "checkpoint_sha256": "588ac75930b2bb1318ce8c7c5613c49e925d457b576adf6ce0535ff5f518c2de",
-        "completed_iterations": 6000,
-        "source_campaign": "/mnt/data/users/jixin/workspace/code/Oh-My-Duck/outputs/experiments/jd-reproduction-20260923-04"
-      }
-    },
     {
       "id": "isaac-newton-rsl-rl-standup-seed42",
       "backend": "isaac-newton",

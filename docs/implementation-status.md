@@ -1,5 +1,7 @@
 # Implementation status
 
+> 2026-09-26 RL 状态：`jd_B300` 上的三组正式训练在完成预算前同时中断，原始 checkpoint 和日志均已保存；退出代码 247 的原因尚未确认。Walking SB3 保存于第 6000 次更新，原生 MuJoCo 无推扰评估完成 700 步，但前进与转向响应未通过评分；该策略目前保留。Newton RSL StandUp 两个 checkpoint 各已完成 5001 次真实更新，原生 Newton 无推扰评估在单一 seed 下均为 2/4 姿态。新的 MuJoCo/RSL Walking 官方配置对照已在 GPU6 启动完整流程，两组 StandUp 将在原生恢复计数检查通过后接续训练。已检查的 TensorBoard 标量均为有限值，现有训练奖励不能代替行为验收。详见 [中断训练诊断](reports/rl-jd-interrupted-2026-09-26.md) 与 [官方实现核对](reports/rl-official-comparison-2026-09-26.md)。
+
 > 2026-09-23：`jd_B300` 的 CUDA 13 正式环境通过实际 GPU 检查，macOS 和 Linux 分别通过同组 55 项 CPU 测试。Isaac 资产转换通过，三组训练均完成启动检查、导出、恢复与容量检查，并已进入完整预算：Walking 使用 GPU 6，Newton StandUp 的 seed 42、43 分别使用 GPU 2、1。三组在线 W&B 记录已开始并出现正常更新；短训练回放行为未达标（返回码 2），最终行为验收需要完整训练与评估。语音与仿真执行仍待实现。GitHub 开放 Issues 和 Pull Requests 均为 0。见 [当前状态与未完成工作](reports/project-status-2026-09-23.md)。下方保留历史验证记录。
 
 > 2026-09-21 CPU 验证：Walking 使用逐阶段评分版本 3；训练前检查复用覆盖完整源码、配置及依赖声明；SB3 按指定目录恢复并核对训练预算。53 项 CPU 测试通过，包括实际 Git 操作和原生 PPO 保存、加载、继续训练。Microduck GPU 仿真和历史策略重新评分尚未执行。见 [验证记录](reports/project-review-2026-09-21.md)。
