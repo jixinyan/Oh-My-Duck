@@ -4,12 +4,14 @@ title: Agentic Microduck — 分步执行计划
 version: 0.2
 status: In progress
 created: 2026-09-06
-updated: 2026-09-23
+updated: 2026-09-26
 tags:
   - microduck
   - implementation-plan
   - sim-to-real
 ---
+
+> 2026-09-26 RL 执行状态：`jd_B300` 原三组完整训练在预算前中断，原生 checkpoint、日志与来源记录已保留；退出代码 247 的原因尚未确认。MuJoCo/RSL-RL Walking 官方配置对照已在 GPU 6 进入 50000 次更新的完整训练。Newton/RSL-RL StandUp 的两个原生 checkpoint 各已完成 5001 次更新，恢复代码经过真实 Newton 连续两次恢复及训练状态检查；两组正式恢复已在 GPU 2、1 进入完整接续训练，日志确认从第 5001 次更新继续，并连续运行至标签 5005。下一项验收依据完整训练后的 Walking 指令响应、StandUp 多姿态与跨后端/CPU 行为评估；当前奖励趋势和短程恢复检查均不能代替最终行为结果。见 [中断训练诊断](reports/rl-jd-interrupted-2026-09-26.md) 与 [官方实现核对及恢复验证](reports/rl-official-comparison-2026-09-26.md)。下方保留历史记录。
 
 > 2026-09-23：当前执行主机为 `jd_B300`。Linux x86_64 的 CUDA 13 训练环境与实际 GPU 检查通过，W&B 在线账号和项目已验证，Isaac 资产环境与两种 Newton 资产转换完成。Walking 在 GPU 6、Newton StandUp 的 seed 42 和 43 分别在 GPU 2、1 通过启动、导出、恢复及容量检查，三组完整训练预算均已启动并出现正常更新。短训练回放行为未达标（返回码 2），最终行为验收仍需完整训练后的评估。macOS 与 Linux 分别通过同组 55 项 CPU 测试。语音服务、仿真技能执行与 sensor tools 可以独立推进。见 [当前状态与完成条件](reports/project-status-2026-09-23.md)。下方保留历史验证记录。
 
@@ -305,6 +307,8 @@ tags:
 
 ### 第 11 步：加入显式录音和语音转文字
 
+2026-09-26：本地 WAV 文件通过 Qwen3-ASR-0.6B 在目标 GPU 转写，官方中文录音结果与示例文本一致。麦克风采集、录音提交和外部 Harness 文本链路尚未接入；见[语音验收记录](reports/voice-validation-2026-09-26.md)。
+
 **依赖**：第 10 步的文本链路；第 01 步确认的推理资源。
 
 工作内容：
@@ -320,6 +324,8 @@ tags:
 **通过条件**：录音提交“向前走”，沿用第 10 步的控制路径执行；无需另建语音专用 agent loop。
 
 ### 第 12 步：加入音色设置与固定声音播报
+
+2026-09-26：VoiceDesign 候选、显式确认、SQLite 版本保存及两个独立进程复用活动版本完成真实 GPU 验证。两段 Base 合成 WAV 的文字经 ASR 回读检查。试听与扬声器播报仍需设备接入；见[语音验收记录](reports/voice-validation-2026-09-26.md)。
 
 **依赖**：第 10 步的回复文本；与第 11 步使用相同主机资源清单。
 

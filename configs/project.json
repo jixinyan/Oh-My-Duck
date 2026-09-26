@@ -31,8 +31,8 @@
     },
     "voice": {
       "module": "oh_my_duck.voice",
-      "state": "interface_only",
-      "role": "ASR, voice profile, TTS and audio interfaces"
+      "state": "file_asr_tts_and_voice_profile_gpu_verified",
+      "role": "WAV transcription, Qwen voice design, confirmed voice profiles and WAV synthesis; microphone and playback pending"
     },
     "recording": {
       "module": "oh_my_duck.experience",
@@ -41,7 +41,7 @@
     },
     "training": {
       "module": "oh_my_duck.rl.training",
-      "state": "pipeline_verified_partial_behavior_causal_debugging",
+      "state": "pipeline_verified_walking_and_standup_full_running_behavior_pending",
       "role": "Independent simulation-backend and RL-framework selection, configured W&B training and evaluation"
     },
     "perception": {
@@ -118,11 +118,11 @@
       "gpu_model_reported": "NVIDIA H20G",
       "gpu_count": 8,
       "compute_capability": "10.3",
-      "state": "cuda13_three_full_budgets_running",
+      "state": "cuda13_walking_and_standup_full_running",
       "cuda_warp_mujoco_probe": "passed_on_gpu_6_with_torchscript_quaternion_and_rgb_readback",
       "headless_rendering": "egl_and_osmesa_passed",
       "historical_checkpoints_migrated": false,
-      "report": "docs/reports/project-status-2026-09-23.md"
+      "report": "docs/reports/rl-jd-interrupted-2026-09-26.md"
     },
     "local_rl_gpus": {
       "walking": 7,
@@ -183,7 +183,23 @@
   },
   "rl_framework_registry": "oh_my_duck.rl.training.frameworks:default_framework_registry",
   "rl_acceptance": {
-    "state": "partial_behavior_acceptance_jd_full_training_running",
+    "state": "walking_and_standup_full_running_behavior_pending",
+    "active_iteration_20260926": {
+      "host": "jd_B300",
+      "previous_training": "three_full_runs_interrupted_before_budget_exit_247_cause_unconfirmed",
+      "walking": "mujoco_rsl_rl_official_configuration_full_50000_updates_running_gpu6",
+      "walking_source_commit": "4253ee7",
+      "walking_wandb_run": "4uezg0gj",
+      "stand_up": "newton_rsl_rl_seed42_seed43_native_resume_full_running_from_label_5001",
+      "stand_up_first_verified_labels": [5001, 5002, 5003, 5004, 5005],
+      "stand_up_wandb_runs": {"seed42": "ghcs61i8", "seed43": "xwhqqk1j"},
+      "stand_up_completed_updates_per_seed": 5001,
+      "stand_up_remaining_updates_per_seed": 9999,
+      "stand_up_resume_source_commit": "eb8eb0ec5cbae6bb4b297dd271cd92373aa83555",
+      "behavior_acceptance": "pending_full_training_and_final_evaluation",
+      "comparison_report": "docs/reports/rl-official-comparison-2026-09-26.md",
+      "interrupted_training_report": "docs/reports/rl-jd-interrupted-2026-09-26.md"
+    },
     "latest_cpu_validation": {
       "date": "2026-09-23",
       "passed": 55,
@@ -730,7 +746,7 @@
       },
       "historical_snapshot": true
     },
-    "current_iteration": {
+    "previous_iteration_20260923": {
       "date": "2026-09-23",
       "state": "three_full_budgets_running_final_evaluation_pending",
       "host": "jd_B300",

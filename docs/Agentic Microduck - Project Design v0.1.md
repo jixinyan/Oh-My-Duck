@@ -4,7 +4,7 @@ title: Agentic Microduck — 项目概览与详细设计
 version: 0.2
 status: Implementation in progress
 created: 2026-09-05
-updated: 2026-09-23
+updated: 2026-09-26
 tags:
   - microduck
   - embodied-ai
@@ -12,6 +12,8 @@ tags:
   - sim-to-real
   - project-design
 ---
+
+> 2026-09-26 RL 进度：`jd_B300` 上 9 月 23 日启动的三组训练在完整预算前中断，checkpoint 与日志均已保存，退出代码 247 的原因尚未确认。MuJoCo/RSL-RL Walking 官方配置对照已在 GPU 6 进入 50000 次更新的完整训练；Newton/RSL-RL StandUp 的 seed 42、43 均保存了已完成 5001 次更新的原生 checkpoint，恢复计数修复已通过真实 Newton 连续两次恢复验证。两组正式恢复已分别在 GPU 2、1 进入完整接续训练，日志确认从第 5001 次更新继续，且已连续运行至标签 5005。官方固定源码与当前 Flat 任务配置、直接引用的 MDP 函数和 BAM 已完成核查，现有证据尚未确认训练行为差异的单一原因。Walking 与 StandUp 的最终行为验收仍待完整训练和评估。见 [中断训练诊断](reports/rl-jd-interrupted-2026-09-26.md) 与 [官方实现核对](reports/rl-official-comparison-2026-09-26.md)。下方保留历史记录。
 
 > 2026-09-23：用户授权通过 SSH 使用 `jd_B300` 的空闲 GPU。Linux x86_64 的 CUDA 13 训练环境通过实际 GPU 检查，macOS 与 Linux 分别通过同组 55 项 CPU 测试；W&B 在线账号和项目已验证，Isaac 资产转换通过。Walking 在 GPU 6、Newton StandUp 的 seed 42 和 43 分别在 GPU 2、1 进入完整训练预算并出现正常更新，最终行为验收仍待完成。项目范围保持语音、机器人 tools、仿真执行、训练与经验记录；外部 Harness 负责通用 agent loop 和长期记忆。见 [当前状态](reports/project-status-2026-09-23.md)。下方保留历史验证记录。
 
@@ -278,7 +280,7 @@ flowchart LR
 | 声音设计 | `Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign` | setup 或用户修改音色时 |
 | 日常合成 | `Qwen/Qwen3-TTS-12Hz-0.6B-Base` | 根据已确认的参考音频与参考文本合成 |
 
-以上名称是候选模型标识，不是本项目已测性能结果。Qwen 官方提供声音设计后通过参考音频复用的流程；实际声音一致性、语言表现和推理资源需要验收。[S08][S09]
+上述三个 Qwen 模型已在 `jd_B300` 的 GPU 5 完成文件推理验收：官方中文录音转写、VoiceDesign 候选生成、显式确认，以及两个独立进程使用同一活动音色版本合成中文语音。两段合成语音的 ASR 回读确认了文字内容；模型 commit、耗时、显存和音频文件见[语音验收记录](reports/voice-validation-2026-09-26.md)。声音相似度的人工试听、麦克风录制和播放设备仍需验证。[S08][S09]
 
 0.6B Base 的核心用途是参考声音复用。日常语气 / 情绪的自由控制能力不作为该配置的已保证特性，也不依赖每次重新设计声音。后续若需更强表达控制，再比较相应模型与接口。
 
