@@ -65,15 +65,29 @@ def run_train(task_id, cfg, log_dir):
         runner = binding.runner.resolve()(native_env, agent_cfg, str(log_dir), device)
         runner.add_git_repo_to_log(__file__)
         resume = None
+        resume_progress = None
         if cfg.agent.resume:
+            import yaml
+            from oh_my_duck.rl.learners.rsl_rl.progress import checkpoint_progress
             resume = get_checkpoint_path(log_dir.parent, cfg.agent.load_run, cfg.agent.load_checkpoint)
             previous = json.loads((Path(resume).parent/'run.json').read_text())
             validate_resume(previous,task=task_id,backend=cfg.backend,framework='rsl-rl')
             validate_intervention_resume(previous, intervention)
             if previous.get('provenance',{}).get('upstream',provenance['upstream']) != provenance['upstream']:
                 raise ValueError('Resume upstream pins differ')
+            saved_agent = yaml.full_load((Path(resume).parent/'params/agent.yaml').read_text())
+            if saved_agent['num_steps_per_env'] != cfg.agent.num_steps_per_env:
+                raise ValueError('Resume rollout length differs from the saved native agent')
             print(f'[INFO] Loading native checkpoint {resume}', flush=True)
-            runner.load(str(resume))
+            infos = runner.load(str(resume))
+            resume_progress = checkpoint_progress(
+                runner.current_learning_iteration,
+                infos['env_state']['common_step_counter'],
+                cfg.agent.num_steps_per_env,
+            )
+            if env.common_step_counter != resume_progress['common_step_counter']:
+                raise ValueError('Native runner did not restore the saved environment step counter')
+            runner.current_learning_iteration = resume_progress['next_iteration_label']
         before = runner.current_learning_iteration
         if rank == 0:
             # Native RSL checkpoints already include curriculum state. Retain
@@ -83,20 +97,28 @@ def run_train(task_id, cfg, log_dir):
                 'task': task_id, 'backend': cfg.backend, 'framework': 'rsl-rl',
                 'status': 'running', 'iteration_before': before,
                 'num_envs_per_rank': cfg.env.scene.num_envs,
+                'num_steps_per_env': cfg.agent.num_steps_per_env,
                 'world_size': int(os.environ.get('WORLD_SIZE', 1)),
                 'provenance': provenance, 'behavior': 'unvalidated', 'training_intervention': intervention,
+                'resume_progress': resume_progress,
             }, indent=2) + '\n')
         runner.learn(num_learning_iterations=cfg.agent.max_iterations, init_at_random_ep_len=True)
+        expected_steps = (before + cfg.agent.max_iterations) * cfg.agent.num_steps_per_env
+        if env.common_step_counter != expected_steps:
+            raise ValueError(f'Native environment progress differs: {env.common_step_counter} != {expected_steps}')
         if rank == 0:
             import subprocess
             (log_dir / 'run.json').write_text(json.dumps({
                 'task': task_id, 'backend': cfg.backend, 'framework': 'rsl-rl',
                 'num_envs_per_rank': cfg.env.scene.num_envs,
+                'num_steps_per_env': cfg.agent.num_steps_per_env,
                 'world_size': int(os.environ.get('WORLD_SIZE', 1)),
                 'iteration_before': before, 'iteration_after': runner.current_learning_iteration,
+                'completed_iterations_after': env.common_step_counter // cfg.agent.num_steps_per_env,
                 'resume': str(resume) if resume else None, 'wandb_mode': settings()['mode'],
                 'project_commit': subprocess.check_output(['git','rev-parse','HEAD'], cwd=ROOT, text=True).strip(),
-                'behavior': 'unvalidated', 'provenance':provenance, 'training_intervention': intervention, 'wall_time_s':time.monotonic()-started}, indent=2)+'\n')
+                'behavior': 'unvalidated', 'provenance':provenance, 'training_intervention': intervention,
+                'resume_progress': resume_progress, 'wall_time_s':time.monotonic()-started}, indent=2)+'\n')
     finally:
         env.close()
         if rank == 0:

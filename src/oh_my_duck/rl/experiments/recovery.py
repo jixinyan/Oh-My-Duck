@@ -43,16 +43,18 @@ def validate_checkpoint(spec, root):
             raise ValueError('Checkpoint is not on a complete rollout boundary')
         completed = steps // block
     else:
-        # Read our own native checkpoint in the locked torch environment, keeping
-        # the CLI itself free of simulator/learner imports.
-        completed = int(subprocess.check_output([
-            str(root / '.envs/mujoco/bin/python'), '-c',
-            'import sys,torch; print(torch.load(sys.argv[1],map_location="cpu",weights_only=False)["iter"])',
-            str(checkpoint)], text=True).strip())
+        progress = json.loads(subprocess.check_output([
+            str(root / '.envs/mujoco/bin/python'),
+            '-m', 'oh_my_duck.rl.learners.rsl_rl.progress',
+            '--checkpoint', str(checkpoint),
+            '--agent-config', str(run / 'params/agent.yaml'),
+        ], text=True))
+        completed = progress['completed_iterations']
     if completed != recovery['completed_iterations']:
         raise ValueError('Declared progress differs from native checkpoint')
     remaining = spec['iterations'] - completed
     if remaining <= 0:
         raise ValueError('No training budget remains')
     return {**recovery, 'remaining_iterations': remaining,
+            'native_progress': progress if spec['framework'] == 'rsl-rl' else None,
             'state_restoration': 'native optimizer, normalizer and curriculum; fresh simulator episodes'}
