@@ -7,7 +7,7 @@
 [![Status: active development](https://img.shields.io/badge/status-active_development-blue)](docs/implementation-status.md)
 [![RL acceptance: partial](https://img.shields.io/badge/RL_acceptance-partial-orange)](docs/implementation-status.md)
 [![Recorded CPU checks: 55 passed on 2026-09-23](https://img.shields.io/badge/recorded_CPU_checks-55_passed-2ea44f)](docs/reports/project-status-2026-09-23.md)
-[![Voice: interfaces only](https://img.shields.io/badge/voice-interfaces_only-lightgrey)](docs/implementation-status.md)
+[![Voice: file inference verified](https://img.shields.io/badge/voice-file_inference_verified-green)](docs/reports/voice-validation-2026-09-26.md)
 [![Hardware validation: pending](https://img.shields.io/badge/hardware_validation-pending-orange)](docs/implementation-status.md)
 
 **An interactive, extensible Microduck—with a persistent voice, shared experiences, and skills you can train.**
@@ -55,13 +55,13 @@ Representative RL tasks are flat-ground Walking and StandUp. Task recipes, MDP f
 
 Task families have separate environment and PPO configurations under `rl/tasks/<family>/`; see the [RL source map](src/oh_my_duck/rl/README.md). [Training campaigns](docs/rl-campaigns.md) assign independent task/framework runs to GPUs, with explicit sharing and checkpoint recovery when needed.
 
-Training and evaluation run headlessly. `omd preview` creates checkpoint videos and a local gallery for visual inspection alongside numerical metrics. The current training host is `jd_B300`, where explicitly assigned idle GPUs can run independent learners directly. W&B records training online under the verified project account and keeps local run artifacts. Three September 23 learners stopped before their full budgets; saved checkpoints were evaluated and preserved. A native MuJoCo/RSL Walking control is running, while the two Newton StandUp continuations await exact progress verification. See the [training diagnosis](docs/reports/rl-jd-interrupted-2026-09-26.md) and [implementation status](docs/implementation-status.md).
+Training and evaluation run headlessly. `omd preview` creates checkpoint videos and a local gallery for visual inspection alongside numerical metrics. The current training host is `jd_B300`, where explicitly assigned idle GPUs can run independent learners directly. W&B records training online under the verified project account and keeps local run artifacts. Three September 23 learners stopped before their full budgets; saved checkpoints were evaluated and preserved. A native MuJoCo/RSL Walking control and two Newton StandUp checkpoint continuations are running; the Walking SB3 checkpoint remains available for diagnosis. See the [training diagnosis](docs/reports/rl-jd-interrupted-2026-09-26.md) and [implementation status](docs/implementation-status.md).
 
 ## A voice and history that persist
 
 Voice setup is a deliberate choice: **describe → generate → listen → confirm → save**. Daily TTS uses the active voice profile; restarting or switching execution backends does not silently choose a new voice.
 
-The initial voice design uses Qwen3 ASR and TTS candidates, with voice design performed on demand and reference-voice synthesis used for daily responses. Model choice remains replaceable and must be validated on the target host.
+Qwen3 ASR, VoiceDesign and Base TTS have been verified on the target GPU with WAV files. The command-line flow generates a candidate, saves it after explicit confirmation, and reuses the same voice profile across processes. Microphone recording, playback control and Harness integration remain open. See [voice usage](docs/voice-profiles.md) and [GPU validation](docs/reports/voice-validation-2026-09-26.md).
 
 Episodes preserve what was heard, observed, requested, executed and spoken—including cancellation and partial playback. Simulation and real-world experiences remain labeled separately. The external harness decides how to summarize and retrieve this evidence.
 
@@ -94,7 +94,7 @@ src/oh_my_duck/
 ├── agentic/         external Harness, tools, skills and application assembly
 ├── robotics/        robot models, motors, execution and policy interfaces
 ├── perception/      perception interfaces
-├── voice/           audio and voice interfaces
+├── voice/           Qwen file inference and persistent voice profiles
 ├── experience/      episode records
 ├── core/            shared contracts
 ├── infrastructure/  environments, jobs and tracking
@@ -102,7 +102,7 @@ src/oh_my_duck/
 ```
 
 
-The public development entry point is `python omd.py --help`. Backend dependencies are isolated. Voice, tools and hardware packages will be added as those milestones are implemented.
+The public development entry point is `python omd.py --help`. Voice file inference runs through `python -m oh_my_duck.cli.voice` in the isolated ASR and TTS environments. Backend dependencies remain isolated.
 
 ## Upstream
 

@@ -13,6 +13,7 @@ dependencies = []
 
 [project.optional-dependencies]
 rl = ["mjlab==1.3.0", "better-actuator-models", "scipy>=1.16", "onnxruntime>=1.24.4", "huggingface_hub>=0.27.0"]
+voice = ["soundfile>=0.13.1"]
 
 [project.scripts]
 omd = "oh_my_duck.cli:main"

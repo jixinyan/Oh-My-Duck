@@ -45,7 +45,7 @@ rl/artifacts/                normalized export and schema-2 packaging
 rl/evaluation/               audits, metrics and deployment rehearsal
 rl/experiments/              independent per-GPU training campaigns
 perception/                  active perception interfaces
-voice/                       audio, ASR, TTS and persistent voice interfaces
+voice/                       Qwen WAV inference and persistent voice profiles
 experience/                  episode recording and replay contracts
 infrastructure/              scheduler, environment setup and offline tracking
 ```
@@ -91,7 +91,7 @@ Current contracts are Python interface proposals, not a frozen external wire pro
 
 ## Current framework limits
 
-The interfaces are intentional scaffolding. They do not claim implemented sensor acquisition, cancellation, TTS, real-robot transport, autonomous behavior. Isaac/Newton representative training has separate smoke evidence in the implementation status. Tool handlers must validate their declared schemas; automatic JSON Schema validation is not yet implemented. The JSONL recorder supports a single process with threads, not cross-process locking or a database durability contract.
+Qwen WAV transcription, voice design, confirmed voice storage and WAV synthesis have GPU validation. Microphone capture, playback interruption, sensor acquisition, real-robot transport and autonomous behavior remain unavailable. Isaac/Newton representative training has separate evidence in the implementation status. Tool handlers must validate their declared schemas; automatic JSON Schema validation is not yet implemented. The JSONL recorder supports a single process with threads, without cross-process locking or a database durability guarantee.
 
 `configs/project.json` and `omd status` describe **software maturity**, not live robot capability discovery. Keep future device-specific discovery separate.
 

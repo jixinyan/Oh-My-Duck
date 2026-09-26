@@ -1268,8 +1268,9 @@ requires-dist = [
     { name = "mjlab", marker = "extra == 'rl'", specifier = "==1.3.0" },
     { name = "onnxruntime", marker = "extra == 'rl'", specifier = ">=1.24.4" },
     { name = "scipy", marker = "extra == 'rl'", specifier = ">=1.16" },
+    { name = "soundfile", marker = "extra == 'voice'", specifier = ">=0.13.1" },
 ]
-provides-extras = ["rl"]
+provides-extras = ["rl", "voice"]
 
 [[package]]
 name = "oh-my-duck-mujoco-frameworks"

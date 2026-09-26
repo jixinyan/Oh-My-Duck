@@ -1,6 +1,6 @@
 # Implementation status
 
-> 2026-09-26 RL 状态：`jd_B300` 上的三组正式训练在完成预算前同时中断，原始 checkpoint 和日志均已保存；退出代码 247 的原因尚未确认。Walking SB3 保存于第 6000 次更新，原生 MuJoCo 无推扰评估完成 700 步，但前进与转向响应未通过评分；该策略目前保留。Newton RSL StandUp 两个 checkpoint 各已完成 5001 次真实更新，原生 Newton 无推扰评估在单一 seed 下均为 2/4 姿态。新的 MuJoCo/RSL Walking 官方配置对照已在 GPU6 启动完整流程，两组 StandUp 将在原生恢复计数检查通过后接续训练。已检查的 TensorBoard 标量均为有限值，现有训练奖励不能代替行为验收。详见 [中断训练诊断](reports/rl-jd-interrupted-2026-09-26.md) 与 [官方实现核对](reports/rl-official-comparison-2026-09-26.md)。
+> 2026-09-26 RL 状态：`jd_B300` 上的三组正式训练在完成预算前同时中断，原始 checkpoint 和日志均已保存；退出代码 247 的原因尚未确认。Walking SB3 保存于第 6000 次更新，原生 MuJoCo 无推扰评估完成 700 步，但前进与转向响应未通过评分；该策略目前保留。Newton RSL StandUp 两个 checkpoint 各已完成 5001 次真实更新，原生 Newton 无推扰评估在单一 seed 下均为 2/4 姿态。新的 MuJoCo/RSL Walking 官方配置对照已在 GPU6 进行完整训练；原生恢复计数修复通过真实 checkpoint 连续恢复验证，两组 Newton StandUp 已在 GPU2/GPU1 接续剩余 9999 次更新，训练日志均连续记录第 5001 至 5005 次更新。独立预览流程用真实 StandUp checkpoint 生成四份视频。已检查的 TensorBoard 标量均为有限值，现有训练奖励不能代替行为验收。详见 [中断训练诊断](reports/rl-jd-interrupted-2026-09-26.md) 与 [官方实现核对](reports/rl-official-comparison-2026-09-26.md)。
 
 > 2026-09-23：`jd_B300` 的 CUDA 13 正式环境通过实际 GPU 检查，macOS 和 Linux 分别通过同组 55 项 CPU 测试。Isaac 资产转换通过，三组训练均完成启动检查、导出、恢复与容量检查，并已进入完整预算：Walking 使用 GPU 6，Newton StandUp 的 seed 42、43 分别使用 GPU 2、1。三组在线 W&B 记录已开始并出现正常更新；短训练回放行为未达标（返回码 2），最终行为验收需要完整训练与评估。语音与仿真执行仍待实现。GitHub 开放 Issues 和 Pull Requests 均为 0。见 [当前状态与未完成工作](reports/project-status-2026-09-23.md)。下方保留历史验证记录。
 
@@ -157,7 +157,8 @@ is prepared but not launched. Default task recipes and native PPO algorithms rem
 | CLI/application | Unified entry point and explicit service composition |
 | Core contracts/tool catalog/recording | Tested contracts, tool registry and JSONL event storage |
 | Agentic Harness, skills, robot execution | Interfaces; deterministic external-Harness mock remains future work |
-| Perception, voice, policy adapters | Interfaces for future implementation; no runtime capability claim |
+| Perception and policy adapters | Interfaces for future implementation; no runtime capability claim |
+| Voice file inference | Qwen ASR, VoiceDesign, Base TTS and confirmed voice profiles verified on GPU 5 with real WAV files; microphone capture, playback control and Harness integration pending. See [validation](reports/voice-validation-2026-09-26.md) |
 | MuJoCo RL | Both representative tasks × both native PPO frameworks passed the single-GPU lifecycle and completed replay |
 | Isaac/Newton RL | Both representative tasks × both native PPO frameworks passed the single-GPU lifecycle and completed replay |
 | Newton physics | Actual solver, canonical state/sensors, precise collisions, BAM cadence, DR and penalties audited |
