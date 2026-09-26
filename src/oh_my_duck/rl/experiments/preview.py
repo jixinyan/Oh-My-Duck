@@ -14,9 +14,9 @@ from oh_my_duck.core.paths import project_root
 from .campaign import worker_environment
 
 
-def checkpoint_source(spec, campaign, root, minimum_updates=0):
+def checkpoint_source(spec, campaign, root, minimum_updates=0, run_output=None):
     """Prefer a completed periodic save; recoveries can preview their source save."""
-    result = campaign / spec['id'] / 'result.json'
+    result = (run_output if run_output is not None else campaign / spec['id']) / 'result.json'
     if result.exists():
         stage = json.loads(result.read_text()).get('stages', {}).get('full', {})
         command = stage.get('command', [])
@@ -72,7 +72,7 @@ Refresh to see newly completed previews. Behavior scores are separate from train
 
 
 @contextmanager
-def training_preview(root, output, spec, device, checkpoint_interval):
+def training_preview(root, output, spec, device, checkpoint_interval, poll_interval=60):
     """Follow one learner on its allocated GPU; finish with that training stage.
 
     The follower inherits the worker process group so scheduler cancellation
@@ -81,10 +81,16 @@ def training_preview(root, output, spec, device, checkpoint_interval):
     """
     stop_file = output / 'preview-training-finished'
     destination = output / 'previews'
+    campaign = output / 'preview-campaign'
+    campaign.mkdir(exist_ok=False)
+    (campaign / 'campaign.json').write_text(json.dumps({
+        'status': 'running', 'plan': {'runs': [spec]}, 'run_output': str(output.resolve()),
+    }, indent=2) + '\n')
     command = [sys.executable, str(root / 'omd.py'), 'preview',
-               '--campaign', str(output.parent), '--output', str(destination),
+               '--campaign', str(campaign), '--output', str(destination),
                '--run-id', spec['id'], '--gpu', str(device), '--watch',
-               '--minimum-updates', str(checkpoint_interval), '--stop-file', str(stop_file)]
+               '--minimum-updates', str(checkpoint_interval), '--stop-file', str(stop_file),
+               '--interval', str(poll_interval)]
     record = {'status': 'running', 'output': str(destination), 'command': command,
               'checkpoint_interval_updates': checkpoint_interval, 'gpu': device}
     with (output / 'preview.log').open('x') as stream:
@@ -131,13 +137,14 @@ def main():
             break
         manifest = json.loads((args.campaign / 'campaign.json').read_text())
         specs = manifest['plan']['runs']
+        run_output = Path(manifest['run_output']) if 'run_output' in manifest else None
         if args.run_id:
             known = {spec['id'] for spec in specs}
             if set(args.run_id) - known:
                 parser.error('Unknown run ID')
             specs = [spec for spec in specs if spec['id'] in args.run_id]
         for spec in specs:
-            source = checkpoint_source(spec, args.campaign, root, args.minimum_updates)
+            source = checkpoint_source(spec, args.campaign, root, args.minimum_updates, run_output)
             if source is None:
                 continue
             run, checkpoint = source
