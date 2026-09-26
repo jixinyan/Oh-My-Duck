@@ -26,10 +26,14 @@ Walking 在 MuJoCo、评估 seed 42 下完成 700 个控制步，标准推扰与
 
 StandUp 在原生 Newton、无推扰、评估 seed 42 下，两份 checkpoint 均完成四个姿态各 400 个控制步。站立和坐姿通过，俯卧和仰卧未通过。seed 42 的俯卧/仰卧末端倾斜分别为 0.6003/0.5981 rad；seed 43 对应 0.5881/1.1097 rad，仰卧末端高度为 0.0592 m。当前结果仅覆盖一个评估 seed 与训练中途 checkpoint。
 
-诊断的原始 `result.json`、轨迹、ONNX 与 TensorBoard 摘要位于服务器 `outputs/diagnostics/jd-interrupted-20260926`。Walking SB3 保留中途 checkpoint，新的原生 MuJoCo/RSL Walking 对照正在执行完整训练；两组 StandUp 计划在原生恢复计数核对完成后接续至 15000 次总更新预算。完整预算后的行为结论以最终评估为准。
+诊断的原始 `result.json`、轨迹、ONNX 与 TensorBoard 摘要位于服务器 `outputs/diagnostics/jd-interrupted-20260926`。Walking SB3 保留中途 checkpoint。新的原生 MuJoCo/RSL Walking 对照使用源码提交 `4253ee7901458b99903bb2bf7416ac727347b0f6`，已通过 64 环境启动、原生导出、真实恢复、8192 环境容量与导出检查，在 GPU6 执行 50000 次更新的完整训练。其 W&B online run ID 为 `4uezg0gj`，训练日志已记录初始更新，运行目录为 `outputs/experiments/jd-walking-rsl-control-20260926/mujoco-rsl-rl-walking-official-seed42`。
+
+原生 RSL 恢复计数修复包含在提交 `eb8eb0ec5cbae6bb4b297dd271cd92373aa83555`。历史重复标签 checkpoint 在真实 Newton GPU 训练中连续恢复两次：保存标签 4、已完成 6 次、计数 144；随后两次保存标签 6/7、已完成 7/8 次、计数 168/192，optimizer step 从 120 增至 140、160。两组正式 StandUp 使用此提交的独立源码副本、8192 环境和 `9999` 次剩余更新预算，分别在 GPU2（seed 42，PID 535324，W&B online run `ghcs61i8`）及 GPU1（seed 43，PID 535196，W&B online run `xwhqqk1j`）启动。各自 `result.json` 的恢复校验记录原始计数 120024、已完成 5001 次、下一编号 5001；两份 `full.log` 均连续记录从 5001 到 5005 的首批更新。运行中的新环境计数需要等待下一次原生 checkpoint 保存才能直接读取。运行目录为 `outputs/experiments/jd-resume-20260926`。完整预算后的行为结论以最终评估为准。
+
+修复后的独立预览命令已对 seed 42 的真实 `model_5000.pt` 完成 RSL 导出和 Newton 四姿态评估。`previews.json` 记录原始 checkpoint SHA-256、导出退出代码 0、行为评估退出代码 2。四份视频均为 1280×720、25 fps、8 秒，文件大小分别为站立 326002、坐姿 438154、俯卧 281624、仰卧 214806 字节；目录为服务器 `outputs/diagnostics/jd-interrupted-20260926/stand42-preview`。该预览检查视频生成流程，行为结果仍为 2/4。
 
 ## 官方资料与运行环境
 
 针对 `pollen-robotics/mjlab_microduck/441tzs6d` 与 `pollen-robotics/mjlab_microduck/69u48n8l` 的 W&B API 读取均返回 403，当前账号无法取得其配置或 checkpoint。已经核对的源码范围为 Flat Walking 直接引用的 22 项 MDP 函数及 StandUp 的 31 项同源函数；此前在真实 64 环境中完成 `set_random_ground_state` 的 15 种配置下 `qpos`、`qvel`、随机数状态对照，见 [官方基线审查](official-baseline-audit-2026-09-08.md)。该检查不说明整套 Newton 物理行为与官方实现相同。
 
-服务器系统 `libEGL.so.1.1.0` 文件大小为 0。项目已有的 `.cache/render-libs/osmesa/usr/lib/x86_64-linux-gnu/libEGL.so.1.1.0` 大小为 72352 字节。给 worker 指定该目录的 `LD_LIBRARY_PATH` 后，原生 `omd.py export` 成功完成同一 Walking checkpoint 的归一化导出检查。新训练的启动记录会保存该环境路径、GPU、源码提交、进程号与 cgroup 内存计数。
+服务器系统 `libEGL.so.1.1.0` 文件大小为 0。项目已有的 `.cache/render-libs/osmesa/usr/lib/x86_64-linux-gnu/libEGL.so.1.1.0` 大小为 72352 字节。给 worker 指定该目录的 `LD_LIBRARY_PATH` 后，原生 `omd.py export` 成功完成同一 Walking checkpoint 的归一化导出检查。三组新训练的 `outputs/launches` 启动记录保存该环境路径、GPU、源码提交、进程号、节点 boot ID 与 cgroup 内存计数。
