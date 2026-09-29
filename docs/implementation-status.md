@@ -2,6 +2,8 @@
 
 > 2026-09-30 Harness progress：已与 `origin/main` 对齐，并审读本地 Embodied-DeepSeek-Harness `main`（0.2.0 rc.2 review checkpoint）。本项目新增并验证确定性 Harness mock：显式文本路由、工具注册、请求幂等、工具参数 JSON Schema 子集校验、事件/experience 去重和取消边界均通过 3 个新测试。mock 不启动模型、planner、scheduler 或 memory；EDH 的真实 session/tool transport 尚未稳定，因此仍保持不可用。详见 [Harness 接入审查](reports/harness-integration-review-2026-09-30.md)。
 
+> 2026-09-30 官方上游复核：已抓取 `pollen-robotics/microduck_rl` `develop@cfe1c2a` 与 `pollen-robotics/microduck` `main@f0d934e`，并更新 `configs/upstream.json`。已迁移通用的粗糙地形 reset 原点修复，避免把局部高度写成世界高度导致机器人出生在地形内部；新增 CPU 回归覆盖非零 terrain origin。上游 protective-fall/VelStand 的其余语义变化保留为独立后续变体，不改变代表性 Walking/StandUp 基线。详见 [官方上游复核](reports/upstream-review-2026-09-30.md)。
+
 > 2026-09-30 策略优先状态：当前 jd_B300 产物已统一诊断。MuJoCo/RSL Walking 的 50000 次更新策略在无推扰前进命令 `0.1 m/s` 下仅约 `0.3%` 响应，转向可响应但整段行为未通过；Newton RSL StandUp 两个 15000 次更新策略均能站立/坐下，却在俯卧和仰卧恢复上失败。训练、导出、回放和视频产物保留，尚无可作为 locomotion tool 的策略包。下一步先做单因素因果修复并按完整门禁重新训练和验收；Harness 继续只保留接口与确定性 mock，不提前实现工具适配器。详见 [jd_B300 诊断](reports/rl-jd-interrupted-2026-09-26.md) 与 [Harness 接入审查](reports/harness-integration-review-2026-09-30.md)。
 
 > 2026-09-26 RL 状态：`jd_B300` 上的三组正式训练在完成预算前同时中断，原始 checkpoint 和日志均已保存；退出代码 247 的原因尚未确认。Walking SB3 保存于第 6000 次更新，原生 MuJoCo 无推扰评估完成 700 步，但前进与转向响应未通过评分；该策略目前保留。Newton RSL StandUp 两个 checkpoint 各已完成 5001 次真实更新，原生 Newton 无推扰评估在单一 seed 下均为 2/4 姿态。新的 MuJoCo/RSL Walking 官方配置对照已在 GPU6 进行完整训练；原生恢复计数修复通过真实 checkpoint 连续恢复验证，两组 Newton StandUp 已在 GPU2/GPU1 接续剩余 9999 次更新，训练日志均连续记录第 5001 至 5005 次更新。独立预览流程用真实 StandUp checkpoint 生成四份视频。已检查的 TensorBoard 标量均为有限值，现有训练奖励不能代替行为验收。详见 [中断训练诊断](reports/rl-jd-interrupted-2026-09-26.md) 与 [官方实现核对](reports/rl-official-comparison-2026-09-26.md)。

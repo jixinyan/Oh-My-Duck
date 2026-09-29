@@ -149,12 +149,13 @@ FALLEN_TIMEOUT_S = 8.0
 # started prone+econ together at 800 and prone recovery never bootstrapped.
 # Crouch slice alone starts at 800: near-upright states, tax-free until econ,
 # and it doubles as full-stand posture data (run 6 stood truly vertical).
+PRONE_SIDE_PROB = 0.5  # official fall review: side landings dominate pushed falls
 PRONE_RAMP_STAGES = [
-    {"step": 0,                        "params": {"prone_prob": 0.00, "face_down_prob": 1.0,  "crouch_prob": 0.00}},
-    {"step": 800 * NUM_STEPS_PER_ENV,  "params": {"prone_prob": 0.00, "face_down_prob": 1.0,  "crouch_prob": 0.15}},
-    {"step": 1500 * NUM_STEPS_PER_ENV, "params": {"prone_prob": 0.15, "face_down_prob": 0.80, "crouch_prob": 0.15}},
-    {"step": 2000 * NUM_STEPS_PER_ENV, "params": {"prone_prob": 0.30, "face_down_prob": 0.65, "crouch_prob": 0.15}},
-    {"step": 2500 * NUM_STEPS_PER_ENV, "params": {"prone_prob": 0.45, "face_down_prob": 0.50, "crouch_prob": 0.15}},
+    {"step": 0,                        "params": {"prone_prob": 0.00, "face_down_prob": 1.0,  "side_prob": PRONE_SIDE_PROB, "crouch_prob": 0.00}},
+    {"step": 800 * NUM_STEPS_PER_ENV,  "params": {"prone_prob": 0.00, "face_down_prob": 1.0,  "side_prob": PRONE_SIDE_PROB, "crouch_prob": 0.15}},
+    {"step": 1500 * NUM_STEPS_PER_ENV, "params": {"prone_prob": 0.15, "face_down_prob": 0.80, "side_prob": PRONE_SIDE_PROB, "crouch_prob": 0.15}},
+    {"step": 2000 * NUM_STEPS_PER_ENV, "params": {"prone_prob": 0.30, "face_down_prob": 0.65, "side_prob": PRONE_SIDE_PROB, "crouch_prob": 0.15}},
+    {"step": 2500 * NUM_STEPS_PER_ENV, "params": {"prone_prob": 0.45, "face_down_prob": 0.50, "side_prob": PRONE_SIDE_PROB, "crouch_prob": 0.15}},
 ]
 
 
@@ -295,6 +296,7 @@ def make_microduck_velstand_env_cfg(play: bool = False, rough: bool = False) -> 
         params={
             "prone_prob": 0.0,        # ramped by the prone_init_prob curriculum
             "face_down_prob": 1.0,
+            "side_prob": PRONE_SIDE_PROB,
             "prone_z_min": 0.05,
             "prone_z_max": 0.09,
             "crouch_prob": 0.0,       # ramped by the prone_init_prob curriculum

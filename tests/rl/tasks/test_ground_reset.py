@@ -21,10 +21,13 @@ class Robot:
     def write_joint_position_to_sim(self,position,env_ids):self.data.data.qpos[env_ids[:,None],self.indexing.joint_q_adr]=position
 
 
-def fixture(permutation):
+def fixture(permutation, origin_z=None):
     raw=SimpleNamespace(qpos=torch.ones(32,21),qvel=torch.ones(32,20))
     robot=Robot(raw,permutation)
-    return SimpleNamespace(device='cpu',sim=SimpleNamespace(data=raw),scene={'robot':robot})
+    scene={'robot':robot}
+    if origin_z is not None:
+        scene['terrain']=SimpleNamespace(env_origins=torch.as_tensor(origin_z).repeat(32, 1))
+    return SimpleNamespace(device='cpu',sim=SimpleNamespace(data=raw),scene=scene)
 
 
 def run_event(event,permutation):
@@ -53,3 +56,14 @@ def test_reset_fixture_uses_native_entity_interfaces():
         parameters = inspect.signature(getattr(Entity, name)).parameters
         assert 'env_ids' in parameters
         assert hasattr(Robot, name)
+
+
+def test_ground_reset_adds_terrain_origin_to_local_height():
+    env = fixture(torch.arange(14), origin_z=(0.0, 0.0, 0.21))
+    params = make_microduck_standup_env_cfg().events['set_ground_state'].params.copy()
+    params.update(face_down_prob=0.0, face_up_prob=0.0, sitting_prob=0.0,
+                  standing_prob=1.0, standing_z_min=0.11, standing_z_max=0.11)
+    torch.manual_seed(3)
+    set_random_ground_state(env, torch.tensor([2, 4]), **params)
+    assert torch.allclose(env.sim.data.qpos[[2, 4], 2], torch.tensor([0.32, 0.32]))
+    assert torch.all(env.sim.data.qpos[[0, 1, 3, 5], 2] == 1.0)

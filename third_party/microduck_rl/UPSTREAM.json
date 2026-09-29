@@ -1,8 +1,21 @@
 {
   "repository": "https://github.com/pollen-robotics/microduck_rl",
-  "commit": "29e887ecfbf5d37144759e5a9f8a176dfb83d547",
+  "commit": "cfe1c2adcceb55f6b6e369c888b31c6873175c55",
   "license": "Apache-2.0",
-  "role": "Historical baseline; these are owned editable source files, not a generated runtime cache.",
+  "role": "Pinned upstream reference; these are owned editable source files, not a generated runtime cache.",
+  "reviewed_at": "2026-09-30",
+  "upstream_latest": {
+    "microduck_rl": {
+      "branch": "develop",
+      "commit": "cfe1c2adcceb55f6b6e369c888b31c6873175c55",
+      "url": "https://github.com/pollen-robotics/microduck_rl"
+    },
+    "microduck": {
+      "branch": "main",
+      "commit": "f0d934e761a0bc96a6a7d1b5bc1260ce5a4120e5",
+      "url": "https://github.com/pollen-robotics/microduck"
+    }
+  },
   "changes": [
     "Python namespace migrated to omd_microduck",
     "Removed Hugging Face auto-submit import hook; project scheduler owns submission",
@@ -11,7 +24,8 @@
     "Native SB3 policy factory added for editable actor configuration",
     "Publishing provenance names jixinyan/Oh-My-Duck",
     "Selected upstream CPU regression tests migrated; CLI name changed to omd-publish",
-    "CPU rehearsal uses a project BAM extension to match FRICTION_DOF constraints by DOF id, correcting pinned BAM CPU joint-id indexing; motor and friction formulas and dependency pins are unchanged."
+    "CPU rehearsal uses a project BAM extension to match FRICTION_DOF constraints by DOF id, correcting pinned BAM CPU joint-id indexing; motor and friction formulas and dependency pins are unchanged.",
+    "Reviewed develop through cfe1c2a and main through f0d934e; migrated terrain-origin-relative reset poses into the owned event layer and retained the upstream all-collision/protective-fall work as an explicit future variant rather than changing representative Walking/StandUp semantics."
   ],
   "files": [
     {
