@@ -413,14 +413,15 @@ def body_upright_gaussian(
     creates a strong differential pull in the regime where the linear
     version is weakest.
 
-    Uses ``2*(qx² + qy²) = 1 - cos(tilt) ≈ tilt²/2`` as a tilt-squared
-    proxy and applies ``exp(-tilt²/std²)``. Default std=0.1 rad ≈ 5.7°.
+    Applies ``exp(-tilt²/std²)`` to the actual tilt angle. Default std=0.1 rad
+    ≈ 5.7°.
     """
     asset: Entity = env.scene[asset_cfg.name]
     quat = asset.data.root_link_quat_w
     qx = quat[:, 1]
     qy = quat[:, 2]
-    tilt_sq = 2.0 * (qx * qx + qy * qy)  # ≈ 1 − cos(tilt); small-angle: tilt²/2
+    cos_tilt = (1.0 - 2.0 * (qx * qx + qy * qy)).clamp(-1.0, 1.0)
+    tilt_sq = torch.square(torch.acos(cos_tilt))
     return torch.exp(-tilt_sq / (std * std))
 
 
@@ -443,7 +444,12 @@ def upright_gaussian_at_height(
     quat = asset.data.root_link_quat_w
     qx = quat[:, 1]
     qy = quat[:, 2]
-    tilt_sq = 2.0 * (qx * qx + qy * qy)
+    # Convert the quaternion to the actual tilt angle before applying the
+    # configured standard deviation.  The angle form keeps the reward scale
+    # faithful to the task configuration and avoids over-crediting a leaned
+    # fallen pose.
+    cos_tilt = (1.0 - 2.0 * (qx * qx + qy * qy)).clamp(-1.0, 1.0)
+    tilt_sq = torch.square(torch.acos(cos_tilt))
     upright_g = torch.exp(-tilt_sq / (std * std))
     z = torch.nan_to_num(
         asset.data.root_link_pos_w[:, 2] - env.scene.terrain.env_origins[:, 2], nan=0.0
@@ -532,7 +538,8 @@ def standing_composite_score(
     quat = asset.data.root_link_quat_w
     qx = quat[:, 1]
     qy = quat[:, 2]
-    tilt_sq = 2.0 * (qx * qx + qy * qy)
+    cos_tilt = (1.0 - 2.0 * (qx * qx + qy * qy)).clamp(-1.0, 1.0)
+    tilt_sq = torch.square(torch.acos(cos_tilt))
     upright_score = torch.exp(-tilt_sq / (upright_std * upright_std))
 
     target = _servo_default_joint_pos(env, asset).clone()
