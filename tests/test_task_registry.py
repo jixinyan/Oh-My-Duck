@@ -12,10 +12,16 @@ ROOT = Path(__file__).resolve().parents[1]
 class TaskRegistryTests(unittest.TestCase):
     def test_discovery_is_lightweight_and_reports_only_explicit_bindings(self):
         registry = project_tasks(ROOT)
-        self.assertEqual(len(registry.list()), 33)
+        self.assertEqual(len(registry.list()), 34)
         self.assertEqual([t.id for t in registry.list('isaac-newton')], ['Mjlab-StandUp-Flat-MicroDuck', 'Mjlab-Velocity-Flat-MicroDuck'])
         for name in ('mujoco', 'torch', 'warp', 'isaaclab'):
             self.assertNotIn(name, sys.modules)
+
+    def test_experimental_task_is_registered_without_becoming_representative(self):
+        task = project_tasks(ROOT).get("Mjlab-ProtectiveFall-Flat-MicroDuck")
+        self.assertFalse(task.representative)
+        self.assertEqual(task.maturity, "experimental_unvalidated")
+        self.assertEqual(tuple(task.bindings), ("mujoco",))
 
     def test_custom_task_id_is_not_tied_to_robot_name_or_dispatcher(self):
         registry = TaskRegistry()

@@ -1,10 +1,10 @@
 # RL 任务目录
 
-更新于 2026-09-12；依据本项目 `configs/tasks.json`，不是联网推断的官方
+更新于 2026-09-30；依据本项目 `configs/tasks.json`，不是联网推断的官方
 最新任务集合。框架使用固定官方版本，任务/MDP/机器人资产由本项目拥有。
 
-目前注册 **33 个任务入口、13 个任务家族**。默认配方可选择原生 RSL-RL
-或原生 SB3；注册和可构建不代表已经训练出有效策略。完整验收仍聚焦
+目前注册 **34 个任务入口、14 个任务家族**；其中 ProtectiveFall 是实验性、未验收入口。默认配方可选择原生 RSL-RL
+或原生 SB3；注册和可构建不代表已经训练出有效策略。ProtectiveFall 使用完整碰撞模型和保护奖励，只是配置接口，不能替代官方 VelStand 或代表性任务。完整验收仍聚焦
 Flat Walking 与 Flat StandUp。只有这两个入口目前绑定了 Newton 后端、
 专用行为评估协议和策略打包配置；其余入口当前绑定 MuJoCo，需要补齐各自
 的训练/导出/行为/CPU 演练验收，才能列为可交付能力。
@@ -13,6 +13,7 @@ Flat Walking 与 Flat StandUp。只有这两个入口目前绑定了 Newton 后�
 |---|---|---:|---|
 | 平地/粗糙地面速度跟踪 | `Mjlab-Velocity-Flat-MicroDuck` | 4 | isaac-newton, mujoco |
 | 站立姿态与速度控制 | `Mjlab-VelStand-Flat-MicroDuck` | 4 | mujoco |
+| 保护跌倒与恢复（实验性） | `Mjlab-ProtectiveFall-Flat-MicroDuck` | 1 | mujoco |
 | 从坐姿、俯卧、仰卧起身 | `Mjlab-StandUp-Flat-MicroDuck` | 4 | isaac-newton, mujoco |
 | 按命令坐下与站起 | `Mjlab-SitStand-Flat-MicroDuck` | 4 | mujoco |
 | 低头触地/拾取动作 | `Mjlab-GroundPick-Flat-MicroDuck` | 4 | mujoco |

@@ -1,5 +1,4 @@
 ---
-
 title: Agentic Microduck — 分步执行计划
 version: 0.2
 status: In progress
@@ -10,6 +9,8 @@ tags:
   - implementation-plan
   - sim-to-real
 ---
+
+> 2026-09-30 下一项配置迭代：保护跌倒变体已作为 `experimental_unvalidated` 入口接入任务注册，复用官方 VelStand 恢复层并叠加完整碰撞/伺服冲击保护。当前仅完成配置和 14-servo 编译回归，不启动训练；先完成代表性 Walking/StandUp 的因果修复与验收，再为该变体执行独立门禁。
 
 > 2026-09-30 执行顺序：先训练并验收有效的 Walking、StandUp 执行策略，再把通过验收的策略封装成上层 agent 可调用的 tool。当前 jd_B300 完整产物仍未通过行为验收，下一步是单因素因果修复和完整训练门禁；外部 Embodied-DeepSeek-Harness 仅保留语义接口与确定性 mock，真实 transport 和 agent loop 等待其项目稳定。
 
