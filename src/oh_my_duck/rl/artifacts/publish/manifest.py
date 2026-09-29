@@ -23,13 +23,19 @@ from typing import Any, Literal
 SCHEMA_VERSION = 2
 # `duck_ipc_proto`: the daemon refuses a policy whose manifest disagrees with these, and refuses
 # at load a network whose graph does. 61 = 48 proprioception + 13 command; 14 = the servos.
-MODEL_API = 1
+# API 1 is the existing feed-forward contract. API 2 adds the explicit-state
+# LSTM contract accepted by the current microduck daemon.
+MODEL_API = 2
 OBS_LEN = 61
 ACTION_LEN = 14
 ROBOT: dict[str, Any] = {"model": "microduck", "hw_rev": 1, "servos": "xl330", "control_hz": 50}
 
 # The one `.onnx` a repo carries. The daemon takes the sole `.onnx` in a repo and refuses several.
 POLICY_FILE = "policy.onnx"
+
+# A rollout video, if the repo carries one. The Hub's replay widget picks up a file of exactly
+# this name, so it is shown there and neither the manifest nor the README points at it.
+REPLAY_FILE = "replay.mp4"
 
 Kind = Literal["episodic", "perpetual"]
 KINDS: tuple[str, ...] = ("episodic", "perpetual")
@@ -102,6 +108,7 @@ def build_manifest(
     command_help: dict[str, Any] | None = None,
     training: dict[str, Any] | None = None,
     eval: dict[str, Any] | None = None,
+    model_api: int = 1,
 ) -> dict[str, Any]:
     """A single-policy manifest the daemon loads without surprises.
 
@@ -142,6 +149,8 @@ def build_manifest(
         raise ManifestError(f"action_scale {action_scale} is outside (0, 2]")
     if len(idle) != 3:
         raise ManifestError("idle is a 3-vector twist")
+    if model_api < 1 or model_api > MODEL_API:
+        raise ManifestError(f"model_api {model_api}: supported range is 1..{MODEL_API}")
 
     command: dict[str, Any] = {
         "encoding": "constant",
@@ -155,7 +164,7 @@ def build_manifest(
 
     manifest: dict[str, Any] = {
         "schema_version": SCHEMA_VERSION,
-        "model_api": MODEL_API,
+        "model_api": model_api,
         "obs_len": OBS_LEN,
         "action_len": ACTION_LEN,
         "robot": dict(ROBOT),
@@ -229,41 +238,129 @@ class OnnxShape:
     output_name: str
     obs_len: int
     action_len: int
+    recurrent: bool = False
+    state_shape: tuple[int, int, int] | None = None
+
+    @property
+    def model_api(self) -> int:
+        return 2 if self.recurrent else 1
 
 
 def inspect_onnx(path: Path) -> OnnxShape:
-    """The graph's single input and output widths, as the daemon checks them at load."""
+    """Inspect the feed-forward or explicit-state LSTM graph the daemon can load.
+
+    This mirrors the current ``duck-control`` loader: all tensors are float32,
+    the observation/action matrices have rank two and batch one (or symbolic
+    batch), and recurrent graphs have exactly the named three-input/three-output
+    contract with matching, bounded state tensors.
+    """
     import onnx
 
     model = onnx.load(str(path), load_external_data=False)
     graph = model.graph
     initializers = {i.name for i in graph.initializer}
     inputs = [i for i in graph.input if i.name not in initializers]
-    if len(inputs) != 1 or len(graph.output) != 1:
+    if (len(inputs), len(graph.output)) not in ((1, 1), (3, 3)):
         raise ManifestError(
-            f"{path.name}: expected one input and one output, found "
+            f"{path.name}: expected obs -> actions or explicit LSTM state contract, found "
             f"{[i.name for i in inputs]} -> {[o.name for o in graph.output]}"
         )
 
-    def last_dim(value) -> int:
-        dims = value.type.tensor_type.shape.dim
+    def tensor_shape(value, role: str) -> tuple[int, ...]:
+        tensor = value.type.tensor_type
+        if tensor.elem_type != onnx.TensorProto.FLOAT:
+            raise ManifestError(
+                f"{path.name}: {role} {value.name!r} must be float32, "
+                f"got element type {tensor.elem_type}"
+            )
+        if not tensor.HasField("shape"):
+            raise ManifestError(f"{path.name}: {role} {value.name!r} has no shape")
+        dims = tensor.shape.dim
         if not dims:
-            raise ManifestError(f"{path.name}: {value.name} has no shape")
-        last = dims[-1]
-        if not last.HasField("dim_value"):
-            raise ManifestError(f"{path.name}: {value.name}'s last dimension is symbolic")
-        return int(last.dim_value)
+            raise ManifestError(f"{path.name}: {role} {value.name!r} has no shape")
+        result: list[int] = []
+        for dim in dims:
+            if dim.HasField("dim_value"):
+                result.append(int(dim.dim_value))
+            elif dim.HasField("dim_param"):
+                result.append(-1)
+            else:
+                raise ManifestError(f"{path.name}: {role} {value.name!r} has an unknown dimension")
+        return tuple(result)
 
+    def matrix_shape(value, width: int, role: str) -> tuple[int, ...]:
+        shape = tensor_shape(value, role)
+        if len(shape) != 2 or shape[0] not in (1, -1) or shape[1] != width:
+            raise ManifestError(
+                f"{path.name}: {role} {value.name!r} must have shape [1 or dynamic, {width}], "
+                f"got {list(shape)}"
+            )
+        return shape
+
+    obs_value = next((value for value in inputs if value.name == "obs"), None)
+    if obs_value is None:
+        raise ManifestError(f"{path.name}: input contract must contain an 'obs' tensor")
+    matrix_shape(obs_value, OBS_LEN, "observation")
+
+    recurrent = len(inputs) == 3
+    if not recurrent:
+        if len(inputs) != 1 or len(graph.output) != 1:
+            raise ManifestError(f"{path.name}: feed-forward graph must have one input and one output")
+        action_value = graph.output[0]
+        matrix_shape(action_value, ACTION_LEN, "action")
+        return OnnxShape(
+            input_name=obs_value.name,
+            output_name=action_value.name,
+            obs_len=OBS_LEN,
+            action_len=ACTION_LEN,
+        )
+
+    expected_inputs = {"obs", "h_in", "c_in"}
+    expected_outputs = {"actions", "h_out", "c_out"}
+    actual_inputs = {value.name for value in inputs}
+    actual_outputs = {value.name for value in graph.output}
+    if actual_inputs != expected_inputs or actual_outputs != expected_outputs:
+        raise ManifestError(
+            f"{path.name}: recurrent graph names must be inputs {sorted(expected_inputs)} and "
+            f"outputs {sorted(expected_outputs)}, got {sorted(actual_inputs)} -> {sorted(actual_outputs)}"
+        )
+    action_value = next(value for value in graph.output if value.name == "actions")
+    matrix_shape(action_value, ACTION_LEN, "action")
+
+    state_shapes: list[tuple[int, int, int]] = []
+    for name, role, values in (
+        ("h_in", "LSTM input state", inputs),
+        ("c_in", "LSTM input state", inputs),
+        ("h_out", "LSTM output state", graph.output),
+        ("c_out", "LSTM output state", graph.output),
+    ):
+        value = next(value for value in values if value.name == name)
+        shape = tensor_shape(value, role)
+        if len(shape) != 3 or shape[0] <= 0 or shape[1] not in (1, -1) or shape[2] <= 0:
+            raise ManifestError(
+                f"{path.name}: {role} {name!r} must have shape "
+                f"[positive layers, 1 or dynamic batch, positive hidden size], got {list(shape)}"
+            )
+        normalized = (shape[0], 1, shape[2])
+        state_shapes.append(normalized)
+    if any(shape != state_shapes[0] for shape in state_shapes[1:]):
+        raise ManifestError(f"{path.name}: LSTM h/c state shapes must match, got {state_shapes}")
+    layers, _, hidden = state_shapes[0]
+    if layers * hidden > 1_048_576:
+        raise ManifestError(
+            f"{path.name}: LSTM state has {layers * hidden} elements; maximum is 1048576"
+        )
     return OnnxShape(
-        input_name=inputs[0].name,
-        output_name=graph.output[0].name,
-        obs_len=last_dim(inputs[0]),
-        action_len=last_dim(graph.output[0]),
+        input_name=obs_value.name,
+        output_name=action_value.name,
+        obs_len=OBS_LEN,
+        action_len=ACTION_LEN,
+        recurrent=True,
+        state_shape=state_shapes[0],
     )
 
-
 def check_onnx(path: Path) -> OnnxShape:
-    """Refuse a file the daemon would refuse at load: wrong widths, or one that is not 61 -> 14."""
+    """Refuse a file the daemon would refuse at load: wrong widths or contract."""
     if not path.exists():
         raise ManifestError(f"{path}: no such file")
     shape = inspect_onnx(path)
@@ -292,8 +389,27 @@ def smoke_run_onnx(path: Path, steps: int = 50, seed: int = 0) -> None:
     rng = np.random.default_rng(seed)
     obs = np.zeros((1, shape.obs_len), dtype=np.float32)
     outputs = []
+    state = None
+    if shape.recurrent:
+        assert shape.state_shape is not None
+        state = {
+            "h_in": np.zeros(shape.state_shape, dtype=np.float32),
+            "c_in": np.zeros(shape.state_shape, dtype=np.float32),
+        }
     for _ in range(steps):
-        (out,) = session.run([shape.output_name], {shape.input_name: obs})
+        feed = {shape.input_name: obs}
+        if state is not None:
+            feed.update(state)
+            out, h_out, c_out = session.run(
+                [shape.output_name, "h_out", "c_out"], feed
+            )
+            if h_out.shape != state["h_in"].shape or c_out.shape != state["c_in"].shape:
+                raise ManifestError(f"{path.name}: recurrent state shape changed during smoke run")
+            if not np.all(np.isfinite(h_out)) or not np.all(np.isfinite(c_out)):
+                raise ManifestError(f"{path.name}: recurrent state became non-finite")
+            state = {"h_in": h_out, "c_in": c_out}
+        else:
+            (out,) = session.run([shape.output_name], feed)
         if not np.all(np.isfinite(out)):
             raise ManifestError(f"{path.name}: the network produced a non-finite action")
         outputs.append(out)
@@ -325,8 +441,16 @@ def install_commands(manifest: dict[str, Any], repo_id: str) -> str:
     return f"sudo robotctl policy load {slot} {repo_id}"
 
 
-def render_readme(manifest: dict[str, Any], repo_id: str) -> str:
-    """A model card that says how to run the policy on a robot, generated so it cannot go stale."""
+def render_readme(manifest: dict[str, Any], repo_id: str, base_model: str | None = None) -> str:
+    """A model card that says how to run the policy on a robot, generated so it cannot go stale.
+
+    ``base_model`` is the Hub repo a remix was trained from; the card declares it so the Hub links
+    the two (the parent lists this repo among its fine-tunes).
+    """
+    if base_model is not None:
+        _check_repo_id(base_model, "base_model")
+        if base_model == repo_id:
+            raise ManifestError(f"base_model {base_model!r} is the repo being published")
     kind = manifest["kind"]
     name = manifest["name"]
     description = manifest.get("description", "")
@@ -353,7 +477,11 @@ def render_readme(manifest: dict[str, Any], repo_id: str) -> str:
         "- robotics",
         "- reinforcement-learning",
         "- onnx",
-        "library_name: onnx",
+        # The Hub's `robotctl policy load <slot>` snippet reads the slot from this tag.
+        *([f"- microduck-slot:{manifest['slot']}"] if manifest.get("slot") else []),
+        "library_name: microduck",
+        "pipeline_tag: robotics",
+        *([f"base_model: {base_model}", "base_model_relation: finetune"] if base_model else []),
         "---",
         "",
         f"# {name}",
@@ -373,6 +501,8 @@ def render_readme(manifest: dict[str, Any], repo_id: str) -> str:
         "`manifest.json` follows schema 2 of the microduck policy manifest "
         "(`docs/policy-manifest.md` in the daemon repo).",
     ]
+    if base_model:
+        lines += ["", f"A remix of [{base_model}](https://huggingface.co/{base_model})."]
     if training:
         lines += ["", "## Training", ""]
         for key in ("task_id", "repo", "branch", "commit", "run", "checkpoint", "exported"):
@@ -381,6 +511,12 @@ def render_readme(manifest: dict[str, Any], repo_id: str) -> str:
         if training.get("dirty"):
             lines.append("- exported from a checkout with uncommitted changes")
     return "\n".join(lines) + "\n"
+
+
+def _check_repo_id(repo_id: str, what: str) -> None:
+    owner, _, name = repo_id.partition("/")
+    if not owner or not name or "/" in name or repo_id != repo_id.strip():
+        raise ManifestError(f"{what} must be a Hub repo id `<user-or-org>/<name>`, not {repo_id!r}")
 
 
 def dump_manifest(manifest: dict[str, Any]) -> str:

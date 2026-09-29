@@ -15,6 +15,8 @@ tags:
 
 > 2026-09-30 策略优先：上层 agent 未来通过工具调用已验证的 Walking、StandUp 等执行策略。当前 jd_B300 的完整策略产物尚未达到行为验收：Walking 无推扰前进响应约 0.3%，StandUp 在俯卧/仰卧恢复失败。先完成单因素因果修复、完整 RL 门禁和跨后端/CPU 回放，再将通过验收的策略封装为 tool；外部 Embodied-DeepSeek-Harness 目前只保留接口与确定性 mock，不提前实现本地 agent loop。
 
+> 2026-09-30 官方上游同步：官方 `microduck_rl` develop 与 `microduck` main 已复核到 `configs/upstream.json` 的提交。项目发布边界现支持官方前馈 API-1 与显式状态 LSTM API-2 的严格 float32/61→14 校验，并保留失败清空状态；相机 UYVY、8×8 ToF 逐射线保护和足底 odometry anchor 数据已有自有确定性适配。保护跌倒奖励项只作为独立实验接口，完整 VelStand expert-BC、TCP body server、硬件 provisioning 和实际 Newton 行为门禁仍待完成。详见 [官方上游复核](reports/upstream-review-2026-09-30.md)。
+
 > 2026-09-26 RL 进度：`jd_B300` 上 9 月 23 日启动的三组训练在完整预算前中断，checkpoint 与日志均已保存，退出代码 247 的原因尚未确认。MuJoCo/RSL-RL Walking 官方配置对照已在 GPU 6 进入 50000 次更新的完整训练；Newton/RSL-RL StandUp 的 seed 42、43 均保存了已完成 5001 次更新的原生 checkpoint，恢复计数修复已通过真实 Newton 连续两次恢复验证。两组正式恢复已分别在 GPU 2、1 进入完整接续训练，日志确认从第 5001 次更新继续，且已连续运行至标签 5005。官方固定源码与当前 Flat 任务配置、直接引用的 MDP 函数和 BAM 已完成核查，现有证据尚未确认训练行为差异的单一原因。Walking 与 StandUp 的最终行为验收仍待完整训练和评估。见 [中断训练诊断](reports/rl-jd-interrupted-2026-09-26.md) 与 [官方实现核对](reports/rl-official-comparison-2026-09-26.md)。下方保留历史记录。
 
 > 2026-09-23：用户授权通过 SSH 使用 `jd_B300` 的空闲 GPU。Linux x86_64 的 CUDA 13 训练环境通过实际 GPU 检查，macOS 与 Linux 分别通过同组 55 项 CPU 测试；W&B 在线账号和项目已验证，Isaac 资产转换通过。Walking 在 GPU 6、Newton StandUp 的 seed 42 和 43 分别在 GPU 2、1 进入完整训练预算并出现正常更新，最终行为验收仍待完成。项目范围保持语音、机器人 tools、仿真执行、训练与经验记录；外部 Harness 负责通用 agent loop 和长期记忆。见 [当前状态](reports/project-status-2026-09-23.md)。下方保留历史验证记录。

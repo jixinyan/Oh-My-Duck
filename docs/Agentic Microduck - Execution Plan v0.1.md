@@ -13,6 +13,8 @@ tags:
 
 > 2026-09-30 执行顺序：先训练并验收有效的 Walking、StandUp 执行策略，再把通过验收的策略封装成上层 agent 可调用的 tool。当前 jd_B300 完整产物仍未通过行为验收，下一步是单因素因果修复和完整训练门禁；外部 Embodied-DeepSeek-Harness 仅保留语义接口与确定性 mock，真实 transport 和 agent loop 等待其项目稳定。
 
+> 2026-09-30 上游迁移：已复核官方 `microduck_rl` develop 与 `microduck` main；下一项迁移已覆盖 API-2 LSTM 加载/失败 reset、UYVY/ToF 传感器适配、足底 odometry anchor 数据和保护跌倒 reward primitives。每项均有 CPU 回归；完整 VelStand expert-BC、TCP body server 与真实 Newton 任务门禁继续作为独立后续阶段，不能用接口存在代替行为验收。
+
 > 2026-09-26 RL 执行状态：`jd_B300` 原三组完整训练在预算前中断，原生 checkpoint、日志与来源记录已保留；退出代码 247 的原因尚未确认。MuJoCo/RSL-RL Walking 官方配置对照已在 GPU 6 进入 50000 次更新的完整训练。Newton/RSL-RL StandUp 的两个原生 checkpoint 各已完成 5001 次更新，恢复代码经过真实 Newton 连续两次恢复及训练状态检查；两组正式恢复已在 GPU 2、1 进入完整接续训练，日志确认从第 5001 次更新继续，并连续运行至标签 5005。下一项验收依据完整训练后的 Walking 指令响应、StandUp 多姿态与跨后端/CPU 行为评估；当前奖励趋势和短程恢复检查均不能代替最终行为结果。见 [中断训练诊断](reports/rl-jd-interrupted-2026-09-26.md) 与 [官方实现核对及恢复验证](reports/rl-official-comparison-2026-09-26.md)。下方保留历史记录。
 
 > 2026-09-23：当前执行主机为 `jd_B300`。Linux x86_64 的 CUDA 13 训练环境与实际 GPU 检查通过，W&B 在线账号和项目已验证，Isaac 资产环境与两种 Newton 资产转换完成。Walking 在 GPU 6、Newton StandUp 的 seed 42 和 43 分别在 GPU 2、1 通过启动、导出、恢复及容量检查，三组完整训练预算均已启动并出现正常更新。短训练回放行为未达标（返回码 2），最终行为验收仍需完整训练后的评估。macOS 与 Linux 分别通过同组 55 项 CPU 测试。语音服务、仿真技能执行与 sensor tools 可以独立推进。见 [当前状态与完成条件](reports/project-status-2026-09-23.md)。下方保留历史验证记录。
