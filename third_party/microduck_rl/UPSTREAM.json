@@ -1,8 +1,10 @@
 {
   "repository": "https://github.com/pollen-robotics/microduck_rl",
   "commit": "cfe1c2adcceb55f6b6e369c888b31c6873175c55",
+  "baseline_commit": "29e887ecfbf5d37144759e5a9f8a176dfb83d547",
   "license": "Apache-2.0",
   "role": "Pinned upstream reference; these are owned editable source files, not a generated runtime cache.",
+  "file_hash_semantics": "files[].upstream_sha256 records the source baseline_commit; selective migrations from commit are listed in changes.",
   "reviewed_at": "2026-09-30",
   "upstream_latest": {
     "microduck_rl": {
