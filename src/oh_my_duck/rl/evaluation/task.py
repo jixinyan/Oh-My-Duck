@@ -27,6 +27,8 @@ def main():
     parser.add_argument("--curriculum-step", type=int, help="Freeze the official curriculum at this control-step count (diagnostic only)")
     parser.add_argument("--push-scale", type=float, default=1.0, help="Explicit diagnostic push amplitude multiplier; timing remains unchanged")
     parser.add_argument("--record-rewards", action="store_true")
+    parser.add_argument("--diagnostic-forward-speed", type=float,
+                        help="Override only Walking's forward command (±0.4 m/s); diagnostic, never acceptance")
     args = parser.parse_args()
     import math
     if (args.profile == "training-stage") != (args.curriculum_step is not None):
@@ -48,7 +50,8 @@ def main():
     task = project_tasks().get(args.task)
     if task.evaluation is None:
         raise ValueError(f"Task {task.id} has no evaluation protocol")
-    protocol = task.evaluation.build()
+    from .diagnostics import diagnostic_forward_protocol
+    protocol = diagnostic_forward_protocol(task.evaluation.build(), args.diagnostic_forward_speed)
     cfg = build_environment(task.binding(args.backend), play=args.profile == "standard")
     cfg.scene.num_envs = 1
     cfg.seed = args.seed
@@ -75,7 +78,9 @@ def main():
         "evaluation_profile": args.profile,
         "curriculum_step": args.curriculum_step,
         "push_scale": args.push_scale,
-        "acceptance_eligible": args.profile == "standard" and args.push_scale == 1.0,
+        "diagnostic_forward_speed": args.diagnostic_forward_speed,
+        "acceptance_eligible": (args.profile == "standard" and args.push_scale == 1.0
+                                and args.diagnostic_forward_speed is None),
         "reward_trace_units": "weighted rate before policy-dt integration" if args.record_rewards else None,
     }
     env = writer = video = None
