@@ -10,6 +10,8 @@ tags:
   - sim-to-real
 ---
 
+> 2026-09-30 Walking 下一步：按低速命令 dead-zone 证据准备 `walking-low-speed-boost.json` 的四后端/框架配对完整流程，boost=1.0 只作用于 `0.01–0.2 m/s` 的非零线速度命令，默认控制组保持官方 recipe。当前只完成实现和测试，不自动提交训练。
+
 > 2026-09-30 下一项配置迭代：保护跌倒变体已作为 `experimental_unvalidated` 入口接入任务注册，复用官方 VelStand 恢复层并叠加完整碰撞/伺服冲击保护。当前仅完成配置和 14-servo 编译回归，不启动训练；先完成代表性 Walking/StandUp 的因果修复与验收，再为该变体执行独立门禁。
 
 > 2026-09-30 执行顺序：先训练并验收有效的 Walking、StandUp 执行策略，再把通过验收的策略封装成上层 agent 可调用的 tool。当前 jd_B300 完整产物仍未通过行为验收，下一步是单因素因果修复和完整训练门禁；外部 Embodied-DeepSeek-Harness 仅保留语义接口与确定性 mock，真实 transport 和 agent loop 等待其项目稳定。

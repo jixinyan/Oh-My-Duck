@@ -93,6 +93,8 @@ def main():
                             '--agent.load-checkpoint', resume_checkpoint or latest_checkpoint(resume).name]
         if 'action_rate_delay_iterations' in spec:
             command += ['--action-rate-delay-iterations', str(spec['action_rate_delay_iterations'])]
+        if 'low_speed_tracking_boost' in spec:
+            command += ['--low-speed-tracking-boost', str(spec['low_speed_tracking_boost'])]
         stage(name, command)
         if spec['framework'] == 'rsl-rl':
             matches = list((root/'logs/rsl_rl'/spec['experiment']).glob('*_'+tag))

@@ -12,6 +12,8 @@ tags:
   - project-design
 ---
 
+> 2026-09-30 Walking 因果修复准备：将低速命令 tracking signal 作为独立、可恢复校验的单因素干预，默认关闭，不改变官方任务或 PPO 语义。配对训练仍需完整 smoke、导出、回放、CPU/BAM 和行为门禁；未通过前不封装为 locomotion tool。
+
 > 2026-09-30 保护变体：`Mjlab-ProtectiveFall-Flat-MicroDuck` 已注册为独立实验性入口，使用完整碰撞资产和保护 reward primitives；它不改变官方 VelStand/代表性任务，也不代表已有可调用 locomotion tool。只有完成 Newton、导出、CPU/BAM 与行为门禁后，才能把策略注册到上层 tool。
 
 > 2026-09-30 策略优先：上层 agent 未来通过工具调用已验证的 Walking、StandUp 等执行策略。当前 jd_B300 的完整策略产物尚未达到行为验收：Walking 无推扰前进响应约 0.3%，StandUp 在俯卧/仰卧恢复失败。先完成单因素因果修复、完整 RL 门禁和跨后端/CPU 回放，再将通过验收的策略封装为 tool；外部 Embodied-DeepSeek-Harness 目前只保留接口与确定性 mock，不提前实现本地 agent loop。

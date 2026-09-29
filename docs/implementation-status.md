@@ -1,7 +1,8 @@
 # Implementation status
 
-> 2026-09-30 ProtectiveFall 任务入口：已把完整碰撞资产、`servo_impact_contact`、伺服 stall/加速度保护项和 fallen smoothness scaling 组合为独立 `Mjlab-ProtectiveFall-Flat-MicroDuck` 配置，CLI 标为 `experimental_unvalidated`。官方 VelStand、Flat Walking 和 Flat StandUp 配置未被改写；该入口只通过静态配置/14-servo 编译测试，尚未训练、Newton 验证、导出、CPU/BAM 演练或封装为 tool。
+> 2026-09-30 Walking 因果干预准备：针对保存策略在 `0.1 m/s` 近似静止、`0.2–0.4 m/s` 才响应的证据，新增可恢复校验的 `low_speed_tracking_boost` 单因素实验和八组完整配对配置。默认值为 0，官方 Walking 配方不变；本轮未启动训练。见 [低速命令干预](reports/rl-walking-low-speed-intervention-2026-09-30.md)。
 
+> 2026-09-30 ProtectiveFall 任务入口：已把完整碰撞资产、`servo_impact_contact`、伺服 stall/加速度保护项和 fallen smoothness scaling 组合为独立 `Mjlab-ProtectiveFall-Flat-MicroDuck` 配置，CLI 标为 `experimental_unvalidated`。官方 VelStand、Flat Walking 和 Flat StandUp 配置未被改写；该入口只通过静态配置/14-servo 编译测试，尚未训练、Newton 验证、导出、CPU/BAM 演练或封装为 tool。
 
 > 2026-09-30 官方 develop/main 迁移续项：已把官方 API-2 显式状态 LSTM 的 `float32`/动态 batch/状态形状检查、失败清空状态和私有 reset 边界迁入发布校验；保留前馈 API-1。新增 deterministic BT.601/UYVY 相机、8×8 ToF 逐射线保护、官方 v15/alpha4/alpha16 足底 odometry anchor 数据，以及 protective-fall 的 servo stall/acceleration 与 fallen smoothness MDP term。对应 CPU 测试已通过；TCP body server、真实硬件 provisioning、完整 VelStand expert-BC 与 Newton GPU 行为门禁仍未完成，不能把这些接口当作已验证 locomotion tool。
 

@@ -37,8 +37,11 @@ def load_plan(path):
         if not re.fullmatch(r'[a-z0-9_-]+', row['id']) or row['id'] in seen:
             raise ValueError('Run IDs must be unique, filesystem-safe names')
         seen.add(row['id'])
-        from oh_my_duck.rl.tasks.interventions import validate_action_rate_delay
+        from oh_my_duck.rl.tasks.interventions import (
+            validate_action_rate_delay, validate_low_speed_tracking_boost,
+        )
         validate_action_rate_delay(row['task'], row.get('action_rate_delay_iterations', 0))
+        validate_low_speed_tracking_boost(row['task'], row.get('low_speed_tracking_boost', 0.0))
         task = tasks.get(row['task'])
         task.binding(row['backend'])
         if task.evaluation is None or task.policy_package is None:

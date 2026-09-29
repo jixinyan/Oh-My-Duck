@@ -68,3 +68,64 @@ def test_full_campaign_has_four_matched_pairs_and_no_short_training_budget():
         assert control == delayed
         assert control['num_envs'] == 8192 and control['iterations'] == 50000
         assert control['seed'] == 42
+
+
+def test_low_speed_tracking_boost_is_explicit_and_preserves_official_zero_case():
+    from oh_my_duck.rl.tasks.interventions import apply_training_interventions
+
+    cfg = make_microduck_velocity_env_cfg(play=False)
+    baseline = describe(cfg)
+    assert apply_training_interventions(cfg, task=WALKING_TASK) == {
+        'action_rate_delay_iterations': 0,
+        'low_speed_tracking_boost': 0.0,
+    }
+    assert describe(cfg) == baseline
+
+    cfg = make_microduck_velocity_env_cfg(play=False)
+    metadata = apply_training_interventions(cfg, task=WALKING_TASK, low_speed_tracking_boost=1.0)
+    term = cfg.rewards['track_linear_velocity']
+    assert metadata['low_speed_tracking_boost'] == 1.0
+    assert term.func.__name__ == 'track_linear_velocity_low_speed_boost'
+    assert term.params['low_speed_threshold'] == 0.2
+    assert term.params['minimum_speed'] == 0.01
+    assert term.params['boost'] == 1.0
+
+
+def test_low_speed_intervention_rejects_other_tasks_and_bad_values():
+    from oh_my_duck.rl.tasks.interventions import validate_low_speed_tracking_boost
+
+    with pytest.raises(ValueError):
+        validate_low_speed_tracking_boost('Mjlab-StandUp-Flat-MicroDuck', 1.0)
+    for value in (-0.1, 4.1, float('inf'), True):
+        with pytest.raises(ValueError):
+            validate_low_speed_tracking_boost(WALKING_TASK, value)
+
+
+def test_low_speed_intervention_resume_defaults_are_backward_compatible():
+    from oh_my_duck.rl.tasks.interventions import validate_intervention_resume
+
+    validate_intervention_resume(
+        {'training_intervention': {'action_rate_delay_iterations': 0}},
+        {'action_rate_delay_iterations': 0, 'low_speed_tracking_boost': 0.0},
+    )
+    with pytest.raises(ValueError):
+        validate_intervention_resume(
+            {'training_intervention': {'low_speed_tracking_boost': 1.0}},
+            {'action_rate_delay_iterations': 0, 'low_speed_tracking_boost': 0.0},
+        )
+
+
+def test_low_speed_campaign_has_eight_matched_full_budget_runs():
+    from oh_my_duck.rl.experiments.campaign import load_plan
+    from oh_my_duck.core.paths import project_root
+
+    plan = load_plan(project_root() / 'configs/experiments/walking-low-speed-boost.json')
+    assert len(plan['runs']) == 8 and plan['record_previews'] and plan['unforced_evaluation']
+    for index in range(0, 8, 2):
+        control, boosted = deepcopy(plan['runs'][index:index + 2])
+        assert control.pop('low_speed_tracking_boost') == 0.0
+        assert boosted.pop('low_speed_tracking_boost') == 1.0
+        control.pop('id')
+        boosted.pop('id')
+        assert control == boosted
+        assert control['num_envs'] == 8192 and control['iterations'] == 50000

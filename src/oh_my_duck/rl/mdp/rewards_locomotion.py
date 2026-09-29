@@ -24,6 +24,46 @@ from oh_my_duck.rl.mdp.constants import _DEFAULT_ASSET_CFG, _HIP_PITCH_KNEE_CFG,
 from oh_my_duck.rl.mdp.state import _fallen_mask, _finite, _servo_joint_vel
 
 
+def track_linear_velocity_low_speed_boost(
+    env: ManagerBasedRlEnv,
+    std: float,
+    command_name: str,
+    low_speed_threshold: float = 0.2,
+    minimum_speed: float = 0.01,
+    boost: float = 0.0,
+    asset_cfg: SceneEntityCfg = _DEFAULT_ASSET_CFG,
+) -> torch.Tensor:
+    """Scale the official linear tracking term only for small nonzero commands.
+
+    This is an opt-in causal intervention for the observed Walking dead zone:
+    the official exponential tracking formula is unchanged, but the advantage
+    between standing still and tracking a small forward command is multiplied
+    by a command-conditioned factor. Zero/turn-in-place commands retain the
+    native term, and the intervention is bounded by ``boost``.
+    """
+    for name, value in (("std", std), ("low_speed_threshold", low_speed_threshold),
+                        ("minimum_speed", minimum_speed), ("boost", boost)):
+        if not math.isfinite(float(value)):
+            raise ValueError(f"{name} must be finite")
+    if std <= 0.0:
+        raise ValueError("std must be positive")
+    if low_speed_threshold <= minimum_speed or minimum_speed < 0.0:
+        raise ValueError("low_speed_threshold must exceed non-negative minimum_speed")
+    if boost < 0.0:
+        raise ValueError("boost must be non-negative")
+
+    from mjlab.tasks.velocity import mdp as _velocity_mdp
+
+    native = _velocity_mdp.track_linear_velocity(
+        env, std=std, command_name=command_name, asset_cfg=asset_cfg
+    )
+    command = env.command_manager.get_command(command_name)
+    speed = torch.linalg.vector_norm(command[:, :2], dim=1)
+    fraction = ((low_speed_threshold - speed) / (low_speed_threshold - minimum_speed)).clamp(0.0, 1.0)
+    fraction = torch.where(speed <= minimum_speed, torch.zeros_like(fraction), fraction)
+    return native * (1.0 + float(boost) * fraction)
+
+
 def joint_accelerations_l2(
     env: ManagerBasedRlEnv, asset_cfg: SceneEntityCfg = _DEFAULT_ASSET_CFG
 ) -> torch.Tensor:
