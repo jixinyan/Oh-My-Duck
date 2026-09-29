@@ -12,4 +12,4 @@
 
 ## 当前状态
 
-本轮只完成函数、CLI/worker/resume identity 和配置级测试；没有启动训练，也没有把它标记为官方替代配方。只有完整配对结果改善 `0.1 m/s` 响应且不牺牲静止、转向、横向 RMSE、跨后端和 CPU/BAM 指标时，才考虑后续采用；否则保留失败产物并回滚该干预。
+本轮已完成 8 个 run 的训练前门禁，但按最小目标在门禁后停止，没有启动完整训练。MuJoCo 四组在 `outputs/experiments/walking-low-speed-boost-20260930-02/` 准备完成；Newton 四组在补做当前 fingerprint 的 `walk` USD 后，于 `outputs/experiments/walking-low-speed-boost-20260930-03-newton-gates/` 准备完成。门禁中的未训练 CPU/BAM rehearsal 仍为行为失败，不能把它当作低速响应改善。只有完整配对结果改善 `0.1 m/s` 响应且不牺牲静止、转向、横向 RMSE、跨后端和 CPU/BAM 指标时，才考虑后续采用；详见[门禁记录](rl-walking-low-speed-gates-2026-09-30.md)。

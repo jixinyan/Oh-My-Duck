@@ -12,7 +12,7 @@ tags:
   - project-design
 ---
 
-> 2026-09-30 Walking 因果修复准备：将低速命令 tracking signal 作为独立、可恢复校验的单因素干预，默认关闭，不改变官方任务或 PPO 语义。配对训练仍需完整 smoke、导出、回放、CPU/BAM 和行为门禁；未通过前不封装为 locomotion tool。
+> 2026-09-30 Walking 因果修复门禁：将低速命令 tracking signal 作为独立、可恢复校验的单因素干预，默认关闭，不改变官方任务或 PPO 语义。8 个 run 的 smoke、导出、恢复、8192 容量和 CPU/BAM rehearsal 门禁已完成，按最小目标在门禁后停止；完整训练和行为验收仍未完成，未封装为 locomotion tool。详见 [门禁记录](reports/rl-walking-low-speed-gates-2026-09-30.md)。
 
 > 2026-09-30 保护变体：`Mjlab-ProtectiveFall-Flat-MicroDuck` 已注册为独立实验性入口，使用完整碰撞资产和保护 reward primitives；它不改变官方 VelStand/代表性任务，也不代表已有可调用 locomotion tool。只有完成 Newton、导出、CPU/BAM 与行为门禁后，才能把策略注册到上层 tool。
 

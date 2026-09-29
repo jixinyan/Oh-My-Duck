@@ -18,7 +18,7 @@ budgets, not promises of convergence. There is no added duration limit.
 
 ## Walking 低速命令因果配对
 
-`configs/experiments/walking-low-speed-boost.json` 是独立的单因素诊断计划：四种后端/原生 PPO 组合各有官方控制组与 `low_speed_tracking_boost=1.0` 组，均使用 8,192 环境和完整 50,000 次更新。该干预只改变 `0.01–0.2 m/s` 非零线速度的 tracking 信号，默认官方配方不变；本配置已通过计划校验，尚未提交训练。详见 [低速命令干预报告](reports/rl-walking-low-speed-intervention-2026-09-30.md)。
+`configs/experiments/walking-low-speed-boost.json` 是独立的单因素诊断计划：四种后端/原生 PPO 组合各有官方控制组与 `low_speed_tracking_boost=1.0` 组，均使用 8,192 环境和完整 50,000 次更新。该干预只改变 `0.01–0.2 m/s` 非零线速度的 tracking 信号，默认官方配方不变。2026-09-30 已完成全部 8 个 run 的训练前门禁并在门禁后停止，完整训练尚未提交；详情见 [低速命令干预报告](reports/rl-walking-low-speed-intervention-2026-09-30.md) 和 [门禁记录](reports/rl-walking-low-speed-gates-2026-09-30.md)。
 
 ```bash
 python omd.py campaign --config configs/experiments/representative-full.json \

@@ -1,6 +1,6 @@
 # Implementation status
 
-> 2026-09-30 Walking 因果干预准备：针对保存策略在 `0.1 m/s` 近似静止、`0.2–0.4 m/s` 才响应的证据，新增可恢复校验的 `low_speed_tracking_boost` 单因素实验和八组完整配对配置。默认值为 0，官方 Walking 配方不变；本轮未启动训练。见 [低速命令干预](reports/rl-walking-low-speed-intervention-2026-09-30.md)。
+> 2026-09-30 Walking 因果干预门禁：针对保存策略在 `0.1 m/s` 近似静止、`0.2–0.4 m/s` 才响应的证据，新增的 `low_speed_tracking_boost` 配对实验已完成 8 个 run 的 smoke、导出、恢复、8192 容量和 CPU/BAM rehearsal 门禁；默认值为 0，官方 Walking 配方不变。按最小目标在门禁后停止，尚未进入完整训练，未产生可封装 tool 的策略。首次门禁暴露并修复了 managed-host EGL loader 传播问题，Newton 资产按当前 fingerprint 重建后四组门禁通过。见 [低速干预](reports/rl-walking-low-speed-intervention-2026-09-30.md) 与 [门禁记录](reports/rl-walking-low-speed-gates-2026-09-30.md)。
 
 > 2026-09-30 ProtectiveFall 任务入口：已把完整碰撞资产、`servo_impact_contact`、伺服 stall/加速度保护项和 fallen smoothness scaling 组合为独立 `Mjlab-ProtectiveFall-Flat-MicroDuck` 配置，CLI 标为 `experimental_unvalidated`。官方 VelStand、Flat Walking 和 Flat StandUp 配置未被改写；该入口只通过静态配置/14-servo 编译测试，尚未训练、Newton 验证、导出、CPU/BAM 演练或封装为 tool。
 

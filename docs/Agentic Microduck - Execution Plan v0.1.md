@@ -10,7 +10,7 @@ tags:
   - sim-to-real
 ---
 
-> 2026-09-30 Walking 下一步：按低速命令 dead-zone 证据准备 `walking-low-speed-boost.json` 的四后端/框架配对完整流程，boost=1.0 只作用于 `0.01–0.2 m/s` 的非零线速度命令，默认控制组保持官方 recipe。当前只完成实现和测试，不自动提交训练。
+> 2026-09-30 Walking 门禁结果：按低速命令 dead-zone 证据完成 `walking-low-speed-boost.json` 的四后端/框架配对训练前门禁，boost=1.0 只作用于 `0.01–0.2 m/s` 的非零线速度命令，默认控制组保持官方 recipe。8 个 run 均准备完成后按最小目标停止；完整训练与行为验收仍待执行。详见 [门禁记录](reports/rl-walking-low-speed-gates-2026-09-30.md)。
 
 > 2026-09-30 下一项配置迭代：保护跌倒变体已作为 `experimental_unvalidated` 入口接入任务注册，复用官方 VelStand 恢复层并叠加完整碰撞/伺服冲击保护。当前仅完成配置和 14-servo 编译回归，不启动训练；先完成代表性 Walking/StandUp 的因果修复与验收，再为该变体执行独立门禁。
 
