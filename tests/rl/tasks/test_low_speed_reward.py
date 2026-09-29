@@ -1,8 +1,8 @@
-import torch
 from types import SimpleNamespace
 
 
 def test_low_speed_tracking_boost_only_scales_small_nonzero_linear_commands(monkeypatch):
+    import torch
     from mjlab.tasks.velocity import mdp as velocity_mdp
     from oh_my_duck.rl.mdp.rewards_locomotion import track_linear_velocity_low_speed_boost
 

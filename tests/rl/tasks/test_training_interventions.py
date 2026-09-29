@@ -1,16 +1,12 @@
 from copy import deepcopy
 from types import SimpleNamespace
 import pytest
-import torch
-from oh_my_duck.rl.tasks.interventions import (
-    WALKING_TASK, apply_action_rate_delay, validate_action_rate_delay, validate_intervention_resume,
-)
-from oh_my_duck.rl.tasks.walking.environment import make_microduck_velocity_env_cfg
-from oh_my_duck.rl.experiments.baseline_probe import describe
-from oh_my_duck.rl.mdp.curricula import reward_weight
 
 
 def test_zero_delay_is_an_exact_official_recipe_noop():
+    from oh_my_duck.rl.tasks.interventions import WALKING_TASK, apply_action_rate_delay
+    from oh_my_duck.rl.tasks.walking.environment import make_microduck_velocity_env_cfg
+    from oh_my_duck.rl.experiments.baseline_probe import describe
     cfg = make_microduck_velocity_env_cfg(play=False)
     before = describe(cfg)
     assert apply_action_rate_delay(cfg, task=WALKING_TASK) == {'action_rate_delay_iterations': 0}
@@ -18,6 +14,9 @@ def test_zero_delay_is_an_exact_official_recipe_noop():
 
 
 def test_only_positive_smoothing_stage_times_change_and_other_recipes_stay_pristine():
+    from oh_my_duck.rl.tasks.interventions import WALKING_TASK, apply_action_rate_delay
+    from oh_my_duck.rl.tasks.walking.environment import make_microduck_velocity_env_cfg
+    from oh_my_duck.rl.experiments.baseline_probe import describe
     cfg = make_microduck_velocity_env_cfg(play=False)
     baseline = deepcopy(cfg)
     apply_action_rate_delay(cfg, task=WALKING_TASK, iterations=4500)
@@ -31,6 +30,10 @@ def test_only_positive_smoothing_stage_times_change_and_other_recipes_stay_prist
 
 
 def test_actual_live_weight_manager_obeys_delayed_boundary_and_restores_final_objective():
+    import torch
+    from oh_my_duck.rl.tasks.interventions import WALKING_TASK, apply_action_rate_delay
+    from oh_my_duck.rl.tasks.walking.environment import make_microduck_velocity_env_cfg
+    from oh_my_duck.rl.mdp.curricula import reward_weight
     cfg = make_microduck_velocity_env_cfg(play=False)
     apply_action_rate_delay(cfg, task=WALKING_TASK, iterations=4500)
     term = SimpleNamespace(weight=-.1)
@@ -43,10 +46,12 @@ def test_actual_live_weight_manager_obeys_delayed_boundary_and_restores_final_ob
 
 @pytest.mark.parametrize('value', [-1, True, 1.5, '4500'])
 def test_invalid_interventions_fail(value):
+    from oh_my_duck.rl.tasks.interventions import validate_action_rate_delay, WALKING_TASK
     with pytest.raises(ValueError): validate_action_rate_delay(WALKING_TASK, value)
 
 
 def test_scope_and_resume_identity_cannot_silently_change():
+    from oh_my_duck.rl.tasks.interventions import WALKING_TASK, validate_action_rate_delay, validate_intervention_resume
     with pytest.raises(ValueError): validate_action_rate_delay('Mjlab-StandUp-Flat-MicroDuck',4500)
     validate_intervention_resume({}, {'action_rate_delay_iterations':0})
     validate_intervention_resume({'training_intervention':{'action_rate_delay_iterations':4500}}, {'action_rate_delay_iterations':4500})
@@ -72,6 +77,9 @@ def test_full_campaign_has_four_matched_pairs_and_no_short_training_budget():
 
 def test_low_speed_tracking_boost_is_explicit_and_preserves_official_zero_case():
     from oh_my_duck.rl.tasks.interventions import apply_training_interventions
+    from oh_my_duck.rl.tasks.interventions import WALKING_TASK
+    from oh_my_duck.rl.tasks.walking.environment import make_microduck_velocity_env_cfg
+    from oh_my_duck.rl.experiments.baseline_probe import describe
 
     cfg = make_microduck_velocity_env_cfg(play=False)
     baseline = describe(cfg)
@@ -92,7 +100,7 @@ def test_low_speed_tracking_boost_is_explicit_and_preserves_official_zero_case()
 
 
 def test_low_speed_intervention_rejects_other_tasks_and_bad_values():
-    from oh_my_duck.rl.tasks.interventions import validate_low_speed_tracking_boost
+    from oh_my_duck.rl.tasks.interventions import WALKING_TASK, validate_low_speed_tracking_boost
 
     with pytest.raises(ValueError):
         validate_low_speed_tracking_boost('Mjlab-StandUp-Flat-MicroDuck', 1.0)
