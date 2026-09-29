@@ -88,6 +88,11 @@ def assigned_devices(visible, count, runs_per_gpu=1):
 
 
 def worker_environment(device, group):
+    # Configure the managed-host EGL loader before copying the parent
+    # environment into each isolated worker.  Without this, MuJoCo imports can
+    # fail before the task-specific renderer has a chance to select a backend.
+    from oh_my_duck.infrastructure.headless import configure_egl
+    configure_egl()
     environment = {k: v for k, v in os.environ.items() if k not in (
         'RANK', 'LOCAL_RANK', 'WORLD_SIZE', 'LOCAL_WORLD_SIZE', 'MASTER_ADDR', 'MASTER_PORT')}
     environment.update(CUDA_VISIBLE_DEVICES=device, WANDB_MODE=settings()['mode'],

@@ -14,6 +14,26 @@ def configure_egl():
     vendor = Path("/usr/share/glvnd/egl_vendor.d/10_nvidia.json")
     if os.environ["MUJOCO_GL"] == "egl" and vendor.is_file():
         os.environ.setdefault("__EGL_VENDOR_LIBRARY_FILENAMES", str(vendor))
+    # Some managed hosts ship an empty system libEGL placeholder.  The pinned
+    # local OSMesa package supplies the loader and its dependencies; expose it
+    # before any child imports MuJoCo so EGL initialization cannot fail during
+    # module import.  The NVIDIA vendor JSON above still selects the CUDA EGL
+    # implementation when the renderer is set to ``egl``.
+    from oh_my_duck.core.paths import project_root
+
+    try:
+        root = project_root()
+    except RuntimeError:
+        # Import-time callers outside a checkout can still use the vendor-only
+        # configuration; the optional project-local loader is simply absent.
+        return
+    library = root / ".cache/render-libs/osmesa/usr/lib/x86_64-linux-gnu"
+    if library.is_dir():
+        prefix = str(library)
+        current = os.environ.get("LD_LIBRARY_PATH", "")
+        entries = [entry for entry in current.split(":") if entry]
+        if prefix not in entries:
+            os.environ["LD_LIBRARY_PATH"] = ":".join([prefix, *entries])
 
 
 def rendering_environment(renderer):
