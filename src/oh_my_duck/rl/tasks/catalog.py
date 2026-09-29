@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 import mjlab.tasks
 from oh_my_duck.rl.training.tasks import project_tasks
-from mjlab.tasks.registry import list_tasks, load_env_cfg, load_rl_cfg
+from mjlab.tasks.registry import load_env_cfg, load_rl_cfg
 from oh_my_duck.rl.backends.mujoco.registration import register_tasks
 register_tasks()
 
@@ -19,6 +19,9 @@ def name(value):
 def catalog():
     tasks = []
     for spec in project_tasks().list('mujoco'):
+        # Keep the generated official inventory free of project-only variants.
+        if spec.maturity != "inventory":
+            continue
         task = spec.id
         cfg, agent = load_env_cfg(task), load_rl_cfg(task)
         model = cfg.scene.entities['robot'].build().compile()

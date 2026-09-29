@@ -50,6 +50,7 @@ class TaskSpec:
     model: str
     bindings: dict[str, TaskBinding]
     representative: bool = False
+    maturity: str = "inventory"
     policy_configs: dict[str, ConfigRef] = field(default_factory=dict)
     evaluation: ConfigRef | None = None
     policy_package: ConfigRef | None = None

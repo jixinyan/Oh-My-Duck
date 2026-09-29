@@ -52,8 +52,10 @@ def main():
         selected = json.loads((root / "configs/training.json").read_text())["representative_tasks"]
         for task in catalog.list():
             if args.all or task.id in selected:
-                print(task.id, "[representative]" if task.id in selected else "[inventory only]",
-                      "backends=" + ",".join(task.bindings))
+                label = "[representative]" if task.id in selected else (
+                    f"[{task.maturity}]" if task.maturity != "inventory" else "[inventory only]"
+                )
+                print(task.id, label, "backends=" + ",".join(task.bindings))
         print("Task registration does not imply training or behavior validation. See docs/rl-reproduction.md.")
         return 0
     if command == "frameworks":

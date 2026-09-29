@@ -1,5 +1,8 @@
 # Implementation status
 
+> 2026-09-30 ProtectiveFall 任务入口：已把完整碰撞资产、`servo_impact_contact`、伺服 stall/加速度保护项和 fallen smoothness scaling 组合为独立 `Mjlab-ProtectiveFall-Flat-MicroDuck` 配置，CLI 标为 `experimental_unvalidated`。官方 VelStand、Flat Walking 和 Flat StandUp 配置未被改写；该入口只通过静态配置/14-servo 编译测试，尚未训练、Newton 验证、导出、CPU/BAM 演练或封装为 tool。
+
+
 > 2026-09-30 官方 develop/main 迁移续项：已把官方 API-2 显式状态 LSTM 的 `float32`/动态 batch/状态形状检查、失败清空状态和私有 reset 边界迁入发布校验；保留前馈 API-1。新增 deterministic BT.601/UYVY 相机、8×8 ToF 逐射线保护、官方 v15/alpha4/alpha16 足底 odometry anchor 数据，以及 protective-fall 的 servo stall/acceleration 与 fallen smoothness MDP term。对应 CPU 测试已通过；TCP body server、真实硬件 provisioning、完整 VelStand expert-BC 与 Newton GPU 行为门禁仍未完成，不能把这些接口当作已验证 locomotion tool。
 
 > 2026-09-30 Harness progress：已与 `origin/main` 对齐，并审读本地 Embodied-DeepSeek-Harness `main`（0.2.0 rc.2 review checkpoint）。本项目新增并验证确定性 Harness mock：显式文本路由、工具注册、请求幂等、工具参数 JSON Schema 子集校验、事件/experience 去重和取消边界均通过 3 个新测试。mock 不启动模型、planner、scheduler 或 memory；EDH 的真实 session/tool transport 尚未稳定，因此仍保持不可用。详见 [Harness 接入审查](reports/harness-integration-review-2026-09-30.md)。

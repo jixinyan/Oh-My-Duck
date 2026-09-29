@@ -79,6 +79,34 @@
       }
     },
     {
+      "id": "Mjlab-ProtectiveFall-Flat-MicroDuck",
+      "model": "allcollisions",
+      "bindings": {
+        "mujoco": {
+          "environment": {
+            "symbol": "oh_my_duck.rl.tasks.protective_fall.environment:make_microduck_protective_fall_env_cfg",
+            "kwargs": {}
+          },
+          "rsl_config": {
+            "symbol": "oh_my_duck.rl.tasks.velocity_stand.ppo:MicroduckVelStandRlCfg"
+          },
+          "runner": {
+            "symbol": "oh_my_duck.rl.learners.rsl_rl.runner:MicroduckOnPolicyRunner"
+          },
+          "runtime": {
+            "symbol": "oh_my_duck.rl.backends.mujoco.environment:make_environment"
+          }
+        }
+      },
+      "representative": false,
+      "maturity": "experimental_unvalidated",
+      "policy_configs": {
+        "sb3": {
+          "symbol": "oh_my_duck.rl.models.sb3:make_policy_cfg"
+        }
+      }
+    },
+    {
       "id": "Mjlab-VelStand-Flat-MicroDuck",
       "model": "groundcontact",
       "bindings": {
