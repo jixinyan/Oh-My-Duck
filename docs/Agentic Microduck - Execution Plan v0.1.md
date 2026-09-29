@@ -10,9 +10,9 @@ tags:
   - sim-to-real
 ---
 
-> 当前核查（客户端 2026-09-29）：三组代表性完整训练与导出已完成，Walking、StandUp 最终行为验收均未通过；8 个 Walking 低速干预配对 run 已完成训练前门禁。后续工作包括配对完整训练与标准最终验收、StandUp 俯卧和仰卧恢复的因果诊断、Qwen 麦克风与扬声器播放及中断、交互仿真草稿的真实后端验收。当前训练 GPU 空闲，项目没有可用真机。见[项目进度](reports/project-status-2026-09-29.md)。
+> 当前核查（客户端 2026-09-29）：Walking 低速干预的八组配对 run 已完成训练前门禁，六组完整训练已产生原生 PPO 更新；两组等待 GPU0/1 空闲。监督程序按固定步数生成预览，完整预算结束后执行标准双后端、CPU/BAM 和无推扰行为验收。上一轮三组完整训练的最终行为验收未通过。语音 HTTP 服务、Mac 内置扬声器播放、内置麦克风录制和合成期间停止后的无迟到播放已完成实际验证，独立 CPU 服务验证完整会话播音和播音开始后的停止；录音回读与原文存在「您好／你好」「小丫／小鸭」两处用字差异。后续还需诊断 StandUp 俯卧和仰卧恢复、接入 Microduck 音频设备与外部 Harness，并在真实后端验证交互仿真草稿；项目没有可用真机。见[Walking 启动记录](reports/rl-walking-low-speed-launch-2026-09-29.md)、[语音交互验收](reports/voice-interaction-validation-2026-09-29.md)与[上一轮结果](reports/project-status-2026-09-29.md)。
 
-> 2026-09-30 Walking 门禁结果：按低速命令 dead-zone 证据完成 `walking-low-speed-boost.json` 的四后端/框架配对训练前门禁，boost=1.0 只作用于 `0.01–0.2 m/s` 的非零线速度命令，默认控制组保持官方 recipe。8 个 run 均准备完成后按最小目标停止；完整训练与行为验收仍待执行。详见 [门禁记录](reports/rl-walking-low-speed-gates-2026-09-30.md)。
+> 2026-09-30 Walking 门禁完成时记录：按低速命令 dead-zone 证据完成 `walking-low-speed-boost.json` 的四后端/框架配对训练前门禁，boost=1.0 只作用于 `0.01–0.2 m/s` 的非零线速度命令，默认控制组保持官方 recipe。8 个 run 准备完成后当时按最小目标停止；当前正式训练见[Walking 启动记录](reports/rl-walking-low-speed-launch-2026-09-29.md)，最终行为验收待完成。门禁证据见[门禁记录](reports/rl-walking-low-speed-gates-2026-09-30.md)。
 
 > 2026-09-30 下一项配置迭代：保护跌倒变体已作为 `experimental_unvalidated` 入口接入任务注册，复用官方 VelStand 恢复层并叠加完整碰撞/伺服冲击保护。当前仅完成配置和 14-servo 编译回归，不启动训练；先完成代表性 Walking/StandUp 的因果修复与验收，再为该变体执行独立门禁。
 

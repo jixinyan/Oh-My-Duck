@@ -1,0 +1,21 @@
+[project]
+name = "oh-my-duck-voice-client"
+version = "0.1.0"
+description = "Oh My Duck local PortAudio and voice service client"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "oh-my-duck",
+  "httpx>=0.28",
+  "numpy>=2.0",
+  "sounddevice>=0.5.3",
+  "soundfile>=0.13.1",
+]
+
+[dependency-groups]
+test = ["pytest>=8"]
+
+[tool.uv]
+package = false
+
+[tool.uv.sources]
+oh-my-duck = { path = "../..", editable = true }

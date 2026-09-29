@@ -25,6 +25,9 @@ COMMANDS = {
     "rehearsal": ("run.py", "Run official CPU MuJoCo/BAM deployment batteries"),
     "package": ("run.py", "Create a local official policy package without uploading"),
     "eval": ("run.py", "Replay a policy headlessly and optionally save video"),
+    "voice": (None, "Manage confirmed voice profiles and file inference"),
+    "voice-session": (None, "Run an explicit local recording and playback session"),
+    "voice-service": (None, "Run an isolated ASR or TTS model service"),
 }
 
 
@@ -68,6 +71,15 @@ def main():
         parser.parse_args(sys.argv[2:])
         print((root / "configs/project.json").read_text())
         return 0
+    if command in {"voice", "voice-session", "voice-service"}:
+        module_name = {
+            "voice": "oh_my_duck.cli.voice",
+            "voice-session": "oh_my_duck.cli.voice_session",
+            "voice-service": "oh_my_duck.voice.service",
+        }[command]
+        module = importlib.import_module(module_name)
+        sys.argv = [sys.argv[0], *sys.argv[2:]]
+        return module.main()
     filename = COMMANDS[command][0]
     module = importlib.import_module("oh_my_duck.rl.experiments." + filename.removesuffix(".py") if command in {"campaign", "preview", "diagnose"}
                                     else "oh_my_duck.infrastructure." + filename.removesuffix(".py"))

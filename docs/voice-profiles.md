@@ -14,26 +14,27 @@
 
 语音模块使用两个独立环境：`environments/voice-asr` 安装 `qwen-asr`，`environments/voice` 安装 `qwen-tts`。两个官方包固定的 `transformers` 版本不同，因此不能安装在同一个环境。两个环境通过 `--data-dir` 共用音色资料目录。
 
-以下命令中的 `python` 分别指向对应环境中的 Python。录音输入为本地 WAV。`--device cuda:0` 指向 `CUDA_VISIBLE_DEVICES` 分配后的第一个可见 GPU。
+以下命令在项目根目录运行，并分别使用对应环境中的 Python。录音输入为本地 WAV。先按[语音交互说明](voice-interaction.md)核对当前设备、设置 `GPU_ID`、安装锁定环境并建立 `.cache/tmp`；`--device cuda:0` 指向 `CUDA_VISIBLE_DEVICES` 分配后的第一个可见 GPU。
 
 ```bash
-CUDA_VISIBLE_DEVICES=5 uv run --project environments/voice-asr --locked python -m oh_my_duck.cli.voice \
-  --data-dir .cache/voice-session --device cuda:0 transcribe recording.wav
+TMPDIR="$PWD/.cache/tmp" CUDA_VISIBLE_DEVICES="$GPU_ID" environments/voice-asr/.venv/bin/python omd.py voice \
+  --data-dir .cache/voice-session --device cuda:0 transcribe recording.wav \
+  --model-revision 5eb144179a02acc5e5ba31e748d22b0cf3e303b0
 
-CUDA_VISIBLE_DEVICES=5 uv run --project environments/voice --locked python -m oh_my_duck.cli.voice \
+TMPDIR="$PWD/.cache/tmp" CUDA_VISIBLE_DEVICES="$GPU_ID" environments/voice/.venv/bin/python omd.py voice \
   --data-dir .cache/voice-session --device cuda:0 design \
   --description "温暖、清楚的中文声音" --reference-text "你好，我是小鸭。"
 
-uv run --project environments/voice --locked python -m oh_my_duck.cli.voice \
+TMPDIR="$PWD/.cache/tmp" environments/voice/.venv/bin/python omd.py voice \
   --data-dir .cache/voice-session confirm CANDIDATE_ID --persona duck-001
 
-CUDA_VISIBLE_DEVICES=5 uv run --project environments/voice --locked python -m oh_my_duck.cli.voice \
+TMPDIR="$PWD/.cache/tmp" CUDA_VISIBLE_DEVICES="$GPU_ID" environments/voice/.venv/bin/python omd.py voice \
   --data-dir .cache/voice-session --device cuda:0 synthesize \
   --persona duck-001 --text "你好，今天有什么计划？"
 ```
 
 `design` 返回候选编号与试听 WAV 路径，不改变活动音色。试听后执行 `confirm`，把候选音频保存为活动音色的新版本；其后 `synthesize` 自动读取该版本。`active --persona duck-001` 可以查询保存的音色和模型 revision。模型通过 Hugging Face snapshot 下载并记录具体 commit SHA。确认时固定 Base 模型的 commit SHA，日常合成使用这个 revision。更换声音时再次生成候选并确认，旧版本留在资料目录中。
 
-当前命令行处理已有录音文件。录音设备、播放设备和外部 Harness 接口仍需接入。
-模型推理在工作线程中运行，同一个模型实例的调用由互斥锁串行执行。调用者取消等待后，已经启动的 GPU 推理仍会继续；播放中断功能需要音频设备实现。
+交互式录音与播放由[语音交互说明](voice-interaction.md)中的独立 client 环境和两个常驻模型服务提供。文件命令行保留音色设计、确认及文件检查功能。交互会话向调用者输出转写文本，并接收调用者明确提供的回复文本；外部 Harness 负责其自身的推理和工具调用。
+模型推理在工作线程中运行，同一个模型实例的调用由互斥锁串行执行。调用者取消等待后，已经启动的 GPU 推理仍会继续；交互会话用请求代次阻止过期合成结果自动播放。
 独立语音 CLI 进程默认设置 `--cpu-threads 1`，也可明确指定正整数。直接使用模型适配器的服务进程应自行设置 PyTorch CPU 线程数量；适配器构造器不会修改进程级线程设置。

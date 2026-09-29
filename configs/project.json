@@ -31,8 +31,8 @@
     },
     "voice": {
       "module": "oh_my_duck.voice",
-      "state": "file_asr_tts_and_voice_profile_gpu_verified",
-      "role": "WAV transcription, Qwen voice design, confirmed voice profiles and WAV synthesis; microphone and playback pending"
+      "state": "qwen_http_mac_audio_voice_session_playback_and_stop_verified",
+      "role": "Qwen ASR/TTS over HTTP with confirmed voice profiles and Mac audio capture; VoiceSession normal playback, active playback stop, and no late playback after GPU synthesis stop verified; Microduck audio hardware and Harness integration pending"
     },
     "recording": {
       "module": "oh_my_duck.experience",
@@ -41,7 +41,7 @@
     },
     "training": {
       "module": "oh_my_duck.rl.training",
-      "state": "pipeline_verified_three_full_runs_completed_behavior_failed",
+      "state": "walking_paired_full_training_six_running_two_waiting_behavior_pending",
       "role": "Independent simulation-backend and RL-framework selection, configured W&B training and evaluation"
     },
     "perception": {
@@ -89,7 +89,7 @@
     "mujoco_video": "explicit_osmesa_on_current_host; native_newton_video_unchanged",
     "representative_videos_verified": 60,
     "checkpoint_previews": {
-      "state": "completed_galleries_preserved_no_active_preview",
+      "state": "fixed_step_preview_workers_active",
       "gallery": "outputs/previews/fixed-8192-0908-01/index.html",
       "manifest": "outputs/previews/fixed-8192-0908-01/previews.json",
       "mode": "fixed_checkpoint_intervals_without_llm_polling",
@@ -103,6 +103,17 @@
       "additional_gallery": "outputs/previews/sb3-repair-0909-01/index.html",
       "auto_resume": false,
       "current_campaign": {
+        "state": "running_with_native_full_learners",
+        "roots": [
+          "outputs/experiments/walking-low-speed-boost-full-20260930-01",
+          "outputs/experiments/walking-low-speed-boost-full-20260930-02-newton-retry"
+        ],
+        "per_run_gallery": "<run-id>/previews/index.html",
+        "interval_updates": 1000,
+        "worker": "same_gpu_as_learner",
+        "llm_polling": false
+      },
+      "previous_campaign_20260913": {
         "state": "inactive_scheduler_suspended_artifacts_preserved",
         "root": "outputs/experiments/walking-delay-0913-01",
         "per_run_gallery": "<run-id>/previews/index.html",
@@ -118,11 +129,11 @@
       "gpu_model_reported": "NVIDIA H20G",
       "gpu_count": 8,
       "compute_capability": "10.3",
-      "state": "cuda13_three_full_runs_completed_gpus_idle",
+      "state": "cuda13_walking_paired_six_running_two_waiting",
       "cuda_warp_mujoco_probe": "passed_on_gpu_6_with_torchscript_quaternion_and_rgb_readback",
       "headless_rendering": "egl_and_osmesa_passed",
       "historical_checkpoints_migrated": false,
-      "report": "docs/reports/project-status-2026-09-29.md"
+      "report": "docs/reports/rl-walking-low-speed-launch-2026-09-29.md"
     },
     "local_rl_gpus": {
       "walking": 7,
@@ -183,8 +194,28 @@
   },
   "rl_framework_registry": "oh_my_duck.rl.training.frameworks:default_framework_registry",
   "rl_acceptance": {
-    "state": "walking_and_standup_full_completed_behavior_failed",
+    "state": "walking_paired_full_training_active_final_behavior_pending",
     "latest_status_20260929": {
+      "host": "jd_B300",
+      "source_commit": "b8c36b29b847f117043c961ac9ecb6a0b9b3deec",
+      "walking_paired_runs": 8,
+      "running": 6,
+      "waiting_for_free_gpu": 2,
+      "waiting_for_gpu5_release": 0,
+      "num_envs_per_run": 8192,
+      "updates_per_run": 50000,
+      "wandb_online_runs": {
+        "mujoco_sb3_control": "46afwkq7",
+        "mujoco_sb3_boost": "4fmav7qs",
+        "newton_rsl_control": "anxyia9j",
+        "newton_rsl_boost": "0mpdlqb7",
+        "newton_sb3_control": "vc9mq86q",
+        "newton_sb3_boost": "gg7jfzdl"
+      },
+      "behavior_acceptance": "pending_full_training_and_final_evaluation",
+      "report": "docs/reports/rl-walking-low-speed-launch-2026-09-29.md"
+    },
+    "previous_baseline_status_20260929": {
       "host": "jd_B300",
       "walking": "mujoco_rsl_rl_50000_updates_completed_behavior_failed",
       "walking_source_commit": "4253ee7",
@@ -559,18 +590,26 @@
       "historical_snapshot": true
     },
     "current_full_training_campaign": {
-      "state": "eight_walking_paired_runs_prepared_full_training_not_started",
+      "state": "six_running_two_waiting_full_behavior_pending",
       "config": "configs/experiments/walking-low-speed-boost.json",
       "num_envs_per_run": 8192,
       "updates_per_run": 50000,
       "prepared": 8,
-      "full_training_started": 0,
-      "running": 0,
+      "full_training_started": 6,
+      "running": 6,
+      "waiting_for_free_gpu": 2,
+      "waiting_for_gpu5_release": 0,
+      "source_commit": "b8c36b29b847f117043c961ac9ecb6a0b9b3deec",
+      "attempt_outputs": [
+        "outputs/experiments/walking-low-speed-boost-full-20260930-01",
+        "outputs/experiments/walking-low-speed-boost-full-20260930-02-newton-retry"
+      ],
+      "attempt_index": "outputs/experiments/walking-low-speed-boost-full-20260930-01/attempts-summary.json",
       "prepared_outputs": [
         "outputs/experiments/walking-low-speed-boost-20260930-02",
         "outputs/experiments/walking-low-speed-boost-20260930-03-newton-gates"
       ],
-      "report": "docs/reports/rl-walking-low-speed-gates-2026-09-30.md"
+      "report": "docs/reports/rl-walking-low-speed-launch-2026-09-29.md"
     },
     "previous_full_training_campaign_20260908": {
       "config": "configs/experiments/representative-8192.json",

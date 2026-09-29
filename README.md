@@ -5,9 +5,9 @@
 # Oh My Duck 🦆
 
 [![Status: active development](https://img.shields.io/badge/status-active_development-blue)](docs/implementation-status.md)
-[![RL behavior: unmet](https://img.shields.io/badge/RL_behavior-unmet-orange)](docs/reports/project-status-2026-09-29.md)
+[![RL behavior: pending](https://img.shields.io/badge/RL_behavior-pending-orange)](docs/reports/rl-walking-low-speed-launch-2026-09-29.md)
 [![Recorded CPU checks: 55 passed on 2026-09-23](https://img.shields.io/badge/recorded_CPU_checks-55_passed-2ea44f)](docs/reports/project-status-2026-09-23.md)
-[![Voice: file inference verified](https://img.shields.io/badge/voice-file_inference_verified-green)](docs/reports/voice-validation-2026-09-26.md)
+[![Voice: Mac audio verified](https://img.shields.io/badge/voice-Mac_audio_verified-green)](docs/reports/voice-interaction-validation-2026-09-29.md)
 [![Hardware validation: pending](https://img.shields.io/badge/hardware_validation-pending-orange)](docs/implementation-status.md)
 
 **An interactive, extensible Microduck—with a persistent voice, shared experiences, and skills you can train.**
@@ -55,13 +55,13 @@ Representative RL tasks are flat-ground Walking and StandUp. Task recipes, MDP f
 
 Task families have separate environment and PPO configurations under `rl/tasks/<family>/`; see the [RL source map](src/oh_my_duck/rl/README.md). [Training campaigns](docs/rl-campaigns.md) assign independent task/framework runs to GPUs, with explicit sharing and checkpoint recovery when needed.
 
-Training and evaluation run headlessly. `omd preview` creates checkpoint videos and a local gallery alongside numerical metrics. The training host is `jd_B300`; W&B records training under the verified project account and keeps local artifacts. The MuJoCo/RSL Walking run finished 50,000 updates, and both Newton/RSL StandUp runs finished 15,000. Native export and packaging completed, while final behavior gates failed: Walking has a measured low-speed command dead zone, and both StandUp policies fail prone and supine recovery. Eight paired Walking control/boost runs have passed preparation gates; their full training has not started. No RL learner is running now. Locomotion tools await policy behavior acceptance. See the [current project status](docs/reports/project-status-2026-09-29.md) and [implementation status](docs/implementation-status.md).
+Training and evaluation run headlessly. `omd preview` creates checkpoint videos and a local gallery alongside numerical metrics. The training host is `jd_B300`; W&B records training under the verified project account and keeps local artifacts. The previous MuJoCo/RSL Walking run finished 50,000 updates, and both Newton/RSL StandUp runs finished 15,000; all three completed export and packaging but failed final behavior acceptance. A paired Walking control/low-speed-boost experiment now has six full learners producing native PPO updates with online W&B records. Two MuJoCo/RSL learners await GPUs used by another project. All eight passed preparation gates, and final behavior evaluation is pending. Locomotion tools await policy behavior acceptance. See the [Walking launch record](docs/reports/rl-walking-low-speed-launch-2026-09-29.md), [previous baseline results](docs/reports/project-status-2026-09-29.md), and [implementation status](docs/implementation-status.md).
 
 ## A voice and history that persist
 
 Voice setup is a deliberate choice: **describe → generate → listen → confirm → save**. Daily TTS uses the active voice profile; restarting or switching execution backends does not silently choose a new voice.
 
-Qwen3 ASR, VoiceDesign and Base TTS have been verified on the target GPU with WAV files. The command-line flow generates a candidate, saves it after explicit confirmation, and reuses the same voice profile across processes. Microphone recording, playback control and Harness integration remain open. See [voice usage](docs/voice-profiles.md) and [GPU validation](docs/reports/voice-validation-2026-09-26.md).
+Qwen3 ASR, VoiceDesign and Base TTS have been verified on the target GPU with WAV files. The command-line flow generates a candidate, saves it after explicit confirmation, and reuses the same voice profile across processes. A Mac speaker and microphone completed real playback and recording through the HTTP voice services; stopping a session during GPU synthesis prevented late playback. Separate CPU service checks verified a complete `VoiceSession.speak` playback and stopping after playback began. The microphone recording returned “您好，我是小丫。我们现在检查语音连接。” for the synthesized text “你好，我是小鸭。我们现在检查语音连接。” Microduck audio hardware and Harness integration remain open. See [voice usage](docs/voice-profiles.md), [Mac audio validation](docs/reports/voice-interaction-validation-2026-09-29.md), and [GPU validation](docs/reports/voice-validation-2026-09-26.md).
 
 Episodes preserve what was heard, observed, requested, executed and spoken—including cancellation and partial playback. Simulation and real-world experiences remain labeled separately. The external harness decides how to summarize and retrieve this evidence.
 

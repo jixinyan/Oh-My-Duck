@@ -12,9 +12,9 @@ tags:
   - project-design
 ---
 
-> 当前核查（客户端 2026-09-29）：MuJoCo/RSL-RL Walking 完成 50000 次更新，Newton/RSL-RL StandUp 两个 seed 各完成 15000 次更新；三组训练与导出完成，最终行为验收均未通过。Walking 低速干预的 8 个配对 run 已完成训练前门禁，尚未进入完整训练。当前没有可用真机，语音播放与中断、交互仿真真实后端验收仍待完成。详见[项目进度](reports/project-status-2026-09-29.md)。
+> 当前核查（客户端 2026-09-29）：上一轮 Walking 与两个 StandUp 完整训练均已完成，最终行为验收均未通过。Walking 低速干预的八组配对 run 已通过训练前门禁，六组正在完整训练并产生原生 PPO 更新，GPU0/1 两组等待其他项目释放。语音 HTTP 服务、Mac 内置扬声器与麦克风已经完成实际音频验证；合成期间停止后没有迟到播放，独立 CPU 服务验证完整会话播音和播音开始后的停止。录音回读与原文有「您好／你好」「小丫／小鸭」两处用字差异。当前没有可用真机，交互仿真草稿仍待真实后端验收。见[Walking 启动记录](reports/rl-walking-low-speed-launch-2026-09-29.md)、[语音交互验收](reports/voice-interaction-validation-2026-09-29.md)与[上一轮结果](reports/project-status-2026-09-29.md)。
 
-> 2026-09-30 Walking 因果修复门禁：将低速命令 tracking signal 作为独立、可恢复校验的单因素干预，默认关闭，不改变官方任务或 PPO 语义。8 个 run 的 smoke、导出、恢复、8192 容量和 CPU/BAM rehearsal 门禁已完成，按最小目标在门禁后停止；完整训练和行为验收仍未完成，未封装为 locomotion tool。详见 [门禁记录](reports/rl-walking-low-speed-gates-2026-09-30.md)。
+> 2026-09-30 Walking 因果修复门禁完成时记录：将低速命令 tracking signal 作为独立、可恢复校验的单因素干预，默认关闭，不改变官方任务或 PPO 语义。8 个 run 的 smoke、导出、恢复、8192 容量和 CPU/BAM rehearsal 门禁已完成，当时按最小目标在门禁后停止；当前正式训练见[Walking 启动记录](reports/rl-walking-low-speed-launch-2026-09-29.md)，行为验收仍待完成，尚未封装为 locomotion tool。门禁证据见[门禁记录](reports/rl-walking-low-speed-gates-2026-09-30.md)。
 
 > 2026-09-30 保护变体：`Mjlab-ProtectiveFall-Flat-MicroDuck` 已注册为独立实验性入口，使用完整碰撞资产和保护 reward primitives；它不改变官方 VelStand/代表性任务，也不代表已有可调用 locomotion tool。只有完成 Newton、导出、CPU/BAM 与行为门禁后，才能把策略注册到上层 tool。
 
@@ -289,7 +289,7 @@ flowchart LR
 | 声音设计 | `Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign` | setup 或用户修改音色时 |
 | 日常合成 | `Qwen/Qwen3-TTS-12Hz-0.6B-Base` | 根据已确认的参考音频与参考文本合成 |
 
-上述三个 Qwen 模型已在 `jd_B300` 的 GPU 5 完成文件推理验收：官方中文录音转写、VoiceDesign 候选生成、显式确认，以及两个独立进程使用同一活动音色版本合成中文语音。两段合成语音的 ASR 回读确认了文字内容；模型 commit、耗时、显存和音频文件见[语音验收记录](reports/voice-validation-2026-09-26.md)。声音相似度的人工试听、麦克风录制和播放设备仍需验证。[S08][S09]
+上述三个 Qwen 模型已在 `jd_B300` 的 GPU 5 完成文件推理验收：官方中文录音转写、VoiceDesign 候选生成、显式确认，以及两个独立进程使用同一活动音色版本合成中文语音。两段合成语音的 ASR 回读确认了文字内容；模型 commit、耗时、显存和音频文件见[语音验收记录](reports/voice-validation-2026-09-26.md)。Mac 内置扬声器播放、内置麦克风录制和远端 HTTP 推理已完成实际验证；独立 CPU 服务验证 `VoiceSession.speak` 完整播音与播音开始后的停止。录音回读与原文有「您好／你好」「小丫／小鸭」两处用字差异；Microduck 音频设备仍待接入。见[语音交互验收](reports/voice-interaction-validation-2026-09-29.md)。[S08][S09]
 
 0.6B Base 的核心用途是参考声音复用。日常语气 / 情绪的自由控制能力不作为该配置的已保证特性，也不依赖每次重新设计声音。后续若需更强表达控制，再比较相应模型与接口。
 

@@ -1,8 +1,8 @@
 # Implementation status
 
-> 当前核查（客户端 2026-09-29）：`jd_B300` 的 MuJoCo/RSL-RL Walking 已完成 50000 次更新，Newton/RSL-RL StandUp 的 seed 42、43 各已完成 15000 次更新；三组完整训练、导出和封装完成，最终 `result.json` 均为 `behavior_failed`。Walking 在无推扰 `0.1 m/s` 前进命令下响应比例约为 0.3%；两组 StandUp 的标准双后端起身评估各为 2/4。Walking 低速干预的 8 个配对 run 已完成训练前门禁，状态为 `prepared`，完整训练尚未执行。核查时八张 GPU 空闲，GitHub 开放 Issues 为 0。语音文件输入与持久音色已验证，麦克风、播放及播放中断仍待接入；交互仿真草稿仍待真实后端验收。服务器原有 2026-09-30 报告名称保持不变。当前证据与后续事项见[项目进度](reports/project-status-2026-09-29.md)。
+> 当前核查（客户端 2026-09-29）：Walking 低速干预的八组配对 run 均通过训练前门禁，六组已产生真实 PPO 更新并建立 W&B 在线记录；MuJoCo/RSL-RL 两组等待 GPU0/1 空闲。固定源码为 `b8c36b2`，每组保持 8192 环境、50000 次更新。三个 Newton worker 的首次启动产物保存为 `execution_failed`，独立运行目录中的三组已进入正式训练；全部 attempt 身份和产物路径见[Walking 启动记录](reports/rl-walking-low-speed-launch-2026-09-29.md)。本轮完整预算与最终行为验收仍待完成。此前 MuJoCo/RSL-RL Walking 与 Newton/RSL-RL StandUp seed 42、43 的三组完整训练、导出和封装均已完成，最终结果均为 `behavior_failed`，详见[上一轮项目结果](reports/project-status-2026-09-29.md)。语音 HTTP 服务、Mac 内置扬声器播放、内置麦克风录制与合成期间停止后的无迟到播放已通过实际验证；合成原文为「你好，我是小鸭。我们现在检查语音连接。」、麦克风回读为「您好，我是小丫。我们现在检查语音连接。」，详见[语音交互验收](reports/voice-interaction-validation-2026-09-29.md)。交互仿真草稿仍待真实后端验收；项目目前没有可用真机。
 
-> 2026-09-30 Walking 因果干预门禁：针对保存策略在 `0.1 m/s` 近似静止、`0.2–0.4 m/s` 才响应的证据，新增的 `low_speed_tracking_boost` 配对实验已完成 8 个 run 的 smoke、导出、恢复、8192 容量和 CPU/BAM rehearsal 门禁；默认值为 0，官方 Walking 配方不变。按最小目标在门禁后停止，尚未进入完整训练，未产生可封装 tool 的策略。首次门禁暴露并修复了 managed-host EGL loader 传播问题，Newton 资产按当前 fingerprint 重建后四组门禁通过。见 [低速干预](reports/rl-walking-low-speed-intervention-2026-09-30.md) 与 [门禁记录](reports/rl-walking-low-speed-gates-2026-09-30.md)。
+> 2026-09-30 Walking 因果干预门禁完成时记录：针对保存策略在 `0.1 m/s` 近似静止、`0.2–0.4 m/s` 才响应的证据，新增的 `low_speed_tracking_boost` 配对实验完成 8 个 run 的 smoke、导出、恢复、8192 容量和 CPU/BAM rehearsal 门禁；默认值为 0，官方 Walking 配方不变。当时按最小目标在门禁后停止，尚未进入完整训练，未产生可封装 tool 的策略。首次门禁暴露并修复了 managed-host EGL loader 传播问题，Newton 资产按当前 fingerprint 重建后四组门禁通过。当前正式训练见[Walking 启动记录](reports/rl-walking-low-speed-launch-2026-09-29.md)；门禁证据见[低速干预](reports/rl-walking-low-speed-intervention-2026-09-30.md)与[门禁记录](reports/rl-walking-low-speed-gates-2026-09-30.md)。
 
 > 2026-09-30 ProtectiveFall 任务入口：已把完整碰撞资产、`servo_impact_contact`、伺服 stall/加速度保护项和 fallen smoothness scaling 组合为独立 `Mjlab-ProtectiveFall-Flat-MicroDuck` 配置，CLI 标为 `experimental_unvalidated`。官方 VelStand、Flat Walking 和 Flat StandUp 配置未被改写；该入口只通过静态配置/14-servo 编译测试，尚未训练、Newton 验证、导出、CPU/BAM 演练或封装为 tool。
 
@@ -172,7 +172,7 @@ is prepared but not launched. Default task recipes and native PPO algorithms rem
 | Core contracts/tool catalog/recording | Tested contracts, tool registry and JSONL event storage |
 | Agentic Harness, skills, robot execution | Deterministic protocol mock and tool-schema boundary verified; EDH transport and robot execution adapters remain pending |
 | Perception and policy adapters | Interfaces for future implementation; no runtime capability claim |
-| Voice file inference | Qwen ASR, VoiceDesign, Base TTS and confirmed voice profiles verified on GPU 5 with real WAV files; microphone capture, playback control and Harness integration pending. See [validation](reports/voice-validation-2026-09-26.md) |
+| Voice interaction | Qwen ASR、VoiceDesign、Base TTS 与确认后的音色版本已通过 GPU 文件推理；Mac 扬声器、麦克风和 HTTP 服务完成实际音频验证，合成期间停止后无迟到播放；独立 CPU 服务验证 `VoiceSession.speak` 正常播完和播音开始后的停止。Microduck 音频设备和 Harness 接入待完成。见[交互验收](reports/voice-interaction-validation-2026-09-29.md)与[文件推理验收](reports/voice-validation-2026-09-26.md) |
 | MuJoCo RL | Both representative tasks × both native PPO frameworks passed the single-GPU lifecycle and completed replay |
 | Isaac/Newton RL | Both representative tasks × both native PPO frameworks passed the single-GPU lifecycle and completed replay |
 | Newton physics | Actual solver, canonical state/sensors, precise collisions, BAM cadence, DR and penalties audited |
