@@ -59,6 +59,7 @@ from oh_my_duck.rl.mdp.events import (
     randomize_dof_field_scaled,
     randomize_imu_orientation,
     randomize_mass_and_inertia,
+    randomize_servo_joints_uniform,
     reset_action_history,
     reset_ball_in_front_of_foot,
     reset_rolling_entry,

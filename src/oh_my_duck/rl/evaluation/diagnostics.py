@@ -1,6 +1,21 @@
 """Explicit frozen-stage interventions and reward evidence for policy diagnosis."""
 from copy import deepcopy
+from dataclasses import replace
 import math
+
+
+def diagnostic_forward_protocol(protocol, speed=None):
+    """Change only Walking's forward command, keeping the acceptance protocol intact."""
+    if speed is None:
+        return protocol
+    if (protocol.kind != 'walking' or isinstance(speed, bool)
+            or not isinstance(speed, (int, float)) or not math.isfinite(speed)
+            or speed == 0 or abs(speed) > 0.4):
+        raise ValueError('Diagnostic forward speed requires Walking and a nonzero speed within ±0.4 m/s')
+    scenarios = tuple(replace(scenario, commands=tuple(
+        (float(speed), command[1], command[2]) if command[0] != 0 else command
+        for command in scenario.commands)) for scenario in protocol.scenarios)
+    return replace(protocol, scenarios=scenarios)
 
 
 def prepare_recipe(cfg, *, profile='standard', curriculum_step=None):

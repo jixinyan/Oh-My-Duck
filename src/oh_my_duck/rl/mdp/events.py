@@ -23,6 +23,29 @@ from dataclasses import dataclass, field
 from oh_my_duck.rl.mdp.constants import _CROUCH_ANCHOR_BY_NAME, _DEFAULT_ASSET_CFG, _ROULADE_FWD_SIGN
 
 
+def _env_origin_z(env: "ManagerBasedRlEnv", env_ids: torch.Tensor) -> torch.Tensor:
+    """Return terrain-relative origin heights for reset poses.
+
+    MuJoCo and Newton place each vectorized environment at its own terrain
+    origin. Reset z values are local trunk heights; writing them directly into
+    world qpos puts resets inside raised rough terrain. Keep the lookup tolerant
+    of lightweight test fixtures and both scene APIs used by the pinned
+    backends.
+    """
+    scene = env.scene
+    terrain = getattr(scene, "terrain", None)
+    if terrain is None and isinstance(scene, dict):
+        terrain = scene.get("terrain")
+    origins = getattr(terrain, "env_origins", None) if terrain is not None else None
+    if origins is None:
+        origins = getattr(scene, "env_origins", None)
+    if origins is None and isinstance(scene, dict):
+        origins = scene.get("env_origins")
+    if origins is None:
+        return torch.zeros(len(env_ids), device=env.device)
+    return origins[env_ids.to(device=env.device, dtype=torch.long), 2]
+
+
 def reset_with_forward_velocity(
     env: ManagerBasedRlEnv,
     env_ids: torch.Tensor,
@@ -601,15 +624,19 @@ def set_random_prone_orientation(
     env_ids: torch.Tensor,
     asset_cfg: SceneEntityCfg = _DEFAULT_ASSET_CFG,
     face_down_prob: float = 0.5,
+    side_prob: float = 0.0,
 ):
-    """Randomly initialize each env as face-down (belly) or face-up (back), with random yaw.
+    """Randomly initialize each env lying down, with random yaw.
 
     Face-down:  +90° pitch → quat = [s*cy, -s*sy,  s*cy,  s*sy]
     Face-up:    -90° pitch → quat = [s*cy,  s*sy, -s*cy,  s*sy]
+    Side:       ±90° roll  → quat = [s*cy, ±s*cy, ±s*sy, s*sy]
 
     Args:
-        face_down_prob: probability of sampling face-down (vs face-up). A curriculum
-            can ramp this from a high initial value (easier task) toward 0.5.
+        face_down_prob: probability of sampling face-down (vs face-up) among
+            non-side samples.
+        side_prob: fraction sampled on either side. The default preserves the
+            historical face-down/face-up distribution.
     """
     if env_ids is None or len(env_ids) == 0:
         return
@@ -623,9 +650,13 @@ def set_random_prone_orientation(
 
     face_down = torch.stack([ s * cy, -s * sy,  s * cy,  s * sy], dim=1)
     face_up   = torch.stack([ s * cy,  s * sy, -s * cy,  s * sy], dim=1)
+    side_sign = torch.where(torch.rand(num, device=env.device) < 0.5, 1.0, -1.0)
+    side = torch.stack([s * cy, side_sign * s * cy, side_sign * s * sy, s * sy], dim=1)
 
     mask = torch.rand(num, device=env.device) < face_down_prob  # True → face-down
     new_quat = torch.where(mask.unsqueeze(1), face_down, face_up)
+    side_mask = torch.rand(num, device=env.device) < side_prob
+    new_quat = torch.where(side_mask.unsqueeze(1), side, new_quat)
 
     env.sim.data.qpos[env_ids, 3:7] = new_quat
     env.sim.data.qvel[env_ids, :6] = 0.0
@@ -763,7 +794,7 @@ def set_random_ground_state(
     # kinematics. Entity writes preserve native joint order on each backend.
     asset: Entity = env.scene[asset_cfg.name]
     pose = asset.data.data.qpos[env_ids][:, asset.indexing.free_joint_q_adr].clone()
-    pose[:, 2] = new_z
+    pose[:, 2] = new_z + _env_origin_z(env, env_ids)
     pose[:, 3:7] = new_quat
     asset.write_root_link_pose_to_sim(pose, env_ids=env_ids)
     asset.write_root_link_velocity_to_sim(torch.zeros(num, 6, device=env.device), env_ids=env_ids)
@@ -846,10 +877,41 @@ def set_random_crouch_state(
     z = z_stand + lam * (z_deep - z_stand) \
         + torch.rand(num, device=env.device) * 0.01
 
-    env.sim.data.qpos[env_ids, 2] = z
+    env.sim.data.qpos[env_ids, 2] = z + _env_origin_z(env, env_ids)
     env.sim.data.qpos[env_ids, 3:7] = quat
     env.sim.data.qpos[env_ids, 7:] = joints
     env.sim.data.qvel[env_ids, :] = 0.0
+
+
+def randomize_servo_joints_uniform(
+    env: ManagerBasedRlEnv,
+    env_ids: torch.Tensor,
+    asset_cfg: SceneEntityCfg = _DEFAULT_ASSET_CFG,
+    range_frac: float = 0.8,
+):
+    """Randomize servo joints within their limits for post-fall reset data.
+
+    Passive backlash and roller joints are left untouched. This is an optional
+    reset intervention for fall-recovery variants; the representative Walking
+    and StandUp recipes keep it disabled by default.
+    """
+    if env_ids is None or len(env_ids) == 0:
+        return
+    if not 0.0 <= range_frac <= 1.0:
+        raise ValueError("range_frac must be within [0, 1]")
+    from oh_my_duck.rl.mdp.state import _servo_joint_ids
+
+    env_ids = env_ids.to(env.device, dtype=torch.long)
+    asset: Entity = env.scene[asset_cfg.name]
+    servo_ids = torch.as_tensor(_servo_joint_ids(env, asset), device=env.device, dtype=torch.long)
+    limits = asset.data.joint_pos_limits[env_ids][:, servo_ids]
+    midpoint = 0.5 * (limits[..., 0] + limits[..., 1])
+    half_width = 0.5 * (limits[..., 1] - limits[..., 0]) * range_frac
+    sample = midpoint + (2.0 * torch.rand_like(midpoint) - 1.0) * half_width
+    joints = asset.data.joint_pos[env_ids].clone()
+    joints[:, servo_ids] = sample
+    asset.write_joint_position_to_sim(joints, env_ids=env_ids)
+    asset.write_joint_velocity_to_sim(torch.zeros_like(joints), env_ids=env_ids)
 
 
 def maybe_set_random_prone_orientation(
@@ -861,6 +923,10 @@ def maybe_set_random_prone_orientation(
     prone_z_min: float = 0.20,
     prone_z_max: float = 0.25,
     crouch_prob: float = 0.0,
+    side_prob: float = 0.0,
+    joint_random_prob: float = 0.0,
+    joint_range_frac: float = 0.8,
+    joint_random_extra_z: float = 0.06,
 ):
     """Reset event that overrides orientation to prone with probability `prone_prob`.
 
@@ -895,11 +961,21 @@ def maybe_set_random_prone_orientation(
     crouch_selected = env_ids_t[(u >= prone_prob) & (u < prone_prob + crouch_prob)]
     if len(selected) > 0:
         set_random_prone_orientation(
-            env, selected, asset_cfg=asset_cfg, face_down_prob=face_down_prob
+            env, selected, asset_cfg=asset_cfg, face_down_prob=face_down_prob,
+            side_prob=side_prob,
         )
         # Override z so the prone body has head/neck clearance when settling.
         z = torch.rand(len(selected), device=env.device) * (prone_z_max - prone_z_min) + prone_z_min
-        env.sim.data.qpos[selected, 2] = z
+        env.sim.data.qpos[selected, 2] = z + _env_origin_z(env, selected)
+        if joint_random_prob > 0.0:
+            if not 0.0 <= joint_random_prob <= 1.0:
+                raise ValueError("joint_random_prob must be within [0, 1]")
+            random_ids = selected[torch.rand(len(selected), device=env.device) < joint_random_prob]
+            if len(random_ids) > 0:
+                randomize_servo_joints_uniform(
+                    env, random_ids, asset_cfg=asset_cfg, range_frac=joint_range_frac
+                )
+                env.sim.data.qpos[random_ids, 2] += joint_random_extra_z
     if len(crouch_selected) > 0:
         set_random_crouch_state(env, crouch_selected, asset_cfg=asset_cfg)
 
@@ -1120,7 +1196,7 @@ def reset_roulade_state(
     z_mid = torch.rand(num, device=env.device) * (midroll_z_max - midroll_z_min) + midroll_z_min
     new_z = torch.where(is_mid, z_mid, z_stand)
 
-    env.sim.data.qpos[env_ids, 2] = new_z
+    env.sim.data.qpos[env_ids, 2] = new_z + _env_origin_z(env, env_ids)
     env.sim.data.qpos[env_ids, 3:7] = quat
     env.sim.data.qvel[env_ids, :6] = 0.0
 

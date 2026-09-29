@@ -4,12 +4,12 @@
     "microduck_rl": {
       "url": "https://github.com/pollen-robotics/microduck_rl.git",
       "branch": "develop",
-      "commit": "29e887ecfbf5d37144759e5a9f8a176dfb83d547"
+      "commit": "cfe1c2adcceb55f6b6e369c888b31c6873175c55"
     },
     "microduck": {
       "url": "https://github.com/pollen-robotics/microduck.git",
       "branch": "main",
-      "commit": "bc41fb5c9a9b39894669c1e022e375cf83800382"
+      "commit": "f0d934e761a0bc96a6a7d1b5bc1260ce5a4120e5"
     }
   },
   "policy": {

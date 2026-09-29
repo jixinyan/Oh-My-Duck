@@ -5,6 +5,37 @@ import pytest
 from oh_my_duck.rl.evaluation.diagnostics import prepare_recipe, summarize_rewards
 
 
+def test_forward_command_intervention_preserves_stops_turns_and_acceptance_limits():
+    from oh_my_duck.rl.evaluation.diagnostics import diagnostic_forward_protocol
+    from oh_my_duck.rl.evaluation.protocols import walking
+    original = walking()
+    assert diagnostic_forward_protocol(original) is original
+    changed = diagnostic_forward_protocol(original, 0.3)
+    assert changed.minimum_command_response == original.minimum_command_response
+    assert changed.zero_command_limits == original.zero_command_limits
+    commands = np.asarray(changed.scenarios[0].commands)
+    np.testing.assert_array_equal(commands[100:300], np.tile([0.3, 0, 0], (200, 1)))
+    before = np.asarray(original.scenarios[0].commands)
+    np.testing.assert_array_equal(commands[:100], before[:100])
+    np.testing.assert_array_equal(commands[300:], before[300:])
+    np.testing.assert_array_equal(before[100:300], np.tile([0.1, 0, 0], (200, 1)))
+
+
+@pytest.mark.parametrize('speed', [0, True, float('nan'), float('inf'), 0.401, -0.401])
+def test_invalid_forward_command_intervention_is_rejected(speed):
+    from oh_my_duck.rl.evaluation.diagnostics import diagnostic_forward_protocol
+    from oh_my_duck.rl.evaluation.protocols import walking
+    with pytest.raises(ValueError):
+        diagnostic_forward_protocol(walking(), speed)
+
+
+def test_forward_command_intervention_rejects_standup():
+    from oh_my_duck.rl.evaluation.diagnostics import diagnostic_forward_protocol
+    from oh_my_duck.rl.evaluation.protocols import standup
+    with pytest.raises(ValueError):
+        diagnostic_forward_protocol(standup(), 0.3)
+
+
 def test_stage_is_detached_before_protocol_reset_and_original_remains_intact():
     term={'weight_stages':[{'step':0,'weight':2.0}]}
     cfg=SimpleNamespace(curriculum={'reward':term})
