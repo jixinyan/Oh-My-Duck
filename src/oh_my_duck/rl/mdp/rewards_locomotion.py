@@ -21,6 +21,7 @@ from mjlab.rl import exporter_utils as _exporter_utils
 from dataclasses import dataclass as _dataclass
 from dataclasses import dataclass, field
 from oh_my_duck.rl.mdp.constants import _DEFAULT_ASSET_CFG, _HIP_PITCH_KNEE_CFG, _NECK_JOINT_CFG, _NECK_JOINT_PATTERNS, _ROLLER_FEET_SITE_CFG
+from oh_my_duck.rl.mdp.state import _fallen_mask, _finite, _servo_joint_vel
 
 
 def joint_accelerations_l2(
@@ -1177,6 +1178,93 @@ def joint_torque_rate_l2(
     rate = current - env._prev_actuator_forces
     env._prev_actuator_forces = current.clone()
     return torch.sum(torch.square(rate), dim=1)
+
+
+def servo_stall_penalty(
+    env: ManagerBasedRlEnv,
+    torque_thresh: float = 0.4,
+    vel_thresh: float = 0.5,
+    asset_cfg: SceneEntityCfg = _DEFAULT_ASSET_CFG,
+) -> torch.Tensor:
+    """Count servo channels that are pushing hard while nearly stationary.
+
+    The term is a non-negative protection cost. It uses the actuator force and
+    the canonical 14-servo joint view, so passive backlash/roller joints cannot
+    change the meaning of the thresholds.
+    """
+    asset: Entity = env.scene[asset_cfg.name]
+    torque = _finite(asset.data.actuator_force)
+    velocity = _finite(_servo_joint_vel(env, asset))
+    if torque.shape != velocity.shape:
+        raise ValueError(
+            f"actuator_force shape {tuple(torque.shape)} does not match servo velocity "
+            f"shape {tuple(velocity.shape)}"
+        )
+    return ((torque.abs() > torque_thresh) & (velocity.abs() < vel_thresh)).float().sum(dim=1)
+
+
+def servo_acc_spike_penalty(
+    env: ManagerBasedRlEnv,
+    acc_thresh: float = 300.0,
+    asset_cfg: SceneEntityCfg = _DEFAULT_ASSET_CFG,
+) -> torch.Tensor:
+    """Penalize servo acceleration above an impact threshold.
+
+    Previous velocity is reset on the first frame of an episode, preventing a
+    stale terminal velocity from charging the next episode. The result is
+    finite and non-negative; task configs should assign it a negative weight.
+    """
+    asset: Entity = env.scene[asset_cfg.name]
+    velocity = _finite(_servo_joint_vel(env, asset))
+    previous = getattr(env, "_servo_acc_prev_vel", None)
+    if previous is None or previous.shape != velocity.shape:
+        previous = velocity.detach().clone()
+    acceleration = (velocity - previous) / float(env.step_dt)
+    episode_length = getattr(env, "episode_length_buf", None)
+    if episode_length is not None:
+        acceleration = torch.where(
+            (episode_length <= 1).unsqueeze(1), torch.zeros_like(acceleration), acceleration
+        )
+    env._servo_acc_prev_vel = velocity.detach().clone()
+    return torch.clamp(acceleration.abs() - acc_thresh, min=0.0).sum(dim=1)
+
+
+def _fallen_smoothness_scale(
+    env: ManagerBasedRlEnv,
+    asset: Entity,
+    fallen_scale: float,
+    gate_tilt_above_deg: float,
+) -> torch.Tensor:
+    if not math.isfinite(fallen_scale) or fallen_scale < 0.0:
+        raise ValueError("fallen_scale must be finite and non-negative")
+    fallen = _fallen_mask(env, asset, 0.0, gate_tilt_above_deg)
+    return torch.where(fallen.bool(), torch.full_like(fallen, fallen_scale), torch.ones_like(fallen))
+
+
+def action_rate_l2_fallen_scaled(
+    env: ManagerBasedRlEnv,
+    fallen_scale: float = 0.1,
+    gate_tilt_above_deg: float = 40.0,
+) -> torch.Tensor:
+    """Scale the native action-rate cost down while the robot is fallen."""
+    asset: Entity = env.scene["robot"]
+    base = torch.sum(
+        torch.square(env.action_manager.action - env.action_manager.prev_action), dim=1
+    )
+    return base * _fallen_smoothness_scale(env, asset, fallen_scale, gate_tilt_above_deg)
+
+
+def joint_torque_rate_l2_fallen_scaled(
+    env: ManagerBasedRlEnv,
+    fallen_scale: float = 0.1,
+    gate_tilt_above_deg: float = 40.0,
+    asset_cfg: SceneEntityCfg = _DEFAULT_ASSET_CFG,
+) -> torch.Tensor:
+    """Scale the native torque-rate cost down while the robot is fallen."""
+    asset: Entity = env.scene[asset_cfg.name]
+    return joint_torque_rate_l2(env, asset_cfg) * _fallen_smoothness_scale(
+        env, asset, fallen_scale, gate_tilt_above_deg
+    )
 
 
 def feet_grounded_reward(

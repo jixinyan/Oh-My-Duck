@@ -64,15 +64,52 @@ OFFICIAL_SET = {
 }
 
 
-def _tiny_policy(path: Path, obs_len: int = m.OBS_LEN, action_len: int = m.ACTION_LEN) -> Path:
+def _tiny_policy(
+    path: Path,
+    obs_len: int = m.OBS_LEN,
+    action_len: int = m.ACTION_LEN,
+    *,
+    obs_shape: list[int | None] | None = None,
+    action_shape: list[int | None] | None = None,
+    dtype: int = TensorProto.FLOAT,
+) -> Path:
     """A one-layer 'policy' with the daemon's shape, so the ONNX checks run without torch."""
     rng = np.random.default_rng(0)
     w = numpy_helper.from_array(rng.normal(0, 0.1, (obs_len, action_len)).astype(np.float32), "W")
     node = helper.make_node("MatMul", ["obs", "W"], ["actions"])
     graph = helper.make_graph(
         [node], "policy",
-        [helper.make_tensor_value_info("obs", TensorProto.FLOAT, [1, obs_len])],
-        [helper.make_tensor_value_info("actions", TensorProto.FLOAT, [1, action_len])],
+        [helper.make_tensor_value_info("obs", dtype, obs_shape or [1, obs_len])],
+        [helper.make_tensor_value_info("actions", dtype, action_shape or [1, action_len])],
+        initializer=[w],
+    )
+    model = helper.make_model(graph, opset_imports=[helper.make_opsetid("", 17)])
+    model.ir_version = 8
+    onnx.save(model, str(path))
+    return path
+
+
+def _tiny_recurrent_policy(path: Path, *, hidden: int = 4) -> Path:
+    """A deterministic explicit-state graph matching the daemon's API 2 contract."""
+    rng = np.random.default_rng(1)
+    w = numpy_helper.from_array(rng.normal(0, 0.1, (m.OBS_LEN, m.ACTION_LEN)).astype(np.float32), "W")
+    graph = helper.make_graph(
+        [
+            helper.make_node("MatMul", ["obs", "W"], ["actions"]),
+            helper.make_node("Identity", ["h_in"], ["h_out"]),
+            helper.make_node("Identity", ["c_in"], ["c_out"]),
+        ],
+        "recurrent-policy",
+        [
+            helper.make_tensor_value_info("obs", TensorProto.FLOAT, [1, m.OBS_LEN]),
+            helper.make_tensor_value_info("h_in", TensorProto.FLOAT, [1, 1, hidden]),
+            helper.make_tensor_value_info("c_in", TensorProto.FLOAT, [1, 1, hidden]),
+        ],
+        [
+            helper.make_tensor_value_info("actions", TensorProto.FLOAT, [1, m.ACTION_LEN]),
+            helper.make_tensor_value_info("h_out", TensorProto.FLOAT, [1, 1, hidden]),
+            helper.make_tensor_value_info("c_out", TensorProto.FLOAT, [1, 1, hidden]),
+        ],
         initializer=[w],
     )
     model = helper.make_model(graph, opset_imports=[helper.make_opsetid("", 17)])
@@ -89,7 +126,7 @@ def test_constants_are_the_daemons():
     here is a refusal on every robot, before the download."""
     assert (m.OBS_LEN, m.ACTION_LEN) == (61, 14)
     assert m.ROBOT["model"] == "microduck"
-    assert m.MODEL_API == 1
+    assert m.MODEL_API == 2
     assert m.SCHEMA_VERSION == 2
 
 
@@ -118,7 +155,7 @@ def test_the_official_set_validates_per_entry():
     [
         ({"obs_len": 51}, "obs_len"),
         ({"action_len": 12}, "action_len"),
-        ({"model_api": 2}, "model_api"),
+        ({"model_api": 3}, "model_api"),
         ({"robot": {"model": "reachy"}}, "robot.model"),
         ({"kind": "oneshot"}, "kind"),
         ({"command": {"encoding": "telepathy"}}, "encoding"),
@@ -208,6 +245,37 @@ def test_the_readme_tells_the_owner_how_to_run_it():
     assert "--hold <seconds>" in m.render_readme(pp, "someone/microduck-flamingo")
 
 
+def test_the_readme_puts_the_repo_under_the_robotics_pipeline():
+    ep = m.build_manifest(name="bow", kind="episodic", description="Bows.", duration_s=4.0)
+    front = m.render_readme(ep, "someone/microduck-bow").split("---")[1]
+    assert "pipeline_tag: robotics" in front.splitlines()
+    assert "base_model" not in front, "an original policy declares no parent"
+
+
+def test_a_gait_tags_its_slot_for_the_hub_snippet():
+    gait = m.build_manifest(name="my-walk", kind="perpetual", description="d", slot="walk")
+    front = m.render_readme(gait, "u/microduck-my-walk").split("---")[1].splitlines()
+    assert "- microduck-slot:walk" in front
+    no_slot = m.build_manifest(name="bow", kind="episodic", description="d", duration_s=4.0)
+    assert "microduck-slot" not in m.render_readme(no_slot, "u/microduck-bow")
+
+
+def test_a_remix_declares_its_base_model():
+    ep = m.build_manifest(name="bow", kind="episodic", description="Bows.", duration_s=4.0)
+    text = m.render_readme(ep, "someone/microduck-deep-bow", base_model="pollen/microduck-bow")
+    front = text.split("---")[1].splitlines()
+    assert "base_model: pollen/microduck-bow" in front
+    assert "base_model_relation: finetune" in front
+    assert "https://huggingface.co/pollen/microduck-bow" in text
+
+
+@pytest.mark.parametrize("base", ["microduck-bow", "a/b/c", "", "someone/microduck-bow"])
+def test_a_bad_base_model_is_refused(base):
+    ep = m.build_manifest(name="bow", kind="episodic", description="Bows.", duration_s=4.0)
+    with pytest.raises(m.ManifestError, match="base_model"):
+        m.render_readme(ep, "someone/microduck-bow", base_model=base)
+
+
 # -- the ONNX gate ------------------------------------------------------------------------------
 
 
@@ -218,6 +286,42 @@ def test_a_61_to_14_graph_passes_and_smoke_runs(tmp_path):
     m.smoke_run_onnx(path)
 
 
+def test_an_explicit_state_lstm_contract_passes_and_smoke_runs(tmp_path):
+    path = _tiny_recurrent_policy(tmp_path / "lstm.onnx")
+    shape = m.check_onnx(path)
+    assert shape.recurrent and shape.model_api == 2
+    assert shape.state_shape == (1, 1, 4)
+    m.smoke_run_onnx(path)
+
+
+def test_policy_network_keeps_private_recurrent_state_and_resets_on_error(tmp_path):
+    from oh_my_duck.rl.artifacts.inference import PolicyNetwork
+
+    network = PolicyNetwork(_tiny_recurrent_policy(tmp_path / "lstm.onnx"))
+    obs = np.zeros(61, dtype=np.float32)
+    first = network.infer(obs)
+    assert first.shape == (1, 14)
+    network.infer(obs)
+    with pytest.raises(ValueError, match="finite"):
+        network.infer(np.full(61, np.nan, dtype=np.float32))
+    np.testing.assert_array_equal(network.state["h_in"], 0.0)
+    np.testing.assert_array_equal(network.state["c_in"], 0.0)
+
+
+@pytest.mark.parametrize(
+    "kwargs, why",
+    [
+        ({"obs_shape": [2, m.OBS_LEN]}, "observation"),
+        ({"obs_shape": [m.OBS_LEN]}, "observation"),
+        ({"dtype": TensorProto.DOUBLE}, "float32"),
+    ],
+)
+def test_the_shape_gate_rejects_non_runtime_tensor_contracts(tmp_path, kwargs, why):
+    path = _tiny_policy(tmp_path / "bad.onnx", **kwargs)
+    with pytest.raises(m.ManifestError, match=why):
+        m.check_onnx(path)
+
+
 def test_a_legacy_51d_graph_is_refused_before_upload(tmp_path):
     path = _tiny_policy(tmp_path / "old.onnx", obs_len=51)
     with pytest.raises(m.ManifestError, match="51"):
@@ -226,7 +330,7 @@ def test_a_legacy_51d_graph_is_refused_before_upload(tmp_path):
 
 def test_a_wrong_action_width_is_refused(tmp_path):
     path = _tiny_policy(tmp_path / "wide.onnx", action_len=16)
-    with pytest.raises(m.ManifestError, match="16 actions"):
+    with pytest.raises(m.ManifestError, match=r"\[1, 16\]"):
         m.check_onnx(path)
 
 
@@ -265,3 +369,33 @@ def test_the_cli_dry_run_writes_a_repo(tmp_path, monkeypatch):
     assert manifest["training"]["source_file"] == "out.onnx"
     assert "commit" in manifest["training"], "git provenance is filled from the checkout"
     assert "robotctl policy add bow someone/microduck-bow" in (out / "README.md").read_text()
+
+
+def test_the_cli_ships_a_video_as_replay_mp4_and_nowhere_else(tmp_path, monkeypatch):
+    """The Hub's replay widget finds `replay.mp4` by name; the manifest and README stay silent."""
+    from oh_my_duck.rl.artifacts.publish.cli import PublishConfig, run
+
+    policy = _tiny_policy(tmp_path / "out.onnx")
+    clip = tmp_path / "bow_take3.mp4"
+    clip.write_bytes(b"not really an mp4")
+    monkeypatch.chdir(tmp_path)
+    code = run(PublishConfig(
+        repo="someone/microduck-bow", kind="episodic", onnx=str(policy),
+        duration_s=4.0, description="Bows.", video=str(clip), dry_run=True,
+    ))
+    assert code == 0
+    out = tmp_path / "publish-bow"
+    assert (out / m.REPLAY_FILE).read_bytes() == clip.read_bytes()
+    for text in ((out / "manifest.json").read_text(), (out / "README.md").read_text()):
+        assert "mp4" not in text and "bow_take3" not in text
+
+
+def test_the_cli_refuses_a_missing_video(tmp_path):
+    from oh_my_duck.rl.artifacts.publish.cli import PublishConfig, run
+
+    policy = _tiny_policy(tmp_path / "out.onnx")
+    with pytest.raises(SystemExit):
+        run(PublishConfig(
+            repo="someone/microduck-bow", kind="episodic", onnx=str(policy),
+            duration_s=4.0, video=str(tmp_path / "nope.mp4"), dry_run=True,
+        ))

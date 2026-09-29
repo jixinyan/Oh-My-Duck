@@ -640,6 +640,10 @@ def set_random_prone_orientation(
     """
     if env_ids is None or len(env_ids) == 0:
         return
+    if not math.isfinite(face_down_prob) or not 0.0 <= face_down_prob <= 1.0:
+        raise ValueError("face_down_prob must be within [0, 1]")
+    if not math.isfinite(side_prob) or not 0.0 <= side_prob <= 1.0:
+        raise ValueError("side_prob must be within [0, 1]")
     env_ids = env_ids.to(env.device, dtype=torch.int)
     num = len(env_ids)
 
@@ -650,13 +654,15 @@ def set_random_prone_orientation(
 
     face_down = torch.stack([ s * cy, -s * sy,  s * cy,  s * sy], dim=1)
     face_up   = torch.stack([ s * cy,  s * sy, -s * cy,  s * sy], dim=1)
-    side_sign = torch.where(torch.rand(num, device=env.device) < 0.5, 1.0, -1.0)
-    side = torch.stack([s * cy, side_sign * s * cy, side_sign * s * sy, s * sy], dim=1)
-
     mask = torch.rand(num, device=env.device) < face_down_prob  # True → face-down
     new_quat = torch.where(mask.unsqueeze(1), face_down, face_up)
-    side_mask = torch.rand(num, device=env.device) < side_prob
-    new_quat = torch.where(side_mask.unsqueeze(1), side, new_quat)
+    # Keep the historical random stream exactly unchanged when side sampling is
+    # disabled. This matters for reproducible baseline Walking/StandUp seeds.
+    if side_prob > 0.0:
+        side_sign = torch.where(torch.rand(num, device=env.device) < 0.5, 1.0, -1.0)
+        side = torch.stack([s * cy, side_sign * s * cy, side_sign * s * sy, s * sy], dim=1)
+        side_mask = torch.rand(num, device=env.device) < side_prob
+        new_quat = torch.where(side_mask.unsqueeze(1), side, new_quat)
 
     env.sim.data.qpos[env_ids, 3:7] = new_quat
     env.sim.data.qvel[env_ids, :6] = 0.0
@@ -948,6 +954,21 @@ def maybe_set_random_prone_orientation(
     """
     if prone_prob <= 0.0 and crouch_prob <= 0.0:
         return
+    for name, probability in (
+        ("prone_prob", prone_prob),
+        ("crouch_prob", crouch_prob),
+        ("face_down_prob", face_down_prob),
+        ("side_prob", side_prob),
+        ("joint_random_prob", joint_random_prob),
+    ):
+        if not math.isfinite(probability) or not 0.0 <= probability <= 1.0:
+            raise ValueError(f"{name} must be within [0, 1]")
+    if prone_prob + crouch_prob > 1.0:
+        raise ValueError("prone_prob + crouch_prob must be <= 1")
+    if not math.isfinite(joint_range_frac) or not 0.0 <= joint_range_frac <= 1.0:
+        raise ValueError("joint_range_frac must be within [0, 1]")
+    if not math.isfinite(joint_random_extra_z):
+        raise ValueError("joint_random_extra_z must be finite")
     # env_ids=None means "all envs" (the initial global reset passes None —
     # the old early-return silently skipped prone init there).
     if env_ids is None:
@@ -968,8 +989,6 @@ def maybe_set_random_prone_orientation(
         z = torch.rand(len(selected), device=env.device) * (prone_z_max - prone_z_min) + prone_z_min
         env.sim.data.qpos[selected, 2] = z + _env_origin_z(env, selected)
         if joint_random_prob > 0.0:
-            if not 0.0 <= joint_random_prob <= 1.0:
-                raise ValueError("joint_random_prob must be within [0, 1]")
             random_ids = selected[torch.rand(len(selected), device=env.device) < joint_random_prob]
             if len(random_ids) > 0:
                 randomize_servo_joints_uniform(

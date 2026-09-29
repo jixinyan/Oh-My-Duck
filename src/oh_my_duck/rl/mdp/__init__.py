@@ -134,7 +134,9 @@ from oh_my_duck.rl.mdp.rewards_locomotion import (
     hip_pitch_knee_vel_l2,
     is_alive,
     joint_accelerations_l2,
+    action_rate_l2_fallen_scaled,
     joint_torque_rate_l2,
+    joint_torque_rate_l2_fallen_scaled,
     joint_torques_l2,
     joint_vel_l2_when_standing,
     leg_action_acceleration_l2,
@@ -162,6 +164,8 @@ from oh_my_duck.rl.mdp.rewards_locomotion import (
     wheel_glide_reward,
     wheel_speed_reward,
     zero_command_padding,
+    servo_acc_spike_penalty,
+    servo_stall_penalty,
 )
 from oh_my_duck.rl.mdp.rewards_pose import (
     _gp_phase,
