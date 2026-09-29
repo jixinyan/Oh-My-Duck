@@ -4,7 +4,7 @@ title: Agentic Microduck — 项目概览与详细设计
 version: 0.2
 status: Implementation in progress
 created: 2026-09-05
-updated: 2026-09-26
+updated: 2026-09-30
 tags:
   - microduck
   - embodied-ai
@@ -12,6 +12,8 @@ tags:
   - sim-to-real
   - project-design
 ---
+
+> 2026-09-30 策略优先：上层 agent 未来通过工具调用已验证的 Walking、StandUp 等执行策略。当前 jd_B300 的完整策略产物尚未达到行为验收：Walking 无推扰前进响应约 0.3%，StandUp 在俯卧/仰卧恢复失败。先完成单因素因果修复、完整 RL 门禁和跨后端/CPU 回放，再将通过验收的策略封装为 tool；外部 Embodied-DeepSeek-Harness 目前只保留接口与确定性 mock，不提前实现本地 agent loop。
 
 > 2026-09-26 RL 进度：`jd_B300` 上 9 月 23 日启动的三组训练在完整预算前中断，checkpoint 与日志均已保存，退出代码 247 的原因尚未确认。MuJoCo/RSL-RL Walking 官方配置对照已在 GPU 6 进入 50000 次更新的完整训练；Newton/RSL-RL StandUp 的 seed 42、43 均保存了已完成 5001 次更新的原生 checkpoint，恢复计数修复已通过真实 Newton 连续两次恢复验证。两组正式恢复已分别在 GPU 2、1 进入完整接续训练，日志确认从第 5001 次更新继续，且已连续运行至标签 5005。官方固定源码与当前 Flat 任务配置、直接引用的 MDP 函数和 BAM 已完成核查，现有证据尚未确认训练行为差异的单一原因。Walking 与 StandUp 的最终行为验收仍待完整训练和评估。见 [中断训练诊断](reports/rl-jd-interrupted-2026-09-26.md) 与 [官方实现核对](reports/rl-official-comparison-2026-09-26.md)。下方保留历史记录。
 
@@ -341,7 +343,7 @@ flowchart LR
 
 ### 6.1 通用 harness 接口约束
 
-外部 harness 的最终 API 尚未提供。本项目先定义语义契约，实际名称、传输方式在 bridge 内映射：
+外部 harness 的最终 API 尚未提供。本项目先定义语义契约，实际名称、传输方式在 bridge 内映射。2026-09-30 已加入确定性 mock，真实 EDH transport 仍不可用：
 
 - 提交用户文本，并携带录音、会话和请求来源。
 - 注册工具描述、参数 schema 和实际设备能力。
@@ -349,7 +351,7 @@ flowchart LR
 - 接收待播报文本和工具调用。
 - 使用 harness 提供的任务标识与取消机制。
 
-开发时使用一个最小确定性 harness stub 验证接口，例如固定把“坐下”映射到已注册技能。stub 只验证连接，不实现替代版 agent loop 或长期记忆。
+开发时使用一个最小确定性 harness stub 验证接口，例如把预先配置的文本映射到已注册工具。stub 只验证请求、注册、参数校验、事件、experience 和取消边界，不实现替代版 agent loop 或长期记忆。
 
 ### 6.2 工具示例
 

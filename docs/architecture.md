@@ -73,7 +73,7 @@ trainable on another backend; no diagnostic fallback is allowed.
 7. The recorder persists evidence. The harness decides what to remember and what to say.
 8. TTS consumes the confirmed active voice profile and the harness's response text.
 
-Current contracts are Python interface proposals, not a frozen external wire protocol. No concrete robot backend or model is silently created by constructing a protocol.
+Current contracts are Python semantic contracts, not a frozen external wire protocol. The deterministic harness mock uses explicit text routes and never starts a model, planner or memory loop. The external Embodied DeepSeek Harness is kept behind the same bridge until its wire API is stable. No concrete robot backend or model is silently created by constructing a protocol.
 
 ## How to add functionality
 
@@ -91,7 +91,7 @@ Current contracts are Python interface proposals, not a frozen external wire pro
 
 ## Current framework limits
 
-Qwen WAV transcription, voice design, confirmed voice storage and WAV synthesis have GPU validation. Microphone capture, playback interruption, sensor acquisition, real-robot transport and autonomous behavior remain unavailable. Isaac/Newton representative training has separate evidence in the implementation status. Tool handlers must validate their declared schemas; automatic JSON Schema validation is not yet implemented. The JSONL recorder supports a single process with threads, without cross-process locking or a database durability guarantee.
+Qwen WAV transcription, voice design, confirmed voice storage and WAV synthesis have GPU validation. Microphone capture, playback interruption, sensor acquisition, real-robot transport and autonomous behavior remain unavailable. Isaac/Newton representative training has separate evidence in the implementation status. Tool handlers receive arguments after the catalog validates the supported JSON Schema subset; full EDH contract validation remains the responsibility of the eventual transport adapter. The JSONL recorder supports a single process with threads, without cross-process locking or a database durability guarantee.
 
 `configs/project.json` and `omd status` describe **software maturity**, not live robot capability discovery. Keep future device-specific discovery separate.
 
@@ -100,8 +100,11 @@ Qwen WAV transcription, voice design, confirmed voice storage and WAV synthesis 
 1. Establish and verify the framework, dependency boundaries, module map and entry point.
 2. Fill the official training/evaluation adapter and record actual worker evidence.
 3. Add Newton training and sim2sim tests.
-4. Fill robot execution, skill/tool adapters and deterministic Harness mock.
-5. Add voice, perception, replay and hardware functionality by milestone.
+4. Validate effective Walking and StandUp policies through the full RL gates,
+   including cross-backend replay and CPU/BAM evidence.
+5. Expose only verified policies through robot execution and skill/tool
+   adapters, then bind the deterministic Harness mock to those contracts.
+6. Add voice, perception, replay and hardware functionality by milestone.
 
 The original Project Design and Execution Plan remain the product and milestone authorities. Update them together with this architecture document when changing boundaries.
 

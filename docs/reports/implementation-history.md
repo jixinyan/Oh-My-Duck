@@ -17,7 +17,7 @@ Updated: 2026-09-06. Current priority: **complete the whole-project framework, t
 | Tool catalog | Registry implemented and tested | Unknown tools unsupported; duplicate names / wrong request IDs rejected |
 | Active perception / target records | Interface only | Sensor-backed look/inspect and tracking |
 | Joint / velocity / sequence policy adapters | Interface only | Concrete inference runtimes |
-| Harness bridge | Interface only | Deterministic mock first; no alternative agent loop |
+| Harness bridge | Deterministic protocol mock implemented and tested | Explicit text routes, request identity, cancellation, event/experience deduplication and tool-schema validation; EDH transport remains pending |
 | Voice services | Interfaces only | VoiceDesign, confirmed profile store, ASR, TTS, audio devices |
 | Episode recording | JSONL implementation tested | Single process; payload storage/replay still pending |
 | Training backend registry | Implemented and tested | Unimplemented Newton cannot fall back to another engine |

@@ -39,7 +39,7 @@ The duck's name, voice and remembered experiences give it continuity. Learning n
 
 ![Project architecture: interaction, external harness, robot tools, simulation and experience recording.](docs/diagrams/project-overview.svg)
 
-**The external harness supplies the agent loop.** Oh My Duck supplies robot-specific tools, execution adapters, training, voice services and evidence. We do not build a second planner or long-term memory system inside the robot integration. A deterministic mock will stand in for the unfinished harness during protocol development.
+**The external harness supplies the agent loop.** Oh My Duck supplies robot-specific tools, execution adapters, training, voice services and evidence. We do not build a second planner or long-term memory system inside the robot integration. The deterministic bridge mock now covers protocol development; the real Embodied DeepSeek Harness transport remains unavailable until its wire API is released.
 
 High-frequency joint control stays with the policy/runtime. The harness chooses tasks and can observe, interrupt or replan; a model response is not itself evidence that a physical task succeeded.
 

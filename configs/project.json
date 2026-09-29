@@ -26,8 +26,8 @@
     },
     "harness": {
       "module": "oh_my_duck.agentic.harness",
-      "state": "interface_only",
-      "role": "External harness bridge; deterministic mock is next"
+      "state": "deterministic_mock_protocol_verified_external_bridge_pending",
+      "role": "External EDH bridge boundary with a deterministic text-route mock; no local agent loop"
     },
     "voice": {
       "module": "oh_my_duck.voice",
@@ -81,7 +81,7 @@
   },
   "execution": {
     "hardware_available": false,
-    "harness": "external_with_planned_mock",
+    "harness": "external_edh_bridge_pending_deterministic_mock_available",
     "server_jobs": "Direct independent GPU learners on jd_B300 authorized 2026-09-23; explicit idle-device allocation",
     "headless": true,
     "video": "offscreen_1280x720",
