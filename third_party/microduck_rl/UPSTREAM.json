@@ -27,11 +27,11 @@
     "Publishing provenance names jixinyan/Oh-My-Duck",
     "Selected upstream CPU regression tests migrated; CLI name changed to omd-publish",
     "CPU rehearsal uses a project BAM extension to match FRICTION_DOF constraints by DOF id, correcting pinned BAM CPU joint-id indexing; motor and friction formulas and dependency pins are unchanged.",
-    "Reviewed develop through cfe1c2a and main through f0d934e; migrated terrain-origin-relative reset poses into the owned event layer and retained the upstream all-collision/protective-fall work as an explicit future variant rather than changing representative Walking/StandUp semantics.",
+    "Reviewed develop through cfe1c2a and main through f0d934e; migrated terrain-origin-relative reset poses into the owned event layer and kept full-collision/protective-fall semantics as an explicit future variant rather than changing representative Walking/StandUp semantics.",
     "Migrated official schema-2 replay video/base-model publisher fields and dry-run staging.",
     "Migrated official API-2 explicit-state LSTM shape/type/state-smoke checks and private reset-on-failure policy wrapper; feed-forward API-1 remains unchanged.",
     "Migrated official BT.601/UYVY camera packing, 8x8 ToF conventions with per-ray invalid guards, and generated v15/alpha4/alpha16 sole odometry anchor data as owned adapters.",
-    "Migrated protective-fall servo stall/acceleration protection costs and fallen smoothness scaling as unbound MDP primitives; full VelStand expert-BC and warm-start runner semantics remain a separate gated variant."
+    "Migrated protective-fall servo stall/acceleration protection costs, fallen smoothness scaling, and the named full-collision backlash asset as unbound MDP primitives; full VelStand expert-BC and warm-start runner semantics remain a separate gated variant."
   ],
   "files": [
     {

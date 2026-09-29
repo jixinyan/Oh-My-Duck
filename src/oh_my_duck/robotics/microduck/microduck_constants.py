@@ -34,6 +34,8 @@ MICRODUCK_GROUNDCONTACT_ROLLERS_XML: Path = _ROBOT_DIR / "robot_groundcontact_ro
 MICRODUCK_GROUNDCONTACT_BACKLASH_XML: Path = _ROBOT_DIR / "robot_groundcontact_backlash.xml"
 MICRODUCK_WALK_BACKLASH_XML: Path = _ROBOT_DIR / "robot_walk_backlash.xml"
 MICRODUCK_GROUNDCONTACT_ROLLERS_BACKLASH_XML: Path = _ROBOT_DIR / "robot_groundcontact_rollers_backlash.xml"
+# Full-collision backlash model used by protective-fall / VelStand variants.
+MICRODUCK_ALLCOLLISIONS_BACKLASH_XML: Path = _ROBOT_DIR / "robot_allcollisions_backlash.xml"
 
 assert MICRODUCK_WALK_XML.exists(), f"XML not found: {MICRODUCK_WALK_XML}"
 assert MICRODUCK_GROUNDCONTACT_XML.exists(), f"XML not found: {MICRODUCK_GROUNDCONTACT_XML}"
@@ -43,6 +45,30 @@ assert MICRODUCK_GROUNDCONTACT_ROLLERS_XML.exists(), f"XML not found: {MICRODUCK
 assert MICRODUCK_GROUNDCONTACT_BACKLASH_XML.exists(), f"XML not found: {MICRODUCK_GROUNDCONTACT_BACKLASH_XML}"
 assert MICRODUCK_WALK_BACKLASH_XML.exists(), f"XML not found: {MICRODUCK_WALK_BACKLASH_XML}"
 assert MICRODUCK_GROUNDCONTACT_ROLLERS_BACKLASH_XML.exists(), f"XML not found: {MICRODUCK_GROUNDCONTACT_ROLLERS_BACKLASH_XML}"
+assert MICRODUCK_ALLCOLLISIONS_BACKLASH_XML.exists(), f"XML not found: {MICRODUCK_ALLCOLLISIONS_BACKLASH_XML}"
+
+
+SERVO_MESH_NAME = "xl330"
+SERVO_GEOM_SUFFIX = "_servo_collision"
+
+
+def name_servo_collision_geoms(spec: mujoco.MjSpec) -> mujoco.MjSpec:
+    """Name XL330 housing collision geoms for impact sensing.
+
+    The CAD export leaves most collision geoms unnamed. Protective-fall tasks
+    need to distinguish a servo housing hitting the floor from a shell contact,
+    so this applies a stable ``<body>_<n>_servo_collision`` name to every
+    colliding ``xl330`` mesh. It mutates only the supplied spec.
+    """
+    counts: dict[str, int] = {}
+    for geom in spec.geoms:
+        if geom.meshname != SERVO_MESH_NAME or (geom.contype == 0 and geom.conaffinity == 0):
+            continue
+        body = geom.parent.name
+        index = counts.get(body, 0)
+        counts[body] = index + 1
+        geom.name = f"{body}_{index}{SERVO_GEOM_SUFFIX}"
+    return spec
 
 
 def get_walk_spec() -> mujoco.MjSpec:
@@ -64,7 +90,13 @@ def get_walk_rollers_spec() -> mujoco.MjSpec:
 
 
 def get_allcollisions_spec() -> mujoco.MjSpec:
-    return mujoco.MjSpec.from_file(str(MICRODUCK_ALLCOLLISIONS_XML))
+    return name_servo_collision_geoms(mujoco.MjSpec.from_file(str(MICRODUCK_ALLCOLLISIONS_XML)))
+
+
+def get_allcollisions_backlash_spec() -> mujoco.MjSpec:
+    return name_servo_collision_geoms(
+        mujoco.MjSpec.from_file(str(MICRODUCK_ALLCOLLISIONS_BACKLASH_XML))
+    )
 
 
 def get_ball_spec() -> mujoco.MjSpec:
@@ -189,6 +221,19 @@ MICRODUCK_STANDUP_ROBOT_CFG = EntityCfg(
     ),
 )
 
+# Full-collision model for protective-fall experiments. Keep this separate from
+# StandUp's curated ground-contact model so existing policy comparisons remain
+# reproducible when all body parts are allowed to contact the floor.
+MICRODUCK_ALLCOLLISIONS_ROBOT_CFG = EntityCfg(
+    spec_fn=get_allcollisions_spec,
+    init_state=HOME_FRAME,
+    collisions=(FULL_COLLISION,),
+    articulation=EntityArticulationInfoCfg(
+        actuators=(actuators,),
+        soft_joint_pos_limit_factor=0.9,
+    ),
+)
+
 MICRODUCK_GROUND_PICK_ROBOT_CFG = EntityCfg(
     spec_fn=get_ground_pick_spec,
     init_state=HOME_FRAME,
@@ -208,6 +253,16 @@ MICRODUCK_GROUND_PICK_ROBOT_CFG = EntityCfg(
 # unconfounded by the collision model).
 MICRODUCK_BACKLASH_ROBOT_CFG = EntityCfg(
     spec_fn=get_backlash_spec,
+    init_state=BACKLASH_HOME_FRAME,
+    collisions=(FULL_COLLISION,),
+    articulation=EntityArticulationInfoCfg(
+        actuators=(backlash_actuators,),
+        soft_joint_pos_limit_factor=0.9,
+    ),
+)
+
+MICRODUCK_ALLCOLLISIONS_BACKLASH_ROBOT_CFG = EntityCfg(
+    spec_fn=get_allcollisions_backlash_spec,
     init_state=BACKLASH_HOME_FRAME,
     collisions=(FULL_COLLISION,),
     articulation=EntityArticulationInfoCfg(
