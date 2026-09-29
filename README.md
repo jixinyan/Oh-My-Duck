@@ -5,7 +5,7 @@
 # Oh My Duck 🦆
 
 [![Status: active development](https://img.shields.io/badge/status-active_development-blue)](docs/implementation-status.md)
-[![RL acceptance: partial](https://img.shields.io/badge/RL_acceptance-partial-orange)](docs/implementation-status.md)
+[![RL behavior: unmet](https://img.shields.io/badge/RL_behavior-unmet-orange)](docs/reports/project-status-2026-09-29.md)
 [![Recorded CPU checks: 55 passed on 2026-09-23](https://img.shields.io/badge/recorded_CPU_checks-55_passed-2ea44f)](docs/reports/project-status-2026-09-23.md)
 [![Voice: file inference verified](https://img.shields.io/badge/voice-file_inference_verified-green)](docs/reports/voice-validation-2026-09-26.md)
 [![Hardware validation: pending](https://img.shields.io/badge/hardware_validation-pending-orange)](docs/implementation-status.md)
@@ -55,7 +55,7 @@ Representative RL tasks are flat-ground Walking and StandUp. Task recipes, MDP f
 
 Task families have separate environment and PPO configurations under `rl/tasks/<family>/`; see the [RL source map](src/oh_my_duck/rl/README.md). [Training campaigns](docs/rl-campaigns.md) assign independent task/framework runs to GPUs, with explicit sharing and checkpoint recovery when needed.
 
-Training and evaluation run headlessly. `omd preview` creates checkpoint videos and a local gallery for visual inspection alongside numerical metrics. The current training host is `jd_B300`, where explicitly assigned scheduler GPUs can run independent learners. W&B records training online under the verified project account and keeps local run artifacts. The September 2026 checkpoints and failed gates remain preserved; no RL worker is running now. The current final MuJoCo/RSL Walking export has a measured low-speed command dead zone, and the Newton RSL StandUp export still fails prone and supine recovery. A policy is not exposed as a locomotion tool until it passes the unforced behavior gates. See the [training diagnosis](docs/reports/rl-jd-interrupted-2026-09-26.md), [command dead-zone diagnosis](docs/reports/rl-walking-command-deadzone-2026-09-30.md), and [implementation status](docs/implementation-status.md).
+Training and evaluation run headlessly. `omd preview` creates checkpoint videos and a local gallery alongside numerical metrics. The training host is `jd_B300`; W&B records training under the verified project account and keeps local artifacts. The MuJoCo/RSL Walking run finished 50,000 updates, and both Newton/RSL StandUp runs finished 15,000. Native export and packaging completed, while final behavior gates failed: Walking has a measured low-speed command dead zone, and both StandUp policies fail prone and supine recovery. Eight paired Walking control/boost runs have passed preparation gates; their full training has not started. No RL learner is running now. Locomotion tools await policy behavior acceptance. See the [current project status](docs/reports/project-status-2026-09-29.md) and [implementation status](docs/implementation-status.md).
 
 ## A voice and history that persist
 

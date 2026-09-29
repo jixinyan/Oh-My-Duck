@@ -41,7 +41,7 @@
     },
     "training": {
       "module": "oh_my_duck.rl.training",
-      "state": "pipeline_verified_walking_and_standup_full_running_behavior_pending",
+      "state": "pipeline_verified_three_full_runs_completed_behavior_failed",
       "role": "Independent simulation-backend and RL-framework selection, configured W&B training and evaluation"
     },
     "perception": {
@@ -89,7 +89,7 @@
     "mujoco_video": "explicit_osmesa_on_current_host; native_newton_video_unchanged",
     "representative_videos_verified": 60,
     "checkpoint_previews": {
-      "state": "stopped_by_user_galleries_preserved",
+      "state": "completed_galleries_preserved_no_active_preview",
       "gallery": "outputs/previews/fixed-8192-0908-01/index.html",
       "manifest": "outputs/previews/fixed-8192-0908-01/previews.json",
       "mode": "fixed_checkpoint_intervals_without_llm_polling",
@@ -118,11 +118,11 @@
       "gpu_model_reported": "NVIDIA H20G",
       "gpu_count": 8,
       "compute_capability": "10.3",
-      "state": "cuda13_walking_and_standup_full_running",
+      "state": "cuda13_three_full_runs_completed_gpus_idle",
       "cuda_warp_mujoco_probe": "passed_on_gpu_6_with_torchscript_quaternion_and_rgb_readback",
       "headless_rendering": "egl_and_osmesa_passed",
       "historical_checkpoints_migrated": false,
-      "report": "docs/reports/rl-jd-interrupted-2026-09-26.md"
+      "report": "docs/reports/project-status-2026-09-29.md"
     },
     "local_rl_gpus": {
       "walking": 7,
@@ -183,8 +183,23 @@
   },
   "rl_framework_registry": "oh_my_duck.rl.training.frameworks:default_framework_registry",
   "rl_acceptance": {
-    "state": "walking_and_standup_full_running_behavior_pending",
-    "active_iteration_20260926": {
+    "state": "walking_and_standup_full_completed_behavior_failed",
+    "latest_status_20260929": {
+      "host": "jd_B300",
+      "walking": "mujoco_rsl_rl_50000_updates_completed_behavior_failed",
+      "walking_source_commit": "4253ee7",
+      "walking_final_checkpoint": "model_49999.pt",
+      "walking_final_environment_steps": 1200000,
+      "stand_up": "newton_rsl_rl_seed42_seed43_each_15000_updates_completed_behavior_failed",
+      "stand_up_resume_source_commit": "eb8eb0e",
+      "stand_up_final_checkpoint": "model_14999.pt",
+      "stand_up_final_environment_steps_per_seed": 360000,
+      "walking_boost_paired_runs_prepared": 8,
+      "active_training_runs": 0,
+      "behavior_acceptance": "failed_all_three_final_runs",
+      "report": "docs/reports/project-status-2026-09-29.md"
+    },
+    "previous_iteration_20260926": {
       "host": "jd_B300",
       "previous_training": "three_full_runs_interrupted_before_budget_exit_247_cause_unconfirmed",
       "walking": "mujoco_rsl_rl_official_configuration_full_50000_updates_running_gpu6",
@@ -220,9 +235,9 @@
     },
     "smoke_and_resume": "8_of_8_passed_at_5971dca",
     "open_items": [
-      "Diagnose ineffective task learning from preserved official/owned/framework comparisons",
-      "Verify final Newton RSL StandUp robustness across seeds in native backends and CPU/BAM",
-      "Resolve Walking response regression and SB3 StandUp recovery plateau before resumed full training",
+      "Complete paired Walking low-speed boost training and standard final acceptance",
+      "Diagnose Newton StandUp prone and supine recovery across both seeds",
+      "Diagnose SB3 StandUp recovery and complete both frameworks' behavior acceptance",
       "Newton native DDP acceptance remains deferred"
     ],
     "architecture_merge": "6303ca4",
@@ -544,6 +559,20 @@
       "historical_snapshot": true
     },
     "current_full_training_campaign": {
+      "state": "eight_walking_paired_runs_prepared_full_training_not_started",
+      "config": "configs/experiments/walking-low-speed-boost.json",
+      "num_envs_per_run": 8192,
+      "updates_per_run": 50000,
+      "prepared": 8,
+      "full_training_started": 0,
+      "running": 0,
+      "prepared_outputs": [
+        "outputs/experiments/walking-low-speed-boost-20260930-02",
+        "outputs/experiments/walking-low-speed-boost-20260930-03-newton-gates"
+      ],
+      "report": "docs/reports/rl-walking-low-speed-gates-2026-09-30.md"
+    },
+    "previous_full_training_campaign_20260908": {
       "config": "configs/experiments/representative-8192.json",
       "manifest": "outputs/experiments/fixed-8192-0908-01/campaign.json",
       "source_commit": "3070b71a4561618fc96363c0eb71f3365a4fe56c",
@@ -551,7 +580,8 @@
       "running": 0,
       "completed": 3,
       "intentionally_stopped": 5,
-      "review": "docs/reports/rl-debug-handoff-2026-09-09.md"
+      "review": "docs/reports/rl-debug-handoff-2026-09-09.md",
+      "historical_snapshot": true
     },
     "sb3_repair": {
       "state": "four_learners_intentionally_stopped_by_user",

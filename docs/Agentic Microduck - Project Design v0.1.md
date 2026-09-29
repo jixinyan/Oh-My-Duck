@@ -12,6 +12,8 @@ tags:
   - project-design
 ---
 
+> 当前核查（客户端 2026-09-29）：MuJoCo/RSL-RL Walking 完成 50000 次更新，Newton/RSL-RL StandUp 两个 seed 各完成 15000 次更新；三组训练与导出完成，最终行为验收均未通过。Walking 低速干预的 8 个配对 run 已完成训练前门禁，尚未进入完整训练。当前没有可用真机，语音播放与中断、交互仿真真实后端验收仍待完成。详见[项目进度](reports/project-status-2026-09-29.md)。
+
 > 2026-09-30 Walking 因果修复门禁：将低速命令 tracking signal 作为独立、可恢复校验的单因素干预，默认关闭，不改变官方任务或 PPO 语义。8 个 run 的 smoke、导出、恢复、8192 容量和 CPU/BAM rehearsal 门禁已完成，按最小目标在门禁后停止；完整训练和行为验收仍未完成，未封装为 locomotion tool。详见 [门禁记录](reports/rl-walking-low-speed-gates-2026-09-30.md)。
 
 > 2026-09-30 保护变体：`Mjlab-ProtectiveFall-Flat-MicroDuck` 已注册为独立实验性入口，使用完整碰撞资产和保护 reward primitives；它不改变官方 VelStand/代表性任务，也不代表已有可调用 locomotion tool。只有完成 Newton、导出、CPU/BAM 与行为门禁后，才能把策略注册到上层 tool。
