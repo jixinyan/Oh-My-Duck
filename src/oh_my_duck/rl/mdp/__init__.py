@@ -139,6 +139,7 @@ from oh_my_duck.rl.mdp.rewards_locomotion import (
     joint_torque_rate_l2_fallen_scaled,
     joint_torques_l2,
     joint_vel_l2_when_standing,
+    track_linear_velocity_low_speed_boost,
     leg_action_acceleration_l2,
     leg_action_rate_l2,
     leg_joint_vel_l2,

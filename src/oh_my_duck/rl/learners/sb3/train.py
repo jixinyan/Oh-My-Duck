@@ -80,6 +80,7 @@ def main():
     parser.add_argument("task", choices=[t.id for t in project_tasks().list("mujoco")])
     parser.add_argument("--backend", default="mujoco")
     parser.add_argument("--action-rate-delay-iterations", type=int, default=0, help="Explicit Flat Walking smoothing curriculum experiment; zero preserves the official recipe")
+    parser.add_argument("--low-speed-tracking-boost", type=float, default=0.0, help="Explicit Flat Walking low-speed tracking intervention; zero preserves the official recipe")
     parser.add_argument("--num-envs", type=int, default=64)
     parser.add_argument("--iterations", type=int, default=5)
     parser.add_argument("--checkpoint-interval", type=int, help="PPO updates between native checkpoint bundles; default: task save interval")
@@ -103,9 +104,12 @@ def main():
     task = project_tasks().get(args.task)
     binding = task.binding(args.backend)
     cfg, official_agent = build_environment(binding), binding.rsl_config.build()
-    from oh_my_duck.rl.tasks.interventions import apply_action_rate_delay, validate_intervention_resume
-    intervention = apply_action_rate_delay(cfg, task=args.task, iterations=args.action_rate_delay_iterations,
-                                           steps_per_iteration=official_agent.num_steps_per_env)
+    from oh_my_duck.rl.tasks.interventions import apply_training_interventions, validate_intervention_resume
+    intervention = apply_training_interventions(
+        cfg, task=args.task, action_rate_delay_iterations=args.action_rate_delay_iterations,
+        low_speed_tracking_boost=args.low_speed_tracking_boost,
+        steps_per_iteration=official_agent.num_steps_per_env,
+    )
     checkpoint_interval = args.checkpoint_interval or official_agent.save_interval
     if args.checkpoint_interval is not None and args.checkpoint_interval < 1:
         parser.error("checkpoint-interval must be positive")

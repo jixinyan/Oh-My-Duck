@@ -39,7 +39,7 @@ def reuse_smoke(path, spec, root):
     report = json.loads(path.read_text())
     previous = report['spec']
     keys = ('id', 'backend', 'framework', 'task', 'experiment', 'seed', 'learning_rate',
-            'learning_rate_mode', 'critic_observations', 'initial_episode_phase', 'action_rate_delay_iterations')
+            'learning_rate_mode', 'critic_observations', 'initial_episode_phase', 'action_rate_delay_iterations', 'low_speed_tracking_boost')
     if any(previous.get(k) != spec.get(k) for k in keys):
         raise ValueError('Smoke task, recipe, framework or seed differs')
     required = ('smoke', 'smoke-export', 'smoke-rehearsal', 'resume-check')

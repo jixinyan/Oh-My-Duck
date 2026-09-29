@@ -22,6 +22,7 @@ class TrainConfig:
     gpu_ids: list[int] | Literal['all'] | None = field(default_factory=lambda: [0])
     backend: str = 'mujoco'
     action_rate_delay_iterations: int = 0
+    low_speed_tracking_boost: float = 0.0
     torchrunx_log_dir: str | None = None
 
 
@@ -49,9 +50,12 @@ def run_train(task_id, cfg, log_dir):
     cfg.env.seed = cfg.agent.seed
     task = project_tasks(ROOT).get(task_id)
     binding = task.binding(cfg.backend)
-    from oh_my_duck.rl.tasks.interventions import apply_action_rate_delay, validate_intervention_resume
-    intervention = apply_action_rate_delay(cfg.env, task=task_id, iterations=cfg.action_rate_delay_iterations,
-                                           steps_per_iteration=cfg.agent.num_steps_per_env)
+    from oh_my_duck.rl.tasks.interventions import apply_training_interventions, validate_intervention_resume
+    intervention = apply_training_interventions(
+        cfg.env, task=task_id, action_rate_delay_iterations=cfg.action_rate_delay_iterations,
+        low_speed_tracking_boost=cfg.low_speed_tracking_boost,
+        steps_per_iteration=cfg.agent.num_steps_per_env,
+    )
     print(f'[INFO] Training task={task_id} backend={cfg.backend} device={device} seed={cfg.agent.seed} rank={rank}', flush=True)
     from oh_my_duck.rl.training.runtime import create_environment
     env = create_environment(task,cfg.env,backend=cfg.backend,device=device)
