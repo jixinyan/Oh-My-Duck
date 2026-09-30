@@ -78,7 +78,10 @@ def read_export(export: Path) -> tuple[dict, list[dict], dict, dict[str, list[di
             raise ValueError("Recorded camera bytes differ from the native attachment")
         frame = {"file": path, "wall": timestamp(row["eventAt"]),
                  "at": row["eventAt"], "event_sequence": row["eventSequence"],
-                 "simulation_time_s": row["simulationTimeS"], "name": row["image"]["name"]}
+                 "simulation_time_s": row["simulationTimeS"],
+                 "name": row.get("cameraName", row["image"]["name"]),
+                 "perception_source": row.get("perceptionSource"),
+                 "sample_sequence": row.get("sampleSequence")}
         if row["kind"] == "simulation.frame" and (
                 not isinstance(frame["simulation_time_s"], (int, float)) or
                 not math.isfinite(frame["simulation_time_s"])):
@@ -332,6 +335,13 @@ def tool_summary(event: dict) -> str:
             visible.update(selected(measurements, ("angular_velocity_rad_s", "projected_gravity")))
         elif result.get("sensor") == "joint_state":
             visible["joint_count"] = len(measurements["joint_names"])
+    elif tool == "microduck.inspect_scene":
+        targets = [f"{target['label']} · {target['distance_m']:.2f} m · bearing {target['bearing_deg']:+.1f}°"
+                   if target["distance_status"] == "valid" else
+                   f"{target['label']} · {target['distance_status']}" for target in result.get("targets", [])[:3]]
+        return (f"{tool} · {result['prompt']} · captured seq {result['sequence']}\n"
+                f"detection: {result['detection_source']} · distance: {result['distance_source']}\n" +
+                "\n".join(targets or ["No visible target"]))
     elif tool == "microduck.set_command":
         visible = selected(result, ("effective_after_sequence", "command"))
     elif tool in ("microduck.walk", "microduck.rotate"):
@@ -519,7 +529,12 @@ def render_frame(run: dict, events: list[dict], times: list[float], cameras: dic
         if inset is not None:
             draw.rectangle((908, 792, 1180, 1002), fill=PANEL_DARK, outline=ACCENT, width=2)
             canvas.paste(inset, (916, 800))
-            draw_text(draw, (928, 964), "HEAD RGB · AGENT VIEW", fonts["caption"],
+            caption = ("HEAD CAPTURE · SIM GT" if head.get("perception_source") == "simulator_ground_truth"
+                       else "HEAD CAPTURE · RGB")
+            draw.rectangle((916, 800, 1172, 823), fill=PANEL_DARK)
+            draw_text(draw, (925, 801), f"seq {head['sample_sequence']} · event #{head['event_sequence']}",
+                      fonts["caption"], TEXT, 1168, 822)
+            draw_text(draw, (928, 964), caption, fonts["caption"],
                       TEXT, 1174, 996)
 
     planner = latest(events, times, wall, "agent.output", "planner")

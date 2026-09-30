@@ -53,7 +53,7 @@ def history(origin: str, run_id: str, count: int, after: int = 0) -> list[dict]:
     return events
 
 
-def export_run(origin: str, run_id: str, output: Path) -> dict:
+def export_run(origin: str, run_id: str, output: Path, data_directory: Path | None = None) -> dict:
     run_route = f"/api/runs/{quote(run_id, safe='')}?events=none"
     run = request(origin, run_route)
     if run["id"] != run_id or run["state"] not in TERMINAL_STATES:
@@ -69,6 +69,31 @@ def export_run(origin: str, run_id: str, output: Path) -> dict:
     rows = []
     known = set()
     for event in events:
+        if (event["type"] == "tool.completed" and event["detail"].get("tool") in
+                ("microduck.inspect_scene", "microduck.read_sensor") and
+                event["detail"].get("result", {}).get("image_ref")):
+            if data_directory is None:
+                raise ValueError("Tool image export requires the native data directory")
+            result = event["detail"]["result"]
+            image = result["image_ref"]
+            attachment = image["attachmentId"]
+            if (not attachment.startswith("sha256:") or len(attachment) != 71 or
+                    any(character not in "0123456789abcdef" for character in attachment[7:])):
+                raise ValueError("Native tool image hash is invalid")
+            data = (data_directory / "tool-images" / f"{attachment[7:]}.png").read_bytes()
+            if len(data) != image["bytes"] or hashlib.sha256(data).hexdigest() != attachment[7:]:
+                raise ValueError("Native tool image identity or byte count differs")
+            path = Path("observations") / f"{event['sequence']}-tool-head.png"
+            (output / "observations").mkdir(exist_ok=True)
+            (output / path).write_bytes(data)
+            rows.append({"kind": "agent.observation", "eventSequence": event["sequence"],
+                "eventAt": event["at"], "evidenceId": None, "observedAt": result.get("observed_at"),
+                "sampleSequence": result.get("sequence"), "image": image,
+                "cameraName": "head_rgb.png", "perceptionSource": result.get("detection_source"),
+                "executionId": None, "policyRequestId": None, "segmentId": None,
+                "nativeStepIndex": None, "simulationTimeS": None,
+                "file": path.as_posix(), "availability": "available"})
+            continue
         if event["type"] == "simulation.frame":
             sample = event["detail"]["sample"]
         elif event["type"] == "tool.completed" and event["detail"].get("tool") == "perception.capture":
@@ -129,6 +154,7 @@ def main() -> None:
     parser.add_argument("--instruction", type=Path)
     parser.add_argument("--run-id")
     parser.add_argument("--output", type=Path)
+    parser.add_argument("--data-directory", type=Path)
     args = parser.parse_args()
     parsed = urlsplit(args.base_url)
     if parsed.scheme not in ("http", "https") or not parsed.hostname or parsed.query or parsed.fragment:
@@ -143,7 +169,7 @@ def main() -> None:
     elif args.operation == "export":
         if args.output is None or args.run_id is None:
             raise ValueError("Export requires a run ID and a new output directory")
-        result = export_run(origin, args.run_id, args.output)
+        result = export_run(origin, args.run_id, args.output, args.data_directory)
     elif args.operation == "status":
         if args.run_id is None:
             raise ValueError("Status requires a run ID")

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+from datetime import datetime
 import hashlib
 import json
 import math
@@ -43,13 +44,32 @@ def audit_motion_guard_pauses(events: list[dict], run_id: str) -> None:
                 guard["sequence"] != progress["sequence"] or
                 execution["state"] != "paused" or not execution["device_confirmed"]):
             raise AssertionError("Motion guard differs from its measured paused execution")
-        if not any(event["sequence"] < progress_event["sequence"] and
+        if not any(datetime.fromisoformat(event["detail"]["execution"]["boundary_at"].replace("Z", "+00:00")) <=
+                   datetime.fromisoformat(progress_event["at"].replace("Z", "+00:00")) and
                    event["detail"]["execution"]["execution_id"] == execution["execution_id"] and
                    event["detail"]["execution"]["boundary_event_id"] == execution["boundary_id"] and
                    event["detail"]["execution"]["task_scope"]["task_id"] == run_id
                    for event in paused):
             raise AssertionError("Motion guard lacks the matching native confirmed pause")
         command_event = commands.get(guard["command_request_id"])
+        if command_event is None and guard.get("metric_request_id") is None:
+            segment = progress.get("command_segment", {})
+            initial_start = [event for event in events if event["type"] == "tool.completed" and
+                             event["detail"].get("tool") == "execution.start" and
+                             event["detail"]["result"]["execution"]["execution_id"] == execution["execution_id"] and
+                             event["sequence"] < progress_event["sequence"]]
+            if (len(initial_start) == 1 and segment.get("request_id") == guard["command_request_id"] and
+                    segment.get("effective_after_sequence") == 0 and
+                    segment.get("max_control_steps") == segment.get("used_control_steps") == 75 and
+                    guard["reason"] == "command_segment_complete" and
+                    guard["sequence"] == guard["used_control_steps"] == guard["max_control_steps"] == 75 and
+                    progress["policy_name"] == "velstand" and progress["stopped_samples"] >= 5 and
+                    progress["command_block"] == [0] * 13 and
+                    guard["command"]["twist"] == [0, 0, 0] and
+                    guard["command"]["head"] == [0] * 4 and guard["command"]["body"] == [0] * 6 and
+                    not any(event["sequence"] < progress_event["sequence"] for event in
+                            [*commands.values(), *metric_commands.values()])):
+                continue
         if command_event is None and guard.get("metric_request_id") in metric_commands:
             metric_event = metric_commands[guard["metric_request_id"]]
             if metric_event["sequence"] >= progress_event["sequence"]:
@@ -112,8 +132,9 @@ def main() -> None:
         "verification__check", "verification__submit",
     }
     if arguments.prior_export is None:
-        required_calls.update(("microduck__policy_catalog", "microduck__select_policy",
-                               "execution__resume"))
+        required_calls.update(("microduck__policy_catalog", "execution__resume"))
+        if not set(calls) & {"microduck__select_policy", "microduck__walk", "microduck__rotate"}:
+            raise AssertionError("Original trace lacks an official policy selection tool")
     if arguments.require_metric_tools:
         required_calls.discard("microduck__select_policy")
         required_calls.add("microduck__walk")
@@ -285,6 +306,8 @@ def main() -> None:
         "formal_status": verdict["status"], "run_state": manifest["runState"],
         "environment": environment, "observer_size": observer_size,
         "audited_stop_progress_count": stop_progress_count,
+        "strict_metric_targets_required": arguments.require_metric_tools,
+        "checker_source_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
     }, ensure_ascii=False, sort_keys=True))
 
 
