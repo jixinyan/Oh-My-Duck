@@ -1,0 +1,270 @@
+import { randomBytes, randomUUID } from 'node:crypto';
+import { readFile, mkdir } from 'node:fs/promises';
+import { createConnection, createServer } from 'node:net';
+import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
+import { createInterface } from 'node:readline';
+
+const omdRoot = fileURLToPath(new URL('../../', import.meta.url));
+const edhRoot = resolve(process.env.OMD_EDH_SOURCE ?? '');
+const pinnedRevision = '8a5e685b22d032207f53db20454f0992a4ad60fd';
+const python = process.env.OMD_CPU_PYTHON;
+const catalogDir = process.env.OMD_POLICY_DIR;
+const dataDirectory = process.env.OMD_DATA_DIRECTORY;
+const baseURL = process.env.EDH_MODEL_BASE_URL;
+const model = process.env.EDH_MODEL;
+const key = process.env.EDH_MODEL_API_KEY;
+if (!python || !catalogDir || !dataDirectory || !baseURL || !model)
+  throw new Error('CPU worker, policy catalog, data directory, and model endpoint are required');
+const [{ ContractValidator }, { OpenAICompatibleAdapter }, serverModule] = await Promise.all([
+  import(resolve(edhRoot, 'harness/contracts/src/index.ts')),
+  import(resolve(edhRoot, 'harness/agent-runtime/models/src/index.ts')),
+  import(resolve(edhRoot, 'apps/server/src/index.ts')),
+]);
+const { startServer, createNativeWorkerEnvironment } = serverModule;
+const validator = new ContractValidator(JSON.parse(await readFile(
+  resolve(edhRoot, 'harness/contracts/schema/physical.schema.json'), 'utf8')));
+const tempDirectory = resolve(omdRoot, '.cache/tmp');
+await mkdir(tempDirectory, { recursive: true });
+await mkdir(dataDirectory, { recursive: true });
+const runSockets = new Map();
+const goal = { kind: 'room', room: 'office', hold_ticks: 5 };
+const taskInstruction = 'Navigate the official MicroDuck apartment from the corridor to the office and remain upright in the office for five admitted control steps.';
+const check = { check_id: 'goal_reached', check: 'native_goal_reached', args: [] };
+const catalog = {
+  revision: `microduck-apartment-${pinnedRevision.slice(0, 12)}`,
+  tasks: {
+    'navigate-office': {
+      label: 'Navigate to the office',
+      instruction: taskInstruction,
+      goal: {
+        id: 'office-reached',
+        configuration: JSON.stringify(goal),
+        successContract: {
+          id: 'microduck-office-native', version: '1', all: [check],
+          source: { kind: 'benchmark', reference: 'official-microduck-apartment-native-gt' },
+        },
+        entities: { robot: 'microduck', destination: 'office' },
+        capabilities: ['policy-navigation', 'head-rgb', 'tof', 'imu', 'joint-state', 'odometry'],
+        taskSemantics: ['Navigate using admitted policy actions', 'Remain upright in the office'],
+        budget: { max_control_steps: 4000, max_wall_time_s: 1800 },
+      },
+    },
+  },
+};
+
+async function control(runId, operation, arguments_, signal) {
+  const endpoint = runSockets.get(runId);
+  if (!endpoint) throw new Error('MicroDuck task has no active native worker');
+  signal.throwIfAborted();
+  const socket = createConnection({ host: '127.0.0.1', port: endpoint.port });
+  const abort = () => socket.destroy(signal.reason);
+  signal.addEventListener('abort', abort, { once: true });
+  try {
+    await new Promise((accept, reject) => {
+      socket.once('connect', accept);
+      socket.once('error', reject);
+    });
+    socket.write(`${JSON.stringify({ run_task_id: runId, control_secret: endpoint.secret, operation,
+      request_id: randomUUID(), arguments: arguments_ })}\n`);
+    const lines = createInterface({ input: socket, crlfDelay: Infinity });
+    for await (const line of lines) {
+      const response = JSON.parse(line);
+      if (response.error) throw new Error(`${response.error.type}: ${response.error.message}`);
+      if (!Object.hasOwn(response, 'result')) throw new Error('MicroDuck tool response has no result');
+      return response.result;
+    }
+    throw new Error('MicroDuck tool connection closed without a response');
+  } finally {
+    signal.removeEventListener('abort', abort);
+    socket.destroy();
+  }
+}
+
+async function availableControlPort() {
+  const server = createServer();
+  await new Promise((accept, reject) => {
+    server.once('error', reject);
+    server.listen(0, '127.0.0.1', accept);
+  });
+  const port = server.address().port;
+  await new Promise((accept, reject) => server.close((error) => error ? reject(error) : accept()));
+  return port;
+}
+
+function tool(operation, properties, required, services) {
+  return (assignment) => ({
+    name: `microduck__${operation}`,
+    description: {
+      policy_catalog: 'List the verified official MicroDuck policies, their kind and command encoding.',
+      scene_info: 'Read public apartment room topology and world-frame directions.',
+      select_policy: 'Select an official policy at a confirmed stopped execution boundary.',
+      finish_policy: 'End the current policy at a confirmed paused boundary; the native independent Verifier then checks the goal.',
+      set_command: 'Set the next official policy command: twist, head, body, or posture.',
+      read_sensor: 'Read a current physical MicroDuck RGB, ToF, IMU, joint, or odometry sensor.',
+      task_progress: 'Read current physical position, velocity, policy, and execution sequence without private goal truth.',
+    }[operation],
+    parameters: { type: 'object', properties, required, additionalProperties: false },
+    output: {
+      schema: { type: 'object', additionalProperties: true },
+      render: (_args, value) => [
+        { type: 'text', text: JSON.stringify(value) },
+        ...(value.image_ref ? [{ type: 'image', attachment: value.image_ref }] : []),
+      ],
+    },
+    timeoutMs: 120_000,
+    execute: async (args, exec) => {
+      const runId = assignment.brief.task_scope.task_id;
+      const workerOperation = {
+        policy_catalog: 'catalog', scene_info: 'scene', task_progress: 'progress',
+      }[operation] ?? operation;
+      const result = await control(runId, workerOperation, args, exec.signal);
+      if (operation !== 'read_sensor' || args.sensor !== 'head_rgb') return result;
+      const encoded = result.measurements.rgb_png_base64;
+      const data = Buffer.from(encoded, 'base64');
+      if (!data.length || data.toString('base64') !== encoded)
+        throw new Error('MicroDuck RGB transport is invalid');
+      const [imageRef] = await services.images.saveImages([
+        { data, mediaType: 'image/png', name: 'microduck-head-rgb.png' },
+      ]);
+      delete result.measurements.rgb_png_base64;
+      return { ...result, image_ref: imageRef };
+    },
+  });
+}
+
+const port = Number(process.env.OMD_EDH_PORT ?? 4318);
+if (!Number.isSafeInteger(port) || port < 1 || port > 65535)
+  throw new Error('OMD_EDH_PORT must be a valid TCP port');
+const server = await startServer({
+  root: edhRoot,
+  port,
+  dataDirectory,
+  deployment: ({ images }) => ({
+    id: 'microduck-live',
+    version: `edh-${pinnedRevision}-official-policy-1`,
+    source: 'simulation',
+    description: 'Official MicroDuck apartment with native EDH execution and verification',
+    teamFile: resolve(omdRoot, 'integrations/edh/team.yaml'),
+    roleRoot: resolve(omdRoot, 'integrations/edh'),
+    defaultModel: 'brain',
+    models: { brain: { provider: 'configured-vlm', model } },
+    adapters: [{ providers: ['configured-vlm'], adapter: new OpenAICompatibleAdapter({
+      baseURL, models: [{ id: model, inputModalities: ['text', 'image'],
+        contextWindow: 32768, maxTokens: 4096 }],
+      ...(key ? { apiKey: () => key } : {}),
+      timeoutMs: 180_000,
+      resolveImage: (ref, signal) => images.readImageRequest(ref,
+        { maxPixels: 1024 * 1024, maxBytes: 2 * 1024 * 1024 }, signal),
+    }) }],
+    contextManagement: {
+      compaction: { thresholdRatio: 0.7, retainRatio: 0.15,
+        headroomTokens: 4096, maxTokens: 8192 },
+      visualHistory: { maxImages: 12 },
+    },
+    assignmentLifetimeMs: 3_600_000,
+    tasks: {},
+    additionalTools: {
+      'microduck.policy_catalog': tool('policy_catalog', {}, [], { images }),
+      'microduck.scene_info': tool('scene_info', {}, [], { images }),
+      'microduck.select_policy': tool('select_policy', {
+        policy_name: { type: 'string' },
+      }, ['policy_name'], { images }),
+      'microduck.finish_policy': tool('finish_policy', {
+        execution_id: { type: 'string' },
+        generation: { type: 'integer', minimum: 0 },
+        boundary_id: { type: 'string' },
+      }, ['execution_id', 'generation', 'boundary_id'], { images }),
+      'microduck.set_command': tool('set_command', {
+        command: { type: 'object', properties: {
+          twist: { type: 'array', items: { type: 'number' }, minItems: 3, maxItems: 3 },
+          head: { type: 'array', items: { type: 'number' }, minItems: 4, maxItems: 4 },
+          body: { type: 'array', items: { type: 'number' }, minItems: 6, maxItems: 6 },
+          posture: { type: 'string', enum: ['sit', 'stand'] },
+        }, additionalProperties: false },
+      }, ['command'], { images }),
+      'microduck.read_sensor': tool('read_sensor', {
+        sensor: { type: 'string', enum: ['head_rgb', 'tof', 'imu', 'joint_state', 'odometry'] },
+      }, ['sensor'], { images }),
+      'microduck.task_progress': tool('task_progress', {}, [], { images }),
+    },
+    launchProfiles: {
+      'official-apartment-office': {
+        source: 'simulation',
+        label: 'Official MicroDuck apartment: office',
+        environment: 'CPU MuJoCo/BAM official 8 × 6 m apartment',
+        embodiment: 'MicroDuck XL330 M6',
+        executionMode: 'policy',
+        policy: 'official-microduck-onnx',
+        checkpoint: 'pollen-robotics/microduck-policies@1b56c396825c052a4e26e95cf2b8d8298af9e9b4',
+        defaultModel: 'brain',
+        tasks: [],
+        taskSource: 'environment',
+        createEnvironment: async ({ signal, services }) => {
+          signal.throwIfAborted();
+          const controlPort = await availableControlPort();
+          const controlSecret = randomBytes(32).toString('hex');
+          const worker = {
+            provider: 'microduck',
+            command: [python, '-m', 'oh_my_duck.integrations.edh_native'],
+            cwd: omdRoot,
+            env: { PYTHONPATH: `${resolve(omdRoot, 'src')}:${resolve(edhRoot,
+              'harness/physical-runtime/src')}`, TMPDIR: tempDirectory },
+            nativeTaskId: 'official-apartment-office',
+            sceneConfiguration: {
+              native_task_id: 'official-apartment-office',
+              catalog_dir: catalogDir,
+              seed: Number(process.env.OMD_SCENE_SEED ?? 20260929),
+              goal,
+              spawn_pose: { x_m: 0, y_m: 0, yaw_rad: 0 },
+              task_instruction: taskInstruction,
+              policy_revision: '1b56c396825c052a4e26e95cf2b8d8298af9e9b4',
+              control_port: controlPort,
+              control_secret: controlSecret,
+            },
+            schemaPath: resolve(edhRoot, 'harness/contracts/schema/physical.schema.json'),
+            policyId: 'official-microduck-onnx',
+            policyUri: 'microduck-native://self-hosted',
+            executionMode: 'policy',
+            policyMaxActionsPerInference: 1,
+            monitorEveryActions: 1,
+            observationTtlS: 30,
+            deviceTimeoutS: 120,
+            policyTimeoutS: 30,
+            catalog,
+          };
+          const native = await createNativeWorkerEnvironment(worker, services, validator);
+          return {
+            describeTasks: native.describeTasks,
+            async createTaskBackend(taskId, options) {
+              const backend = await native.createTaskBackend(taskId, options);
+              runSockets.set(options.runId, { port: controlPort, secret: controlSecret });
+              const close = backend.close.bind(backend);
+              backend.close = async () => {
+                try {
+                  await close();
+                } finally {
+                  runSockets.delete(options.runId);
+                }
+              };
+              return backend;
+            },
+            async close() {
+              for (const [runId, endpoint] of runSockets)
+                if (endpoint.port === controlPort) runSockets.delete(runId);
+              await native.close();
+            },
+          };
+        },
+      },
+    },
+  }),
+});
+process.stdout.write(`${server.url}\n`);
+for (const signal of ['SIGINT', 'SIGTERM'])
+  process.once(signal, () => {
+    void server.close().then(() => process.exit(0), (error) => {
+      process.stderr.write(`${String(error)}\n`);
+      process.exit(1);
+    });
+  });

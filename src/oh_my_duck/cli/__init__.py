@@ -28,6 +28,8 @@ COMMANDS = {
     "voice": (None, "Manage confirmed voice profiles and file inference"),
     "voice-session": (None, "Run an explicit local recording and playback session"),
     "voice-service": (None, "Run an isolated ASR or TTS model service"),
+    "sim": ("simulation.py", "Run interactive measured simulation tools through JSONL"),
+    "harness": ("harness.py", "Run the official apartment through native EDH"),
 }
 
 
@@ -82,6 +84,7 @@ def main():
         return module.main()
     filename = COMMANDS[command][0]
     module = importlib.import_module("oh_my_duck.rl.experiments." + filename.removesuffix(".py") if command in {"campaign", "preview", "diagnose"}
+                                    else "oh_my_duck.cli." + filename.removesuffix(".py") if command in {"sim", "harness"}
                                     else "oh_my_duck.infrastructure." + filename.removesuffix(".py"))
     sys.argv = [sys.argv[0], *([command] if filename == "run.py" else []), *sys.argv[2:]]
     return module.main()
