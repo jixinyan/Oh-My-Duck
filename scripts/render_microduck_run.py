@@ -7,7 +7,7 @@ import math
 from pathlib import Path
 import subprocess
 
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageOps
 
 
 WIDTH = 1920
@@ -66,16 +66,22 @@ def read_export(export: Path) -> tuple[dict, list[dict], dict, dict[str, list[di
         raise ValueError("Recorded event sequence or wall time is invalid")
     cameras: dict[str, list[dict]] = {}
     for row in rows:
-        if row["kind"] != "simulation.frame":
+        if row["kind"] not in ("simulation.frame", "agent.observation"):
             continue
         if row["file"] is None:
             if row["image"]["name"] == OBSERVER_CAMERA:
                 raise ValueError("A recorded observer frame is unavailable")
             continue
-        frame = {"file": source_path(export, row["file"]), "wall": timestamp(row["eventAt"]),
+        path = source_path(export, row["file"])
+        if (path.stat().st_size != row["image"]["bytes"] or
+                f"sha256:{file_sha256(path)}" != row["image"]["attachmentId"]):
+            raise ValueError("Recorded camera bytes differ from the native attachment")
+        frame = {"file": path, "wall": timestamp(row["eventAt"]),
                  "at": row["eventAt"], "event_sequence": row["eventSequence"],
                  "simulation_time_s": row["simulationTimeS"], "name": row["image"]["name"]}
-        if not isinstance(frame["simulation_time_s"], (int, float)) or not math.isfinite(frame["simulation_time_s"]):
+        if row["kind"] == "simulation.frame" and (
+                not isinstance(frame["simulation_time_s"], (int, float)) or
+                not math.isfinite(frame["simulation_time_s"])):
             raise ValueError("Recorded simulation frame has no simulator time")
         cameras.setdefault(frame["name"], []).append(frame)
     if OBSERVER_CAMERA not in cameras or not cameras[OBSERVER_CAMERA]:
@@ -83,12 +89,14 @@ def read_export(export: Path) -> tuple[dict, list[dict], dict, dict[str, list[di
     for name, frames in cameras.items():
         frames.sort(key=lambda item: item["event_sequence"])
         if any(frames[index]["wall"] > frames[index + 1]["wall"] or
-               frames[index]["simulation_time_s"] > frames[index + 1]["simulation_time_s"]
+               (frames[index]["simulation_time_s"] is not None and
+                frames[index + 1]["simulation_time_s"] is not None and
+                frames[index]["simulation_time_s"] > frames[index + 1]["simulation_time_s"])
                for index in range(len(frames) - 1)):
             raise ValueError(f"Recorded camera time is not monotonic: {name}")
     with Image.open(cameras[OBSERVER_CAMERA][0]["file"]) as first:
-        if first.format != "PNG" or first.size != (640, 480):
-            raise ValueError("The native observer camera must contain 640x480 PNG frames")
+        if first.format != "PNG" or first.size not in ((640, 480), (1280, 720)):
+            raise ValueError("The native observer camera dimensions are unsupported")
     return run, events, manifest, cameras
 
 
@@ -303,7 +311,7 @@ def tool_summary(event: dict) -> str:
     if not isinstance(result, dict):
         return f"{tool} · {json.dumps(result, ensure_ascii=False)}"
     if tool == "microduck.scene_info":
-        visible = selected(result, ("scene", "frame", "rooms"))
+        visible = selected(result, ("scene", "frame", "rooms", "scene_id", "frame_id", "solver"))
     elif tool == "microduck.policy_catalog":
         visible = {"revision": result.get("revision"),
                    "policies": [policy["name"] for policy in result.get("policies", [])]}
@@ -339,7 +347,9 @@ def tool_summary(event: dict) -> str:
         visible = selected(result, ("policy_name", "kind", "encoding", "duration_s"))
         visible["action_spec_version"] = result.get("action_spec", {}).get("version")
     elif tool == "microduck.finish_policy":
-        visible = selected(result, ("accepted", "generation"))
+        visible = selected(result, ("accepted",))
+        visible["stop_confirmation"] = selected(result["stop_confirmation"],
+                                                ("zero_control_steps", "stopped_samples"))
     elif tool.startswith("execution."):
         visible = selected(result.get("execution", {}),
                            ("state", "control_steps", "raw_sim_steps", "device_confirmed",
@@ -370,20 +380,31 @@ def native_check(event: dict) -> dict:
             "position_m": evidence["robot_world_position_m"],
             "held_ticks": evidence["held_ticks"],
             "required_hold_ticks": evidence["required_hold_ticks"],
-            "target_room": evidence["target"]["room"]}
+            "target": evidence["target"]}
+
+
+def native_target_text(target: dict) -> str:
+    if "room" in target:
+        return target["room"]
+    elif "target_xy_m" in target:
+        return f"distance={target['distance_xy_m']:.3f}/{target['threshold_m']:.3f} m"
+    raise ValueError("Native verification target is unsupported")
 
 
 def native_check_text(event: dict) -> str:
     check = native_check(event)
     position = check["position_m"]
+    destination = native_target_text(check["target"])
     return (f"{check['check_id']}={str(check['value']).lower()} · "
-            f"{check['target_room']} · position=({position[0]:.3f},{position[1]:.3f},{position[2]:.3f}) m · "
+            f"{destination} · position=({position[0]:.3f},{position[1]:.3f},{position[2]:.3f}) m · "
             f"hold={check['held_ticks']}/{check['required_hold_ticks']}")
 
 
 def event_summary(event: dict) -> str:
     detail = event["detail"]
     kind = event["type"]
+    if kind == "tool.failed":
+        return f"{detail['tool']} · {detail['error']}"
     if kind == "agent.output":
         return model_text(event)
     if kind == "plan.updated":
@@ -415,7 +436,10 @@ def load_camera_image(frame: dict | None, cache: dict, size: tuple[int, int]) ->
         with Image.open(frame["file"]) as image:
             if image.format != "PNG":
                 raise ValueError("A recorded camera file is not PNG")
-            cache["image"] = image.convert("RGB").resize(size, Image.Resampling.LANCZOS)
+            fitted = ImageOps.contain(image.convert("RGB"), size, Image.Resampling.LANCZOS)
+            background = Image.new("RGB", size, PANEL_DARK)
+            background.paste(fitted, ((size[0] - fitted.width) // 2, (size[1] - fitted.height) // 2))
+            cache["image"] = background
         cache["key"] = key
     return cache["image"]
 
@@ -428,8 +452,14 @@ def render_frame(run: dict, events: list[dict], times: list[float], cameras: dic
     canvas.paste(logo, (34, 24), logo)
     draw_text(draw, (130, 24), "OH MY DUCK  ·  AGENTIC MICRODUCK",
               fonts["title"], TEXT, 1190, 72)
-    draw_text(draw, (132, 80), f"CPU MuJoCo/BAM · official apartment · waiting {wall_speed:g}× · motion ≤1×",
+    environment = run["configuration"]["launchProfile"]["environment"]
+    label = ("Isaac Lab / Newton / BAM" if environment.startswith("Isaac Lab Newton/BAM:")
+             else "CPU MuJoCo / BAM · official apartment")
+    draw_text(draw, (132, 80), f"{label} · waiting {wall_speed:g}× · motion ≤1×",
               fonts["small"], MUTED, 1350, 112)
+    brain = run["configuration"]["models"]["brain"]
+    draw_text(draw, (1195, 80), f"BRAIN · {brain['model']} · {brain.get('reasoningEffort', 'provider default')}",
+              fonts["caption"], MUTED, 1638, 112)
     visible_events = events[:bisect_right(times, wall)]
     terminal_event = next((event for event in reversed(visible_events)
                            if event["type"] in TERMINAL_EVENT_TYPES), None)
@@ -466,6 +496,16 @@ def render_frame(run: dict, events: list[dict], times: list[float], cameras: dic
         draw_text(draw, (62, 203),
                   f"guard seq={guard_sequence}  ·  ToF {distance} mm  ·  non-ground samples {samples}",
                   fonts["caption"], TEXT, 660, 231)
+        scene = latest_tool_result(events, times, wall, "microduck.scene_info")
+        goal = scene.get("goal") if scene is not None else None
+        position = progress.get("body_position_m")
+        if goal is not None and goal["kind"] == "point" and position is not None:
+            target = goal["target_xy_m"]
+            error = math.dist(position[:2], target)
+            draw.rounded_rectangle((48, 908, 902, 950), radius=9, fill=PANEL_DARK)
+            draw_text(draw, (62, 918),
+                      f"WORLD XY ({position[0]:.3f}, {position[1]:.3f}) m  ·  GOAL DISTANCE {error:.3f} / {goal['distance_m']:.3f} m",
+                      fonts["caption"], ACCENT, 888, 946)
     head_frames = cameras.get("head_camera.png", cameras.get("head_rgb.png"))
     if head_frames:
         head = active_frame(head_frames, wall)
@@ -473,7 +513,7 @@ def render_frame(run: dict, events: list[dict], times: list[float], cameras: dic
         if inset is not None:
             draw.rectangle((908, 792, 1180, 1002), fill=PANEL_DARK, outline=ACCENT, width=2)
             canvas.paste(inset, (916, 800))
-            draw_text(draw, (928, 964), "HEAD CAMERA · AGENT SENSOR", fonts["caption"],
+            draw_text(draw, (928, 964), "HEAD RGB · AGENT VIEW", fonts["caption"],
                       TEXT, 1174, 996)
 
     planner = latest(events, times, wall, "agent.output", "planner")
@@ -522,7 +562,7 @@ def render_frame(run: dict, events: list[dict], times: list[float], cameras: dic
         fact = native_check(check)
         position = fact["position_m"]
         draw_text(draw, (1230, 923),
-                  f"{fact['check_id']}: {str(fact['value']).lower()} · {fact['target_room']}",
+                  f"{fact['check_id']}: {str(fact['value']).lower()} · {native_target_text(fact['target'])}",
                   fonts["small"], TEXT, 1870, 950)
         draw_text(draw, (1230, 949),
                   f"position (m): {position[0]:.3f}, {position[1]:.3f}, {position[2]:.3f} · "
@@ -634,12 +674,15 @@ def encode_video(export: Path, output: Path, review_dir: Path, font_path: Path, 
             if image.size != (WIDTH, HEIGHT):
                 raise ValueError("Extracted review frame has the wrong dimensions")
         keyframes.append(str(destination))
-    backend_source = Path(__file__).resolve().parents[1] / "src" / "oh_my_duck" / "robotics" / "backends" / "simulation.py"
+    environment = run["configuration"]["launchProfile"]["environment"]
+    backend_file = "isaac_official.py" if environment.startswith("Isaac Lab Newton/BAM:") else "simulation.py"
+    backend_source = Path(__file__).resolve().parents[1] / "src" / "oh_my_duck" / "robotics" / "backends" / backend_file
     report = {"runId": run["id"], "runState": run["state"], "runError": run.get("error"),
               "sourceEventCount": source_event_count, "renderedEventCount": len(events),
               "terminalEventSequence": terminal_event["sequence"],
               "terminalEventType": terminal_event["type"], "terminalEventAt": terminal_event["at"],
               "sourceObserverFrameCount": source_observer_count,
+              "environment": environment,
               "renderedObserverFrameCount": len(cameras[OBSERVER_CAMERA]),
               "optionalCameraNames": sorted(set(cameras) - {OBSERVER_CAMERA}),
               "width": WIDTH, "height": HEIGHT, "fps": fps, "frameCount": frame_count,

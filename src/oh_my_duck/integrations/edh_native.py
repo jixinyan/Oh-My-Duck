@@ -538,7 +538,11 @@ class MicroDuckWorkerSession(NativeWorkerSession):
                           "measurements": {key: measured[key] for key in fields},
                           "motion_guard": self._motion_guard}
             elif operation == "progress":
-                observed = await self._device.on_owner(backend.observe_control)
+                def progress_on_owner():
+                    observation = backend.observe_control()
+                    observation["measurements"]["stopped_samples"] = backend._stopped_samples
+                    return observation
+                observed = await self._device.on_owner(progress_on_owner)
                 measured = observed["measurements"]
                 gate_state = self._require_gate().snapshot() if self._gate is not None else None
                 result = {"episode_id": observed["episode_id"], "sequence": observed["sequence"],
@@ -546,6 +550,8 @@ class MicroDuckWorkerSession(NativeWorkerSession):
                           "policy_name": measured["policy_name"],
                           "body_position_m": measured["body_position_m"],
                           "body_twist": measured["body_twist"], "fallen": measured["fallen"],
+                          "stopped_samples": measured["stopped_samples"],
+                          "required_stopped_samples": STOP_SAMPLES,
                           "command_block": measured["command_block"],
                           "contact_evidence": measured["contact_evidence"],
                           "motion_guard": self._motion_guard,

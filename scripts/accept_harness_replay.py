@@ -6,6 +6,8 @@ import json
 import math
 from pathlib import Path
 
+from PIL import Image
+
 
 def require_one(events: list[dict], event_type: str) -> dict:
     matches = [event for event in events if event["type"] == event_type]
@@ -62,9 +64,18 @@ def main() -> None:
     parser.add_argument("--expected-verdict", choices=("passed", "failed"))
     parser.add_argument("--expected-stop-reason", choices=("policy_stop", "budget_exhausted"))
     parser.add_argument("--prior-export", type=Path)
+    parser.add_argument("--require-stop-progress", action="store_true")
     arguments = parser.parse_args()
     root = arguments.export_dir.resolve(strict=True)
     manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
+    run = json.loads((root / "source/run.json").read_text(encoding="utf-8"))
+    environment = run["configuration"]["launchProfile"]["environment"]
+    if environment.startswith("Isaac Lab Newton/BAM:"):
+        observer_size = (1280, 720)
+    elif environment == "CPU MuJoCo/BAM official 8 × 6 m apartment":
+        observer_size = (640, 480)
+    else:
+        raise AssertionError("Run environment has no accepted observer specification")
     events = json.loads((root / "source/events.json").read_text(encoding="utf-8"))
     frames = json.loads((root / "frames.json").read_text(encoding="utf-8"))
     if manifest["eventCount"] != len(events):
@@ -88,6 +99,33 @@ def main() -> None:
     if "execution__pause" not in calls:
         audit_motion_guard_pauses(events, manifest["runId"])
     tool_results = [event["detail"] for event in events if event["type"] == "tool.completed"]
+    stop_progress_count = 0
+    if arguments.require_stop_progress:
+        samples_by_sequence = {}
+        last_progress = None
+        for detail in tool_results:
+            if detail["tool"] in ("microduck.select_policy", "microduck.transition_policy"):
+                samples_by_sequence.clear()
+            if detail["tool"] == "microduck.task_progress":
+                result = detail["result"]
+                samples = result["stopped_samples"]
+                if (type(samples) is not int or samples < 0 or
+                        result["required_stopped_samples"] != 5):
+                    raise AssertionError("Stop progress lacks measured nonnegative sample counts")
+                identity = (result["episode_id"], result["sequence"], result["policy_name"])
+                if identity in samples_by_sequence and samples_by_sequence[identity] != samples:
+                    raise AssertionError("Stop samples changed without a physical control step")
+                samples_by_sequence[identity] = samples
+                last_progress = result
+                stop_progress_count += 1
+            if detail["tool"] == "microduck.finish_policy":
+                result = detail["result"]
+                if (last_progress is None or last_progress["stopped_samples"] < 5 or
+                        result["stop_confirmation"]["stopped_samples"] !=
+                        last_progress["stopped_samples"]):
+                    raise AssertionError("Policy finish differs from measured stop progress")
+        if stop_progress_count < 2:
+            raise AssertionError("Stop progress lacks observations across physical execution")
     if arguments.prior_export is None:
         selection_results = tool_results
     else:
@@ -160,14 +198,15 @@ def main() -> None:
     if arguments.expected_verdict is not None and verdict["status"] != arguments.expected_verdict:
         raise AssertionError("Formal verdict differs from the requested result")
 
-    observer = [frame for frame in frames if frame["kind"] == "simulation.frame"]
+    observer = [frame for frame in frames if frame["kind"] == "simulation.frame"
+                and frame["image"]["name"] == "observer_follow.png"]
     if not observer:
         raise AssertionError("No physical observer frames were exported")
     previous_time = -1.0
     for frame in observer:
         if frame["image"]["name"] != "observer_follow.png" or (
             frame["image"]["width"], frame["image"]["height"]
-        ) != (640, 480) or frame["nativeStepIndex"] != 4:
+        ) != observer_size or frame["nativeStepIndex"] != 4:
             raise AssertionError("Observer frame metadata differs from the native capture")
         if frame["simulationTimeS"] <= previous_time:
             raise AssertionError("Observer simulation time is not increasing")
@@ -175,6 +214,10 @@ def main() -> None:
         image = (root / frame["file"]).read_bytes()
         if hashlib.sha256(image).hexdigest() != frame["image"]["attachmentId"].removeprefix("sha256:"):
             raise AssertionError("Observer PNG differs from the native attachment")
+        with Image.open(root / frame["file"]) as captured:
+            if captured.format != "PNG" or captured.size != observer_size:
+                raise AssertionError("Observer PNG dimensions differ from native metadata")
+            captured.verify()
 
     if verdict["status"] == "passed":
         if manifest["runState"] != "succeeded" or (
@@ -191,6 +234,8 @@ def main() -> None:
         "raw_sim_steps": execution["raw_sim_steps"], "stop_reason": execution["stop_reason"],
         "verdict_id": verdict["verdict_id"], "goal_reached": verdict["checks"][0]["value"],
         "formal_status": verdict["status"], "run_state": manifest["runState"],
+        "environment": environment, "observer_size": observer_size,
+        "audited_stop_progress_count": stop_progress_count,
     }, ensure_ascii=False, sort_keys=True))
 
 

@@ -37,12 +37,22 @@ tools:
 设置 twist、head、body 或 posture，读取实际 RGB、ToF、IMU、关节与 odometry。
 根据任务目标维护规划，并在每段动作后检查 execution 状态和传感器。
 
+planning.read 返回的 goal_id、success_contract 和原生检查条件保持原样。
+使用 description 与 todo_write 记录动作阶段。独立 Verifier 正式通过后，
+读取最新 plan，将对应项目设为 status="done"，并把该项目当前正式
+verdict_id 写入 last_verdict_ref。将读取到的 plan.version 增加一，调用
+planning.update 提交完整 plan；每次提交前读取最新版本。
+tasks.finish 要求所有计划项目为 done 或明确 abandoned；最终目标必须
+为 done，并引用当前 attempt 和最新确认停止边界的 passed verdict。
+
 初始 policy 为 velstand。每条命令执行 5–100 个实际控制步，默认 75 步。
 命令结束、前方 ToF 接近障碍、外部接触或持续停滞会触发原生 Gate 暂停。
 在确认边界读取 task_progress.motion_guard、RGB、ToF 和 odometry，
 设置新的有界命令后调用 execution.resume。发生障碍或停滞后，继续非零运动需要
 在当前边界读取新鲜 ToF 并修改 twist。零 twist 可用于实际停止控制。
-暂停确认表示已接纳动作执行完毕；身体是否停止需要检查实际 body_twist。
+暂停确认表示已接纳动作执行完毕；身体是否停止需要检查实际 body_twist
+以及 task_progress.stopped_samples。停止样本由实际控制步累计，重复读取
+同一 sequence 保留相同计数。
 
 policy_catalog 提供文件来源、支持的命令槽位、动作时长、模型模式与已验证范围。
 select_policy 要求当前 Gate 确认暂停或结束，并具有至少五个测得的停止样本。
