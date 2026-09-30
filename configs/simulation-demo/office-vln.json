@@ -1,0 +1,22 @@
+{
+  "backend": "isaac-newton",
+  "scene_id": "nvidia-office-vln",
+  "usd_path": "data/scenes/nvidia-office-6.0/source/Assets/Isaac/6.0/Isaac/Environments/Office/office.usd",
+  "provenance_path": "data/scenes/nvidia-office-6.0/asset-provenance.json",
+  "public_map_path": "data/scenes/nvidia-office-6.0/public-map.json",
+  "perception_endpoint": "http://127.0.0.1:8784",
+  "device": "cuda:0",
+  "spawn_pose": {"x_m": -17.55, "y_m": 30.45, "z_m": 0.125, "yaw_rad": 0.0},
+  "goal": {
+    "kind": "point",
+    "target_xy_m": [-16.8, 34.4],
+    "distance_m": 0.3,
+    "hold_ticks": 5,
+    "waypoints": [
+      {"target_xy_m": [-17.5, 32.2], "distance_m": 0.45},
+      {"target_xy_m": [-16.35, 32.4], "distance_m": 0.45}
+    ]
+  },
+  "task_instruction": "Turn left into the open lobby and find the office desks. Travel through the center, make a short detour to the right, then turn back toward the desk and approach it. Stop upright about one meter from the desk. Observe the desk repeatedly and adjust the route from current head RGB, measured target bearing and distance. This demo explicitly permits simulator-ground-truth segmentation and distances. The physical benchmark also requires the ordered center and right-detour checkpoints before final arrival.",
+  "budget": {"max_control_steps": 10000, "max_wall_time_s": 2400}
+}

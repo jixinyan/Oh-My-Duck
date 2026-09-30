@@ -1,0 +1,26 @@
+[project]
+name = "oh-my-duck-perception"
+version = "0.1.0"
+description = "YOLO26 and official SAM 3.1 perception service"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "oh-my-duck", "ultralytics-opencv-headless>=8.4", "sam3", "torch==2.10.0", "torchvision==0.25.0",
+  "numpy==1.26.4", "opencv-python-headless==4.11.0.86", "Pillow>=11", "einops",
+  "decord", "pycocotools", "scipy", "psutil", "hydra-core", "requests",
+  "fastapi", "uvicorn", "huggingface-hub",
+]
+
+[tool.uv]
+package = false
+environments = ["sys_platform == 'linux' and platform_machine == 'x86_64'"]
+
+[tool.uv.sources]
+oh-my-duck = { path = "../..", editable = true }
+sam3 = { git = "https://github.com/facebookresearch/sam3", rev = "2345a4ad109ac29c569da749c91d84f10dc08c40" }
+torch = { index = "pytorch-cu130" }
+torchvision = { index = "pytorch-cu130" }
+
+[[tool.uv.index]]
+name = "pytorch-cu130"
+url = "https://download.pytorch.org/whl/cu130"
+explicit = true

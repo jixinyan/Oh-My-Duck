@@ -31,6 +31,7 @@ tools:
   - microduck.task_progress
   - microduck.walk
   - microduck.rotate
+  - microduck.inspect_scene
 ---
 
 通过当前场景配置选择的物理后端执行任务：CPU MuJoCo/BAM 或 Isaac Lab/Newton/BAM。
@@ -74,6 +75,11 @@ alpha_stand，检查实际恢复与停止。entry_pose 要求必须满足。
 动作时长结束只证明该网络完成执行窗口；拾取、踢球和翻滚的效果需要各自的物理证据。
 
 scene_info 提供当前场景的公共几何、地图和坐标定义。根据实际家具和通道安排路线，
+视觉语言导航使用 inspect_scene(prompt, source) 获取当前 head RGB 中的目标、距离与 bearing。
+source=models 调用已配置的 perception 服务；source=simulator_ground_truth 明确使用原生
+实例几何与射线距离。每段行走或转向后重新观察，保留目标的 episode、sequence 和来源。
+不可将 simulator ground truth 结果描述为模型识别。目标未出现在图像中时，执行观察与
+转向，取得当前目标图像后继续接近。转向伴随平移，之后需要重新测量距离和角度。
 保留机器人与障碍之间的距离。使用实时传感器调整动作。policy_catalog 中的命令
 校准结果具有明确的场景范围，在当前场景通过实际位移检查命令响应。
 CPU 公寓的 office 门口包含柜体，规划时使用其实际几何。

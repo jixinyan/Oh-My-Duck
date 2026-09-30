@@ -1,5 +1,5 @@
 import { randomBytes, randomUUID } from 'node:crypto';
-import { readFile, mkdir } from 'node:fs/promises';
+import { readFile, mkdir, writeFile } from 'node:fs/promises';
 import { createConnection, createServer } from 'node:net';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -208,6 +208,7 @@ function tool(operation, properties, required, services) {
       finish_policy: 'End the current policy at a confirmed paused boundary; the native independent Verifier then checks the goal.',
       set_command: 'Set a bounded policy command at a confirmed paused boundary. Each command runs for 5–100 actual control steps. After proximity, contact, or stall, read fresh ToF and change twist before renewed motion; zero twist remains available for stopping.',
       read_sensor: 'Read a current physical MicroDuck RGB, ToF, IMU, joint, or odometry sensor.',
+      inspect_scene: 'Inspect current head RGB for a named object and return visible targets, bounding boxes, surface distance in meters and bearing in degrees. Select models for YOLO26/SAM service inference, or simulator_ground_truth for explicit native shape masks and ray-hit distances. The result labels detection, mask and distance sources. Requires a confirmed paused execution. Positive bearing means left. Reobserve after movement; targets are tied to one episode and sequence.',
       task_progress: 'Read current physical position, velocity, contact evidence, bounded-command status, and native motion-pause reason.',
       walk: 'Prepare official alpha_walking to move a signed distance in meters along the current heading. Positive moves forward; negative moves backward. Requires a confirmed paused execution and five measured stopped samples. Call execution.resume afterward. Native odometry controls completion and braking; read task_progress.metric_motion after the pause.',
       rotate: 'Prepare official alpha_walking for a walking turn by a signed angle in degrees. This maneuver includes translation; the measured translation_xy_m is reported. Positive is counterclockwise around world +Z; negative is clockwise. Requires a confirmed paused execution and five measured stopped samples. Call execution.resume afterward. Accumulated measured yaw controls completion and braking; read task_progress.metric_motion after the pause.',
@@ -227,15 +228,21 @@ function tool(operation, properties, required, services) {
         policy_catalog: 'catalog', scene_info: 'scene', task_progress: 'progress',
       }[operation] ?? operation;
       const result = await control(runId, workerOperation, args, exec.signal);
-      if (operation !== 'read_sensor' || args.sensor !== 'head_rgb') return result;
-      const encoded = result.measurements.rgb_png_base64;
+      if (operation !== 'inspect_scene' && (operation !== 'read_sensor' || args.sensor !== 'head_rgb')) return result;
+      const encoded = operation === 'inspect_scene' ? result.rgb_png_base64 : result.measurements.rgb_png_base64;
       const data = Buffer.from(encoded, 'base64');
       if (!data.length || data.toString('base64') !== encoded)
         throw new Error('MicroDuck RGB transport is invalid');
       const [imageRef] = await services.images.saveImages([
         { data, mediaType: 'image/png', name: 'microduck-head-rgb.png' },
       ]);
-      delete result.measurements.rgb_png_base64;
+      if (!/^sha256:[a-f0-9]{64}$/.test(imageRef.attachmentId))
+        throw new Error('Native tool image identity is invalid');
+      const imageDirectory = resolve(dataDirectory, 'tool-images');
+      await mkdir(imageDirectory, { recursive: true });
+      await writeFile(resolve(imageDirectory, `${imageRef.attachmentId.slice(7)}.png`), data);
+      if (operation === 'inspect_scene') delete result.rgb_png_base64;
+      else delete result.measurements.rgb_png_base64;
       return { ...result, image_ref: imageRef };
     },
   });
@@ -300,6 +307,10 @@ const server = await startServer({
         sensor: { type: 'string', enum: ['head_rgb', 'tof', 'imu', 'joint_state', 'odometry'] },
       }, ['sensor'], { images }),
       'microduck.task_progress': tool('task_progress', {}, [], { images }),
+      'microduck.inspect_scene': tool('inspect_scene', {
+        prompt: { type: 'string', minLength: 1, maxLength: 120 },
+        source: { type: 'string', enum: ['models', 'simulator_ground_truth'] },
+      }, ['prompt', 'source'], { images }),
       'microduck.walk': tool('walk', {
         distance_m: { type: 'number', minimum: -10, maximum: 10 },
         speed_m_s: { type: 'number', minimum: 0.1, maximum: 0.4 },

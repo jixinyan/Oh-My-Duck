@@ -16,7 +16,7 @@ from uuid import uuid4
 import mujoco
 import mujoco_warp as mjw
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageDraw
 import torch
 import warp as wp
 
@@ -26,6 +26,7 @@ from oh_my_duck.robotics.backends.simulation import (
 from oh_my_duck.robotics.microduck.protocol import HOME, JOINT_NAMES
 from oh_my_duck.robotics.microduck.official_policies import OfficialPolicyCatalogue
 from oh_my_duck.robotics.microduck.sim_sensors import camera_optical_pose, tof_directions
+from oh_my_duck.perception.rgbd import measure_target
 
 
 @wp.kernel
@@ -93,7 +94,7 @@ class IsaacNewtonBamBackend(CpuMujocoBamBackend):
             joint_names_expr=list(JOINT_NAMES), deployment=True)}
         scene.head_camera = CameraCfg(
             prim_path="{ENV_REGEX_NS}/HeadCamera", width=320, height=240,
-            data_types=["rgb", "instance_segmentation_fast"], update_period=0.0, update_latest_camera_pose=True,
+            data_types=["rgb", "depth", "instance_segmentation_fast"], update_period=0.0, update_latest_camera_pose=True,
             spawn=PinholeCameraCfg(clipping_range=(0.01, 30.0)),
             renderer_cfg=NewtonWarpRendererCfg(colorize_instance_segmentation=False))
         scene.observer_camera = CameraCfg(
@@ -389,15 +390,91 @@ class IsaacNewtonBamBackend(CpuMujocoBamBackend):
         self.bind_goal(goal)
         return self.observe_control()
 
+    def perception_frame(self) -> dict:
+        self._require_owner()
+        observed = self.observe_control()
+        camera = self.native.scene["head_camera"]
+        render = camera._render_data
+        depth = wp.to_torch(render.outputs.depth_image)[0, 0].detach().cpu().numpy()
+        rays = wp.to_torch(render.camera_rays)[0].detach().cpu().numpy()
+        eye, rotation = self._frame_pose(self._camera_body, self._camera_local_position,
+                                         self._camera_local_quaternion)
+        points = (rays[..., 0, :] + rays[..., 1, :] * depth[..., None]) @ rotation.T + eye
+        points[~np.isfinite(depth) | (depth < 0)] = np.nan
+        output = BytesIO()
+        np.save(output, points.astype(np.float32), allow_pickle=False)
+        measured = observed["measurements"]
+        return {"episode_id": observed["episode_id"], "sequence": observed["sequence"],
+                "observed_at": observed["observed_at"], "rgb_png_base64": measured["rgb_png_base64"],
+                "points_world_npy_base64": base64.b64encode(output.getvalue()).decode(),
+                "camera_position_m": eye.tolist(), "body_position_m": measured["body_position_m"],
+                "yaw_rad": measured["odometry"]["yaw_rad"], "distance_source": "simulator_ground_truth",
+                "depth_semantics": "Newton ray-hit meters from actual clipped ray origin",
+                "camera_frame_id": measured["camera_frame_id"]}
+
+    def inspect_scene(self, prompt: str) -> dict:
+        from oh_my_duck.rl.backends.isaac_newton.mdp import as_torch
+        frame = self.perception_frame()
+        camera = self.native.scene["head_camera"]
+        segmentation = as_torch(camera.data.output["instance_segmentation_fast"])[0, ..., 0].detach().cpu().numpy()
+        points = np.load(BytesIO(base64.b64decode(frame["points_world_npy_base64"])), allow_pickle=False)
+        groups = {}
+        names = {"desk": ("TableWork", "StandTableWork"), "plant": ("Plant",),
+                 "bin": ("TrashCan",), "reception": ("ReceptionTable",),
+                 "chair": ("Chair", "Seat"), "door": ("Door",)}
+        for index in np.unique(segmentation):
+            if not 0 <= index < len(self._shape_labels):
+                continue
+            shape = self._shape_labels[int(index)]
+            if not shape.startswith("/World/Environment/"):
+                continue
+            asset = "/".join(shape.split("/")[:4])
+            labels = [label for label, tokens in names.items() if any(token in asset for token in tokens)]
+            if not labels or prompt not in ("objects", *labels):
+                continue
+            if asset not in groups:
+                groups[asset] = {"label": labels[0], "ids": []}
+            groups[asset]["ids"].append(int(index))
+        image = Image.open(BytesIO(base64.b64decode(frame["rgb_png_base64"]))).convert("RGB")
+        draw = ImageDraw.Draw(image)
+        targets = []
+        for asset, item in groups.items():
+            mask = np.isin(segmentation, item["ids"])
+            rows, columns = np.nonzero(mask)
+            if len(rows) < 8:
+                continue
+            box = [int(columns.min()), int(rows.min()), int(columns.max() + 1), int(rows.max() + 1)]
+            target = {"target_id": asset, "label": item["label"], "bbox_xyxy": box,
+                      "visible_pixels": len(rows), "detection_source": "simulator_ground_truth",
+                      "mask_source": "simulator_ground_truth", "distance_source": "simulator_ground_truth",
+                      **measure_target(mask, points, frame["camera_position_m"], frame["body_position_m"], frame["yaw_rad"])}
+            targets.append(target)
+            draw.rectangle(box, outline="lime", width=2)
+            draw.text((box[0], box[1]), item["label"], fill="white")
+        output = BytesIO()
+        image.save(output, format="PNG")
+        return {"episode_id": frame["episode_id"], "sequence": frame["sequence"],
+                "observed_at": frame["observed_at"], "prompt": prompt,
+                "detection_source": "simulator_ground_truth", "distance_source": "simulator_ground_truth",
+                "targets": sorted(targets, key=lambda target: -target["visible_pixels"])[:16],
+                "rgb_png_base64": base64.b64encode(output.getvalue()).decode()}
+
     def bind_goal(self, goal: dict) -> dict:
         self._require_owner()
-        if (set(goal) != {"kind", "target_xy_m", "distance_m", "hold_ticks"}
+        if (set(goal) - {"waypoints"} != {"kind", "target_xy_m", "distance_m", "hold_ticks"}
                 or goal["kind"] != "point" or len(goal["target_xy_m"]) != 2
                 or not all(math.isfinite(float(v)) for v in goal["target_xy_m"])
                 or not math.isfinite(float(goal["distance_m"])) or goal["distance_m"] <= 0
                 or type(goal["hold_ticks"]) is not int or not 1 <= goal["hold_ticks"] <= 500):
             raise ValueError("Point goal requires target_xy_m, positive distance_m and bounded hold_ticks")
+        for waypoint in goal.get("waypoints", []):
+            if (set(waypoint) != {"target_xy_m", "distance_m"} or len(waypoint["target_xy_m"]) != 2
+                    or not np.isfinite(waypoint["target_xy_m"]).all()
+                    or not math.isfinite(waypoint["distance_m"]) or waypoint["distance_m"] <= 0):
+                raise ValueError("Route waypoints require finite XY meters and positive radius")
         self._goal = goal.copy()
+        self._route_visits = []
+        self._route_last_sequence = -1
         self._goal_held_ticks = 0
         self._goal_checked_sequence = -1
         return {"episode_id": self.episode_id, "goal": self._goal,
@@ -408,8 +485,17 @@ class IsaacNewtonBamBackend(CpuMujocoBamBackend):
         position = np.asarray(state["body_position_m"])
         distance = float(np.linalg.norm(position[:2] - self._goal["target_xy_m"]))
         reached = distance <= self._goal["distance_m"] and state["height_m"] >= 0.09 and state["tilt_rad"] <= math.radians(25)
+        waypoints = self._goal.get("waypoints", [])
+        if self._sequence != self._route_last_sequence and len(self._route_visits) < len(waypoints):
+            waypoint = waypoints[len(self._route_visits)]
+            if (np.linalg.norm(position[:2] - waypoint["target_xy_m"]) <= waypoint["distance_m"]
+                    and state["height_m"] >= 0.09 and state["tilt_rad"] <= math.radians(25)):
+                self._route_visits.append({"sequence": self._sequence, "position_xy_m": position[:2].tolist()})
+            self._route_last_sequence = self._sequence
+        reached = reached and len(self._route_visits) == len(waypoints)
         target = {"target_xy_m": self._goal["target_xy_m"], "distance_xy_m": distance,
-                  "threshold_m": self._goal["distance_m"], "source": "Newton GPU root pose"}
+                  "threshold_m": self._goal["distance_m"], "source": "Newton GPU root pose",
+                  "route_visits": self._route_visits.copy(), "required_waypoints": len(waypoints)}
         return reached, target, state, position.tolist()
 
     def action_spec(self):

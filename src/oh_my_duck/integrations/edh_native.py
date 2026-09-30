@@ -576,6 +576,23 @@ class MicroDuckWorkerSession(NativeWorkerSession):
                           "sequence": observed["sequence"], "observed_at": observed["observed_at"],
                           "measurements": {key: measured[key] for key in fields},
                           "motion_guard": self._motion_guard}
+            elif operation == "inspect_scene":
+                await self._await_motion_cleanup()
+                snapshot = self._require_gate().snapshot()
+                if snapshot["state"] not in ("paused", "ended") or not snapshot["device_confirmed"]:
+                    raise RuntimeError("Perception requires a confirmed paused execution boundary")
+                prompt = args["prompt"]
+                if not isinstance(prompt, str) or not prompt.strip() or len(prompt) > 120:
+                    raise ValueError("Perception prompt must contain 1–120 characters")
+                if args["source"] == "simulator_ground_truth":
+                    result = await self._device.on_owner(lambda: backend.inspect_scene(prompt))
+                elif args["source"] == "models":
+                    from oh_my_duck.perception.client import PerceptionClient
+                    endpoint = self._environment.configuration["perception_endpoint"]
+                    frame = await self._device.on_owner(backend.perception_frame)
+                    result = await asyncio.to_thread(PerceptionClient(endpoint).inspect, frame, prompt)
+                else:
+                    raise ValueError("Unknown perception source")
             elif operation == "progress":
                 def progress_on_owner():
                     observation = backend.observe_control()
