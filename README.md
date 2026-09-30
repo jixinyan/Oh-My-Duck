@@ -8,7 +8,8 @@
 [![RL behavior: pending](https://img.shields.io/badge/RL_behavior-pending-orange)](docs/reports/rl-walking-low-speed-launch-2026-09-29.md)
 [![Recorded CPU checks: 55 passed on 2026-09-23](https://img.shields.io/badge/recorded_CPU_checks-55_passed-2ea44f)](docs/reports/project-status-2026-09-23.md)
 [![Voice: Mac audio verified](https://img.shields.io/badge/voice-Mac_audio_verified-green)](docs/reports/voice-interaction-validation-2026-09-29.md)
-[![Isaac Office: agentic navigation verified](https://img.shields.io/badge/Isaac_Office-agentic_navigation_verified-green)](docs/reports/isaac-agentic-office-demo-2026-09-30.md)
+[![Isaac Office: agentic navigation verified](https://img.shields.io/badge/Isaac_Office-agentic_navigation_verified-green)](docs/reports/metric-camera-tools-2026-09-30.md)
+[![Policy tools: meters and degrees verified](https://img.shields.io/badge/policy_tools-meters_and_degrees_verified-green)](docs/metric-policy-tools.md)
 [![Hardware validation: pending](https://img.shields.io/badge/hardware_validation-pending-orange)](docs/implementation-status.md)
 
 **An interactive, extensible Microduck—with a persistent voice, shared experiences, and skills you can train.**
@@ -44,9 +45,9 @@ The duck's name, voice and remembered experiences give it continuity. Learning n
 
 High-frequency joint control stays with the policy/runtime. The harness chooses tasks and can observe, interrupt or replan; a model response is not itself evidence that a physical task succeeded.
 
-External Isaac USD scenes enter through `omd harness --scene-config`; the native Python worker can run on an explicitly selected remote GPU over SSH. A real Astra/high session navigated NVIDIA Office with official `velstand` and `alpha_walking` policies under Newton/BAM: 300 control steps, 0.405 m measured displacement, zero external obstacle contact samples, and 100 zero-command steps before measured stopping. The independent Verifier passed, and the Planner completed native `tasks.finish`. The agentic MP4 combines actual robot frames, public Planner text, plans, tool feedback and the formal verdict. See the [Office demo and acceptance record](docs/reports/isaac-agentic-office-demo-2026-09-30.md) and [recording instructions](docs/harness-native-integration.md#agentic-mp4). Multi-scene long navigation and policy-specific object effects remain open; CPU tools have separately verified `kick_left` followed by `alpha_stand`.
+External Isaac USD scenes enter through `omd harness --scene-config`; the native Python worker can run on an explicitly selected remote GPU over SSH. The Harness calls `microduck.walk(distance_m)` and `microduck.rotate(angle_deg)` through official `alpha_walking`, with measured progress, braking and five stopped samples. Newton Office tests passed at 0.4 and 1.0 meters and +45°, −45° and +270°; turns include measured translation. Head RGB uses the official forward camera frame, and the observer camera includes the duck and Office geometry. A real Astra/high session executed the distance tool under Newton/BAM, completed 313 control steps without external obstacle contact, and obtained a passed independent verdict before native `tasks.finish`. The 60.3-second agentic MP4 combines actual robot frames, head RGB, public Planner text, plans, tool parameters and the formal verdict. See the [tools and camera acceptance record](docs/reports/metric-camera-tools-2026-09-30.md), [tool parameters](docs/metric-policy-tools.md) and [recording instructions](docs/harness-native-integration.md#agentic-mp4). Multi-scene long navigation and policy-specific object effects remain open; CPU tools have separately verified `kick_left` followed by `alpha_stand`.
 
-![Actual Newton Office robot frame with recorded Planner text, tool feedback and a passed independent verdict.](docs/assets/office-agentic/demo.png)
+![Actual Newton Office robot frame and head RGB with recorded Planner text, metric tool feedback and a passed independent verdict.](docs/assets/office-agentic/metric-demo.png)
 
 ## Train with MuJoCo or Isaac / Newton
 

@@ -70,6 +70,8 @@ PYTHONPATH=src .cache/cpu-apartment-locked-venv/bin/python omd.py harness \
 
 ## Agentic MP4
 
+距离与角度指令使用 `microduck.walk(distance_m)`、`microduck.rotate(angle_deg)`；运动结束与测量结果见[工具接口](metric-policy-tools.md)。Newton Office 的实际工具检查、相机来源和原生模型 Demo 见[验证记录](reports/metric-camera-tools-2026-09-30.md)。录制距离工具任务时，为下方 `accept_harness_replay.py` 命令增加 `--require-metric-tools`；该选项检查实际模型调用、odometry 目标、停止误差、五个停止样本与当前命令身份。
+
 `scripts/record_harness_demo.py` 通过原生 HTTP API 创建会话、提交任务、读取进展、导出终态和关闭会话。导出包含完整事件与 SHA256 检查后的原始 PNG。`scripts/render_microduck_run.py` 将相机画面、Planner 公开文字、计划、工具反馈与正式 verdict 同步到 MP4，支持 CPU 的 640×480 和 Isaac 的 1280×720 相机。等待时间可以压缩，运动片段保留物理时间下限。
 
 ```sh

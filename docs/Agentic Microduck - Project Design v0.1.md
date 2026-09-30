@@ -12,6 +12,8 @@ tags:
   - project-design
 ---
 
+> 当前工具与相机（2026-09-30）：原生 Harness 可调用 `microduck.walk(distance_m)` 与 `microduck.rotate(angle_deg)`，距离/角度目标由当前物理 odometry 控制，停止后检查 0.05 米/5 度误差及五个实际停止样本。Newton Office 已验证 0.4/1.0 米和 +45°/−45°/+270°；转向伴随平移并返回测量值。head RGB 使用官方 optical pose 与近裁剪，observer 取景包含机器人和场景，原生 segmentation 检查通过。真实 Astra/high 的距离工具任务完成 313 控制步并获得独立 Verifier passed，原始事件与相机生成 60.3 秒 agentic MP4。RL 保持停止；CPU 距离/角度、多场景长导航、物体效果与真机待验证。见[工具接口](metric-policy-tools.md)及[验证记录](reports/metric-camera-tools-2026-09-30.md)。
+
 > 当前核查（2026-09-30）：上一轮 Walking 与两个 StandUp 完整训练的最终行为验收均未通过。用户已停止 Walking 低速干预的全部八组配对训练及预览、评估进程；checkpoint、输出与 W&B 文件保留，不自动恢复。语音 HTTP 服务、Mac 内置扬声器与麦克风完成实际音频验证。官方预训练策略已在 CPU MuJoCo/BAM 公寓中经原生 EDH ActionGate 执行，真实 Astra 会话完成图像与状态传感器读取、暂停、策略切换、恢复及 `finish_policy`。同一物理会话的首项 office 任务正式判定为 failed；第二项从目标外继续导航，独立 Verifier 判定 passed，run 状态 succeeded。当前没有可用真机。见[Walking 停止记录](reports/rl-walking-user-stop-2026-09-30.md)、[真实闭环记录](reports/harness-apartment-live-2026-09-30.md)与[实现进度](implementation-status.md)。
 
 > 2026-09-30 Walking 因果修复门禁完成时记录：将低速命令 tracking signal 作为独立、可恢复校验的单因素干预，默认关闭，不改变官方任务或 PPO 语义。8 个 run 的 smoke、导出、恢复、8192 容量和 CPU/BAM rehearsal 门禁已完成，当时按最小目标在门禁后停止；后续启动与停止分别见[Walking 启动记录](reports/rl-walking-low-speed-launch-2026-09-29.md)和[停止记录](reports/rl-walking-user-stop-2026-09-30.md)，行为验收仍待完成，尚未封装为 locomotion tool。门禁证据见[门禁记录](reports/rl-walking-low-speed-gates-2026-09-30.md)。
@@ -78,9 +80,9 @@ tags:
 
 本文件保留原文件名以维持链接，内容已随 2026-09-06 的用户决策更新至 v0.2。当前已开始工程实现；功能状态以本节及[实现进度](implementation-status.md)为准，设计提案不等于已验证能力。完整逐文件审计仍在进行，Isaac 迁移与真机试验尚未完成。
 
-**当前执行条件**：用户已停止本轮八组 Walking 训练及预览、评估进程，保存现有 checkpoint 与输出，不自动恢复。当前没有真机。上层任务使用固定 EDH 原生运行时与 CPU MuJoCo/BAM 仿真；运动命令按实际控制步限定时长，ToF、外部接触和位姿停滞可请求原生 Gate 暂停。独立 Astra 会话已从固定 corridor 出生位置完成 office 导航，实际执行 760 个控制步、外部障碍接触累计 0，正式成功由独立 Verifier 读取原生目标状态确认。范围为单一 CPU 公寓 seed，详见[公寓导航验收](reports/harness-office-navigation-2026-09-30.md)。
+**当前执行条件**：用户已停止本轮八组 Walking 训练及预览、评估进程，保存现有 checkpoint 与输出，不自动恢复。当前没有真机。上层使用固定 EDH 原生运行时，物理任务可在 CPU MuJoCo/BAM 公寓或远程 GPU Newton/BAM Office 执行。距离和角度工具按实际 odometry 控制，命令按控制步限定，ToF、外部接触和位姿停滞可请求原生 Gate 暂停。两个场景的单一 seed 导航均获得独立 Verifier 正式 passed，Newton 的距离工具与相机另有完整记录。见[公寓导航验收](reports/harness-office-navigation-2026-09-30.md)和[Newton 工具验证](reports/metric-camera-tools-2026-09-30.md)。
 
-**当前开发策略**：完整项目 scope 保持本文第 1–10 节的交互、工具、感知、声音、经验与训练设计。数据结构与接口、机器人后端、技能、工具、感知、策略、Harness、语音、记录、训练和应用装配已有独立模块。CPU MuJoCo/BAM 公寓已验证真实传感器、官方 ONNX 推理及 ActionGate 控制；原生 Harness 的单一 seed office 导航获得独立 Verifier 正式 passed，非地面外部接触累计 0。Qwen 语音文件推理、Mac 音频服务与停止边界已通过实际验证。用户当前停止八组 Walking 训练及预览、评估进程；自训练策略的完整行为验收、Newton 交互和真机执行仍需完成。各模块证据见[实现进度](implementation-status.md)。
+**当前开发策略**：完整项目 scope 保持本文第 1–10 节的交互、工具、感知、声音、经验与训练设计。数据结构与接口、机器人后端、技能、工具、感知、策略、Harness、语音、记录、训练和应用装配已有独立模块。CPU MuJoCo/BAM 公寓与 Newton/BAM Office 已验证真实传感器、官方 ONNX 推理、ActionGate 和独立 Verifier。Newton 距离/角度工具与相机具有实际物理证据，正式模型任务完成计划与停止。Qwen 语音文件推理、Mac 音频服务与停止边界已通过实际验证。用户当前停止八组 Walking 训练及预览、评估进程；自训练策略的完整行为验收、多场景长导航、物体效果和真机执行仍需完成。各模块证据见[实现进度](implementation-status.md)。
 
 **RL框架扩展（2026-09-06）**：当前训练环境服务于RL，仿真后端（MuJoCo / Isaac-Newton）与RL框架（首批RSL-RL / Stable-Baselines3）独立选择。新增 `--rl-framework` 与兼容矩阵入口 `omd frameworks`；不同框架共用任务、观测/动作和评测契约，各自适配VecEnv、算法配置、checkpoint、normalizer与导出。Isaac/Newton上的RSL-RL与SB3 PPO均已通过短训练，SB3额外验证192次超时重置；RSL-RL归一化ONNX导出数值检查通过；MuJoCo SB3 已完成官方 walking 的 64 环境/5 轮训练和恢复训练，并验证 768 次超时；MuJoCo SB3 已通过官方 runner 扩展导出及 32 组输入数值检查；Isaac SB3 恢复/导出仍待实现，不将所有组合标为已支持。后续框架通过注册扩展，详见[RL框架接入](rl-frameworks.md)。
 

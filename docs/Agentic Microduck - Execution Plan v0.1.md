@@ -10,6 +10,8 @@ tags:
   - sim-to-real
 ---
 
+> 距离/角度与相机验收（2026-09-30）：Newton Office 的 `walk(distance_m)` 与 `rotate(angle_deg)` 实际验证覆盖 0.4/1.0 米、+45°/−45°/+270°，停止后满足 0.05 米/5 度与五个停止样本；转向返回实际平移。head RGB optical pose/近裁剪与 observer 场景取景通过原生 segmentation 检查。真实 Astra/high 的距离工具闭环完成 313 控制步、独立 verdict passed、run succeeded，782 个事件与 64 张实际相机图片生成 60.3 秒 MP4，来源、停止进度与完整解码通过。会话已关闭，RL 保持停止。后续执行目标为 CPU 距离/角度行为、跨房间长导航、多场景和多 policy 物体效果，各项使用实际物理结果与独立 Verifier 验收。见[验证记录](reports/metric-camera-tools-2026-09-30.md)。
+
 > 当前核查（2026-09-30）：用户已停止 Walking 低速干预的全部八组配对训练及预览、评估进程；现有 checkpoint、输出与 W&B 文件保留，不自动恢复。完整预算及最终行为验收未完成，上一轮三组完整训练的最终行为验收未通过。语音 HTTP 服务、Mac 内置扬声器播放、内置麦克风录制与停止边界完成实际验证。原生 EDH 公寓接入使用真实 Astra、官方预训练 ONNX 策略及 CPU MuJoCo/BAM 执行工具、传感器与独立 Verifier 闭环；固定出生位置的独立 office 任务通过正式判定，全程非地面外部接触累计 0。项目没有可用真机。见[Walking 停止记录](reports/rl-walking-user-stop-2026-09-30.md)、[公寓导航验收](reports/harness-office-navigation-2026-09-30.md)与[当前状态](implementation-status.md)。
 
 > 2026-09-30 Walking 门禁完成时记录：按低速命令 dead-zone 证据完成 `walking-low-speed-boost.json` 的四后端/框架配对训练前门禁，boost=1.0 只作用于 `0.01–0.2 m/s` 的非零线速度命令，默认控制组保持官方 recipe。8 个 run 准备完成后当时按最小目标停止；后续启动与停止分别见[Walking 启动记录](reports/rl-walking-low-speed-launch-2026-09-29.md)和[停止记录](reports/rl-walking-user-stop-2026-09-30.md)，最终行为验收待完成。门禁证据见[门禁记录](reports/rl-walking-low-speed-gates-2026-09-30.md)。
