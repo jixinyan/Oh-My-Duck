@@ -295,6 +295,7 @@ class CpuMujocoBamBackend(SimulationBackend):
                 self._source_target_ranges, [-10.0, 10.0], atol=0, rtol=0
             ):
                 raise ValueError("Official source position-target ranges differ")
+            self._scene_path = scene.resolve()
         bam = ip.load_bam_model(200.0, 7.4, ip.BAM_MAX_CURRENT)
         self.model, self.data, self.controller, names = ip.load_mujoco_with_bam(
             str(scene), bam, 0.005, 0.1, ip.BAM_VIN_MIN)
@@ -323,6 +324,16 @@ class CpuMujocoBamBackend(SimulationBackend):
             self._goal = None
             self._goal_held_ticks = 0
             self._goal_checked_sequence = -1
+            self._robot_root_id = int(self.model.body_rootid[self.policy_inference.trunk_base_id])
+            self._ground_geom_ids = frozenset(self.model.geom(name).id for name in (
+                "floor_w", "floor_e", "floor_corridor_s", "floor_corridor_n",
+                "floor_kitchen", "floor_bath", "rug_living", "rug_bedroom"))
+            self._non_ground_contact_samples_total = 0
+            self._non_ground_contact_control_steps = 0
+            self._first_non_ground_contact_sequence = None
+            self._current_control_non_ground_contacts = []
+            self._current_control_ground_contact_samples = 0
+            self._current_control_self_contact_samples = 0
             self._sensor_rng = np.random.default_rng(0)
             self._renderer = None
             self._observer_renderer = None
@@ -348,6 +359,81 @@ class CpuMujocoBamBackend(SimulationBackend):
 
         return {"revision": OFFICIAL_REVISION, "scene": "scene_apartment.xml",
                 "policies": self.catalog.describe_apartment()}
+
+    def public_scene_info(self) -> dict:
+        self._require_owner()
+        obstacles = []
+        for geom_id in range(self.model.ngeom):
+            body_id = int(self.model.geom_bodyid[geom_id])
+            if (int(self.model.body_rootid[body_id]) == self._robot_root_id
+                    or self.model.body_jntnum[body_id] or not self.model.geom_contype[geom_id]
+                    or not self.model.geom_conaffinity[geom_id]):
+                continue
+            if geom_id in self._ground_geom_ids:
+                continue
+            name = self._mujoco.mj_id2name(self.model, self._mujoco.mjtObj.mjOBJ_GEOM, geom_id)
+            if name is None:
+                raise ValueError("Unnamed static apartment collision geom")
+            center = self._np.asarray(self.data.geom_xpos[geom_id], dtype=float)
+            rotation = self._np.asarray(self.data.geom_xmat[geom_id], dtype=float).reshape(3, 3)
+            geom_type = int(self.model.geom_type[geom_id])
+            if geom_type == self._mujoco.mjtGeom.mjGEOM_BOX:
+                extent = self._np.abs(rotation) @ self.model.geom_size[geom_id, :3]
+                shape = "box"
+            elif geom_type == self._mujoco.mjtGeom.mjGEOM_CYLINDER:
+                radius, half_height = self.model.geom_size[geom_id, :2]
+                axis = rotation[:, 2]
+                extent = radius * self._np.sqrt(self._np.clip(1 - axis ** 2, 0, 1)) + half_height * self._np.abs(axis)
+                shape = "cylinder"
+            elif geom_type == self._mujoco.mjtGeom.mjGEOM_SPHERE:
+                extent = self._np.full(3, self.model.geom_size[geom_id, 0])
+                shape = "sphere"
+            else:
+                raise ValueError(f"Unsupported static collision geom: {name}")
+            obstacles.append({"geom": name, "shape": shape,
+                              "category": "wall" if name.startswith(("wall_", "wA_", "wB_", "wC_", "wF", "wG"))
+                              else "stair" if name.startswith("stair_") else "furniture",
+                              "center_world_m": center.tolist(),
+                              "bounds_xy_m": [float(center[0] - extent[0]), float(center[0] + extent[0]),
+                                              float(center[1] - extent[1]), float(center[1] + extent[1])],
+                              "bounds_z_m": [float(center[2] - extent[2]), float(center[2] + extent[2])]})
+
+        def door(name: str, adjacent_rooms: tuple[str, str],
+                 lower_wall: str, upper_wall: str, opening_axis: int) -> dict:
+            lower_id = self.model.geom(lower_wall).id
+            upper_id = self.model.geom(upper_wall).id
+            lower_edge = float(self.data.geom_xpos[lower_id, opening_axis] +
+                               self.model.geom_size[lower_id, opening_axis])
+            upper_edge = float(self.data.geom_xpos[upper_id, opening_axis] -
+                               self.model.geom_size[upper_id, opening_axis])
+            if lower_edge >= upper_edge:
+                raise ValueError(f"Named apartment doorway has no opening: {name}")
+            crossing_axis = 1 - opening_axis
+            lower_centerline = float(self.data.geom_xpos[lower_id, crossing_axis])
+            upper_centerline = float(self.data.geom_xpos[upper_id, crossing_axis])
+            if not math.isclose(lower_centerline, upper_centerline, abs_tol=1e-9):
+                raise ValueError(f"Named apartment doorway walls are misaligned: {name}")
+            half_thickness = max(float(self.model.geom_size[lower_id, crossing_axis]),
+                                 float(self.model.geom_size[upper_id, crossing_axis]))
+            return {"name": name, "adjacent_rooms": list(adjacent_rooms),
+                    "between_static_geoms": [lower_wall, upper_wall],
+                    "opening_axis": "x" if opening_axis == 0 else "y",
+                    "opening_m": [lower_edge, upper_edge],
+                    "width_m": upper_edge - lower_edge,
+                    "crossing_axis": "x" if crossing_axis == 0 else "y",
+                    "wall_centerline_m": lower_centerline,
+                    "wall_band_m": [lower_centerline - half_thickness,
+                                    lower_centerline + half_thickness]}
+
+        doors = [door("kitchen_living_room", ("kitchen", "living_room"), "wA_w", "wA_e", 0),
+                 door("living_room_corridor", ("living_room", "corridor"), "wB_s", "wB_m", 1),
+                 door("kitchen_corridor", ("kitchen", "corridor"), "wB_m", "wB_n", 1),
+                 door("bathroom_corridor", ("bathroom", "corridor"), "wC_s", "wC_m1", 1),
+                 door("office_corridor", ("office", "corridor"), "wC_m1", "wC_m2", 1),
+                 door("bedroom_corridor", ("bedroom", "corridor"), "wC_m2", "wC_n", 1)]
+        return {"scene_id": "official_scene_apartment", "frame_id": "world",
+                "source": str(self._scene_path), "source_kind": "MuJoCo named static collision geoms",
+                "doors": doors, "static_obstacles": obstacles}
 
     def action_spec(self) -> dict:
         self._require_owner()
@@ -475,12 +561,18 @@ class CpuMujocoBamBackend(SimulationBackend):
         if (targets < self._source_target_ranges[:, 0]).any() or (targets > self._source_target_ranges[:, 1]).any():
             raise ValueError("Official action exceeds source position-target range")
         self.policy_inference.set_position_targets(targets)
+        control_non_ground_contacts = {}
+        control_ground_contacts = 0
+        control_self_contacts = 0
         for _ in range(4):
             if self._stop_requested.is_set() or (should_stop is not None and should_stop()):
                 break
             self.controller.update()
             self._mujoco.mj_step(self.model, self.data)
             executed += 1
+            ground, self_contacts = self._sample_native_contacts(control_non_ground_contacts)
+            control_ground_contacts += ground
+            control_self_contacts += self_contacts
             if not self._np.isfinite(self.data.qpos).all() or not self._np.isfinite(self.data.qvel).all():
                 raise FloatingPointError("Nonfinite apartment physical state")
             for warning in ("mjWARN_BADQPOS", "mjWARN_BADQVEL", "mjWARN_BADQACC"):
@@ -488,6 +580,16 @@ class CpuMujocoBamBackend(SimulationBackend):
                     raise FloatingPointError(warning)
         interrupted = executed != 4
         if executed:
+            self._current_control_non_ground_contacts = [
+                {"geom": name, "contact_samples": evidence["contact_samples"],
+                 "max_normal_force_n": evidence["max_normal_force_n"]}
+                for name, evidence in sorted(control_non_ground_contacts.items())]
+            self._current_control_ground_contact_samples = control_ground_contacts
+            self._current_control_self_contact_samples = control_self_contacts
+            if control_non_ground_contacts:
+                self._non_ground_contact_control_steps += 1
+                if self._first_non_ground_contact_sequence is None:
+                    self._first_non_ground_contact_sequence = self._sequence + 1
             self.policy_inference.last_action = values.copy()
             self._sequence += 1
             self._simulation_time_s = float(self.data.time)
@@ -511,6 +613,39 @@ class CpuMujocoBamBackend(SimulationBackend):
         if len(self._applied_requests) > 10000:
             raise RuntimeError("Applied-action request history exceeded its session limit")
         return result
+
+    def _sample_native_contacts(self, non_ground_contacts: dict) -> tuple[int, int]:
+        ground_count = 0
+        self_count = 0
+        for index in range(self.data.ncon):
+            contact = self.data.contact[index]
+            first_robot = int(self.model.body_rootid[self.model.geom_bodyid[contact.geom1]]) == self._robot_root_id
+            second_robot = int(self.model.body_rootid[self.model.geom_bodyid[contact.geom2]]) == self._robot_root_id
+            if not first_robot and not second_robot:
+                continue
+            force = self._np.zeros(6)
+            self._mujoco.mj_contactForce(self.model, self.data, index, force)
+            normal_force = float(force[0])
+            if not math.isfinite(normal_force):
+                raise FloatingPointError("Nonfinite native contact force")
+            if normal_force <= 0:
+                continue
+            if first_robot and second_robot:
+                self_count += 1
+                continue
+            other = int(contact.geom2 if first_robot else contact.geom1)
+            if other in self._ground_geom_ids:
+                ground_count += 1
+                continue
+            name = self._mujoco.mj_id2name(self.model, self._mujoco.mjtObj.mjOBJ_GEOM, other)
+            if name is None:
+                raise ValueError("Unnamed external contact geom")
+            evidence = non_ground_contacts.setdefault(name, {"contact_samples": 0,
+                                                              "max_normal_force_n": 0.0})
+            evidence["contact_samples"] += 1
+            evidence["max_normal_force_n"] = max(evidence["max_normal_force_n"], normal_force)
+            self._non_ground_contact_samples_total += 1
+        return ground_count, self_count
 
     def _native_state(self) -> dict:
         policy = self.policy_inference
@@ -540,7 +675,15 @@ class CpuMujocoBamBackend(SimulationBackend):
                  "fallen": bool(position[2] < 0.06 or tilt > 1.3),
                  "odometry": {"x_m": float(position[0]), "y_m": float(position[1]),
                               "yaw_rad": yaw, "frame_id": "world", "source": "MuJoCo native pose"},
-                 "native_contact_count": int(self.data.ncon)}
+                 "native_contact_count": int(self.data.ncon),
+                 "contact_evidence": {
+                     "non_ground_external_contact_samples_total": self._non_ground_contact_samples_total,
+                     "non_ground_external_contact_control_steps": self._non_ground_contact_control_steps,
+                     "first_non_ground_external_contact_sequence": self._first_non_ground_contact_sequence,
+                     "current_control_non_ground_external": [
+                         item.copy() for item in self._current_control_non_ground_contacts],
+                     "current_control_ground_contact_samples": self._current_control_ground_contact_samples,
+                     "current_control_self_contact_samples": self._current_control_self_contact_samples}}
         if not all(self._np.isfinite(value).all() for value in
                    (position, quaternion, velocity, linear_body, gravity,
                     self.data.qpos, self.data.qvel)):
@@ -635,6 +778,12 @@ class CpuMujocoBamBackend(SimulationBackend):
         self._applied_requests.clear()
         self._used_action_requests.clear()
         self._stopped_samples = 0
+        self._non_ground_contact_samples_total = 0
+        self._non_ground_contact_control_steps = 0
+        self._first_non_ground_contact_sequence = None
+        self._current_control_non_ground_contacts = []
+        self._current_control_ground_contact_samples = 0
+        self._current_control_self_contact_samples = 0
         self.bind_goal(goal)
         return self.observe_control()
 
