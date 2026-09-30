@@ -11,8 +11,8 @@
     },
     "robot_backends": {
       "module": "oh_my_duck.robotics.backends",
-      "state": "cpu_apartment_and_newton_office_policy_sensor_stop_verified",
-      "role": "CPU apartment and actual Newton/BAM Office official policy actions, RGB, environment ToF range semantics and measured stop verified; Newton near-obstacle navigation and hardware pending"
+      "state": "cpu_apartment_and_newton_office_native_proximity_stop_verified",
+      "role": "CPU apartment and actual Newton/BAM Office official policy actions, RGB, in-range wall ToF, native proximity pause and measured stop verified; long navigation and hardware pending"
     },
     "skills": {
       "module": "oh_my_duck.agentic.skills",
@@ -27,7 +27,7 @@
     "harness": {
       "module": "oh_my_duck.integrations.edh_native",
       "state": "native_edh_astra_fresh_spawn_office_goal_passed_zero_external_contact",
-      "role": "Pinned EDH native session, bounded policy commands, measured stop, ActionGate and independent Verifier; CPU apartment office navigation and kick_left-to-alpha_stand execution verified; external Newton Office backend verified, native Isaac VLM/Verifier task acceptance pending"
+      "role": "Pinned EDH native session, bounded policy commands, measured stop, ActionGate and independent Verifier; CPU apartment office navigation and kick_left-to-alpha_stand execution verified; Newton Office native proximity pause and physical stop verified; Isaac VLM/Verifier task acceptance pending"
     },
     "voice": {
       "module": "oh_my_duck.voice",
@@ -46,8 +46,8 @@
     },
     "perception": {
       "module": "oh_my_duck.perception",
-      "state": "generic_interface_cpu_sensors_and_newton_office_rgb_tof_range_verified",
-      "role": "CPU apartment sensors and actual Newton Office RGB and environment ToF queries verified; Office test returned out-of-range no-target, in-range obstacle detection and object recognition pending"
+      "state": "generic_interface_cpu_sensors_and_newton_office_rgb_tof_proximity_verified",
+      "role": "CPU apartment sensors and actual Newton Office RGB, out-of-range no-target, 64 original-wall ToF rays and central-distance proximity pause verified; object recognition pending"
     },
     "policies": {
       "module": "oh_my_duck.robotics.policies",
@@ -84,23 +84,36 @@
     "hardware_available": false,
     "harness": "native_edh_apartment_fresh_spawn_formal_office_goal_passed_single_seed",
     "isaac_scene_runtime": {
-      "state": "office_official_policy_rgb_tof_range_and_measured_stop_verified",
+      "state": "office_native_wall_tof_proximity_pause_and_measured_stop_verified",
       "scene": "nvidia-office-6.0",
       "policy": "alpha_walking",
       "solver": "Newton SolverMuJoCo",
       "device": "cuda:0",
-      "motion_control_steps": 100,
-      "total_control_steps": 137,
-      "bam_physics_calls": 548,
-      "displacement_xy_m": 0.09604489774602466,
-      "stopped_samples": 5,
+      "host_gpu_index": 1,
+      "warmup_control_steps": 75,
+      "motion_control_steps": 52,
+      "zero_command_control_steps": 100,
+      "total_control_steps": 227,
+      "bam_physics_calls": 908,
+      "stopped_samples": 85,
       "environment_collision_geoms": 3646,
       "external_contact_samples": 0,
-      "tof_acceptance": "environment_query_and_out_of_range_status_verified_in_range_obstacle_pending",
-      "native_point_goal_reached": false,
+      "tof_acceptance": "out_of_range_status_and_in_range_original_wall_proximity_pause_verified",
+      "original_wall_rays_per_snapshot": 64,
+      "initial_central_tof_closest_mm": 101,
+      "guard_central_tof_closest_mm": 89,
+      "guard_reason": "forward_proximity",
+      "guard_control_sequence": 127,
+      "native_point_goal_verdict": "not_evaluated_in_proximity_acceptance",
       "native_vlm_verifier_acceptance": "pending",
       "workers_running": 0,
-      "report": "docs/reports/isaac-scene-runtime-handoff-2026-09-30.md"
+      "visualizations": "docs/assets/office-proximity",
+      "source_observer_frames": 45,
+      "source_state_samples": 228,
+      "video_size": [1920, 1080],
+      "video_fps": 10,
+      "artifact_audit": "192_original_wall_ray_hits_and_66_decoded_video_frames_passed",
+      "report": "docs/reports/isaac-proximity-2026-09-30.md"
     },
     "server_jobs": "Direct independent GPU learners on jd_B300 authorized 2026-09-23; explicit idle-device allocation",
     "headless": true,
