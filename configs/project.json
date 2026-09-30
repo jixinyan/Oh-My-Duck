@@ -11,8 +11,8 @@
     },
     "robot_backends": {
       "module": "oh_my_duck.robotics.backends",
-      "state": "cpu_apartment_and_newton_office_native_proximity_stop_verified",
-      "role": "CPU apartment and actual Newton/BAM Office official policy actions, RGB, in-range wall ToF, native proximity pause and measured stop verified; long navigation and hardware pending"
+      "state": "cpu_apartment_and_newton_office_native_agentic_navigation_verified",
+      "role": "CPU apartment and Newton/BAM Office official policies, sensors, measured stop and formal agentic navigation verified; multi-scene long navigation and hardware pending"
     },
     "skills": {
       "module": "oh_my_duck.agentic.skills",
@@ -26,8 +26,8 @@
     },
     "harness": {
       "module": "oh_my_duck.integrations.edh_native",
-      "state": "native_edh_astra_fresh_spawn_office_goal_passed_zero_external_contact",
-      "role": "Pinned EDH native session, bounded policy commands, measured stop, ActionGate and independent Verifier; CPU apartment office navigation and kick_left-to-alpha_stand execution verified; Newton Office native proximity pause and physical stop verified; Isaac VLM/Verifier task acceptance pending"
+      "state": "native_edh_astra_cpu_and_newton_office_formal_navigation_verified",
+      "role": "Pinned EDH native session, SSH GPU worker, bounded official policy actions, measured stop, ActionGate, independent Verifier and completed plan verified in CPU apartment and Newton Office; multi-scene long navigation pending"
     },
     "voice": {
       "module": "oh_my_duck.voice",
@@ -36,8 +36,8 @@
     },
     "recording": {
       "module": "oh_my_duck.experience",
-      "state": "jsonl_implemented",
-      "role": "Persist episode evidence without memory/planning"
+      "state": "jsonl_implemented_native_harness_replay_and_mp4_verified",
+      "role": "Persist episode evidence without memory/planning; native Harness replay and MP4 scripts preserve actual events, camera files and source hashes"
     },
     "training": {
       "module": "oh_my_duck.rl.training",
@@ -82,8 +82,54 @@
   },
   "execution": {
     "hardware_available": false,
-    "harness": "native_edh_apartment_fresh_spawn_formal_office_goal_passed_single_seed",
+    "harness": "native_edh_cpu_apartment_and_newton_office_formal_goal_passed_single_seed",
+    "isaac_agentic_demo": {
+      "state": "formal_verdict_and_native_run_succeeded",
+      "scene": "nvidia-office-6.0",
+      "run_id": "5722c637-c286-47a5-bac8-f8031ea6e066",
+      "session_id": "d794747f-44c1-41c3-8f8f-8b5d62e9943e",
+      "verdict_id": "08766462-9d64-45c2-914b-2b756d96e492",
+      "boundary_id": "7aaba59e-51ec-426f-800a-1a753594fbdf",
+      "edh_revision": "8a5e685b22d032207f53db20454f0992a4ad60fd",
+      "policy_revision": "1b56c396825c052a4e26e95cf2b8d8298af9e9b4",
+      "policies": ["velstand", "alpha_walking"],
+      "model": "gpt-6-astra",
+      "model_api": "responses",
+      "reasoning_effort": "high",
+      "host": "jd_B300",
+      "host_gpu_index": 4,
+      "solver": "Newton SolverMuJoCo",
+      "seed": 20260929,
+      "total_control_steps": 300,
+      "raw_sim_steps": 1200,
+      "displacement_xy_m": 0.4047108179471673,
+      "goal_distance_m": 0.09880742757601384,
+      "goal_threshold_m": 0.15,
+      "goal_hold_ticks": 114,
+      "required_goal_hold_ticks": 5,
+      "zero_command_control_steps": 100,
+      "stopped_samples": 78,
+      "external_contact_samples": 0,
+      "source_events": 899,
+      "source_observer_frames": 60,
+      "source_head_observations": 2,
+      "stop_progress_audits": 7,
+      "session_resources": "released",
+      "workers_running": 0,
+      "video": "outputs/demos/oh-my-duck-agentic-office-20260930-verified.mp4",
+      "video_size": [1920, 1080],
+      "video_fps": 10,
+      "video_frames": 941,
+      "video_duration_s": 94.1,
+      "video_sha256": "fb77c4b7a267573611aa0c398c906c043e1a261cc77a974400750cd90d1da198",
+      "video_audit": "all_frame_text_bounds_source_hashes_and_full_decode_passed",
+      "replay": ".cache/agentic-isaac-demo-04/replay",
+      "report": "docs/reports/isaac-agentic-office-demo-2026-09-30.md",
+      "scope": "single_seed_short_point_navigation; multi_scene_long_navigation_pending"
+    },
     "isaac_scene_runtime": {
+      "historical_snapshot": true,
+      "acceptance_scope": "independent_proximity_and_stop; current_navigation_in_isaac_agentic_demo",
       "state": "office_native_wall_tof_proximity_pause_and_measured_stop_verified",
       "scene": "nvidia-office-6.0",
       "policy": "alpha_walking",

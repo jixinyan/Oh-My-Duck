@@ -1,6 +1,6 @@
 # Implementation status
 
-> 2026-09-30 场景与 policy 工具：原生 EDH 支持外部 Isaac 场景与显式 `transition_policy`。CPU MuJoCo/BAM 已验证 `kick_left` 的 25 个控制步、保留物理状态接续 `alpha_stand` 的 100 个控制步和 90 个连续停止样本。Office 的 2,291 个资源完成依赖校验，Newton/BAM 场景包含 3,646 个环境 collider。官方 `alpha_walking` 的行走、RGB、ToF 超量程状态已验证；native Harness 的量程内墙面检测与近障碍暂停也已完成：64 条射线命中原有墙面，central ToF 从初始 101 mm 降至 89 mm 时触发 `forward_proximity`。本次执行 227 个控制步、908 个物理子步，零命令阶段获得 85 个连续停止样本，外部障碍接触累计为零，机器人保持 upright。已生成 1080p 视频、ToF 热图、实际轨迹和距离/速度曲线，并完成产物检查。Isaac VLM/Verifier 正式导航、长距离指令响应与多场景 Demo 待验收。验证进程已关闭，RL 保持停止。见[近障碍停止与可视化](reports/isaac-proximity-2026-09-30.md)、[场景与 policy 进度](reports/isaac-scene-runtime-handoff-2026-09-30.md)与[场景资源](reports/isaac-scene-assets.md)。
+> 2026-09-30 Isaac agentic Demo：真实 Astra/high 通过固定 EDH 原生运行时与 SSH GPU worker，在 NVIDIA Office 的 Newton/BAM 环境执行官方 `velstand` 与 `alpha_walking`。累计 300 个控制步、1200 个物理子步，实际位移 0.4047 m，外部障碍接触累计为零；末段执行 100 个零命令控制步，确认 78 个连续停止样本。独立 Verifier 判定 passed，目标误差 0.0988 m、直立目标保持 114/5 个控制步，Planner 完成计划并调用原生 `tasks.finish`，run 为 succeeded。完整记录包含 899 个事件、60 个实际 observer 帧与两个头部相机观测；MP4 显示公开 Planner 文字、计划、工具反馈与正式 verdict。原始记录与停止样本检查通过，GPU 会话已释放，RL 保持停止。量程内原有墙面检测与 89 mm 近障碍暂停另有独立验证。当前继续事项为 RGB 地标可辨认度、长距离导航、多场景与多 policy 物体效果。见[agentic Demo](reports/isaac-agentic-office-demo-2026-09-30.md)、[近障碍停止与可视化](reports/isaac-proximity-2026-09-30.md)与[场景资源](reports/isaac-scene-assets.md)。
 
 > 当前核查（2026-09-30）：用户已停止 Walking 低速干预的全部八组配对训练及预览、评估进程；不自动恢复。固定训练源码为 `b8c36b2`，每组原定 8192 环境、50000 次更新，完整预算与最终行为验收均未完成。已有 checkpoint、输出与 W&B 文件保留，详见[停止记录](reports/rl-walking-user-stop-2026-09-30.md)。此前 MuJoCo/RSL-RL Walking 与 Newton/RSL-RL StandUp seed 42、43 的三组完整训练、导出和封装均已完成，最终结果均为 `behavior_failed`，详见[上一轮项目结果](reports/project-status-2026-09-29.md)。语音 HTTP 服务、Mac 内置扬声器播放、内置麦克风录制与合成期间停止后的无迟到播放已通过实际验证；合成原文为「你好，我是小鸭。我们现在检查语音连接。」、麦克风回读为「您好，我是小丫。我们现在检查语音连接。」，详见[语音交互验收](reports/voice-interaction-validation-2026-09-29.md)。原生 EDH 公寓会话已完成真实图像、工具、ActionGate 动作、`policy_stop` 和独立 Verifier 闭环；固定出生位置的独立 office 导航获得正式 passed，全程外部障碍接触累计 0，详见[公寓导航验收](reports/harness-office-navigation-2026-09-30.md)。项目目前没有可用真机。
 
@@ -171,9 +171,9 @@ is prepared but not launched. Default task recipes and native PPO algorithms rem
 |---|---|
 | Source organization | First-party code consolidated under `src/oh_my_duck`; obsolete `training/` packages removed |
 | CLI/application | Unified entry point and explicit service composition |
-| Core contracts/tool catalog/recording | Tested contracts, tool registry and JSONL event storage |
-| Agentic Harness, skills, robot execution | 原生 EDH 会话、真实 Astra 工具与图像、官方 ONNX 推断、CPU MuJoCo/BAM ActionGate 动作、有界命令与传感器停止、`policy_stop` 和独立 Verifier 已运行；固定出生位置的独立 office 导航任务正式 passed，外部障碍接触累计 0，范围为单一 CPU 公寓 seed |
-| Perception and policy adapters | Interfaces for future implementation; no runtime capability claim |
+| Core contracts/tool catalog/recording | 已验证 schema、工具登记与 JSONL；原生 Harness 完整事件和 PNG 导出、SHA256 检查及 1080p agentic MP4 已完成实际验证 |
+| Agentic Harness, skills, robot execution | 固定 EDH 原生会话、SSH GPU worker、真实 Astra/high、官方 ONNX、ActionGate、有界命令、连续停止样本与独立 Verifier 已运行；CPU 公寓及 Newton Office 的单一 seed 导航均正式 passed，外部障碍接触累计为零；多场景长距离导航待验收 |
+| Perception and policy adapters | 官方十项 policy 目录及 61-to-14 推断，CPU episodic 时长/接续、Newton Office 的 velstand/alpha_walking、RGB 捕获、ToF、IMU 与 odometry 已验证；RGB 地标质量、物体识别与各 policy 的物体效果待验证 |
 | Voice interaction | Qwen ASR、VoiceDesign、Base TTS 与确认后的音色版本已通过 GPU 文件推理；Mac 扬声器、麦克风和 HTTP 服务完成实际音频验证，合成期间停止后无迟到播放；独立 CPU 服务验证 `VoiceSession.speak` 正常播完和播音开始后的停止。Microduck 音频设备和 Harness 接入待完成。见[交互验收](reports/voice-interaction-validation-2026-09-29.md)与[文件推理验收](reports/voice-validation-2026-09-26.md) |
 | MuJoCo RL | Both representative tasks × both native PPO frameworks passed the single-GPU lifecycle and completed replay |
 | Isaac/Newton RL | Both representative tasks × both native PPO frameworks passed the single-GPU lifecycle and completed replay |

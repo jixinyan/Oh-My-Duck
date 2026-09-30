@@ -8,7 +8,7 @@
 [![RL behavior: pending](https://img.shields.io/badge/RL_behavior-pending-orange)](docs/reports/rl-walking-low-speed-launch-2026-09-29.md)
 [![Recorded CPU checks: 55 passed on 2026-09-23](https://img.shields.io/badge/recorded_CPU_checks-55_passed-2ea44f)](docs/reports/project-status-2026-09-23.md)
 [![Voice: Mac audio verified](https://img.shields.io/badge/voice-Mac_audio_verified-green)](docs/reports/voice-interaction-validation-2026-09-29.md)
-[![Isaac Office: policy and stop verified](https://img.shields.io/badge/Isaac_Office-policy_and_stop_verified-green)](docs/reports/isaac-scene-runtime-handoff-2026-09-30.md)
+[![Isaac Office: agentic navigation verified](https://img.shields.io/badge/Isaac_Office-agentic_navigation_verified-green)](docs/reports/isaac-agentic-office-demo-2026-09-30.md)
 [![Hardware validation: pending](https://img.shields.io/badge/hardware_validation-pending-orange)](docs/implementation-status.md)
 
 **An interactive, extensible Microduck—with a persistent voice, shared experiences, and skills you can train.**
@@ -44,7 +44,9 @@ The duck's name, voice and remembered experiences give it continuity. Learning n
 
 High-frequency joint control stays with the policy/runtime. The harness chooses tasks and can observe, interrupt or replan; a model response is not itself evidence that a physical task succeeded.
 
-外部 Isaac USD 场景通过 `omd harness --scene-config` 接入。NVIDIA Office 已完成实际 Newton/BAM 官方 policy、RGB、ToF 环境查询与测量停止验证；CPU 原生工具另已验证 `kick_left` 完整执行后接续 `alpha_stand`。Isaac 的 VLM/Verifier 正式导航、多场景长距离导航与多 policy 物体效果待验收。资源与验证进程已停止，详见[场景与 policy 进度](docs/reports/isaac-scene-runtime-handoff-2026-09-30.md)。
+External Isaac USD scenes enter through `omd harness --scene-config`; the native Python worker can run on an explicitly selected remote GPU over SSH. A real Astra/high session navigated NVIDIA Office with official `velstand` and `alpha_walking` policies under Newton/BAM: 300 control steps, 0.405 m measured displacement, zero external obstacle contact samples, and 100 zero-command steps before measured stopping. The independent Verifier passed, and the Planner completed native `tasks.finish`. The agentic MP4 combines actual robot frames, public Planner text, plans, tool feedback and the formal verdict. See the [Office demo and acceptance record](docs/reports/isaac-agentic-office-demo-2026-09-30.md) and [recording instructions](docs/harness-native-integration.md#agentic-mp4). Multi-scene long navigation and policy-specific object effects remain open; CPU tools have separately verified `kick_left` followed by `alpha_stand`.
+
+![Actual Newton Office robot frame with recorded Planner text, tool feedback and a passed independent verdict.](docs/assets/office-agentic/demo.png)
 
 ## Train with MuJoCo or Isaac / Newton
 
