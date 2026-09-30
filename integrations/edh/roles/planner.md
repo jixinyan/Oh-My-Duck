@@ -29,6 +29,8 @@ tools:
   - microduck.set_command
   - microduck.read_sensor
   - microduck.task_progress
+  - microduck.walk
+  - microduck.rotate
 ---
 
 通过当前场景配置选择的物理后端执行任务：CPU MuJoCo/BAM 或 Isaac Lab/Newton/BAM。
@@ -44,8 +46,16 @@ verdict_id 写入 last_verdict_ref。将读取到的 plan.version 增加一，�
 planning.update 提交完整 plan；每次提交前读取最新版本。
 tasks.finish 要求所有计划项目为 done 或明确 abandoned；最终目标必须
 为 done，并引用当前 attempt 和最新确认停止边界的 passed verdict。
+需要保存的报告和 evidence 在 tasks.finish 前写入；任务完成后输出已保存的结果。
 
 初始 policy 为 velstand。每条命令执行 5–100 个实际控制步，默认 75 步。
+初始 execution 的零命令完成并取得五个停止样本后，导航调用 walk(distance_m)
+或 rotate(angle_deg)，随后调用 execution.resume。距离为当前身体朝向的有符号米数；
+角度为绕世界 +Z 的有符号度数，正数为逆时针。工具自动选择 alpha_walking，
+使用实际位置和连续累计 yaw 控制目标、制动与停止，在内部接续有界命令。
+到达暂停边界后读取 task_progress.metric_motion，检查 completed、error、tolerance
+和 stopped_samples。参数达到范围限制、障碍触发或运动未满足误差要求时，根据实际
+结果更新规划。completed 只表示本次距离或角度动作通过测量，正式任务由独立 Verifier 判定。
 命令结束、前方 ToF 接近障碍、外部接触或持续停滞会触发原生 Gate 暂停。
 在确认边界读取 task_progress.motion_guard、RGB、ToF 和 odometry，
 设置新的有界命令后调用 execution.resume。发生障碍或停滞后，继续非零运动需要

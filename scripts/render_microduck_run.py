@@ -334,6 +334,8 @@ def tool_summary(event: dict) -> str:
             visible["joint_count"] = len(measurements["joint_names"])
     elif tool == "microduck.set_command":
         visible = selected(result, ("effective_after_sequence", "command"))
+    elif tool in ("microduck.walk", "microduck.rotate"):
+        visible = selected(result, ("prepared", "arguments", "policy_name", "next_action"))
     elif tool == "microduck.task_progress":
         reason, distance, samples = progress_motion_evidence(result)
         position = result.get("body_position_m")
@@ -341,8 +343,12 @@ def tool_summary(event: dict) -> str:
                        "(" + ",".join(f"{value:.3f}" for value in position) + ")m")
         execution = result.get("execution")
         state = execution.get("state", "未记录") if isinstance(execution, dict) else "未记录"
-        return (f"{tool} · seq={result.get('sequence', '未记录')} · {coordinates} · {state}\n"
+        text = (f"{tool} · seq={result.get('sequence', '未记录')} · {coordinates} · {state}\n"
                 f"guard={reason} · central ToF={distance} mm · non-ground samples={samples}")
+        if motion := result.get("metric_motion"):
+            text += (f"\n{motion['operation']} {motion['measured']:.3f}/{motion['requested']:.3f} {motion['unit']}"
+                     f" · error {motion['error']:.3f} · {motion['phase']}")
+        return text
     elif tool == "microduck.select_policy":
         visible = selected(result, ("policy_name", "kind", "encoding", "duration_s"))
         visible["action_spec_version"] = result.get("action_spec", {}).get("version")

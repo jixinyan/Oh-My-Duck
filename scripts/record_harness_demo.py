@@ -27,12 +27,12 @@ def tool_status(event: dict) -> dict:
     result = event["detail"].get("result", {})
     summary = {key: result[key] for key in ("sequence", "body_position_m", "policy_name",
                "command", "max_control_steps", "body_twist", "fallen", "sensor",
-               "stopped_samples", "required_stopped_samples") if key in result}
+               "stopped_samples", "required_stopped_samples", "metric_motion") if key in result}
     if event["type"] == "tool.failed":
         summary["error"] = event["detail"]["error"]
     if guard := result.get("motion_guard"):
         summary["motion_guard"] = {key: guard[key] for key in
-                                   ("reason", "sequence", "used_control_steps", "central_tof_closest_mm")}
+                                   ("reason", "sequence", "used_control_steps", "central_tof_closest_mm") if key in guard}
     return {"sequence": event["sequence"], "tool": event["detail"]["tool"], "result": summary}
 
 

@@ -24,6 +24,7 @@ from physical_harness.validation import ContractValidator
 
 from oh_my_duck.robotics.backends.simulation import CpuMujocoBamBackend, STOP_SAMPLES
 from oh_my_duck.robotics.microduck.motion_guard import MotionGuard
+from oh_my_duck.robotics.microduck.metric_motion import MetricMotion
 
 
 def _wire_time() -> str:
@@ -259,6 +260,7 @@ class MicroDuckWorkerSession(NativeWorkerSession):
         self._motion_guard: dict[str, Any] | None = None
         self._motion_cleanup_task: asyncio.Task[None] | None = None
         self._guard_tof_boundary_id: str | None = None
+        self._metric_motion: MetricMotion | None = None
 
     async def _await_motion_cleanup(self) -> None:
         task = self._motion_cleanup_task
@@ -274,6 +276,8 @@ class MicroDuckWorkerSession(NativeWorkerSession):
         return count
 
     def _bind_motion_segment(self, command_result: dict[str, Any], count: int) -> None:
+        self._motion_guard = None
+        self._guard_tof_boundary_id = None
         gate = self._gate
         snapshot = gate.snapshot() if gate is not None else None
         self._motion_segment = {
@@ -443,7 +447,40 @@ class MicroDuckWorkerSession(NativeWorkerSession):
             operation = request["operation"]
             args = require_object(request.get("arguments", {}))
             backend = self._environment._backend()
-            if operation == "set_command":
+            if operation in ("walk", "rotate"):
+                async with self._control_lock:
+                    await self._await_motion_cleanup()
+                    self._require_control_lease(run_task_id)
+                    snapshot = self._require_gate().snapshot()
+                    if snapshot["state"] != "paused" or not snapshot["device_confirmed"]:
+                        raise RuntimeError("Metric motion requires a confirmed paused native execution")
+                    if self._motion_guard is not None and self._motion_guard["reason"] in (
+                            "forward_proximity", "external_contact", "motion_stalled", "tof_invalid"):
+                        raise RuntimeError("Resolve the measured motion hazard before metric navigation")
+                    def prepare_metric():
+                        self._require_control_lease(run_task_id)
+                        if backend._stopped_samples < STOP_SAMPLES:
+                            raise RuntimeError("Metric motion requires five measured stopped samples")
+                        measured = backend._native_state()
+                        motion = MetricMotion(operation, args, measured)
+                        motion.request_id = request["request_id"]
+                        selected = ({"policy_name": "alpha_walking"} if backend.active_policy.name == "alpha_walking"
+                                    else backend.select_policy("alpha_walking", request["request_id"] + ":policy"))
+                        command = backend.set_command(motion.command(measured), request["request_id"])
+                        return motion, selected, command
+                    motion, selected, command = await self._device.on_owner(prepare_metric)
+                    self._metric_motion = motion
+                    self._bind_motion_segment(command, self.MAX_COMMAND_STEPS)
+                    result = {"prepared": True, "operation": operation, "arguments": args,
+                              "request_id": request["request_id"], "command_admission": command,
+                              "policy_name": selected["policy_name"],
+                              "start_position_m": motion.start_position, "start_yaw_rad": motion.start_yaw,
+                              "distance_tolerance_m": motion.DISTANCE_TOLERANCE_M,
+                              "angle_tolerance_deg": motion.ANGLE_TOLERANCE_DEG,
+                              "execution_id": snapshot["execution_id"],
+                              "generation": snapshot["generation"], "boundary_id": snapshot["boundary_id"],
+                              "next_action": "execution.resume"}
+            elif operation == "set_command":
                 async with self._control_lock:
                     await self._await_motion_cleanup()
                     self._require_control_lease(run_task_id)
@@ -476,6 +513,7 @@ class MicroDuckWorkerSession(NativeWorkerSession):
                                 raise RuntimeError("Command boundary changed before physical owner mutation")
                         return backend.set_command(args["command"], request_id=request["request_id"])
                     result = await self._device.on_owner(apply_command)
+                    self._metric_motion = None
                     self._bind_motion_segment(result, count)
                     result["max_control_steps"] = count
             elif operation in ("select_policy", "transition_policy"):
@@ -512,6 +550,7 @@ class MicroDuckWorkerSession(NativeWorkerSession):
                             raise RuntimeError("Selected policy changes the admitted physical action semantics")
                         return selected
                     result = await self._device.on_owner(select_on_owner)
+                    self._metric_motion = None
             elif operation == "read_sensor":
                 if args["sensor"] not in ("head_rgb", "tof", "imu", "joint_state", "odometry"):
                     raise ValueError("Unknown MicroDuck sensor")
@@ -527,7 +566,7 @@ class MicroDuckWorkerSession(NativeWorkerSession):
                             observed["sequence"] >= self._motion_guard["sequence"]):
                         self._guard_tof_boundary_id = snapshot["boundary_id"]
                 fields = {
-                    "head_rgb": ("rgb_png_base64", "rgb_width", "rgb_height", "camera_frame_id"),
+                    "head_rgb": ("rgb_png_base64", "rgb_width", "rgb_height", "camera_frame_id", "camera_geometry"),
                     "tof": ("tof_distance_mm", "tof_status", "tof_rows", "tof_cols", "tof_frame_id"),
                     "imu": ("angular_velocity_rad_s", "projected_gravity"),
                     "joint_state": ("joint_names", "joint_position_rad", "joint_velocity_rad_s"),
@@ -552,6 +591,7 @@ class MicroDuckWorkerSession(NativeWorkerSession):
                           "body_twist": measured["body_twist"], "fallen": measured["fallen"],
                           "stopped_samples": measured["stopped_samples"],
                           "required_stopped_samples": STOP_SAMPLES,
+                          "metric_motion": None if self._metric_motion is None else self._metric_motion.result,
                           "command_block": measured["command_block"],
                           "contact_evidence": measured["contact_evidence"],
                           "motion_guard": self._motion_guard,
@@ -699,6 +739,7 @@ class MicroDuckWorkerSession(NativeWorkerSession):
         self._bind_motion_segment(command, self.DEFAULT_COMMAND_STEPS)
         self._motion_guard = None
         self._guard_tof_boundary_id = None
+        self._metric_motion = None
         return opened
 
     async def start(self, arguments: dict[str, Any]) -> dict[str, Any]:
@@ -735,6 +776,39 @@ class MicroDuckWorkerSession(NativeWorkerSession):
         step = self._require_device().last_step
         sample = self._environment._navigation_samples[step.observation.observation_id]
         guard = self._guard_for_sample(sample, snapshot)
+        motion = self._metric_motion
+        if motion is not None:
+            backend = self._environment._backend()
+            state, stopped = await self._device.on_owner(lambda: (backend._native_state(), backend._stopped_samples))
+            previous_phase = motion.phase
+            evidence = motion.observe(sample, state, stopped)
+            self._last_control["metric_motion"] = evidence
+            if guard is not None and guard["reason"] != "command_segment_complete":
+                motion.phase = "blocked"
+                evidence.update(phase="blocked", completed=False, reason=guard["reason"])
+            elif motion.phase in ("complete", "failed"):
+                segment = self._motion_segment
+                used = sample["sequence"] - segment["effective_after_sequence"]
+                if motion.phase == "complete" and used < STOP_SAMPLES:
+                    motion.phase = "braking"
+                    evidence.update(phase="braking", completed=False)
+                    guard = None
+                else:
+                    guard = {"reason": "metric_target_reached" if motion.phase == "complete" else "metric_target_failed",
+                             "run_task_id": self._run_task_id, "execution_id": snapshot["execution_id"],
+                             "generation": snapshot["generation"], "command_request_id": segment["request_id"],
+                             "episode_id": sample["episode_id"], "sequence": sample["sequence"],
+                             "command": segment["command"], "used_control_steps": used,
+                             "max_control_steps": segment["max_control_steps"], "metric_motion": evidence}
+            elif previous_phase != motion.phase or guard is not None:
+                command = await self._device.on_owner(lambda: backend.set_command(
+                    motion.command(state), request_id="metric:" + uuid4().hex))
+                self._bind_motion_segment(command, self.MAX_COMMAND_STEPS)
+                guard = None
+            if guard is not None:
+                guard["metric_request_id"] = motion.request_id
+                guard["command_admission"] = {key: self._motion_segment[key] for key in
+                                              ("request_id", "effective_after_sequence", "max_control_steps", "command")}
         if guard is None:
             return
         self._motion_guard = guard
@@ -775,6 +849,10 @@ class MicroDuckWorkerSession(NativeWorkerSession):
                 self._environment._backend().discard_pending_inference)
             observation = await self._require_device().on_owner(self._environment.observe)
             publication = await self._publish(observation, self._last_control)
+            if self._metric_motion is not None and self._metric_motion.phase in ("moving", "braking"):
+                self._metric_motion.phase = "interrupted"
+                if self._metric_motion.result is not None:
+                    self._metric_motion.result.update(phase="interrupted", completed=False, reason=reason)
             return publication
 
     async def close(self) -> dict[str, Any]:

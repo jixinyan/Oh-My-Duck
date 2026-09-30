@@ -21,6 +21,9 @@ def audit_motion_guard_pauses(events: list[dict], run_id: str) -> None:
                           event["detail"].get("tool") == "microduck.set_command"]
     commands = {event["detail"]["result"]["request_id"]: event
                 for event in completed_commands}
+    metric_commands = {event["detail"]["result"]["request_id"]: event for event in events
+                       if event["type"] == "tool.completed" and
+                       event["detail"].get("tool") in ("microduck.walk", "microduck.rotate")}
     if len(commands) != len(completed_commands):
         raise AssertionError("Physical command request identities are duplicated")
     guarded = [event for event in events if event["type"] == "tool.completed" and
@@ -47,6 +50,22 @@ def audit_motion_guard_pauses(events: list[dict], run_id: str) -> None:
                    for event in paused):
             raise AssertionError("Motion guard lacks the matching native confirmed pause")
         command_event = commands.get(guard["command_request_id"])
+        if command_event is None and guard.get("metric_request_id") in metric_commands:
+            metric_event = metric_commands[guard["metric_request_id"]]
+            if metric_event["sequence"] >= progress_event["sequence"]:
+                raise AssertionError("Metric motion admission follows its physical progress")
+            command = guard["command_admission"]
+            if command["request_id"] != guard["command_request_id"]:
+                raise AssertionError("Metric motion command identity differs from its pause")
+            if (guard["sequence"] != command["effective_after_sequence"] + guard["used_control_steps"] or
+                    guard["command"] != command["command"] or
+                    not 0 < guard["used_control_steps"] <= command["max_control_steps"]):
+                raise AssertionError("Metric motion pause differs from its admitted physical command")
+            motion = progress["metric_motion"]
+            if (motion["request_id"] != guard["metric_request_id"] or motion["sequence"] != progress["sequence"] or
+                    motion["completed"] and (motion["error"] > motion["tolerance"] or motion["stopped_samples"] < 5)):
+                raise AssertionError("Metric completion lacks measured goal and stop evidence")
+            continue
         if command_event is None or command_event["sequence"] >= progress_event["sequence"]:
             raise AssertionError("Motion guard lacks its completed physical command")
         command = command_event["detail"]["result"]
@@ -65,6 +84,7 @@ def main() -> None:
     parser.add_argument("--expected-stop-reason", choices=("policy_stop", "budget_exhausted"))
     parser.add_argument("--prior-export", type=Path)
     parser.add_argument("--require-stop-progress", action="store_true")
+    parser.add_argument("--require-metric-tools", action="store_true")
     arguments = parser.parse_args()
     root = arguments.export_dir.resolve(strict=True)
     manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
@@ -94,11 +114,36 @@ def main() -> None:
     if arguments.prior_export is None:
         required_calls.update(("microduck__policy_catalog", "microduck__select_policy",
                                "execution__resume"))
+    if arguments.require_metric_tools:
+        required_calls.discard("microduck__select_policy")
+        required_calls.add("microduck__walk")
     if missing := required_calls - set(calls):
         raise AssertionError(f"Original trace lacks required tool calls: {sorted(missing)}")
     if "execution__pause" not in calls:
         audit_motion_guard_pauses(events, manifest["runId"])
     tool_results = [event["detail"] for event in events if event["type"] == "tool.completed"]
+    if arguments.require_metric_tools:
+        prepared = {item["result"]["request_id"]: item["result"] for item in tool_results
+                    if item["tool"] == "microduck.walk"}
+        completed_motion = [item["result"] for item in tool_results if item["tool"] == "microduck.task_progress"
+                            and item["result"].get("metric_motion", {}) is not None
+                            and item["result"].get("metric_motion", {}).get("completed") is True]
+        walking = [progress for progress in completed_motion if progress["metric_motion"]["operation"] == "walk"]
+        if not walking:
+            raise AssertionError("Metric walking lacks a completed measured target")
+        for progress in walking:
+            motion = progress["metric_motion"]
+            admission = prepared[motion["request_id"]]
+            requested = admission["arguments"]["distance_m"]
+            start, yaw = motion["start_position_m"], motion["start_yaw_rad"]
+            target = [start[0] + requested * math.cos(yaw), start[1] + requested * math.sin(yaw)]
+            native_position = progress["body_position_m"]
+            native_error = math.dist(target, native_position[:2])
+            if (motion["requested"] != requested or motion["unit"] != "m" or
+                    math.dist(native_position, motion["body_position_m"]) > 1e-6 or
+                    abs(native_error - motion["error"]) > 1e-6 or native_error > 0.05 or
+                    progress["stopped_samples"] < 5 or progress["fallen"]):
+                raise AssertionError("Metric walking differs from its measured native target and stop")
     stop_progress_count = 0
     if arguments.require_stop_progress:
         samples_by_sequence = {}
@@ -152,10 +197,14 @@ def main() -> None:
                  item["policy_name"] != "alpha_walking" for item in current_progress):
             raise AssertionError("Retained task did not continue its confirmed physical episode")
     if not any(item.get("tool") == "microduck.select_policy" and
-               item["result"]["policy_name"] == "alpha_walking" for item in selection_results):
+               item["result"]["policy_name"] == "alpha_walking" or
+               item.get("tool") == "microduck.walk" and item["result"]["policy_name"] == "alpha_walking"
+               for item in selection_results):
         raise AssertionError("Alpha Walking policy selection was not confirmed")
     if not any(item.get("tool") == "microduck.set_command" and
-               item["result"]["command"]["twist"][0] > 0 for item in tool_results):
+               item["result"]["command"]["twist"][0] > 0 or
+               item.get("tool") == "microduck.walk" and item["result"]["arguments"]["distance_m"] > 0
+               for item in tool_results):
         raise AssertionError("A forward policy command was not confirmed")
     positions = [item["result"]["body_position_m"] for item in tool_results
                  if item.get("tool") == "microduck.task_progress"]

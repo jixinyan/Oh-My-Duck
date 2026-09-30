@@ -209,6 +209,8 @@ function tool(operation, properties, required, services) {
       set_command: 'Set a bounded policy command at a confirmed paused boundary. Each command runs for 5–100 actual control steps. After proximity, contact, or stall, read fresh ToF and change twist before renewed motion; zero twist remains available for stopping.',
       read_sensor: 'Read a current physical MicroDuck RGB, ToF, IMU, joint, or odometry sensor.',
       task_progress: 'Read current physical position, velocity, contact evidence, bounded-command status, and native motion-pause reason.',
+      walk: 'Prepare official alpha_walking to move a signed distance in meters along the current heading. Positive moves forward; negative moves backward. Requires a confirmed paused execution and five measured stopped samples. Call execution.resume afterward. Native odometry controls completion and braking; read task_progress.metric_motion after the pause.',
+      rotate: 'Prepare official alpha_walking for a walking turn by a signed angle in degrees. This maneuver includes translation; the measured translation_xy_m is reported. Positive is counterclockwise around world +Z; negative is clockwise. Requires a confirmed paused execution and five measured stopped samples. Call execution.resume afterward. Accumulated measured yaw controls completion and braking; read task_progress.metric_motion after the pause.',
     }[operation],
     parameters: { type: 'object', properties, required, additionalProperties: false },
     output: {
@@ -298,6 +300,14 @@ const server = await startServer({
         sensor: { type: 'string', enum: ['head_rgb', 'tof', 'imu', 'joint_state', 'odometry'] },
       }, ['sensor'], { images }),
       'microduck.task_progress': tool('task_progress', {}, [], { images }),
+      'microduck.walk': tool('walk', {
+        distance_m: { type: 'number', minimum: -10, maximum: 10 },
+        speed_m_s: { type: 'number', minimum: 0.1, maximum: 0.4 },
+      }, ['distance_m'], { images }),
+      'microduck.rotate': tool('rotate', {
+        angle_deg: { type: 'number', minimum: -360, maximum: 360 },
+        angular_speed_deg_s: { type: 'number', minimum: 10, maximum: 55 },
+      }, ['angle_deg'], { images }),
     },
     launchProfiles: {
       [nativeTaskId]: {
