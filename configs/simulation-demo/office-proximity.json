@@ -1,0 +1,20 @@
+{
+  "backend": "isaac-newton",
+  "scene_id": "nvidia-office-6.0",
+  "usd_path": "data/scenes/nvidia-office-6.0/source/Assets/Isaac/6.0/Isaac/Environments/Office/office.usd",
+  "provenance_path": "data/scenes/nvidia-office-6.0/asset-provenance.json",
+  "public_map_path": "data/scenes/nvidia-office-6.0/public-map.json",
+  "device": "cuda:0",
+  "spawn_pose": {"x_m": -5.2870175, "y_m": 25.2000007, "z_m": 0.125, "yaw_rad": 0.0},
+  "goal": {"kind": "point", "target_xy_m": [-5.27, 25.4], "distance_m": 0.06, "hold_ticks": 5},
+  "task_instruction": "Measure the original Office wall with ToF, approach until the native proximity guard pauses execution, and confirm physical rest with zero commands.",
+  "expected_wall": {
+    "path": "/Root/SM_Wall_3m47/SM_Wall_3m",
+    "min": [-5.112017528889261, 24.000000651231243, -0.0000000048956757],
+    "max": [-5.09999988332223, 27.000000649849472, 2.9999999329447746]
+  },
+  "seed": 20260930,
+  "twist": [0.2, 0.25, 0.0],
+  "segment_limit": 8,
+  "budget": {"max_control_steps": 1200, "max_wall_time_s": 1200}
+}

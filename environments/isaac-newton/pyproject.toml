@@ -18,6 +18,7 @@ dependencies = [
 
 [project.optional-dependencies]
 sb3 = ["isaaclab-rl[sb3]", "stable-baselines3==2.7.1"]
+native-harness = ["jsonschema==4.25.1", "websockets==17.0.1"]
 
 [tool.uv]
 package = false
@@ -25,7 +26,8 @@ package = false
 # compatibility override is explicit and covered by installed-environment tests.
 # Preserve Isaac's Pillow pin; MoviePy declares <12. Our render path uses
 # imageio, and installed video-writing checks cover the retained Pillow version.
-override-dependencies = ["typing-extensions==4.15.0", "pillow==12.2.0"]
+# native Harness 的 policy transport 固定 websockets 17；运行验证覆盖 Viser 服务。
+override-dependencies = ["typing-extensions==4.15.0", "pillow==12.2.0", "websockets==17.0.1"]
 index-strategy = "unsafe-best-match"
 prerelease = "allow"
 environments = ["sys_platform == 'linux' and platform_machine == 'x86_64'"]
