@@ -33,7 +33,11 @@ Isaac Lab 固定为 `v3.0.0-beta2.patch1@ffff603eafc6b74264a5261cc0183d6a65390d7
 重复运行需要完整场景资源、对应转换 fingerprint 和新的输出目录：
 
 ```bash
-CUDA_VISIBLE_DEVICES=0 PYTHONPATH=../src ../.envs/isaac-newton/bin/python accept_isaac_official_backend.py --scene-config ../configs/simulation-demo/office.json --catalog /home/jixin/workspace/code/Oh-My-Duck/.cache/official-policies-runtime/1b56c396825c052a4e26e95cf2b8d8298af9e9b4 --output ../outputs/isaac-runtime/office-alpha-next --steps 100
+TMPDIR="$PWD/../.cache/tmp" CUDA_VISIBLE_DEVICES=0 PYTHONPATH=../src \
+  ../.envs/isaac-newton/bin/python accept_isaac_official_backend.py \
+  --scene-config ../configs/simulation-demo/office.json \
+  --catalog /home/jixin/workspace/code/Oh-My-Duck/.cache/official-policies-runtime/1b56c396825c052a4e26e95cf2b8d8298af9e9b4 \
+  --output ../outputs/isaac-runtime/office-alpha-next --steps 100
 ```
 
 工作目录为远程源码副本的 `scripts/`。本次运行使用远程 `.cache/office-scene.json` 中相同的 Office 来源、出生位置与目标配置。
