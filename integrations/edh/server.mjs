@@ -4,6 +4,8 @@ import { createConnection, createServer } from 'node:net';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createInterface } from 'node:readline';
+import { identifyModelClient } from './model-transport.mjs';
+import { createRequire } from 'node:module';
 
 const omdRoot = fileURLToPath(new URL('../../', import.meta.url));
 const edhRoot = resolve(process.env.OMD_EDH_SOURCE ?? '');
@@ -13,15 +15,50 @@ const catalogDir = process.env.OMD_POLICY_DIR;
 const dataDirectory = process.env.OMD_DATA_DIRECTORY;
 const baseURL = process.env.EDH_MODEL_BASE_URL;
 const model = process.env.EDH_MODEL;
+const modelAPI = process.env.EDH_MODEL_API ?? 'chat-completions';
 const key = process.env.EDH_MODEL_API_KEY;
+const reasoningEffort = process.env.EDH_REASONING_EFFORT;
+const remoteWorker = process.env.OMD_REMOTE_WORKER
+  ? JSON.parse(process.env.OMD_REMOTE_WORKER) : null;
+if (reasoningEffort && !['low', 'medium', 'high', 'xhigh', 'max'].includes(reasoningEffort))
+  throw new Error('Model reasoning effort is invalid');
 if (!python || !catalogDir || !dataDirectory || !baseURL || !model)
   throw new Error('Simulation worker, policy catalog, data directory, and model endpoint are required');
-const [{ ContractValidator }, { OpenAICompatibleAdapter }, serverModule] = await Promise.all([
+if (!['chat-completions', 'responses'].includes(modelAPI))
+  throw new Error('Model API is invalid');
+const [{ ContractValidator }, { OpenAICompatibleAdapter, OpenAIResponsesAdapter }, serverModule] = await Promise.all([
   import(resolve(edhRoot, 'harness/contracts/src/index.ts')),
   import(resolve(edhRoot, 'harness/agent-runtime/models/src/index.ts')),
   import(resolve(edhRoot, 'apps/server/src/index.ts')),
 ]);
 const { startServer, createNativeWorkerEnvironment } = serverModule;
+const ModelAdapter = modelAPI === 'responses' ? OpenAIResponsesAdapter : OpenAICompatibleAdapter;
+const { createParser } = createRequire(resolve(edhRoot,
+  'harness/agent-runtime/models/package.json'))('eventsource-parser');
+const closeModelTransport = identifyModelClient(
+  await import(resolve(edhRoot, 'node_modules/undici/index.js')), baseURL, createParser,
+  resolve(dataDirectory, 'model-transport.jsonl'));
+if (process.env.OMD_CHECK_MODEL === '1') {
+  const adapter = new ModelAdapter({ baseURL,
+    models: [{ id: model, inputModalities: ['text', 'image'], contextWindow: 32768, maxTokens: 4096 }],
+    ...(key ? { apiKey: () => key } : {}), timeoutMs: 180_000 });
+  const info = await adapter.resolveModel('configured-vlm', model);
+  if (reasoningEffort && !info.reasoning?.efforts.some((effort) => effort.id === reasoningEffort))
+    throw new Error('Configured adapter does not expose the requested reasoning effort');
+  let text = '';
+  let finish;
+  for await (const chunk of adapter.stream({ provider: 'configured-vlm', model,
+    messages: [{ role: 'user', content: [{ type: 'text', text: 'Reply OK.' }] }],
+    maxTokens: 4096, ...(reasoningEffort ? { reasoningEffort } : {}),
+    signal: new AbortController().signal })) {
+    if (chunk.type === 'text-delta') text += chunk.text;
+    if (chunk.type === 'finish') finish = chunk.reason;
+  }
+  if (!text.trim() || finish?.kind !== 'stop') throw new Error('Model probe did not complete with text');
+  await closeModelTransport();
+  process.stdout.write(`${JSON.stringify({ model, modelAPI, reasoningEffort, finish, text })}\n`);
+  process.exit(0);
+}
 const validator = new ContractValidator(JSON.parse(await readFile(
   resolve(edhRoot, 'harness/contracts/schema/physical.schema.json'), 'utf8')));
 const tempDirectory = resolve(omdRoot, '.cache/tmp');
@@ -119,6 +156,47 @@ async function availableControlPort() {
   return port;
 }
 
+function shellQuote(value) {
+  if (typeof value !== 'string' || !value.length || value.includes('\0'))
+    throw new Error('Remote worker command contains an invalid argument');
+  return `'${value.replaceAll("'", "'\\''")}'`;
+}
+
+function workerTransport(controlPort) {
+  if (remoteWorker === null) return {
+    command: [python, '-m', 'oh_my_duck.integrations.edh_native'],
+    env: { PYTHONPATH: `${resolve(omdRoot, 'src')}:${resolve(edhRoot,
+      'harness/physical-runtime/src')}`, TMPDIR: tempDirectory },
+    schemaPath: resolve(edhRoot, 'harness/contracts/schema/physical.schema.json'),
+  };
+  for (const field of ['root', 'python', 'edh_source', 'policy_dir'])
+    if (typeof remoteWorker[field] !== 'string' || !remoteWorker[field].startsWith('/'))
+      throw new Error(`Remote worker ${field} must be an absolute path`);
+  if (typeof remoteWorker.host !== 'string' || !remoteWorker.host.length ||
+      remoteWorker.host.startsWith('-') || /\s/.test(remoteWorker.host))
+    throw new Error('Remote worker SSH host is invalid');
+  const remoteTemp = `${remoteWorker.root}/.cache/tmp`;
+  const assignments = [
+    `PYTHONPATH=${shellQuote(`${remoteWorker.root}/src:${remoteWorker.edh_source}/harness/physical-runtime/src`)}`,
+    `TMPDIR=${shellQuote(remoteTemp)}`,
+  ];
+  if (remoteWorker.cuda_device !== null) {
+    if (!Number.isSafeInteger(remoteWorker.cuda_device) || remoteWorker.cuda_device < 0)
+      throw new Error('Remote worker CUDA device is invalid');
+    assignments.push(`CUDA_VISIBLE_DEVICES=${remoteWorker.cuda_device}`);
+  }
+  const command = `cd ${shellQuote(remoteWorker.root)} && exec env ${assignments.join(' ')} ` +
+    `${shellQuote(remoteWorker.python)} -u -m oh_my_duck.integrations.edh_native 3>&1 1>&2`;
+  return {
+    command: ['ssh', '-T', '-o', 'BatchMode=yes', '-o', 'ExitOnForwardFailure=yes',
+      '-o', 'ServerAliveInterval=30', '-o', 'ServerAliveCountMax=3',
+      '-L', `127.0.0.1:${controlPort}:127.0.0.1:${controlPort}`, remoteWorker.host, command],
+    transportFd: 1,
+    env: {},
+    schemaPath: `${remoteWorker.edh_source}/harness/contracts/schema/physical.schema.json`,
+  };
+}
+
 function tool(operation, properties, required, services) {
   return (assignment) => ({
     name: `microduck__${operation}`,
@@ -170,14 +248,15 @@ const server = await startServer({
   dataDirectory,
   deployment: ({ images }) => ({
     id: 'microduck-live',
-    version: `edh-${pinnedRevision}-official-policy-1`,
+    version: `edh-${pinnedRevision}-official-policy-1-${modelAPI}`,
     source: 'simulation',
     description: `${environmentLabel} with native EDH execution and verification`,
     teamFile: resolve(omdRoot, 'integrations/edh/team.yaml'),
     roleRoot: resolve(omdRoot, 'integrations/edh'),
     defaultModel: 'brain',
-    models: { brain: { provider: 'configured-vlm', model } },
-    adapters: [{ providers: ['configured-vlm'], adapter: new OpenAICompatibleAdapter({
+    models: { brain: { provider: 'configured-vlm', model,
+      ...(reasoningEffort ? { reasoningEffort } : {}) } },
+    adapters: [{ providers: ['configured-vlm'], adapter: new ModelAdapter({
       baseURL, models: [{ id: model, inputModalities: ['text', 'image'],
         contextWindow: 32768, maxTokens: 4096 }],
       ...(key ? { apiKey: () => key } : {}),
@@ -238,10 +317,8 @@ const server = await startServer({
           const controlSecret = randomBytes(32).toString('hex');
           const worker = {
             provider: 'microduck',
-            command: [python, '-m', 'oh_my_duck.integrations.edh_native'],
+            ...workerTransport(controlPort),
             cwd: omdRoot,
-            env: { PYTHONPATH: `${resolve(omdRoot, 'src')}:${resolve(edhRoot,
-              'harness/physical-runtime/src')}`, TMPDIR: tempDirectory },
             nativeTaskId,
             sceneConfiguration: {
               ...sceneConfiguration,
@@ -256,7 +333,6 @@ const server = await startServer({
               control_port: controlPort,
               control_secret: controlSecret,
             },
-            schemaPath: resolve(edhRoot, 'harness/contracts/schema/physical.schema.json'),
             policyId: 'official-microduck-onnx',
             policyUri: 'microduck-native://self-hosted',
             executionMode: 'policy',
@@ -297,7 +373,7 @@ const server = await startServer({
 process.stdout.write(`${server.url}\n`);
 for (const signal of ['SIGINT', 'SIGTERM'])
   process.once(signal, () => {
-    void server.close().then(() => process.exit(0), (error) => {
+    void server.close().then(closeModelTransport).then(() => process.exit(0), (error) => {
       process.stderr.write(`${String(error)}\n`);
       process.exit(1);
     });

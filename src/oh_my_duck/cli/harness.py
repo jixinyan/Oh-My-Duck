@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 import shlex
 import shutil
 import subprocess
@@ -30,6 +30,16 @@ def main() -> int:
     parser.add_argument("--cpu-python", type=Path,
                         default=root / ".cache/cpu-apartment-locked-venv/bin/python")
     parser.add_argument("--simulation-python", type=Path)
+    parser.add_argument("--model", type=str)
+    parser.add_argument("--model-api", choices=("chat-completions", "responses"))
+    parser.add_argument("--check-model", action="store_true")
+    parser.add_argument("--reasoning-effort", choices=("low", "medium", "high", "xhigh", "max"))
+    parser.add_argument("--worker-host", type=str)
+    parser.add_argument("--worker-root", type=str)
+    parser.add_argument("--worker-python", type=str)
+    parser.add_argument("--worker-edh-source", type=str)
+    parser.add_argument("--worker-policy-dir", type=str)
+    parser.add_argument("--worker-cuda-device", type=int)
     parser.add_argument("--scene-config", type=Path)
     parser.add_argument("--policy-dir", type=Path,
                         default=root / ".cache/official-policies" / POLICY_REVISION)
@@ -62,7 +72,7 @@ def main() -> int:
             "t=p['experimental_bearer_token'] if 'experimental_bearer_token' in p "
             "else os.environ[p['env_key']] if 'env_key' in p else None; "
             "print(json.dumps({'model':d['model'],'base_url':p['base_url'],"
-            "'token':t}))"
+            "'token':t,'wire_api':p.get('wire_api','chat')}))"
         )
         remote = subprocess.run(
             ["ssh", "-o", "BatchMode=yes", args.ssh_host,
@@ -72,15 +82,18 @@ def main() -> int:
         )
         selected = json.loads(remote.stdout)
         model, base_url, token = (selected[key] for key in ("model", "base_url", "token"))
+        model_api = "responses" if selected["wire_api"] == "responses" else "chat-completions"
     elif args.provider_config is None:
         model = os.environ["EDH_MODEL"]
         base_url = os.environ["EDH_MODEL_BASE_URL"]
         token = os.environ.get("EDH_MODEL_API_KEY")
+        model_api = os.environ.get("EDH_MODEL_API", "chat-completions")
     else:
         provider_data = tomllib.loads(args.provider_config.resolve(strict=True).read_text())
         provider = provider_data["model_providers"][provider_data["model_provider"]]
         model = provider_data["model"]
         base_url = provider["base_url"]
+        model_api = "responses" if provider.get("wire_api") == "responses" else "chat-completions"
         if "experimental_bearer_token" in provider and "env_key" in provider:
             raise ValueError("Provider has conflicting credential sources")
         token = (provider["experimental_bearer_token"]
@@ -93,8 +106,35 @@ def main() -> int:
     if token is not None and (not isinstance(token, str) or not token or
                               any(char.isspace() for char in token)):
         raise ValueError("Provider credential is missing or invalid")
+    if args.model is not None:
+        if not args.model.strip() or any(char.isspace() for char in args.model):
+            raise ValueError("Model ID must be nonempty and contain no whitespace")
+        model = args.model
+    model_api = args.model_api or model_api
+    if model_api not in ("chat-completions", "responses"):
+        raise ValueError("Model API must be chat-completions or responses")
+    remote_worker = None
+    worker_paths = (args.worker_root, args.worker_python, args.worker_edh_source,
+                    args.worker_policy_dir)
+    if args.worker_host is not None:
+        if (not all(worker_paths) or args.worker_host.startswith("-") or
+                any(char.isspace() for char in args.worker_host)):
+            raise ValueError("Remote worker requires an SSH host and all four absolute paths")
+        for value in worker_paths:
+            path = PurePosixPath(value)
+            if not path.is_absolute() or ".." in path.parts:
+                raise ValueError("Remote worker paths must be absolute without parent components")
+        if args.worker_cuda_device is not None and args.worker_cuda_device < 0:
+            raise ValueError("CUDA device index must be nonnegative")
+        remote_worker = {
+            "host": args.worker_host, "root": args.worker_root,
+            "python": args.worker_python, "edh_source": args.worker_edh_source,
+            "policy_dir": args.worker_policy_dir, "cuda_device": args.worker_cuda_device,
+        }
+    elif any(value is not None for value in (*worker_paths, args.worker_cuda_device)):
+        raise ValueError("Remote worker options require --worker-host")
     simulation_python = (args.simulation_python or args.cpu_python).absolute()
-    if not simulation_python.is_file():
+    if remote_worker is None and not simulation_python.is_file():
         raise FileNotFoundError(simulation_python)
     scene_configuration = None
     if args.scene_config is not None:
@@ -107,9 +147,17 @@ def main() -> int:
         for field in ("usd_path", "provenance_path", "public_map_path"):
             if field in scene_configuration:
                 value = Path(scene_configuration[field])
-                scene_configuration[field] = str(
-                    (root / value).resolve(strict=True))
-    catalog = args.policy_dir.resolve(strict=True)
+                if remote_worker is None:
+                    scene_configuration[field] = str((root / value).resolve(strict=True))
+                else:
+                    path = PurePosixPath(str(value))
+                    if ".." in path.parts:
+                        raise ValueError("Scene paths must not contain parent components")
+                    scene_configuration[field] = str(PurePosixPath(args.worker_root) / path)
+        if remote_worker is not None and args.worker_cuda_device is None:
+            raise ValueError("Remote Isaac Newton scenes require an explicit CUDA device")
+    catalog = (args.policy_dir.resolve(strict=True) if remote_worker is None
+               else PurePosixPath(args.worker_policy_dir))
     data_dir = args.data_dir.resolve()
     data_dir.mkdir(parents=True, exist_ok=True)
     temp_dir = root / ".cache/tmp"
@@ -129,9 +177,19 @@ def main() -> int:
         "OMD_SCENE_SEED": str(args.seed),
         "EDH_MODEL_BASE_URL": base_url,
         "EDH_MODEL": model,
+        "EDH_MODEL_API": model_api,
+        "OMD_CHECK_MODEL": "1" if args.check_model else "0",
         "TSX_TSCONFIG_PATH": str(edh_source / "tsconfig.runtime.json"),
         "TMPDIR": str(temp_dir),
     })
+    if remote_worker is None:
+        environment.pop("OMD_REMOTE_WORKER", None)
+    else:
+        environment["OMD_REMOTE_WORKER"] = json.dumps(remote_worker, allow_nan=False)
+    if args.reasoning_effort is None:
+        environment.pop("EDH_REASONING_EFFORT", None)
+    else:
+        environment["EDH_REASONING_EFFORT"] = args.reasoning_effort
     if scene_configuration is None:
         environment.pop("OMD_SCENE_CONFIGURATION", None)
     else:
