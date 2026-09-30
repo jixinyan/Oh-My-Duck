@@ -1,6 +1,6 @@
 # Office 门口导航诊断
 
-运行条件：官方 `scene_apartment.xml`、官方 `alpha_walking.onnx`、官方 CPU MuJoCo/BAM 控制器、固定 policy revision `1b56c396825c052a4e26e95cf2b8d8298af9e9b4`。每次诊断从原生位姿 `(0, 0, 0)` 和 seed `20260929` 开始，先执行 `velstand` 187 个控制步；控制频率为 50 Hz，每个控制步包含四个 0.005 秒物理步。office 目标使用同一原生 room GT 和五个连续控制步保持条件。诊断没有修改场景、目标、出生位姿、碰撞、模型权重或控制器。
+运行条件：官方 `scene_apartment.xml`、官方 `alpha_walking.onnx`、官方 CPU MuJoCo/BAM 控制器、固定 policy revision `1b56c396825c052a4e26e95cf2b8d8298af9e9b4`。各诊断从原生位姿 `(0, 0, 0)` 和 seed `20260929` 开始，按照对应记录运行 75、182 或 187 个 `velstand` 控制步；控制频率为 50 Hz，每个控制步包含四个 0.005 秒物理步。office 目标使用同一原生 room GT 和五个连续控制步保持条件。诊断没有修改场景、目标、出生位姿、碰撞、模型权重或控制器。
 
 ## 原始任务证据
 
@@ -19,6 +19,16 @@
 
 以上结果属于相同确定性条件下的物理诊断。正式 agent run 需要以原生动作门、传感器事件、停止边界和独立 Verifier 再次验收。
 
+## 75 步站立准备后的恢复能力
+
+原生动作门使用 75 个 `velstand` 控制步后切换 `alpha_walking`。同条件 CPU 诊断复现 `twist=[0.2,0.25,0]` 在总 `sequence=423`、位置 `(0.49826,0.18689)` 米时触发中央 4×4 ToF 的 90 mm 停止条件；当时最近有效距离为 `89 mm`，非地面外部接触累计为零。诊断保存于 `.cache/apartment-warmup-75-diagnosis-01.json`。
+
+从该物理状态直接执行 `twist=[-0.2,0.3,0]`，150 个控制步后到达 `sequence=573`、位置 `(0.42638,0.38503)` 米；中央最近有效距离增加到 `269 mm`，非地面接触仍为零。接着执行 `twist=[0.2,0.25,0.4]`，193 个控制步后到达 `sequence=766`、位置 `(0.71119,0.43136)` 米，原生 office GT 满足，中央最近有效距离 `881 mm`。零命令再运行 50 个控制步，最终 `sequence=816`、位置 `(0.70486,0.42249,0.11697)` 米，机器人局部线速度各分量绝对值均小于 `0.0004 m/s`，yaw 速率绝对值约 `0.01081 rad/s`，倾角约 `0.00488 rad`；原生 GT 保持 `55/5` 个控制步，非地面接触累计始终为零。完整数据保存于 `.cache/apartment-recovery-commands-stop-02.json`。
+
+同一恢复状态使用 `twist=[0.15,0.3,0.4]` 也达到 office GT，零命令 50 步后位置 `(0.71462,0.43187)` 米、GT 保持 `55/5`、非地面接触累计零。`twist=[0.2,0.3,0.7]` 到达 GT 后，零命令阶段最终位置 `x=0.69406` 米，GT 未保持。恢复后继续使用 `twist=[0.2,0.25,0]` 在 `sequence=705`、位置 `(0.61149,0.32321)` 米再次触发 `87 mm` 距离停止，累计非地面接触为零。带正 yaw 的运动命令在这些实际轨迹中产生了更合适的过门路径。
+
+75 步与 187 步的站立状态位置、yaw 和倾角接近，关节角最大差约 `0.00224 rad`；最大关节速度分别为 `0.01194 rad/s` 与 `0.00039 rad/s`。一个连续 25 步的站立测量窗口在 `sequence=182` 满足局部线速度、yaw 速率、倾角、关节速度与关节角跨度限制，随后相同 `[0.2,0.25,0]` 仍在门口触发 `87 mm` 距离停止。该测量条件能够描述站立收敛，单独使用它无法保证穿门轨迹。数据保存于 `.cache/apartment-standing-75-187-01.json` 和 `.cache/apartment-transfer-diagnosis-01.json`。原生运行需要持续读取 ToF、位姿与接触证据，并在停止边界选择新的有限动作段。
+
 ## ToF 与接触测量
 
 原始 8×8 ToF 状态和距离继续直接来自 MuJoCo ray，诊断只额外记录首个命中的 geom。`status=5` 代表有效命中；没有四米内目标的区域保留原始无目标状态。采样位置里没有自身 geom 首次命中；接近文件柜时，前向区域首先命中 `off_cabinet`。运行时没有过滤自身命中，诊断将 `self_occluded`、`external_first_hit`、`no_target_within_4m` 分开记录。
@@ -36,6 +46,9 @@
 .cache/cpu-apartment-locked-venv/bin/python scripts/diagnose_apartment_routes.py --output .cache/<new-routes-output>.json
 .cache/cpu-apartment-locked-venv/bin/python scripts/diagnose_apartment_diagonals.py --output .cache/<new-diagonals-output>.json
 .cache/cpu-apartment-locked-venv/bin/python scripts/diagnose_apartment_after_goal.py --output .cache/<new-after-goal-output>.json
+.cache/cpu-apartment-locked-venv/bin/python scripts/diagnose_apartment_warmup.py --output .cache/<new-warmup-output>.json
+.cache/cpu-apartment-locked-venv/bin/python scripts/diagnose_apartment_transfer.py --output .cache/<new-transfer-output>.json
+.cache/cpu-apartment-locked-venv/bin/python scripts/diagnose_apartment_recovery_commands.py --output .cache/<new-recovery-output>.json
 ```
 
 输出目录必须使用新文件名，诊断脚本拒绝覆盖既有证据。
