@@ -22,7 +22,8 @@ from physical_harness.execution.worker import NativeWorkerSession, require_objec
 from physical_harness.policies.server import serve_policy
 from physical_harness.validation import ContractValidator
 
-from oh_my_duck.robotics.backends.simulation import CpuMujocoBamBackend
+from oh_my_duck.robotics.backends.simulation import CpuMujocoBamBackend, STOP_SAMPLES
+from oh_my_duck.robotics.microduck.motion_guard import MotionGuard
 
 
 def _wire_time() -> str:
@@ -37,6 +38,7 @@ class MicroDuckEnvironment:
         self._last_sequence = -1
         self._last_control_started_at: float | None = None
         self._observations: dict[str, tuple[str, int]] = {}
+        self._navigation_samples: dict[str, dict[str, Any]] = {}
 
     def _backend(self) -> CpuMujocoBamBackend:
         if self.backend is None:
@@ -69,8 +71,18 @@ class MicroDuckEnvironment:
             raise FloatingPointError("MicroDuck sensor state contains nonfinite values")
         observation_id = f"microduck:{state['episode_id']}:{sequence}:{uuid4().hex}"
         self._observations[observation_id] = (state["episode_id"], sequence)
+        self._navigation_samples[observation_id] = {
+            "episode_id": state["episode_id"], "sequence": sequence,
+            "body_position_m": tuple(measured["body_position_m"]),
+            "yaw_rad": float(measured["odometry"]["yaw_rad"]),
+            "tof_distance_mm": tuple(measured["tof_distance_mm"]),
+            "tof_status": tuple(measured["tof_status"]),
+            "contact_evidence": measured["contact_evidence"],
+        }
         if len(self._observations) > 128:
-            self._observations.pop(next(iter(self._observations)))
+            oldest = next(iter(self._observations))
+            self._observations.pop(oldest)
+            self._navigation_samples.pop(oldest)
         return NativeObservation(
             observation_id=observation_id,
             observed_at=_wire_time(),
@@ -214,11 +226,93 @@ class MicroDuckActionDevice(NativeActionDevice):
 
 
 class MicroDuckWorkerSession(NativeWorkerSession):
+    DEFAULT_COMMAND_STEPS = 75
+    MIN_COMMAND_STEPS = 5
+    MAX_COMMAND_STEPS = 100
+
     def __init__(self, emit) -> None:
         super().__init__(emit)
         self._policy_server = None
         self._control_server = None
         self._control_secret: str | None = None
+        self._motion_segment: dict[str, Any] | None = None
+        self._motion_guard: dict[str, Any] | None = None
+        self._motion_cleanup_task: asyncio.Task[None] | None = None
+        self._guard_tof_boundary_id: str | None = None
+
+    async def _await_motion_cleanup(self) -> None:
+        task = self._motion_cleanup_task
+        if task is not None:
+            await task
+            if self._motion_cleanup_task is task:
+                self._motion_cleanup_task = None
+
+    def _command_steps(self, arguments: dict[str, Any]) -> int:
+        count = arguments.get("max_control_steps", self.DEFAULT_COMMAND_STEPS)
+        if type(count) is not int or not self.MIN_COMMAND_STEPS <= count <= self.MAX_COMMAND_STEPS:
+            raise ValueError("MicroDuck command requires 5 to 100 control steps")
+        return count
+
+    def _bind_motion_segment(self, command_result: dict[str, Any], count: int) -> None:
+        gate = self._gate
+        snapshot = gate.snapshot() if gate is not None else None
+        self._motion_segment = {
+            "run_task_id": self._run_task_id,
+            "execution_id": None if snapshot is None or snapshot["state"] == "ended"
+            else snapshot["execution_id"],
+            "generation": None if snapshot is None or snapshot["state"] == "ended"
+            else snapshot["generation"],
+            "boundary_id": None if snapshot is None or snapshot["state"] == "ended"
+            else snapshot["boundary_id"],
+            "effective_after_sequence": command_result["effective_after_sequence"],
+            "max_control_steps": count,
+            "command": command_result["command"],
+            "request_id": command_result["request_id"],
+            "guard": MotionGuard(command_result["command"],
+                                 command_result["effective_after_sequence"], count),
+        }
+
+    def _guard_for_sample(self, sample: dict[str, Any], snapshot: dict[str, Any]) -> dict[str, Any] | None:
+        segment = self._motion_segment
+        if segment is None or segment["run_task_id"] != self._run_task_id:
+            raise RuntimeError("MicroDuck command segment lacks the active task identity")
+        if segment["execution_id"] is None:
+            segment["execution_id"] = snapshot["execution_id"]
+            segment["generation"] = snapshot["generation"]
+        if (segment["execution_id"] != snapshot["execution_id"] or
+                segment["generation"] != snapshot["generation"]):
+            raise RuntimeError("MicroDuck command segment belongs to another action generation")
+        evidence = segment["guard"].observe(sample)
+        if evidence is None:
+            return None
+        return {
+            "run_task_id": self._run_task_id, "execution_id": snapshot["execution_id"],
+            "generation": snapshot["generation"], "command_request_id": segment["request_id"],
+            **evidence,
+        }
+
+    async def _complete_motion_pause(self, ready: asyncio.Event, gate, policy) -> None:
+        await ready.wait()
+        pump = self._pump
+        if pump is not None:
+            await pump
+            if self._pump is pump:
+                self._pump = None
+        snapshot = gate.snapshot()
+        if snapshot["state"] == "pausing":
+            snapshot = await gate.pause(snapshot["stop_reason"],
+                                        terminal=snapshot["stop_reason"] == "user_stop")
+        if (self._gate is not gate or snapshot["state"] not in ("paused", "ended") or
+                not snapshot["device_confirmed"]):
+            raise RuntimeError(f"MicroDuck guarded pause lost its confirmed execution boundary: {snapshot}")
+        if self._host_connected:
+            await self._require_device().on_owner(
+                self._environment._backend().discard_pending_inference)
+            observation = await self._require_device().on_owner(self._environment.observe)
+            await self._publish(observation, self._last_control)
+        if self._policy is policy and policy is not None:
+            await policy.close()
+            self._policy = None
 
     def _require_control_lease(self, run_task_id: str) -> None:
         if run_task_id != self._run_task_id or not self._lease_active or not self._host_connected:
@@ -331,13 +425,42 @@ class MicroDuckWorkerSession(NativeWorkerSession):
             backend = self._environment._backend()
             if operation == "set_command":
                 async with self._control_lock:
+                    await self._await_motion_cleanup()
                     self._require_control_lease(run_task_id)
+                    count = self._command_steps(args)
+                    snapshot = self._gate.snapshot() if self._gate is not None else None
+                    if snapshot is not None and snapshot["state"] == "ended":
+                        snapshot = None
+                    if snapshot is not None and (snapshot["state"] != "paused" or
+                                                 not snapshot["device_confirmed"]):
+                        raise RuntimeError("Command adjustment requires a confirmed paused boundary")
+                    hazard = self._motion_guard
+                    if (hazard is not None and hazard["reason"] in
+                            ("forward_proximity", "external_contact", "motion_stalled", "tof_invalid")):
+                        current_twist = self._motion_segment["command"]["twist"]
+                        next_twist = args["command"].get("twist", current_twist)
+                        if any(abs(value) > 1e-6 for value in next_twist):
+                            if list(next_twist) == hazard["command"]["twist"]:
+                                raise RuntimeError("Guarded motion requires a changed twist command")
+                            if (snapshot is None or
+                                    self._guard_tof_boundary_id != snapshot["boundary_id"]):
+                                raise RuntimeError("Guarded motion requires fresh ToF at this stopped boundary")
                     def apply_command() -> dict:
                         self._require_control_lease(run_task_id)
+                        if snapshot is not None:
+                            current = self._gate.snapshot()
+                            if (current["execution_id"] != snapshot["execution_id"] or
+                                    current["generation"] != snapshot["generation"] or
+                                    current["boundary_id"] != snapshot["boundary_id"] or
+                                    current["state"] != "paused"):
+                                raise RuntimeError("Command boundary changed before physical owner mutation")
                         return backend.set_command(args["command"], request_id=request["request_id"])
                     result = await self._device.on_owner(apply_command)
+                    self._bind_motion_segment(result, count)
+                    result["max_control_steps"] = count
             elif operation == "select_policy":
                 async with self._control_lock:
+                    await self._await_motion_cleanup()
                     self._require_control_lease(run_task_id)
                     def select_on_owner() -> dict:
                         self._require_control_lease(run_task_id)
@@ -368,8 +491,17 @@ class MicroDuckWorkerSession(NativeWorkerSession):
             elif operation == "read_sensor":
                 if args["sensor"] not in ("head_rgb", "tof", "imu", "joint_state", "odometry"):
                     raise ValueError("Unknown MicroDuck sensor")
+                await self._await_motion_cleanup()
                 observed = await self._device.on_owner(backend.observe_control)
+                self._require_control_lease(run_task_id)
                 measured = observed["measurements"]
+                if args["sensor"] == "tof" and self._motion_guard is not None:
+                    snapshot = self._gate.snapshot() if self._gate is not None else None
+                    if (snapshot is not None and snapshot["state"] == "paused" and
+                            snapshot["device_confirmed"] and
+                            snapshot["execution_id"] == self._motion_guard["execution_id"] and
+                            observed["sequence"] >= self._motion_guard["sequence"]):
+                        self._guard_tof_boundary_id = snapshot["boundary_id"]
                 fields = {
                     "head_rgb": ("rgb_png_base64", "rgb_width", "rgb_height", "camera_frame_id"),
                     "tof": ("tof_distance_mm", "tof_status", "tof_rows", "tof_cols", "tof_frame_id"),
@@ -379,7 +511,8 @@ class MicroDuckWorkerSession(NativeWorkerSession):
                 }[args["sensor"]]
                 result = {"sensor": args["sensor"], "episode_id": observed["episode_id"],
                           "sequence": observed["sequence"], "observed_at": observed["observed_at"],
-                          "measurements": {key: measured[key] for key in fields}}
+                          "measurements": {key: measured[key] for key in fields},
+                          "motion_guard": self._motion_guard}
             elif operation == "progress":
                 observed = await self._device.on_owner(backend.observe_control)
                 measured = observed["measurements"]
@@ -390,6 +523,15 @@ class MicroDuckWorkerSession(NativeWorkerSession):
                           "body_position_m": measured["body_position_m"],
                           "body_twist": measured["body_twist"], "fallen": measured["fallen"],
                           "command_block": measured["command_block"],
+                          "contact_evidence": measured["contact_evidence"],
+                          "motion_guard": self._motion_guard,
+                          "command_segment": None if self._motion_segment is None else {
+                              "request_id": self._motion_segment["request_id"],
+                              "effective_after_sequence": self._motion_segment["effective_after_sequence"],
+                              "max_control_steps": self._motion_segment["max_control_steps"],
+                              "used_control_steps": max(0, observed["sequence"] -
+                                                        self._motion_segment["effective_after_sequence"]),
+                          },
                           "execution": None if gate_state is None else {
                               "execution_id": gate_state["execution_id"],
                               "generation": gate_state["generation"],
@@ -402,9 +544,20 @@ class MicroDuckWorkerSession(NativeWorkerSession):
                 for policy in result["policies"]:
                     policy["executable_in_native_edh"] = (
                         policy["executable_here"] and policy["kind"] == "perpetual")
+                    if policy["name"] == "alpha_walking":
+                        policy["apartment_command_calibration"] = {
+                            "pure_lateral_and_in_place_yaw": "weak_response_in_cpu_apartment",
+                            "coupled_forward_lateral": "measured_motion_with_positive_vx_and_vy",
+                            "coupled_reverse_lateral": "measured_retreat_with_negative_vx_and_positive_vy",
+                            "coupled_forward_lateral_yaw": "measured_turning_motion_with_positive_vx_vy_yaw",
+                            "tested_twists_m_s_rad_s": [[0.2, 0.25, 0.0], [-0.2, 0.3, 0.0],
+                                                        [0.2, 0.25, 0.4]],
+                            "scope": "one_deterministic_cpu_apartment_seed",
+                        }
             elif operation == "finish_policy":
                 result = await self._finish_policy(args, request["run_task_id"])
             elif operation == "scene":
+                geometry = await self._device.on_owner(backend.public_scene_info)
                 result = {
                     "scene": "scene_apartment.xml",
                     "frame": "world",
@@ -422,6 +575,7 @@ class MicroDuckWorkerSession(NativeWorkerSession):
                         {"from": "corridor", "to": "living_room",
                          "route": "west doorway near the south end"},
                     ],
+                    "public_geometry": geometry,
                 }
             else:
                 raise ValueError("Unknown MicroDuck tool operation")
@@ -438,6 +592,7 @@ class MicroDuckWorkerSession(NativeWorkerSession):
 
     async def _finish_policy(self, arguments: dict[str, Any], run_task_id: str) -> dict[str, Any]:
         async with self._control_lock:
+            await self._await_motion_cleanup()
             if run_task_id != self._run_task_id or not self._lease_active:
                 raise RuntimeError("Policy finish lacks the active task lease")
             gate = self._require_gate()
@@ -448,6 +603,36 @@ class MicroDuckWorkerSession(NativeWorkerSession):
                     arguments["generation"] != snapshot["generation"] or
                     arguments["boundary_id"] != snapshot["boundary_id"]):
                 raise RuntimeError("Policy finish identity differs from the confirmed boundary")
+            segment = self._motion_segment
+            if (segment is None or segment["run_task_id"] != run_task_id or
+                    segment["execution_id"] != snapshot["execution_id"] or
+                    any(abs(value) > 1e-6 for value in segment["command"]["twist"])):
+                raise RuntimeError("Policy finish requires the current zero-twist command segment")
+            def confirm_physical_stop() -> dict[str, Any]:
+                self._require_control_lease(run_task_id)
+                current = gate.snapshot()
+                if (current["execution_id"] != snapshot["execution_id"] or
+                        current["generation"] != snapshot["generation"] or
+                        current["boundary_id"] != snapshot["boundary_id"] or
+                        current["state"] != "paused" or not current["device_confirmed"]):
+                    raise RuntimeError("Policy finish boundary changed before physical confirmation")
+                backend = self._environment._backend()
+                completed_zero_steps = backend._sequence - segment["effective_after_sequence"]
+                state = backend._native_state()
+                if completed_zero_steps < STOP_SAMPLES:
+                    raise RuntimeError("Policy finish requires five executed zero-command steps")
+                guard = self._motion_guard
+                if (guard is None or guard["command_request_id"] != segment["request_id"] or
+                        guard["run_task_id"] != run_task_id or
+                        any(abs(value) > 1e-6 for value in backend._requested_command["twist"]) or
+                        backend._stopped_samples < STOP_SAMPLES or
+                        state["fallen"] or backend._is_moving(state)):
+                    raise RuntimeError("Policy finish requires measured physical stop")
+                return {"zero_control_steps": completed_zero_steps,
+                        "stopped_samples": backend._stopped_samples,
+                        "body_twist": state["body_twist"]}
+            stop_confirmation = await self._require_device().on_owner(confirm_physical_stop)
+            self._require_control_lease(run_task_id)
             await gate.pause("policy_stop", terminal=True)
             if self._pump is not None:
                 await self._pump
@@ -461,25 +646,82 @@ class MicroDuckWorkerSession(NativeWorkerSession):
                 self._policy = None
             return {"accepted": True, "run_task_id": run_task_id,
                     "execution": publication["status"],
-                    "observation_id": observation.observation_id}
+                    "observation_id": observation.observation_id,
+                    "stop_confirmation": stop_confirmation}
 
     async def open_task(self, arguments: dict[str, Any]) -> dict[str, Any]:
+        await self._await_motion_cleanup()
         state = await self._device.on_owner(self._environment._backend()._goal_measurement)
         if state[0]:
             raise RuntimeError("Retained MicroDuck scene already occupies this task goal")
-        return await super().open_task(arguments)
+        opened = await super().open_task(arguments)
+        run_task_id = opened["run_task_id"]
+        def initial_command() -> dict:
+            self._require_control_lease(run_task_id)
+            return self._environment._backend().set_command(
+                {"twist": [0.0, 0.0, 0.0]}, request_id=uuid4().hex)
+        command = await self._device.on_owner(initial_command)
+        self._require_control_lease(run_task_id)
+        self._bind_motion_segment(command, self.DEFAULT_COMMAND_STEPS)
+        self._motion_guard = None
+        self._guard_tof_boundary_id = None
+        return opened
+
+    async def start(self, arguments: dict[str, Any]) -> dict[str, Any]:
+        await self._await_motion_cleanup()
+        if self._motion_segment is None or self._motion_segment["run_task_id"] != self._run_task_id:
+            raise RuntimeError("Native start requires a bounded MicroDuck command")
+        return await super().start(arguments)
+
+    async def resume(self, arguments: dict[str, Any]) -> dict[str, Any]:
+        await self._await_motion_cleanup()
+        snapshot = self._require_gate().snapshot()
+        segment = self._motion_segment
+        if (segment is None or segment["run_task_id"] != self._run_task_id or
+                segment["execution_id"] != snapshot["execution_id"] or
+                segment["generation"] != snapshot["generation"] or
+                segment["boundary_id"] != snapshot["boundary_id"] or
+                snapshot["state"] != "paused" or not snapshot["device_confirmed"]):
+            raise RuntimeError("Resume requires a new bounded command at the confirmed boundary")
+        return await super().resume(arguments)
 
     async def close_task(self) -> dict[str, Any]:
         self._lease_active = False
+        await self._await_motion_cleanup()
         return await super().close_task()
+
+    async def _on_segment(self, segment: dict[str, Any], receipt: dict[str, Any]) -> None:
+        await super()._on_segment(segment, receipt)
+        gate = self._require_gate()
+        snapshot = gate.snapshot()
+        if (snapshot["state"] != "running" or
+                self._require_device().executed_actions >= self._request["budget"]["max_control_steps"] or
+                gate.remaining_wall_time() <= 0):
+            return
+        step = self._require_device().last_step
+        sample = self._environment._navigation_samples[step.observation.observation_id]
+        guard = self._guard_for_sample(sample, snapshot)
+        if guard is None:
+            return
+        self._motion_guard = guard
+        self._guard_tof_boundary_id = None
+        self._last_control["motion_guard"] = guard
+        ready = asyncio.Event()
+        cleanup = asyncio.create_task(self._complete_motion_pause(ready, gate, self._policy))
+        self._motion_cleanup_task = cleanup
+        try:
+            await gate.pause("planner_pause")
+        finally:
+            ready.set()
 
     async def _publish_pausing(self, observation: NativeObservation) -> None:
         if self._require_gate().snapshot()["stop_reason"] in ("budget_exhausted", "policy_stop"):
             return
-        await self._publish(observation)
+        await self._publish(observation, self._last_control)
 
     async def pause(self, arguments: dict[str, Any], *, terminal: bool = False) -> dict[str, Any]:
         async with self._control_lock:
+            await self._await_motion_cleanup()
             gate = self._require_gate()
             if "execution_id" in arguments and arguments["execution_id"] != gate.snapshot()["execution_id"]:
                 raise ValueError("Stop request belongs to another execution")
@@ -488,6 +730,7 @@ class MicroDuckWorkerSession(NativeWorkerSession):
                         "observation": self._observation_wire(self._latest_observation)}
             reason = "user_stop" if terminal else "planner_pause"
             await gate.pause(reason, terminal=terminal)
+            await self._await_motion_cleanup()
             if self._policy is not None:
                 await self._policy.close()
                 self._policy = None

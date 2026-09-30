@@ -97,12 +97,12 @@ function tool(operation, properties, required, services) {
     name: `microduck__${operation}`,
     description: {
       policy_catalog: 'List the verified official MicroDuck policies, their kind and command encoding.',
-      scene_info: 'Read public apartment room topology and world-frame directions.',
+      scene_info: 'Read public apartment topology, native doorway and furniture geometry, and world-frame directions.',
       select_policy: 'Select an official policy at a confirmed stopped execution boundary.',
       finish_policy: 'End the current policy at a confirmed paused boundary; the native independent Verifier then checks the goal.',
-      set_command: 'Set the next official policy command: twist, head, body, or posture.',
+      set_command: 'Set a bounded policy command at a confirmed paused boundary. Each command runs for 5–100 actual control steps. After proximity, contact, or stall, read fresh ToF and change twist before renewed motion; zero twist remains available for stopping.',
       read_sensor: 'Read a current physical MicroDuck RGB, ToF, IMU, joint, or odometry sensor.',
-      task_progress: 'Read current physical position, velocity, policy, and execution sequence without private goal truth.',
+      task_progress: 'Read current physical position, velocity, contact evidence, bounded-command status, and native motion-pause reason.',
     }[operation],
     parameters: { type: 'object', properties, required, additionalProperties: false },
     output: {
@@ -182,6 +182,7 @@ const server = await startServer({
           body: { type: 'array', items: { type: 'number' }, minItems: 6, maxItems: 6 },
           posture: { type: 'string', enum: ['sit', 'stand'] },
         }, additionalProperties: false },
+        max_control_steps: { type: 'integer', minimum: 5, maximum: 100 },
       }, ['command'], { images }),
       'microduck.read_sensor': tool('read_sensor', {
         sensor: { type: 'string', enum: ['head_rgb', 'tof', 'imu', 'joint_state', 'odometry'] },
