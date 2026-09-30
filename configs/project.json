@@ -26,8 +26,8 @@
     },
     "harness": {
       "module": "oh_my_duck.integrations.edh_native",
-      "state": "native_edh_model_tools_images_policy_actions_pause_resume_finish_verifier_retained_office_goal_passed",
-      "role": "Pinned EDH native session, ActionGate and Verifier with official ONNX policy and CPU MuJoCo/BAM apartment"
+      "state": "native_edh_astra_fresh_spawn_office_goal_passed_zero_external_contact",
+      "role": "Pinned EDH native session, bounded policy commands, measured stop, ActionGate and independent Verifier with official ONNX policy and CPU MuJoCo/BAM apartment; single-seed fresh-spawn office navigation passed"
     },
     "voice": {
       "module": "oh_my_duck.voice",
@@ -82,7 +82,7 @@
   },
   "execution": {
     "hardware_available": false,
-    "harness": "native_edh_apartment_retained_second_task_formal_office_goal_passed",
+    "harness": "native_edh_apartment_fresh_spawn_formal_office_goal_passed_single_seed",
     "server_jobs": "Direct independent GPU learners on jd_B300 authorized 2026-09-23; explicit idle-device allocation",
     "headless": true,
     "video": "offscreen_1280x720",

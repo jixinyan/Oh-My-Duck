@@ -78,9 +78,9 @@ tags:
 
 本文件保留原文件名以维持链接，内容已随 2026-09-06 的用户决策更新至 v0.2。当前已开始工程实现；功能状态以本节及[实现进度](implementation-status.md)为准，设计提案不等于已验证能力。完整逐文件审计仍在进行，Isaac 迁移与真机试验尚未完成。
 
-**当前执行条件**：服务器训练任务通过 Alaya HTrain `submit` 提交；训练与评测均 headless，离屏保存视频。可按实际需要使用单节点多 GPU。当前没有真机。上层任务使用固定 EDH 原生运行时与 CPU MuJoCo/BAM 仿真，正式成功以独立 Verifier 读取原生目标状态为准。
+**当前执行条件**：用户已停止本轮八组 Walking 训练及预览、评估进程，保存现有 checkpoint 与输出，不自动恢复。当前没有真机。上层任务使用固定 EDH 原生运行时与 CPU MuJoCo/BAM 仿真；运动命令按实际控制步限定时长，ToF、外部接触和位姿停滞可请求原生 Gate 暂停。独立 Astra 会话已从固定 corridor 出生位置完成 office 导航，实际执行 760 个控制步、外部障碍接触累计 0，正式成功由独立 Verifier 读取原生目标状态确认。范围为单一 CPU 公寓 seed，详见[公寓导航验收](reports/harness-office-navigation-2026-09-30.md)。
 
-**当前开发策略：先整体框架，后逐步填充功能。** 完整项目 scope 保持本文第 1–10 节的交互、工具、感知、声音、经验与训练设计。整体轻量框架已建立：契约、执行后端、技能、工具、感知、策略、Harness、语音、记录、训练及应用装配均有独立模块；接口占位与可运行实现明确区分。现有 MuJoCo 适配保留在框架内，隔离 Python 环境与主要依赖版本已可读取；worker设备检查、CPU MuJoCo基础仿真与EGL渲染已通过，官方平地 walking 已完成 64 环境、5 轮训练和官方 ONNX 导出；回放命令跟踪仍待解决。已建立本地 Git 与统一入口；远程 `https://github.com/jixinyan/Oh-My-Duck.git` 目前认证失败。详细状态与测试见 [implementation-status.md](implementation-status.md)。
+**当前开发策略**：完整项目 scope 保持本文第 1–10 节的交互、工具、感知、声音、经验与训练设计。数据结构与接口、机器人后端、技能、工具、感知、策略、Harness、语音、记录、训练和应用装配已有独立模块。CPU MuJoCo/BAM 公寓已验证真实传感器、官方 ONNX 推理及 ActionGate 控制；原生 Harness 的单一 seed office 导航获得独立 Verifier 正式 passed，非地面外部接触累计 0。Qwen 语音文件推理、Mac 音频服务与停止边界已通过实际验证。用户当前停止八组 Walking 训练及预览、评估进程；自训练策略的完整行为验收、Newton 交互和真机执行仍需完成。各模块证据见[实现进度](implementation-status.md)。
 
 **RL框架扩展（2026-09-06）**：当前训练环境服务于RL，仿真后端（MuJoCo / Isaac-Newton）与RL框架（首批RSL-RL / Stable-Baselines3）独立选择。新增 `--rl-framework` 与兼容矩阵入口 `omd frameworks`；不同框架共用任务、观测/动作和评测契约，各自适配VecEnv、算法配置、checkpoint、normalizer与导出。Isaac/Newton上的RSL-RL与SB3 PPO均已通过短训练，SB3额外验证192次超时重置；RSL-RL归一化ONNX导出数值检查通过；MuJoCo SB3 已完成官方 walking 的 64 环境/5 轮训练和恢复训练，并验证 768 次超时；MuJoCo SB3 已通过官方 runner 扩展导出及 32 组输入数值检查；Isaac SB3 恢复/导出仍待实现，不将所有组合标为已支持。后续框架通过注册扩展，详见[RL框架接入](rl-frameworks.md)。
 

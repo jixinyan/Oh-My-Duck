@@ -33,9 +33,9 @@ EDH_MODEL_BASE_URL=http://127.0.0.1:8000/v1 EDH_MODEL=your-vision-tool-model PYT
 
 浏览器打开 CLI 输出的本地地址。EDH 原生控制台同页显示 agent 工具记录与真实相机图像；侧栏可选择已保存的任务，事件与图像保留原生 run/evidence 身份。选择 `official-apartment-office` 建立会话，再选择 `navigate-office`。新会话从固定 seed 与 corridor 出生位置开始；同一会话的后续任务沿用实际物理状态。Planner 可读取公开公寓连接关系、RGB、ToF、IMU、关节与里程计，设置官方策略命令，并在真实停止确认后切换策略。目标坐标与成功检查留在环境及独立 Verifier。
 
-正常结束时，Planner 暂停并读取 `task_progress` 的 `execution_id`、`generation`、`boundary_id`，调用 `finish_policy`。原生 ActionGate 在已确认的物理停止边界以 `policy_stop` 结束执行，EDH 主机分配独立 Verifier 读取新鲜物理观测与目标状态。真实成功需要该正式结果支持。取消通过 EDH 原生任务接口执行，并以确认边界及后续动作计数检查。当前原生 EDH 工具执行 perpetual 策略；目录中的 episodic 策略仍可查看，但其原生 EDH 执行未开放。
+正常结束时，Planner 在已确认暂停边界设置有界零 `twist` 命令，经原生 `execution.resume` 实际执行至少五个控制步，再读取 `task_progress` 的身体速度与停止状态；公寓导航验收使用 100 个零命令控制步。随后从当前确认边界读取 `execution_id`、`generation`、`boundary_id`，调用 `finish_policy`。该工具由物理 owner 确认当前零命令、已执行零命令控制步、连续停止样本和身体速度，原生 ActionGate 再以 `policy_stop` 结束执行。EDH 主机分配独立 Verifier 读取新鲜物理观测与目标状态。真实成功需要该正式结果支持。取消通过 EDH 原生任务接口执行，并以确认边界及后续动作计数检查。当前原生 EDH 工具执行 perpetual 策略；目录中的 episodic 策略仍可查看，但其原生 EDH 执行未开放。
 
-真实 Astra 会话已完成图像及多种状态传感器读取、官方 14 关节动作、暂停、策略切换与恢复。同一物理会话的第二项 office 任务从目标外开始，继续执行 275 个控制步；独立 Verifier 正式判定 `goal_reached=true`，run 状态为 `succeeded`。每次运行事件保存在 `.cache/harness-data/`，已完成任务的原始导出保存在 `.cache/demo/<run-id>/`。固定 EDH 自带 `scripts/export-run-replay.js`；完成的 run 可以使用以下命令导出完整原生事件、对应 PNG、视频与网页回放：
+真实 Astra 会话已完成图像及多种状态传感器读取、官方 14 关节动作、有界命令、暂停、策略切换与恢复。独立新会话的 office 任务从固定 corridor 出生位置开始，执行 760 个控制步，外部障碍接触累计 0；100 个零命令控制步后 `finish_policy` 确认物理停止，独立 Verifier 正式判定 `goal_reached=true`，run 状态为 `succeeded`。运动段按完成的物理控制步计数，靠近障碍、外部接触及实际停滞可以请求原生 Gate 暂停；这些阻碍情形由独立真实 worker 验证，本次 Astra 任务的暂停原因均为命令段结束。会话事件保存在所选 `--data-dir`，原始导出保存在 `.cache/demo/<run-id>/`。固定 EDH 自带 `scripts/export-run-replay.js`；完成的 run 可以使用以下命令导出完整原生事件、对应 PNG、视频与网页回放：
 
 ```sh
 TMPDIR="$PWD/.cache/tmp" node .cache/edh/8a5e685b22d032207f53db20454f0992a4ad60fd/scripts/export-run-replay.js --base-url http://127.0.0.1:4318 --run-id "$RUN_ID" --output ".cache/demo/$RUN_ID" --camera observer_follow.png

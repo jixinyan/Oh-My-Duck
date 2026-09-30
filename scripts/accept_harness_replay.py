@@ -14,6 +14,48 @@ def require_one(events: list[dict], event_type: str) -> dict:
     return matches[0]
 
 
+def audit_motion_guard_pauses(events: list[dict], run_id: str) -> None:
+    completed_commands = [event for event in events if event["type"] == "tool.completed" and
+                          event["detail"].get("tool") == "microduck.set_command"]
+    commands = {event["detail"]["result"]["request_id"]: event
+                for event in completed_commands}
+    if len(commands) != len(completed_commands):
+        raise AssertionError("Physical command request identities are duplicated")
+    guarded = [event for event in events if event["type"] == "tool.completed" and
+               event["detail"].get("tool") == "microduck.task_progress" and
+               event["detail"]["result"].get("motion_guard")]
+    if not guarded:
+        raise AssertionError("Native automatic pause lacks measured motion-guard progress")
+    paused = [event for event in events if event["type"] == "execution.updated" and
+              event["detail"]["execution"]["state"] == "paused" and
+              event["detail"]["execution"]["device_confirmed"]]
+    for progress_event in guarded:
+        progress = progress_event["detail"]["result"]
+        guard = progress["motion_guard"]
+        execution = progress["execution"]
+        if (guard["run_task_id"] != run_id or
+                guard["execution_id"] != execution["execution_id"] or
+                guard["sequence"] != progress["sequence"] or
+                execution["state"] != "paused" or not execution["device_confirmed"]):
+            raise AssertionError("Motion guard differs from its measured paused execution")
+        if not any(event["sequence"] < progress_event["sequence"] and
+                   event["detail"]["execution"]["execution_id"] == execution["execution_id"] and
+                   event["detail"]["execution"]["boundary_event_id"] == execution["boundary_id"] and
+                   event["detail"]["execution"]["task_scope"]["task_id"] == run_id
+                   for event in paused):
+            raise AssertionError("Motion guard lacks the matching native confirmed pause")
+        command_event = commands.get(guard["command_request_id"])
+        if command_event is None or command_event["sequence"] >= progress_event["sequence"]:
+            raise AssertionError("Motion guard lacks its completed physical command")
+        command = command_event["detail"]["result"]
+        if (guard["sequence"] != command["effective_after_sequence"] +
+                guard["used_control_steps"] or
+                not 0 < guard["used_control_steps"] <= guard["max_control_steps"] or
+                guard["max_control_steps"] != command["max_control_steps"] or
+                guard["command"] != command["command"]):
+            raise AssertionError("Motion guard action count differs from its bounded command")
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description="Audit an exported real EDH MicroDuck run")
     parser.add_argument("export_dir", type=Path)
@@ -35,7 +77,7 @@ def main() -> None:
     required_calls = {
         "microduck__read_sensor", "microduck__set_command",
         "microduck__task_progress",
-        "execution__start", "execution__pause",
+        "execution__start",
         "verification__check", "verification__submit",
     }
     if arguments.prior_export is None:
@@ -43,6 +85,8 @@ def main() -> None:
                                "execution__resume"))
     if missing := required_calls - set(calls):
         raise AssertionError(f"Original trace lacks required tool calls: {sorted(missing)}")
+    if "execution__pause" not in calls:
+        audit_motion_guard_pauses(events, manifest["runId"])
     tool_results = [event["detail"] for event in events if event["type"] == "tool.completed"]
     if arguments.prior_export is None:
         selection_results = tool_results

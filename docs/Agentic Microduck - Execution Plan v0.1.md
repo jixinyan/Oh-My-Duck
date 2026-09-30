@@ -10,13 +10,13 @@ tags:
   - sim-to-real
 ---
 
-> 当前核查（2026-09-30）：用户已停止 Walking 低速干预的全部八组配对训练及预览、评估进程；现有 checkpoint、输出与 W&B 文件保留，不自动恢复。完整预算及最终行为验收未完成，上一轮三组完整训练的最终行为验收未通过。语音 HTTP 服务、Mac 内置扬声器播放、内置麦克风录制与停止边界完成实际验证。原生 EDH 公寓接入已经使用真实 Astra、官方预训练 ONNX 策略及 CPU MuJoCo/BAM 执行工具、传感器与独立 Verifier 闭环；同一物理会话的首项 office 任务正式判定 failed，第二项继续导航后正式判定 passed。项目没有可用真机。见[Walking 停止记录](reports/rl-walking-user-stop-2026-09-30.md)、[真实闭环记录](reports/harness-apartment-live-2026-09-30.md)与[当前状态](implementation-status.md)。
+> 当前核查（2026-09-30）：用户已停止 Walking 低速干预的全部八组配对训练及预览、评估进程；现有 checkpoint、输出与 W&B 文件保留，不自动恢复。完整预算及最终行为验收未完成，上一轮三组完整训练的最终行为验收未通过。语音 HTTP 服务、Mac 内置扬声器播放、内置麦克风录制与停止边界完成实际验证。原生 EDH 公寓接入使用真实 Astra、官方预训练 ONNX 策略及 CPU MuJoCo/BAM 执行工具、传感器与独立 Verifier 闭环；固定出生位置的独立 office 任务通过正式判定，全程非地面外部接触累计 0。项目没有可用真机。见[Walking 停止记录](reports/rl-walking-user-stop-2026-09-30.md)、[公寓导航验收](reports/harness-office-navigation-2026-09-30.md)与[当前状态](implementation-status.md)。
 
 > 2026-09-30 Walking 门禁完成时记录：按低速命令 dead-zone 证据完成 `walking-low-speed-boost.json` 的四后端/框架配对训练前门禁，boost=1.0 只作用于 `0.01–0.2 m/s` 的非零线速度命令，默认控制组保持官方 recipe。8 个 run 准备完成后当时按最小目标停止；后续启动与停止分别见[Walking 启动记录](reports/rl-walking-low-speed-launch-2026-09-29.md)和[停止记录](reports/rl-walking-user-stop-2026-09-30.md)，最终行为验收待完成。门禁证据见[门禁记录](reports/rl-walking-low-speed-gates-2026-09-30.md)。
 
 > 2026-09-30 下一项配置迭代：保护跌倒变体已作为 `experimental_unvalidated` 入口接入任务注册，复用官方 VelStand 恢复层并叠加完整碰撞/伺服冲击保护。当前仅完成配置和 14-servo 编译回归，不启动训练；先完成代表性 Walking/StandUp 的因果修复与验收，再为该变体执行独立门禁。
 
-> 2026-09-30 Harness 接入：固定 EDH `main@8a5e685` 已运行原生会话、ActionGate 和独立 Verifier；官方预训练 ONNX 策略连接 CPU MuJoCo/BAM 公寓。真实 Astra 会话完成传感器与图像读取、控制动作、暂停、策略切换、恢复及 `finish_policy`；Verifier 对第一项 office 任务判定 failed，对同一物理会话中继续实际导航的第二项任务判定 passed。原生 EDH 当前执行 perpetual 策略，episodic 策略尚未在该接入中开放。jd_B300 自训练 Walking/StandUp 仍须完成各自行为门禁后才能作为已验收工具。
+> 2026-09-30 Harness 接入：固定 EDH `main@8a5e685` 已运行原生会话、ActionGate 和独立 Verifier；官方预训练 ONNX 策略连接 CPU MuJoCo/BAM 公寓。真实 Astra 会话完成传感器与图像读取、有界控制、自动暂停、策略切换、恢复及物理停止检查后的 `finish_policy`。独立新会话从固定 corridor 出生位置进入 office，760 个控制步、外部障碍接触累计 0；Verifier 正式判定 passed，Planner 调用 `tasks.finish`。本次自动暂停原因均为有界命令结束；近障碍与停滞边界由独立真实 worker 测试覆盖。原生 EDH 当前执行 perpetual 策略，episodic 策略尚未在该接入中开放。jd_B300 自训练 Walking/StandUp 仍须完成各自行为门禁后才能作为已验收工具。
 
 > 2026-09-30 上游迁移：已复核官方 `microduck_rl` develop 与 `microduck` main；下一项迁移已覆盖 API-2 LSTM 加载/失败 reset、UYVY/ToF 传感器适配、足底 odometry anchor 数据和保护跌倒 reward primitives。每项均有 CPU 回归；完整 VelStand expert-BC、TCP body server 与真实 Newton 任务门禁继续作为独立后续阶段，不能用接口存在代替行为验收。
 
