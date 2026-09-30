@@ -1,6 +1,7 @@
 """Frames carry measurement validity and a clock domain; unknown is never free space."""
 from dataclasses import dataclass
 from enum import StrEnum
+from typing import Any
 
 
 class Validity(StrEnum):
@@ -31,3 +32,5 @@ class SensorFrame:
     validity: Validity
     payload: PayloadRef | None
     calibration_revision: str | None = None
+    readings: dict[str, Any] | None = None
+    evidence_refs: tuple[str, ...] = ()

@@ -25,3 +25,4 @@ class TaskResult:
     status: TaskStatus
     evidence_refs: tuple[str, ...] = ()
     reason: str | None = None
+    details: dict | None = None

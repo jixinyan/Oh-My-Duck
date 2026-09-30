@@ -14,6 +14,7 @@ class RobotCapabilities:
     skills: tuple[str, ...] = ()
     audio_capture: bool = False
     audio_playback: bool = False
+    command_limits: dict | None = None
 
 
 @dataclass(frozen=True)
@@ -23,6 +24,10 @@ class RobotState:
     clock_domain: str
     motion_state: str
     active_task_id: str | None = None
+    simulation_time_s: float | None = None
+    sequence: int = 0
+    measurements: dict | None = None
+    evidence_refs: tuple[str, ...] = ()
 
 
 @dataclass(frozen=True)
