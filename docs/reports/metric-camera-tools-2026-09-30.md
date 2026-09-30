@@ -79,8 +79,8 @@ MP4 保留公开 Planner 文字、计划、工具参数与测量反馈、正式 
 | `integrations/edh_native.py` | `9dcb434b1b8d8c0589462f7261180f747752bcb013d6afd555d84d0a1fc88467` |
 | `robotics/microduck/metric_motion.py` | `f667c514e9b49176df01fe3d60113deea8cf0745d8847e2ed389e91dfc547d48` |
 | `robotics/microduck/sim_sensors.py` | `9e8df810124aacb76011c9257dd8d92ff1bd2b48c7df203c8defe6fb56c5bd68` |
-| `robotics/microduck/isaac_official.py` | `811aa1e18d5983428aa1c3850f1077b31fffb4d302767d3d7ccf42b9ea18f9ba` |
-| `robotics/microduck/simulation.py` | `6100aa7b2d47fe3bc7e349b9e3c7d5667faeb4dbecbbfa576b1c0fe11f069e7f` |
+| `robotics/backends/isaac_official.py` | `811aa1e18d5983428aa1c3850f1077b31fffb4d302767d3d7ccf42b9ea18f9ba` |
+| `robotics/backends/simulation.py` | `6100aa7b2d47fe3bc7e349b9e3c7d5667faeb4dbecbbfa576b1c0fe11f069e7f` |
 
 实际行为检查在远程源码副本运行，分配前检查 GPU 使用情况，明确指定当前空闲设备：
 
