@@ -2,8 +2,7 @@
 
 ## 模型职责
 
-- `gpt-6-astra`：全局规划、架构设计、技术决策和验收审查。
-- `gpt-6-sol`：代码实现、测试、调试和相关文档更新。
+- 主 agent 与 subagent 均使用 `gpt-6.1-sol`，reasoning effort 为 `high`，负责规划、设计、代码实现、测试和验收。
 
 The product scope is `docs/Agentic Microduck - Project Design v0.1.md`. Keep that document, the execution plan, `docs/implementation-status.md`, and the CLI maturity matrix synchronized with verified results. README is the whole-project overview; detailed experiments belong in reports.
 
@@ -40,3 +39,5 @@ This project extends the pinned official `pollen-robotics/microduck_rl` and `pol
 - Latest user instruction (2026-09-13): scheduler submissions should normally run the complete training workflow, not standalone short validation jobs. Include required smoke/export/rehearsal gates in the same job, reuse valid configuration-matched gates, and automatically proceed to the full declared training budget after gates pass, followed by final evaluation/videos. Do not use `--prepare-only` for routine submissions. Failed gates must still stop the affected run; do not bypass them or blindly resume known ineffective recipes.
 
 - 用户于 2026-09-23 授权通过 SSH 使用 `jd_B300` 的空闲 GPU，启动时检查使用情况并明确指定设备。保留完整的 smoke、导出、回放、恢复、训练与最终评估流程、不可变源码副本，以及已核对账号的 W&B 在线记录和本地产物。当前服务器已有源码，历史 checkpoint 仍在旧文件系统。
+
+- 用户于 2026-09-30 要求完成当前最小目标后停止。本次停止条件为单个 NVIDIA Office 场景中的实际 Isaac Lab/Newton/BAM、官方 policy、相机、ToF 与测量停止验证；完成后关闭本次验证进程并记录进度。RL 训练继续保持停止，多场景、多 policy 完整 Demo 等待后续继续。

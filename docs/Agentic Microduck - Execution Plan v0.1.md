@@ -16,7 +16,7 @@ tags:
 
 > 2026-09-30 下一项配置迭代：保护跌倒变体已作为 `experimental_unvalidated` 入口接入任务注册，复用官方 VelStand 恢复层并叠加完整碰撞/伺服冲击保护。当前仅完成配置和 14-servo 编译回归，不启动训练；先完成代表性 Walking/StandUp 的因果修复与验收，再为该变体执行独立门禁。
 
-> 2026-09-30 Harness 接入：固定 EDH `main@8a5e685` 已运行原生会话、ActionGate 和独立 Verifier；官方预训练 ONNX 策略连接 CPU MuJoCo/BAM 公寓。真实 Astra 会话完成传感器与图像读取、有界控制、自动暂停、策略切换、恢复及物理停止检查后的 `finish_policy`。独立新会话从固定 corridor 出生位置进入 office，760 个控制步、外部障碍接触累计 0；Verifier 正式判定 passed，Planner 调用 `tasks.finish`。本次自动暂停原因均为有界命令结束；近障碍与停滞边界由独立真实 worker 测试覆盖。原生 EDH 当前执行 perpetual 策略，episodic 策略尚未在该接入中开放。jd_B300 自训练 Walking/StandUp 仍须完成各自行为门禁后才能作为已验收工具。
+> 2026-09-30 Harness 接入：固定 EDH `main@8a5e685` 已运行原生会话、ActionGate 和独立 Verifier；官方预训练 ONNX 策略连接 CPU MuJoCo/BAM 公寓。真实 Astra 会话完成传感器与图像读取、有界控制、自动暂停、策略切换、恢复及物理停止检查后的 `finish_policy`。独立新会话从固定 corridor 出生位置进入 office，760 个控制步、外部障碍接触累计 0；Verifier 正式判定 passed，Planner 调用 `tasks.finish`。近障碍与停滞边界由独立真实 worker 测试覆盖。原生工具支持 perpetual、scripted 与 episodic policy；真实 CPU 验证已完成 `kick_left` 全部 25 个控制步、保留物理状态接续 `alpha_stand` 的 100 个控制步，以及 90 个连续停止样本。外部 Isaac 场景通过 `--scene-config` 接入；实际 Newton/BAM Office 验证完成官方行走、RGB、ToF 环境查询与超量程状态、五个连续停止样本，位移 `0.096 m`，外部障碍接触累计为零。按用户要求关闭本次验证进程。后续验收包括 Isaac 原生 VLM/Verifier 任务闭环、量程内障碍检测、跨房间通行和多 policy 物体效果。jd_B300 自训练 Walking/StandUp 仍须完成各自行为门禁后才能作为已验收工具。见[场景与 policy 进度](reports/isaac-scene-runtime-handoff-2026-09-30.md)。
 
 > 2026-09-30 上游迁移：已复核官方 `microduck_rl` develop 与 `microduck` main；下一项迁移已覆盖 API-2 LSTM 加载/失败 reset、UYVY/ToF 传感器适配、足底 odometry anchor 数据和保护跌倒 reward primitives。每项均有 CPU 回归；完整 VelStand expert-BC、TCP body server 与真实 Newton 任务门禁继续作为独立后续阶段，不能用接口存在代替行为验收。
 

@@ -18,7 +18,7 @@ tags:
 
 > 2026-09-30 保护变体：`Mjlab-ProtectiveFall-Flat-MicroDuck` 已注册为独立实验性入口，使用完整碰撞资产和保护 reward primitives；它不改变官方 VelStand/代表性任务，也不代表已有可调用 locomotion tool。只有完成 Newton、导出、CPU/BAM 与行为门禁后，才能把策略注册到上层 tool。
 
-> 2026-09-30 Harness 接入：`omd harness` 使用固定 EDH `main@8a5e685` 的原生会话、ActionGate、execution tools 和独立 Verifier。官方预训练 ONNX 策略接入 CPU MuJoCo/BAM 公寓；真实 Astra 会话已经读取 RGB、ToF、IMU、关节与里程计，执行 14 关节策略动作，并完成暂停、策略切换、恢复、`policy_stop` 及正式验证。同一物理会话的首项 office 任务获得 `goal_reached=false`；第二项继续实际运动后获得 `goal_reached=true` 与正式 passed 判定。原生 EDH 当前开放 perpetual 策略，episodic 策略仍需单独验收。jd_B300 的自训练 Walking/StandUp 产物未注册为已验收策略。
+> 2026-09-30 Harness 接入：`omd harness` 使用固定 EDH `main@8a5e685` 的原生会话、ActionGate、execution tools 和独立 Verifier。官方预训练 ONNX 策略接入 CPU MuJoCo/BAM 公寓；真实 Astra 会话已经读取 RGB、ToF、IMU、关节与里程计，执行 14 关节策略动作，并完成暂停、策略切换、恢复、`policy_stop` 及正式验证。固定出生位置的独立 office 导航获得 Verifier 正式 passed，外部障碍接触累计为零。原生工具支持 perpetual、scripted 和 episodic policy；真实 CPU 验证覆盖 `kick_left` 完整 25 个控制步、保留物理状态接续 `alpha_stand` 的 100 个控制步，以及 90 个连续停止样本。外部 Isaac 场景通过 `--scene-config` 接入；实际 Newton/BAM Office 验证完成官方行走、真实 RGB、ToF 环境查询与超量程状态，以及五个连续停止样本，位移 `0.096 m`，外部障碍接触累计为零。Isaac VLM/Verifier 任务闭环、量程内障碍检测、多 policy 物体效果与长距离导航仍待验收。本次验证进程已关闭。jd_B300 的自训练 Walking/StandUp 产物未注册为已验收策略。见[场景与 policy 进度](reports/isaac-scene-runtime-handoff-2026-09-30.md)。
 
 > 2026-09-30 官方上游同步：官方 `microduck_rl` develop 与 `microduck` main 已复核到 `configs/upstream.json` 的提交。项目发布边界现支持官方前馈 API-1 与显式状态 LSTM API-2 的严格 float32/61→14 校验，并保留失败清空状态；相机 UYVY、8×8 ToF 逐射线保护和足底 odometry anchor 数据已有自有确定性适配。保护跌倒奖励项只作为独立实验接口，完整 VelStand expert-BC、TCP body server、硬件 provisioning 和实际 Newton 行为门禁仍待完成。详见 [官方上游复核](reports/upstream-review-2026-09-30.md)。
 

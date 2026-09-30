@@ -8,6 +8,7 @@
 [![RL behavior: pending](https://img.shields.io/badge/RL_behavior-pending-orange)](docs/reports/rl-walking-low-speed-launch-2026-09-29.md)
 [![Recorded CPU checks: 55 passed on 2026-09-23](https://img.shields.io/badge/recorded_CPU_checks-55_passed-2ea44f)](docs/reports/project-status-2026-09-23.md)
 [![Voice: Mac audio verified](https://img.shields.io/badge/voice-Mac_audio_verified-green)](docs/reports/voice-interaction-validation-2026-09-29.md)
+[![Isaac Office: policy and stop verified](https://img.shields.io/badge/Isaac_Office-policy_and_stop_verified-green)](docs/reports/isaac-scene-runtime-handoff-2026-09-30.md)
 [![Hardware validation: pending](https://img.shields.io/badge/hardware_validation-pending-orange)](docs/implementation-status.md)
 
 **An interactive, extensible Microduck—with a persistent voice, shared experiences, and skills you can train.**
@@ -42,6 +43,8 @@ The duck's name, voice and remembered experiences give it continuity. Learning n
 **外部 Harness 负责 agent loop。** Oh My Duck 提供机器人工具、执行适配、训练、语音服务与证据。`omd harness` 使用固定版本 `8a5e685b22d032207f53db20454f0992a4ad60fd` 的 Embodied-DeepSeek-Harness 原生 SessionEnvironment、ActionGate 和独立 Verifier，连接官方预训练 ONNX 策略及 CPU MuJoCo/BAM 公寓。真实 Astra 会话已读取图像与状态传感器、调用工具、执行 14 关节动作，并完成有界控制、暂停、策略切换、恢复和 `finish_policy` 正式结束。从 corridor 固定出生位置完成的 office 导航执行了 760 个实际控制步，末段零命令停止，外部障碍接触累计 0；独立 Verifier 判定 passed，Planner 调用原生 `tasks.finish`。[公寓导航验收](docs/reports/harness-office-navigation-2026-09-30.md)。
 
 High-frequency joint control stays with the policy/runtime. The harness chooses tasks and can observe, interrupt or replan; a model response is not itself evidence that a physical task succeeded.
+
+外部 Isaac USD 场景通过 `omd harness --scene-config` 接入。NVIDIA Office 已完成实际 Newton/BAM 官方 policy、RGB、ToF 环境查询与测量停止验证；CPU 原生工具另已验证 `kick_left` 完整执行后接续 `alpha_stand`。Isaac 的 VLM/Verifier 正式导航、多场景长距离导航与多 policy 物体效果待验收。资源与验证进程已停止，详见[场景与 policy 进度](docs/reports/isaac-scene-runtime-handoff-2026-09-30.md)。
 
 ## Train with MuJoCo or Isaac / Newton
 
