@@ -25,7 +25,14 @@ from oh_my_duck.robotics.backends.simulation import (
 )
 from oh_my_duck.robotics.microduck.protocol import HOME, JOINT_NAMES
 from oh_my_duck.robotics.microduck.official_policies import OfficialPolicyCatalogue
-from oh_my_duck.robotics.microduck.sim_sensors import tof_directions
+from oh_my_duck.robotics.microduck.sim_sensors import camera_optical_pose, tof_directions
+
+
+@wp.kernel
+def _clip_camera_rays(rays: wp.array(dtype=wp.vec3f, ndim=4), near: float):
+    camera, row, column = wp.tid()
+    direction = rays[camera, row, column, 1]
+    rays[camera, row, column, 0] = direction * (near / -direction[2])
 
 
 class IsaacNewtonBamBackend(CpuMujocoBamBackend):
@@ -86,14 +93,14 @@ class IsaacNewtonBamBackend(CpuMujocoBamBackend):
             joint_names_expr=list(JOINT_NAMES), deployment=True)}
         scene.head_camera = CameraCfg(
             prim_path="{ENV_REGEX_NS}/HeadCamera", width=320, height=240,
-            data_types=["rgb"], update_period=0.0, update_latest_camera_pose=True,
+            data_types=["rgb", "instance_segmentation_fast"], update_period=0.0, update_latest_camera_pose=True,
             spawn=PinholeCameraCfg(clipping_range=(0.01, 30.0)),
-            renderer_cfg=NewtonWarpRendererCfg())
+            renderer_cfg=NewtonWarpRendererCfg(colorize_instance_segmentation=False))
         scene.observer_camera = CameraCfg(
             prim_path="{ENV_REGEX_NS}/ObserverCamera", width=1280, height=720,
-            data_types=["rgb"], update_period=0.0, update_latest_camera_pose=True,
+            data_types=["rgb", "instance_segmentation_fast"], update_period=0.0, update_latest_camera_pose=True,
             spawn=PinholeCameraCfg(clipping_range=(0.01, 100.0)),
-            renderer_cfg=NewtonWarpRendererCfg())
+            renderer_cfg=NewtonWarpRendererCfg(colorize_instance_segmentation=False))
         native_cfg = ManagerBasedEnvCfg(
             scene=scene, decimation=1, actions=PhysicsOnlyTerms(),
             observations=PhysicsOnlyTerms(), events=PhysicsOnlyTerms(), seed=0,
@@ -119,7 +126,10 @@ class IsaacNewtonBamBackend(CpuMujocoBamBackend):
         self._tof_body = self.robot.body_names.index(
             reference.body(int(reference.site_bodyid[self._reference_tof_id])).name.removeprefix("robot/"))
         self._camera_local_position = reference.cam_pos[self._reference_camera_id].copy()
-        self._camera_local_quaternion = reference.cam_quat[self._reference_camera_id].copy()
+        self._camera_local_position, self._camera_local_quaternion = camera_optical_pose(reference)
+        self._clipped_cameras: set[str] = set()
+        self._render_evidence: dict[str, dict] = {}
+        self._shape_labels = list(NewtonManager._builder.shape_label)
         self._tof_local_position = reference.site_pos[self._reference_tof_id].copy()
         self._tof_local_quaternion = reference.site_quat[self._reference_tof_id].copy()
         self._robot_geom_ids = set(np.flatnonzero(
@@ -243,10 +253,27 @@ class IsaacNewtonBamBackend(CpuMujocoBamBackend):
             orientations=torch.as_tensor(quaternion[[1, 2, 3, 0]][None], device=self.sim.device, dtype=torch.float32),
             convention="opengl")
         self.native.sim.render()
+        if name not in self._clipped_cameras:
+            rays = camera._render_data.camera_rays
+            directions = wp.to_torch(rays)[..., 1, :]
+            if not torch.isfinite(directions).all() or not torch.all(directions[..., 2] < 0):
+                raise ValueError("Newton camera rays have invalid optical directions")
+            wp.launch(_clip_camera_rays, dim=rays.shape[:3],
+                      inputs=[rays, camera.cfg.spawn.clipping_range[0]], device=self.sim.device)
+            self._clipped_cameras.add(name)
         camera.update(0.0, force_recompute=True)
         rgb = as_torch(camera.data.output["rgb"])[0, ..., :3].detach().cpu().numpy()
         if rgb.shape != (height, width, 3) or rgb.dtype != np.uint8 or np.ptp(rgb) == 0:
             raise ValueError("Newton renderer returned invalid RGB")
+        segmentation = as_torch(camera.data.output["instance_segmentation_fast"])[0, ..., 0].detach().cpu().numpy()
+        ids, counts = np.unique(segmentation, return_counts=True)
+        visible = [{"shape_id": int(index), "shape": self._shape_labels[int(index)], "pixels": int(count)}
+                   for index, count in zip(ids, counts, strict=True) if 0 <= index < len(self._shape_labels)]
+        self._render_evidence[name] = {"eye_world_m": np.asarray(eye).tolist(),
+                                      "forward_world": forward.tolist(), "up_world": corrected_up.tolist(),
+                                      "near_plane_m": camera.cfg.spawn.clipping_range[0],
+                                      "rgb_mean": float(rgb.mean()), "rgb_std": float(rgb.std()),
+                                      "visible_shapes": visible}
         output = BytesIO()
         Image.fromarray(rgb).save(output, format="PNG")
         return base64.b64encode(output.getvalue()).decode("ascii")
@@ -283,6 +310,7 @@ class IsaacNewtonBamBackend(CpuMujocoBamBackend):
                 "camera_frame_id": "head_camera", "tof_frame_id": "tof",
                 "capture_time_s": self._simulation_time_s,
                 "camera_source": "Isaac NewtonWarpRenderer",
+                "camera_geometry": self._render_evidence["head_camera"],
                 "tof_source": "Newton SolverMuJoCo geometry and current GPU pose"}
 
     def _reset_contact_evidence(self):
@@ -484,12 +512,15 @@ class IsaacNewtonBamBackend(CpuMujocoBamBackend):
         if include_segmentation:
             raise ValueError("Newton observer segmentation must be configured explicitly")
         lookat = np.asarray(self._native_state()["body_position_m"])
-        eye = lookat + np.array([0.6, 0.6, 0.4])
+        eye = lookat + np.array([2.0, -2.0, 1.4])
+        target = lookat + np.array([0.0, 0.0, 0.35])
+        encoded = self._render_rgb("observer_camera", eye, target, (0, 0, 1), 1280, 720)
         return {"episode_id": self.episode_id, "sequence": self._sequence,
                 "simulation_time_s": self._simulation_time_s, "capture_time_s": self._simulation_time_s,
                 "camera_frame_id": "observer_follow", "rgb_width": 1280, "rgb_height": 720,
-                "rgb_png_base64": self._render_rgb("observer_camera", eye, lookat, (0, 0, 1), 1280, 720),
-                "camera": {"mode": "Newton follow camera", "lookat_world_m": lookat.tolist()}}
+                "rgb_png_base64": encoded,
+                "camera": {"mode": "Newton scene follow camera", "lookat_world_m": target.tolist(),
+                           "geometry": self._render_evidence["observer_camera"]}}
 
     def close(self):
         self.native.close()

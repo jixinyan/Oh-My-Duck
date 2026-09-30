@@ -341,6 +341,10 @@ class CpuMujocoBamBackend(SimulationBackend):
             self._tof_site_id = mujoco.mj_name2id(self.model, mujoco.mjtObj.mjOBJ_SITE, "tof")
             if self._camera_site_id < 0 or self._tof_site_id < 0:
                 raise ValueError("The apartment robot requires head_camera and tof frames")
+            from oh_my_duck.robotics.microduck.sim_sensors import camera_optical_pose
+            position, quaternion = camera_optical_pose(self.model)
+            self.model.cam_pos[self._camera_site_id] = position
+            self.model.cam_quat[self._camera_site_id] = quaternion
             self.model.vis.global_.offwidth = 640
             self.model.vis.global_.offheight = 480
 
@@ -712,6 +716,10 @@ class CpuMujocoBamBackend(SimulationBackend):
                 "rgb_width": 320, "rgb_height": 240,
                 "tof_distance_mm": distances, "tof_status": statuses,
                 "tof_rows": 8, "tof_cols": 8, "camera_frame_id": "head_camera",
+                "camera_geometry": {"eye_world_m": self.data.cam_xpos[self._camera_site_id].tolist(),
+                                    "forward_world": (-self.data.cam_xmat[self._camera_site_id].reshape(3, 3)[:, 2]).tolist(),
+                                    "up_world": self.data.cam_xmat[self._camera_site_id].reshape(3, 3)[:, 1].tolist(),
+                                    "rgb_mean": float(rgb.mean()), "rgb_std": float(rgb.std())},
                 "tof_frame_id": "tof", "capture_time_s": float(self.data.time)}
 
     def observe_control(self) -> dict:

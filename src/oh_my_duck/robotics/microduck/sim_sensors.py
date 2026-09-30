@@ -27,6 +27,17 @@ TOF_STATUS_VALID = 5
 TOF_STATUS_NO_TARGET = 255
 
 
+def camera_optical_pose(model: mujoco.MjModel) -> tuple[np.ndarray, np.ndarray]:
+    site = model.site("head_camera").id
+    rotation = np.zeros(9)
+    mujoco.mju_quat2Mat(rotation, model.site_quat[site])
+    # site 的 +X 前向与 +Z 上向转换为 OpenGL 相机方向。
+    optical = rotation.reshape(3, 3) @ np.array([[0., 0., -1.], [-1., 0., 0.], [0., 1., 0.]])
+    quaternion = np.zeros(4)
+    mujoco.mju_mat2Quat(quaternion, optical.ravel())
+    return model.site_pos[site].copy(), quaternion
+
+
 def to_uyvy(rgb: np.ndarray) -> bytes:
     """Pack an even-width RGB frame as UYVY 4:2:2 bytes.
 
