@@ -103,27 +103,79 @@ def holds(events: list[dict]) -> list[tuple[float, float, dict]]:
             (event["type"] != "agent.output" or model_text(event).strip())]
 
 
-def schedule(events: list[dict], wall_speed: float) -> tuple[list[tuple], float]:
-    cursor = timestamp(events[0]["at"])
+def schedule(events: list[dict], observer_frames: list[dict],
+             wall_speed: float) -> tuple[list[tuple], float, dict]:
+    start = timestamp(events[0]["at"])
     end = timestamp(events[-1]["at"])
+    frame_walls = [frame["wall"] for frame in observer_frames]
+    frame_simulation = [frame["simulation_time_s"] for frame in observer_frames]
+    if (not frame_walls or frame_walls[0] < start or frame_walls[-1] > end or
+            any(frame_walls[index] == frame_walls[index + 1] and
+                frame_simulation[index] != frame_simulation[index + 1]
+                for index in range(len(frame_walls) - 1))):
+        raise ValueError("Observer frame timestamps cannot define a monotonic schedule")
+
+    def simulation_at(wall: float) -> float:
+        if wall <= frame_walls[0]:
+            return frame_simulation[0]
+        if wall >= frame_walls[-1]:
+            return frame_simulation[-1]
+        index = bisect_right(frame_walls, wall) - 1
+        left, right = frame_walls[index], frame_walls[index + 1]
+        if left == right:
+            raise ValueError("Observer simulation time has an ambiguous wall timestamp")
+        fraction = (wall - left) / (right - left)
+        return frame_simulation[index] + fraction * (frame_simulation[index + 1] - frame_simulation[index])
+
+    read_holds = holds(events)
+    nodes = sorted({start, end, *frame_walls, *(at for at, _, _ in read_holds)})
+    hold_by_wall: dict[float, list[tuple[float, dict]]] = {}
+    for at, duration, event in read_holds:
+        hold_by_wall.setdefault(at, []).append((duration, event))
     playback = 0.0
     segments = []
-    for at, duration, event in holds(events):
-        if at > cursor:
-            interval = (at - cursor) / wall_speed
-            segments.append((playback, playback + interval, cursor, at, None))
+    motion_floor_s = 0.0
+    node_arrival_s = {}
+    for index, wall in enumerate(nodes):
+        if index:
+            previous = nodes[index - 1]
+            simulation_delta = simulation_at(wall) - simulation_at(previous)
+            if simulation_delta < -1e-9:
+                raise ValueError("Observer simulation time moved backward")
+            interval = max((wall - previous) / wall_speed, max(0.0, simulation_delta))
+            motion_floor_s += max(0.0, simulation_delta)
+            if interval <= 0:
+                raise ValueError("Recorded schedule has no positive wall interval")
+            segments.append((playback, playback + interval, previous, wall, None))
             playback += interval
-        segments.append((playback, playback + duration, at, at, event))
-        playback += duration
-        cursor = at
-    if end > cursor:
-        interval = (end - cursor) / wall_speed
-        segments.append((playback, playback + interval, cursor, end, None))
-        playback += interval
+        node_arrival_s[wall] = playback
+        for duration, event in hold_by_wall.get(wall, []):
+            segments.append((playback, playback + duration, wall, wall, event))
+            playback += duration
     if not segments:
-        segments.append((0.0, 3.0, cursor, cursor, None))
+        segments.append((0.0, 3.0, start, start, None))
         playback = 3.0
-    return segments, playback
+    if not math.isclose(motion_floor_s, frame_simulation[-1] - frame_simulation[0], abs_tol=1e-6):
+        raise ValueError("Scheduled motion duration differs from recorded observer time")
+    playback_ratios = []
+    for index in range(len(frame_walls) - 1):
+        simulation_delta = frame_simulation[index + 1] - frame_simulation[index]
+        playback_delta = node_arrival_s[frame_walls[index + 1]] - node_arrival_s[frame_walls[index]]
+        if playback_delta + 1e-9 < simulation_delta:
+            raise ValueError("An observer interval plays faster than recorded simulation time")
+        if simulation_delta > 0:
+            playback_ratios.append(playback_delta / simulation_delta)
+    return segments, playback, {
+        "timeSchedule": "merged_recorded_observer_and_read_hold_nodes",
+        "waitingWallPlaybackSpeed": wall_speed,
+        "observerSimulationTimeRangeS": [frame_simulation[0], frame_simulation[-1]],
+        "observerSimulationDurationS": frame_simulation[-1] - frame_simulation[0],
+        "scheduledSimulationTimeFloorS": motion_floor_s,
+        "observerScheduleNodes": len(frame_walls), "totalScheduleNodes": len(nodes),
+        "motionIntervalRule": "max(wall_delta/waiting_wall_speed, adjacent_observer_simulation_delta)",
+        "observerIntervalPlaybackFloorPassed": True,
+        "minimumObserverIntervalPlaybackRatio": round(min(playback_ratios), 9) if playback_ratios else None,
+    }
 
 
 def wall_at(segments: list[tuple], second: float) -> tuple[float, dict | None]:
@@ -132,6 +184,14 @@ def wall_at(segments: list[tuple], second: float) -> tuple[float, dict | None]:
             fraction = (second - start) / (stop - start)
             return wall_start + (wall_stop - wall_start) * fraction, event
     return segments[-1][3], segments[-1][4]
+
+
+def playback_at_wall(segments: list[tuple], wall: float) -> float:
+    for start, stop, wall_start, wall_stop, event in segments:
+        if event is None and wall_start <= wall <= wall_stop:
+            fraction = (wall - wall_start) / (wall_stop - wall_start) if wall_stop > wall_start else 0.0
+            return start + (stop - start) * fraction
+    raise ValueError("Recorded wall time is absent from the playback schedule")
 
 
 def draw_text(draw: ImageDraw.ImageDraw, xy: tuple[int, int], value: str,
@@ -202,6 +262,27 @@ def latest(events: list[dict], times: list[float], wall: float, event_type: str,
     return None
 
 
+def latest_tool_result(events: list[dict], times: list[float], wall: float,
+                       tool_name: str) -> dict | None:
+    for event in reversed(events[:bisect_right(times, wall)]):
+        if event["type"] == "tool.completed" and event["detail"].get("tool") == tool_name:
+            result = event["detail"].get("result")
+            if not isinstance(result, dict):
+                raise ValueError(f"Recorded {tool_name} result is not an object")
+            return result
+    return None
+
+
+def progress_motion_evidence(result: dict) -> tuple[str, str, str]:
+    guard = result.get("motion_guard")
+    contact = result.get("contact_evidence")
+    reason = guard.get("reason", "未记录") if isinstance(guard, dict) else "未记录"
+    distance = guard.get("central_tof_closest_mm", "未记录") if isinstance(guard, dict) else "未记录"
+    samples = (contact.get("non_ground_external_contact_samples_total", "未记录")
+               if isinstance(contact, dict) else "未记录")
+    return str(reason), "无有效读数" if distance is None else str(distance), str(samples)
+
+
 def model_text(event: dict | None) -> str:
     if event is None:
         return ""
@@ -246,10 +327,14 @@ def tool_summary(event: dict) -> str:
     elif tool == "microduck.set_command":
         visible = selected(result, ("effective_after_sequence", "command"))
     elif tool == "microduck.task_progress":
-        visible = selected(result, ("sequence", "simulation_time_s", "policy_name",
-                                    "body_position_m", "fallen"))
-        visible["execution"] = selected(result.get("execution", {}),
-                                        ("state", "generation", "device_confirmed"))
+        reason, distance, samples = progress_motion_evidence(result)
+        position = result.get("body_position_m")
+        coordinates = ("未记录" if position is None else
+                       "(" + ",".join(f"{value:.3f}" for value in position) + ")m")
+        execution = result.get("execution")
+        state = execution.get("state", "未记录") if isinstance(execution, dict) else "未记录"
+        return (f"{tool} · seq={result.get('sequence', '未记录')} · {coordinates} · {state}\n"
+                f"guard={reason} · central ToF={distance} mm · non-ground samples={samples}")
     elif tool == "microduck.select_policy":
         visible = selected(result, ("policy_name", "kind", "encoding", "duration_s"))
         visible["action_spec_version"] = result.get("action_spec", {}).get("version")
@@ -343,7 +428,7 @@ def render_frame(run: dict, events: list[dict], times: list[float], cameras: dic
     canvas.paste(logo, (34, 24), logo)
     draw_text(draw, (130, 24), "OH MY DUCK  ·  AGENTIC MICRODUCK",
               fonts["title"], TEXT, 1190, 72)
-    draw_text(draw, (132, 80), f"CPU MuJoCo/BAM · official apartment · wall time {wall_speed:g}×",
+    draw_text(draw, (132, 80), f"CPU MuJoCo/BAM · official apartment · waiting {wall_speed:g}× · motion ≤1×",
               fonts["small"], MUTED, 1350, 112)
     visible_events = events[:bisect_right(times, wall)]
     terminal_event = next((event for event in reversed(visible_events)
@@ -369,6 +454,18 @@ def render_frame(run: dict, events: list[dict], times: list[float], cameras: dic
     else:
         draw_text(draw, (330, 540), "Waiting for recorded observer frame",
                   fonts["body"], MUTED, 1110, 590)
+    progress = latest_tool_result(events, times, wall, "microduck.task_progress")
+    if progress is not None:
+        reason, distance, samples = progress_motion_evidence(progress)
+        guard = progress.get("motion_guard")
+        guard_sequence = guard.get("sequence", "未记录") if isinstance(guard, dict) else "未记录"
+        draw.rounded_rectangle((48, 160, 676, 238), radius=9, fill=PANEL_DARK)
+        draw_text(draw, (62, 170),
+                  f"LATEST TASK PROGRESS seq={progress.get('sequence', '未记录')}  ·  guard {reason}",
+                  fonts["caption"], TEXT, 660, 199)
+        draw_text(draw, (62, 203),
+                  f"guard seq={guard_sequence}  ·  ToF {distance} mm  ·  non-ground samples {samples}",
+                  fonts["caption"], TEXT, 660, 231)
     head_frames = cameras.get("head_camera.png", cameras.get("head_rgb.png"))
     if head_frames:
         head = active_frame(head_frames, wall)
@@ -469,7 +566,7 @@ def encode_video(export: Path, output: Path, review_dir: Path, font_path: Path, 
                for name, frames in cameras.items()}
     if not cameras[OBSERVER_CAMERA]:
         raise ValueError("The run has no observer frame before its terminal event")
-    segments, duration = schedule(events, wall_speed)
+    segments, duration, schedule_details = schedule(events, cameras[OBSERVER_CAMERA], wall_speed)
     frame_count = max(1, math.ceil(duration * fps) + 1)
     fonts = {name: ImageFont.truetype(str(font_path), size) for name, size in
              {"title": 34, "section": 24, "body": 22, "small": 19, "caption": 16}.items()}
@@ -516,9 +613,19 @@ def encode_video(export: Path, output: Path, review_dir: Path, font_path: Path, 
     if (stream["codec_name"] != "h264" or stream["width"] != WIDTH or
             stream["height"] != HEIGHT or int(stream["nb_frames"]) != frame_count):
         raise ValueError("Encoded video dimensions, codec, or frame count differ")
+    observer_frames = cameras[OBSERVER_CAMERA]
+    verifier_hold = next((segment for segment in segments
+                          if segment[4] is not None and segment[4]["type"] == "verification.completed"), None)
+    review_times = {
+        "start": 0.0,
+        "motion_early": playback_at_wall(segments, observer_frames[len(observer_frames) // 3]["wall"]),
+        "motion_late": playback_at_wall(segments, observer_frames[2 * len(observer_frames) // 3]["wall"]),
+        "verifier": ((verifier_hold[0] + verifier_hold[1]) / 2 if verifier_hold is not None
+                     else duration * 0.75),
+        "final": max(0.0, duration - 1 / fps),
+    }
     keyframes = []
-    for name, second in (("start", 0.0), ("middle", duration / 2),
-                         ("final", max(0.0, duration - 1 / fps))):
+    for name, second in review_times.items():
         destination = review_dir / f"{output.stem}-{name}.png"
         subprocess.run(["ffmpeg", "-hide_banner", "-loglevel", "error", "-ss",
                         f"{second:.3f}", "-i", str(output), "-frames:v", "1", "-y",
@@ -547,12 +654,14 @@ def encode_video(export: Path, output: Path, review_dir: Path, font_path: Path, 
                                                  event["detail"].get("message", {}).get("content", []))
                                              for event in events),
               "keyframes": keyframes, "sourceManifest": str(export / "manifest.json"),
+              "keyframePlaybackTimesS": review_times,
               "videoSha256": file_sha256(output),
               "sourceManifestSha256": file_sha256(export / "manifest.json"),
               "sourceRunSha256": file_sha256(export / "source" / "run.json"),
               "sourceEventsSha256": file_sha256(export / "source" / "events.json"),
               "observerBackendSourceSha256": file_sha256(backend_source),
-              "rendererSourceSha256": file_sha256(Path(__file__))}
+              "rendererSourceSha256": file_sha256(Path(__file__)),
+              **schedule_details}
     output.with_suffix(".json").write_text(json.dumps(report, indent=2) + "\n")
     return report
 
