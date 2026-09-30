@@ -12,6 +12,10 @@ tags:
   - project-design
 ---
 
+> 多阶段导航（2026-09-30）：原生 Harness 在 Newton Office 完成大厅、绕行和办公桌接近，7 次当前桌子观测、3 次 walk 与 7 次 rotate 调用形成实际闭环。执行 3689 控制步，独立 Verifier passed、run succeeded，桌前几何距离 1.0434 米，实际相机和 agentic trace 生成 193.3 秒 MP4。所有 GT 感知、公共地图与路线坐标明确标注；3 段长行走的严格终点精度未通过，保留实际 failed 状态与重新规划过程。会话与 GPU worker 已释放，RL 保持停止。单一场景行为、图像输入独立 VLN policy、多场景泛化与真机的范围分别记录。见[验证记录](reports/perception-vln-demo-2026-09-30.md)。
+
+> 感知工具（2026-09-30）：`microduck.inspect_scene` 将当前 head RGB 的目标框、距离、bearing 和标注图像作为原生 Harness 工具结果返回。实际 Newton 的两个相机朝向获得 21 个有效 ground truth 目标；独立 YOLO26 服务完成真实图像推理与距离传输检查。SAM 3.1 文本分割与 YOLO 框关联适配已编写，官方权重授权、联合推理与识别准确率尚待验收。多阶段导航使用明确授权的 simulator ground truth，独立检查按顺序通过 checkpoint 与最终直立保持。接口和验证范围见[感知与导航工具](perception-navigation.md)。
+
 > 当前工具与相机（2026-09-30）：原生 Harness 可调用 `microduck.walk(distance_m)` 与 `microduck.rotate(angle_deg)`，距离/角度目标由当前物理 odometry 控制，停止后检查 0.05 米/5 度误差及五个实际停止样本。Newton Office 已验证 0.4/1.0 米和 +45°/−45°/+270°；转向伴随平移并返回测量值。head RGB 使用官方 optical pose 与近裁剪，observer 取景包含机器人和场景，原生 segmentation 检查通过。真实 Astra/high 的距离工具任务完成 313 控制步并获得独立 Verifier passed，原始事件与相机生成 60.3 秒 agentic MP4。RL 保持停止；CPU 距离/角度、多场景长导航、物体效果与真机待验证。见[工具接口](metric-policy-tools.md)及[验证记录](reports/metric-camera-tools-2026-09-30.md)。
 
 > 当前核查（2026-09-30）：上一轮 Walking 与两个 StandUp 完整训练的最终行为验收均未通过。用户已停止 Walking 低速干预的全部八组配对训练及预览、评估进程；checkpoint、输出与 W&B 文件保留，不自动恢复。语音 HTTP 服务、Mac 内置扬声器与麦克风完成实际音频验证。官方预训练策略已在 CPU MuJoCo/BAM 公寓中经原生 EDH ActionGate 执行，真实 Astra 会话完成图像与状态传感器读取、暂停、策略切换、恢复及 `finish_policy`。同一物理会话的首项 office 任务正式判定为 failed；第二项从目标外继续导航，独立 Verifier 判定 passed，run 状态 succeeded。当前没有可用真机。见[Walking 停止记录](reports/rl-walking-user-stop-2026-09-30.md)、[真实闭环记录](reports/harness-apartment-live-2026-09-30.md)与[实现进度](implementation-status.md)。

@@ -1,0 +1,774 @@
+{
+  "scope": "actual Newton RGB, segmentation, metric rays and optional model inference",
+  "views": [
+    {
+      "yaw_rad": 0.0,
+      "ground_truth": {
+        "episode_id": "5e281adc0f594fd599d1e91ba211ecc4",
+        "sequence": 0,
+        "observed_at": "2026-09-30T20:48:53.462821+00:00",
+        "prompt": "objects",
+        "detection_source": "simulator_ground_truth",
+        "distance_source": "simulator_ground_truth",
+        "targets": [
+          {
+            "target_id": "/World/Environment/SM_ReceptionTableCornerOutside_218",
+            "label": "reception",
+            "bbox_xyxy": [
+              286,
+              64,
+              320,
+              136
+            ],
+            "visible_pixels": 2001,
+            "detection_source": "simulator_ground_truth",
+            "mask_source": "simulator_ground_truth",
+            "distance_source": "simulator_ground_truth",
+            "distance_status": "valid",
+            "valid_depth_pixels": 2001,
+            "distance_m": 6.5093218918903295,
+            "distance_interval_m": [
+              6.310229130314755,
+              6.873687984347465
+            ],
+            "distance_xy_m": 6.550663567386994,
+            "bearing_deg": -21.497178068576087,
+            "surface_position_world_m": [
+              -11.455028533935547,
+              28.049474716186523,
+              0.5722530484199524
+            ]
+          },
+          {
+            "target_id": "/World/Environment/BP_DoorD_1190",
+            "label": "door",
+            "bbox_xyxy": [
+              202,
+              62,
+              248,
+              128
+            ],
+            "visible_pixels": 1293,
+            "detection_source": "simulator_ground_truth",
+            "mask_source": "simulator_ground_truth",
+            "distance_source": "simulator_ground_truth",
+            "distance_status": "valid",
+            "valid_depth_pixels": 1293,
+            "distance_m": 12.291912404513162,
+            "distance_interval_m": [
+              11.872191392347995,
+              12.595297306912418
+            ],
+            "distance_xy_m": 12.295736904712161,
+            "bearing_deg": -11.878303297687664,
+            "surface_position_world_m": [
+              -5.517550945281982,
+              27.919124603271484,
+              1.0597329139709473
+            ]
+          },
+          {
+            "target_id": "/World/Environment/SM_ReceptionTableCornerOutside2_221",
+            "label": "reception",
+            "bbox_xyxy": [
+              278,
+              72,
+              291,
+              134
+            ],
+            "visible_pixels": 511,
+            "detection_source": "simulator_ground_truth",
+            "mask_source": "simulator_ground_truth",
+            "distance_source": "simulator_ground_truth",
+            "distance_status": "valid",
+            "valid_depth_pixels": 511,
+            "distance_m": 7.226807796559312,
+            "distance_interval_m": [
+              7.043890158061739,
+              7.490594930547857
+            ],
+            "distance_xy_m": 7.286394073169623,
+            "bearing_deg": -18.852966631887185,
+            "surface_position_world_m": [
+              -10.654513359069824,
+              28.095470428466797,
+              0.5918900370597839
+            ]
+          },
+          {
+            "target_id": "/World/Environment/SM_Plant3_26",
+            "label": "plant",
+            "bbox_xyxy": [
+              0,
+              45,
+              19,
+              125
+            ],
+            "visible_pixels": 327,
+            "detection_source": "simulator_ground_truth",
+            "mask_source": "simulator_ground_truth",
+            "distance_source": "simulator_ground_truth",
+            "distance_status": "valid",
+            "valid_depth_pixels": 327,
+            "distance_m": 6.9428706599122725,
+            "distance_interval_m": [
+              6.72789596912267,
+              7.166214386535244
+            ],
+            "distance_xy_m": 6.9207314970631195,
+            "bearing_deg": 22.657501418959246,
+            "surface_position_world_m": [
+              -11.163381576538086,
+              33.11601638793945,
+              1.1117483377456665
+            ]
+          },
+          {
+            "target_id": "/World/Environment/SM_Chair2",
+            "label": "chair",
+            "bbox_xyxy": [
+              208,
+              108,
+              222,
+              125
+            ],
+            "visible_pixels": 128,
+            "detection_source": "simulator_ground_truth",
+            "mask_source": "simulator_ground_truth",
+            "distance_source": "simulator_ground_truth",
+            "distance_status": "valid",
+            "valid_depth_pixels": 128,
+            "distance_m": 19.412735470738596,
+            "distance_interval_m": [
+              19.290442055100993,
+              19.54522913730319
+            ],
+            "distance_xy_m": 19.46276127260936,
+            "bearing_deg": -8.71584079425051,
+            "surface_position_world_m": [
+              1.6880066394805908,
+              27.500728607177734,
+              0.5396231412887573
+            ]
+          }
+        ]
+      },
+      "models": {
+        "episode_id": "5e281adc0f594fd599d1e91ba211ecc4",
+        "sequence": 0,
+        "observed_at": "2026-09-30T20:48:53.425400+00:00",
+        "prompt": "objects",
+        "targets": [
+          {
+            "target_id": "5e281adc0f594fd599d1e91ba211ecc4:0:0",
+            "label": "chair",
+            "confidence": 0.5854800939559937,
+            "bbox_xyxy": [
+              73.42593383789062,
+              103.75665283203125,
+              108.22616577148438,
+              128.0106658935547
+            ],
+            "detection_source": "yolo26",
+            "mask_source": "yolo26_bbox",
+            "distance_source": "simulator_ground_truth",
+            "distance_status": "valid",
+            "valid_depth_pixels": 840,
+            "distance_m": 12.20185752338455,
+            "distance_interval_m": [
+              11.593899429329916,
+              12.644197840955005
+            ],
+            "distance_xy_m": 12.214371847055787,
+            "bearing_deg": 10.603253250485738,
+            "surface_position_world_m": [
+              -5.544188976287842,
+              32.697532653808594,
+              0.3815489411354065
+            ],
+            "yolo_match": {
+              "label": "chair",
+              "confidence": 0.5854800939559937
+            }
+          },
+          {
+            "target_id": "5e281adc0f594fd599d1e91ba211ecc4:0:1",
+            "label": "chair",
+            "confidence": 0.22435052692890167,
+            "bbox_xyxy": [
+              204.02886962890625,
+              108.09332275390625,
+              222.29473876953125,
+              125.56990051269531
+            ],
+            "detection_source": "yolo26",
+            "mask_source": "yolo26_bbox",
+            "distance_source": "simulator_ground_truth",
+            "distance_status": "valid",
+            "valid_depth_pixels": 324,
+            "distance_m": 19.678315232839516,
+            "distance_interval_m": [
+              19.23535340355054,
+              23.169793398900435
+            ],
+            "distance_xy_m": 19.77662590339797,
+            "bearing_deg": -8.257535563122524,
+            "surface_position_world_m": [
+              2.021592617034912,
+              27.60962677001953,
+              0.4138001501560211
+            ],
+            "yolo_match": {
+              "label": "chair",
+              "confidence": 0.22435052692890167
+            }
+          },
+          {
+            "target_id": "5e281adc0f594fd599d1e91ba211ecc4:0:2",
+            "label": "bench",
+            "confidence": 0.22309410572052002,
+            "bbox_xyxy": [
+              107.90138244628906,
+              113.60964965820312,
+              147.35183715820312,
+              128.18490600585938
+            ],
+            "detection_source": "yolo26",
+            "mask_source": "yolo26_bbox",
+            "distance_source": "simulator_ground_truth",
+            "distance_status": "valid",
+            "valid_depth_pixels": 546,
+            "distance_m": 12.409124938022103,
+            "distance_interval_m": [
+              11.686484349639489,
+              12.462255894461642
+            ],
+            "distance_xy_m": 12.498342840083733,
+            "bearing_deg": 5.041094812885509,
+            "surface_position_world_m": [
+              -5.100000858306885,
+              31.548233032226562,
+              0.22098764777183533
+            ],
+            "yolo_match": {
+              "label": "bench",
+              "confidence": 0.22309410572052002
+            }
+          },
+          {
+            "target_id": "5e281adc0f594fd599d1e91ba211ecc4:0:3",
+            "label": "airplane",
+            "confidence": 0.18822413682937622,
+            "bbox_xyxy": [
+              0.045589447021484375,
+              45.04737854003906,
+              18.902891159057617,
+              90.3863525390625
+            ],
+            "detection_source": "yolo26",
+            "mask_source": "yolo26_bbox",
+            "distance_source": "simulator_ground_truth",
+            "distance_status": "valid",
+            "valid_depth_pixels": 855,
+            "distance_m": 9.828068146685306,
+            "distance_interval_m": [
+              6.832062264059669,
+              10.873145276587941
+            ],
+            "distance_xy_m": 9.808574412988554,
+            "bearing_deg": 22.048830611300325,
+            "surface_position_world_m": [
+              -8.458782196044922,
+              34.13210678100586,
+              1.392540454864502
+            ],
+            "yolo_match": {
+              "label": "airplane",
+              "confidence": 0.18822413682937622
+            }
+          }
+        ],
+        "detection_source": "yolo26",
+        "models": {
+          "yolo26": "646f8bc3fe0a656803d95c294f7852321748cb29d13466a1af8862e2db384a1b"
+        },
+        "distance_source": "simulator_ground_truth",
+        "image_sha256": "9aad2823faf77cfb43739fb58fabca319ba722053114c0f2e58566c693c17146"
+      }
+    },
+    {
+      "yaw_rad": 1.5707963267948966,
+      "ground_truth": {
+        "episode_id": "034906f47b484307aa1a11033836d8c9",
+        "sequence": 0,
+        "observed_at": "2026-09-30T20:49:02.054868+00:00",
+        "prompt": "objects",
+        "detection_source": "simulator_ground_truth",
+        "distance_source": "simulator_ground_truth",
+        "targets": [
+          {
+            "target_id": "/World/Environment/SM_StandTableWork11_450",
+            "label": "desk",
+            "bbox_xyxy": [
+              19,
+              89,
+              57,
+              140
+            ],
+            "visible_pixels": 1804,
+            "detection_source": "simulator_ground_truth",
+            "mask_source": "simulator_ground_truth",
+            "distance_source": "simulator_ground_truth",
+            "distance_status": "valid",
+            "valid_depth_pixels": 1804,
+            "distance_m": 4.989397313241687,
+            "distance_interval_m": [
+              4.953323096794223,
+              5.139307759522988
+            ],
+            "distance_xy_m": 5.034046456572512,
+            "bearing_deg": 18.24621812918738,
+            "surface_position_world_m": [
+              -19.12616539001465,
+              35.230934143066406,
+              0.34907615184783936
+            ]
+          },
+          {
+            "target_id": "/World/Environment/SM_TableWorkSecurity6",
+            "label": "desk",
+            "bbox_xyxy": [
+              142,
+              82,
+              272,
+              139
+            ],
+            "visible_pixels": 1698,
+            "detection_source": "simulator_ground_truth",
+            "mask_source": "simulator_ground_truth",
+            "distance_source": "simulator_ground_truth",
+            "distance_status": "valid",
+            "valid_depth_pixels": 1698,
+            "distance_m": 5.003283832849965,
+            "distance_interval_m": [
+              4.841262543497396,
+              5.567229479912012
+            ],
+            "distance_xy_m": 4.970529451105942,
+            "bearing_deg": -7.82425661356955,
+            "surface_position_world_m": [
+              -16.873336791992188,
+              35.3742561340332,
+              0.6840631365776062
+            ]
+          },
+          {
+            "target_id": "/World/Environment/SM_StandTableWork12",
+            "label": "desk",
+            "bbox_xyxy": [
+              265,
+              90,
+              307,
+              139
+            ],
+            "visible_pixels": 1556,
+            "detection_source": "simulator_ground_truth",
+            "mask_source": "simulator_ground_truth",
+            "distance_source": "simulator_ground_truth",
+            "distance_status": "valid",
+            "valid_depth_pixels": 1556,
+            "distance_m": 5.217820201228898,
+            "distance_interval_m": [
+              5.144170322489638,
+              5.298683862118344
+            ],
+            "distance_xy_m": 5.2603064639809025,
+            "bearing_deg": -19.33488243199848,
+            "surface_position_world_m": [
+              -15.808370590209961,
+              35.41362380981445,
+              0.3813890218734741
+            ]
+          },
+          {
+            "target_id": "/World/Environment/SM_TableWorkSecurity5",
+            "label": "desk",
+            "bbox_xyxy": [
+              12,
+              82,
+              144,
+              139
+            ],
+            "visible_pixels": 1437,
+            "detection_source": "simulator_ground_truth",
+            "mask_source": "simulator_ground_truth",
+            "distance_source": "simulator_ground_truth",
+            "distance_status": "valid",
+            "valid_depth_pixels": 1437,
+            "distance_m": 5.060164154384827,
+            "distance_interval_m": [
+              4.850616759676369,
+              5.524050710582527
+            ],
+            "distance_xy_m": 5.035817117102016,
+            "bearing_deg": 12.082730950979684,
+            "surface_position_world_m": [
+              -18.604116439819336,
+              35.3742561340332,
+              0.6944671273231506
+            ]
+          },
+          {
+            "target_id": "/World/Environment/SM_StandTableWork13",
+            "label": "desk",
+            "bbox_xyxy": [
+              170,
+              98,
+              194,
+              134
+            ],
+            "visible_pixels": 800,
+            "detection_source": "simulator_ground_truth",
+            "mask_source": "simulator_ground_truth",
+            "distance_source": "simulator_ground_truth",
+            "distance_status": "valid",
+            "valid_depth_pixels": 800,
+            "distance_m": 6.828788144857931,
+            "distance_interval_m": [
+              6.824136327439438,
+              6.836075222626625
+            ],
+            "distance_xy_m": 6.890335251067922,
+            "bearing_deg": -3.480731292225766,
+            "surface_position_world_m": [
+              -17.131668090820312,
+              37.3276252746582,
+              0.3552880585193634
+            ]
+          },
+          {
+            "target_id": "/World/Environment/SM_StandTableWork8_445",
+            "label": "desk",
+            "bbox_xyxy": [
+              90,
+              98,
+              115,
+              133
+            ],
+            "visible_pixels": 767,
+            "detection_source": "simulator_ground_truth",
+            "mask_source": "simulator_ground_truth",
+            "distance_source": "simulator_ground_truth",
+            "distance_status": "valid",
+            "valid_depth_pixels": 767,
+            "distance_m": 6.874478983680222,
+            "distance_interval_m": [
+              6.868446737567054,
+              6.882802506599224
+            ],
+            "distance_xy_m": 6.9344262687753195,
+            "bearing_deg": 8.68209995133146,
+            "surface_position_world_m": [
+              -18.596765518188477,
+              37.30496597290039,
+              0.3548734486103058
+            ]
+          },
+          {
+            "target_id": "/World/Environment/SM_TableWorkingDouble5",
+            "label": "desk",
+            "bbox_xyxy": [
+              92,
+              89,
+              196,
+              137
+            ],
+            "visible_pixels": 656,
+            "detection_source": "simulator_ground_truth",
+            "mask_source": "simulator_ground_truth",
+            "distance_source": "simulator_ground_truth",
+            "distance_status": "valid",
+            "valid_depth_pixels": 656,
+            "distance_m": 5.681739659423596,
+            "distance_interval_m": [
+              5.631036013588647,
+              7.243190775317461
+            ],
+            "distance_xy_m": 5.6814729536676944,
+            "bearing_deg": 1.6902622690447893,
+            "surface_position_world_m": [
+              -17.71758270263672,
+              36.12900161743164,
+              0.643752932548523
+            ]
+          },
+          {
+            "target_id": "/World/Environment/SM_StandTableWork14",
+            "label": "desk",
+            "bbox_xyxy": [
+              190,
+              100,
+              212,
+              132
+            ],
+            "visible_pixels": 488,
+            "detection_source": "simulator_ground_truth",
+            "mask_source": "simulator_ground_truth",
+            "distance_source": "simulator_ground_truth",
+            "distance_status": "valid",
+            "valid_depth_pixels": 488,
+            "distance_m": 7.390027120618949,
+            "distance_interval_m": [
+              7.3796499366445945,
+              7.401859082646209
+            ],
+            "distance_xy_m": 7.452563633507019,
+            "bearing_deg": -6.863355536351937,
+            "surface_position_world_m": [
+              -16.659404754638672,
+              37.849159240722656,
+              0.34318849444389343
+            ]
+          },
+          {
+            "target_id": "/World/Environment/SM_StandTableWork7_442",
+            "label": "desk",
+            "bbox_xyxy": [
+              106,
+              102,
+              130,
+              133
+            ],
+            "visible_pixels": 429,
+            "detection_source": "simulator_ground_truth",
+            "mask_source": "simulator_ground_truth",
+            "distance_source": "simulator_ground_truth",
+            "distance_status": "valid",
+            "valid_depth_pixels": 429,
+            "distance_m": 7.4078459074731065,
+            "distance_interval_m": [
+              7.391304381139223,
+              7.524062191185443
+            ],
+            "distance_xy_m": 7.464704496956017,
+            "bearing_deg": 5.79011219992031,
+            "surface_position_world_m": [
+              -18.30307388305664,
+              37.87662124633789,
+              0.32342591881752014
+            ]
+          },
+          {
+            "target_id": "/World/Environment/BP_DoorGlass2",
+            "label": "door",
+            "bbox_xyxy": [
+              315,
+              53,
+              320,
+              126
+            ],
+            "visible_pixels": 361,
+            "detection_source": "simulator_ground_truth",
+            "mask_source": "simulator_ground_truth",
+            "distance_source": "simulator_ground_truth",
+            "distance_status": "valid",
+            "valid_depth_pixels": 361,
+            "distance_m": 16.656214468056774,
+            "distance_interval_m": [
+              16.451554656584502,
+              16.835336790168896
+            ],
+            "distance_xy_m": 16.63830480317856,
+            "bearing_deg": -23.16807079457938,
+            "surface_position_world_m": [
+              -11.003998756408691,
+              45.74650573730469,
+              1.5048210620880127
+            ]
+          },
+          {
+            "target_id": "/World/Environment/SM_TableWorkingDouble4",
+            "label": "desk",
+            "bbox_xyxy": [
+              108,
+              96,
+              190,
+              133
+            ],
+            "visible_pixels": 285,
+            "detection_source": "simulator_ground_truth",
+            "mask_source": "simulator_ground_truth",
+            "distance_source": "simulator_ground_truth",
+            "distance_status": "valid",
+            "valid_depth_pixels": 285,
+            "distance_m": 7.6681493574614485,
+            "distance_interval_m": [
+              7.335904124403485,
+              8.941147828792753
+            ],
+            "distance_xy_m": 7.713169013200969,
+            "bearing_deg": 1.5574587690299593,
+            "surface_position_world_m": [
+              -17.759639739990234,
+              38.16032028198242,
+              0.722498893737793
+            ]
+          },
+          {
+            "target_id": "/World/Environment/SM_StandTableWork_33",
+            "label": "desk",
+            "bbox_xyxy": [
+              57,
+              110,
+              73,
+              126
+            ],
+            "visible_pixels": 188,
+            "detection_source": "simulator_ground_truth",
+            "mask_source": "simulator_ground_truth",
+            "distance_source": "simulator_ground_truth",
+            "distance_status": "valid",
+            "valid_depth_pixels": 188,
+            "distance_m": 15.367375406123202,
+            "distance_interval_m": [
+              15.242349392247775,
+              15.492666323242544
+            ],
+            "distance_xy_m": 15.419952540669327,
+            "bearing_deg": 14.577117340241017,
+            "surface_position_world_m": [
+              -21.430938720703125,
+              45.37358093261719,
+              0.3950204849243164
+            ]
+          },
+          {
+            "target_id": "/World/Environment/SM_StandTableWork15",
+            "label": "desk",
+            "bbox_xyxy": [
+              162,
+              105,
+              170,
+              130
+            ],
+            "visible_pixels": 187,
+            "detection_source": "simulator_ground_truth",
+            "mask_source": "simulator_ground_truth",
+            "distance_source": "simulator_ground_truth",
+            "distance_status": "valid",
+            "valid_depth_pixels": 187,
+            "distance_m": 9.07824406537878,
+            "distance_interval_m": [
+              9.075948148664805,
+              9.082492432149559
+            ],
+            "distance_xy_m": 9.141118448492431,
+            "bearing_deg": -0.8542904778069585,
+            "surface_position_world_m": [
+              -17.41370964050293,
+              39.59010314941406,
+              0.33975186944007874
+            ]
+          },
+          {
+            "target_id": "/World/Environment/SM_StandTableWork5_92",
+            "label": "desk",
+            "bbox_xyxy": [
+              239,
+              110,
+              252,
+              126
+            ],
+            "visible_pixels": 183,
+            "detection_source": "simulator_ground_truth",
+            "mask_source": "simulator_ground_truth",
+            "distance_source": "simulator_ground_truth",
+            "distance_status": "valid",
+            "valid_depth_pixels": 183,
+            "distance_m": 14.804870923976056,
+            "distance_interval_m": [
+              14.750244158375386,
+              14.84253573057067
+            ],
+            "distance_xy_m": 14.84901632804722,
+            "bearing_deg": -13.219670940191401,
+            "surface_position_world_m": [
+              -14.154252052307129,
+              44.90552520751953,
+              0.3512231111526489
+            ]
+          },
+          {
+            "target_id": "/World/Environment/SM_TrashCan_92",
+            "label": "bin",
+            "bbox_xyxy": [
+              0,
+              116,
+              7,
+              140
+            ],
+            "visible_pixels": 143,
+            "detection_source": "simulator_ground_truth",
+            "mask_source": "simulator_ground_truth",
+            "distance_source": "simulator_ground_truth",
+            "distance_status": "valid",
+            "valid_depth_pixels": 143,
+            "distance_m": 5.075817531853831,
+            "distance_interval_m": [
+              5.010582421016479,
+              5.14231883976407
+            ],
+            "distance_xy_m": 5.133523217644369,
+            "bearing_deg": 22.893509674077606,
+            "surface_position_world_m": [
+              -19.547040939331055,
+              35.17915344238281,
+              0.16961638629436493
+            ]
+          },
+          {
+            "target_id": "/World/Environment/SM_TableWorkSecurity4",
+            "label": "desk",
+            "bbox_xyxy": [
+              212,
+              107,
+              242,
+              127
+            ],
+            "visible_pixels": 123,
+            "detection_source": "simulator_ground_truth",
+            "mask_source": "simulator_ground_truth",
+            "distance_source": "simulator_ground_truth",
+            "distance_status": "valid",
+            "valid_depth_pixels": 123,
+            "distance_m": 14.487272125565475,
+            "distance_interval_m": [
+              14.30722097181076,
+              15.130899857429396
+            ],
+            "distance_xy_m": 14.504963231688563,
+            "bearing_deg": -11.290426454035696,
+            "surface_position_world_m": [
+              -14.710186004638672,
+              44.67425537109375,
+              0.6766331195831299
+            ]
+          }
+        ]
+      },
+      "models": {
+        "episode_id": "034906f47b484307aa1a11033836d8c9",
+        "sequence": 0,
+        "observed_at": "2026-09-30T20:49:02.029382+00:00",
+        "prompt": "objects",
+        "targets": [],
+        "detection_source": "yolo26",
+        "models": {
+          "yolo26": "646f8bc3fe0a656803d95c294f7852321748cb29d13466a1af8862e2db384a1b"
+        },
+        "distance_source": "simulator_ground_truth",
+        "image_sha256": "d45853f3337399e6e8c48b3a86720769b6747260ea5fdceac05a638c0bd687b7"
+      }
+    }
+  ]
+}

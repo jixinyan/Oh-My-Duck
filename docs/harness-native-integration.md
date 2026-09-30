@@ -82,7 +82,7 @@ PYTHONPATH=src .cache/cpu-apartment-locked-venv/bin/python omd.py harness \
   --instruction configs/simulation-demo/office-agentic-instruction.md \
   --output .cache/office-demo/task.json
 .cache/cpu-apartment-locked-venv/bin/python scripts/record_harness_demo.py export \
-  --run-id "$RUN_ID" --output ".cache/demo/$RUN_ID"
+  --run-id "$RUN_ID" --output ".cache/demo/$RUN_ID" --data-directory .cache/harness-office-demo
 .cache/cpu-apartment-locked-venv/bin/python scripts/render_microduck_run.py \
   --export ".cache/demo/$RUN_ID" --output outputs/demos/office-agentic.mp4 --wall-speed 8
 .cache/cpu-apartment-locked-venv/bin/python scripts/accept_harness_replay.py \
@@ -93,6 +93,8 @@ PYTHONPATH=src .cache/cpu-apartment-locked-venv/bin/python omd.py harness \
 ```
 
 `RUN_ID` 使用任务提交返回的身份。`scripts/accept_harness_replay.py` 检查原始模型工具调用、实际位移、ActionGate 终态、独立 verdict、对应相机文件和物理子步。完成导出后，关闭会话并核查远程 worker 退出。
+
+`--data-directory` 使用服务启动时的 `--data-dir`。当前导出包含 `read_sensor(head_rgb)` 与 `inspect_scene` 的原生 tool image attachment，保存原始 PNG、SHA256、字节数与物理帧身份。感知与多阶段导航的运行参数见[感知工具](perception-navigation.md)。
 
 `microduck.task_progress` 返回 `stopped_samples` 与 `required_stopped_samples`，样本由物理控制步累计。`--require-stop-progress` 检查相同 episode、sequence 与 policy 的重复读取计数，以及 `finish_policy` 对应的连续停止样本。独立 Verifier 正式通过后，Planner 将原生目标项目设为 `done`，使用 `last_verdict_ref` 引用当前正式 verdict，再调用 `tasks.finish`。视频分别显示正式 verdict 和 run 终态。
 

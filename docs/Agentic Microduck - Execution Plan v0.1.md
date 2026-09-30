@@ -10,6 +10,10 @@ tags:
   - sim-to-real
 ---
 
+> 多阶段任务完成（2026-09-30）：Newton Office 的大厅、右侧绕行和办公桌接近已通过真实模型、官方 policy、原生 ActionGate 与独立 Verifier，累计 3689 控制步，7 次可见桌子观测，最终误差 0.1617 米，80 个停止样本。原始相机和事件生成 193.3 秒 MP4，边界、路线、SHA256、视频时间与完整解码检查通过；会话/GPU 已释放，RL 保持停止。后续执行项目为 SAM 3.1 官方授权与联合推理、目标识别准确率、长行走段的严格终点精度、图像输入独立 VLN policy、多场景与真机验收。每项均以实际行为检查确定状态。见[完整验证记录](reports/perception-vln-demo-2026-09-30.md)。
+
+> 感知验证（2026-09-30）：原生 `microduck.inspect_scene` 已接入当前物理帧的 RGB、Newton 实例分割与射线距离；两个实际相机朝向获得 21 个有效 ground truth 目标。独立 YOLO26 服务完成真实图像推理和距离传输，SAM 3.1 官方账号授权与联合推理尚待完成。多阶段任务要求大厅中心、右侧绕行和办公桌接近，正式检查记录 checkpoint 的实际位置与通过顺序。见[感知与导航工具](perception-navigation.md)。
+
 > 距离/角度与相机验收（2026-09-30）：Newton Office 的 `walk(distance_m)` 与 `rotate(angle_deg)` 实际验证覆盖 0.4/1.0 米、+45°/−45°/+270°，停止后满足 0.05 米/5 度与五个停止样本；转向返回实际平移。head RGB optical pose/近裁剪与 observer 场景取景通过原生 segmentation 检查。真实 Astra/high 的距离工具闭环完成 313 控制步、独立 verdict passed、run succeeded，782 个事件与 64 张实际相机图片生成 60.3 秒 MP4，来源、停止进度与完整解码通过。会话已关闭，RL 保持停止。后续执行目标为 CPU 距离/角度行为、跨房间长导航、多场景和多 policy 物体效果，各项使用实际物理结果与独立 Verifier 验收。见[验证记录](reports/metric-camera-tools-2026-09-30.md)。
 
 > 当前核查（2026-09-30）：用户已停止 Walking 低速干预的全部八组配对训练及预览、评估进程；现有 checkpoint、输出与 W&B 文件保留，不自动恢复。完整预算及最终行为验收未完成，上一轮三组完整训练的最终行为验收未通过。语音 HTTP 服务、Mac 内置扬声器播放、内置麦克风录制与停止边界完成实际验证。原生 EDH 公寓接入使用真实 Astra、官方预训练 ONNX 策略及 CPU MuJoCo/BAM 执行工具、传感器与独立 Verifier 闭环；固定出生位置的独立 office 任务通过正式判定，全程非地面外部接触累计 0。项目没有可用真机。见[Walking 停止记录](reports/rl-walking-user-stop-2026-09-30.md)、[公寓导航验收](reports/harness-office-navigation-2026-09-30.md)与[当前状态](implementation-status.md)。

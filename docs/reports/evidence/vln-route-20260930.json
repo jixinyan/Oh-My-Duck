@@ -1,0 +1,43 @@
+{
+  "passed": true,
+  "run_id": "71dac4ee-298c-4895-b3db-a9610bce50bb",
+  "desk_observations": 7,
+  "walk_calls": 3,
+  "rotate_calls": 7,
+  "measured_walk_m": 4.166465637731523,
+  "waypoint_visits": [
+    {
+      "sequence": 732,
+      "position_xy_m": [
+        -17.417619705200195,
+        31.757854461669922
+      ]
+    },
+    {
+      "sequence": 2421,
+      "position_xy_m": [
+        -16.74445152282715,
+        32.18721008300781
+      ]
+    }
+  ],
+  "metric_phases": {
+    "4d2064c8-1d2a-446f-a2e5-6d9336696440": "complete",
+    "c4c94013-1101-42db-8e10-4a00691aa2af": "failed",
+    "63d75fa9-1374-4620-8e79-3cb43eca8c74": "blocked",
+    "979ba37d-1730-462b-8d59-1c5877f86458": "blocked",
+    "1b9c62e1-536f-45cc-839c-e9ad34201099": "complete",
+    "f947324f-4234-4618-9d25-fa955b67f3b7": "complete",
+    "de8a4f77-f8bb-456b-8daf-9ceb4eadd0d7": "failed",
+    "d08bbc17-31ec-4671-85df-6d9bd8dda6ed": "complete",
+    "5ab6df3a-c6bd-4b53-8afb-76c48fdff18c": "failed"
+  },
+  "completed_walks": 0,
+  "failed_walks": 3,
+  "blocked_turns": 2,
+  "final_desk_bound_distance_xy_m": 1.0433597456047963,
+  "desk_bound_source": "authored static USD geometry bounds",
+  "final_error_m": 0.16169875482895682,
+  "distance_source": "simulator_ground_truth",
+  "checker_source_sha256": "840a4e7a4c52bfcc1a51d908c2eb34182c9aeaf2f9d4b3296264969cf482c127"
+}

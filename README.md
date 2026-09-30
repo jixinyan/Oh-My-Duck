@@ -49,6 +49,10 @@ External Isaac USD scenes enter through `omd harness --scene-config`; the native
 
 ![Actual Newton Office robot frame and head RGB with recorded Planner text, metric tool feedback and a passed independent verdict.](docs/assets/office-agentic/metric-demo.png)
 
+`microduck.inspect_scene(prompt, source)` provides frame-bound target boxes, surface distance and bearing. Its isolated YOLO26 service has exercised real Office RGB inference and calibrated Newton depth transport. Optional SAM 3.1 provides text-prompt segmentation with YOLO box association; checkpoint access and joint-model acceptance remain pending. The explicit `simulator_ground_truth` source uses visible native shape masks and Newton ray-hit distances. See [perception and navigation tools](docs/perception-navigation.md) and [actual perception evidence](docs/reports/evidence/perception-newton-20260930.json).
+
+A real native-Harness Office task now navigates three stages with repeated desk observations, walking turns, measured stopping and replanning after stalled turns. Its explicitly authorized simulator-ground-truth route passed the independent Verifier after 3689 control steps; final goal error was 0.162 m and desk-bound clearance was 1.043 m. A 193.3-second MP4 records the duck, perception captures and agentic trace. Three long walking segments exceeded the tools' strict 5 cm endpoint tolerance and retain their failed states. See the [navigation demo and validation scope](docs/reports/perception-vln-demo-2026-09-30.md).
+
 ## Train with MuJoCo or Isaac / Newton
 
 ![RL pipeline: two simulation backends and two native PPO frameworks, normalized export, sim2sim and deployment rehearsal.](docs/diagrams/rl-pipeline.svg)

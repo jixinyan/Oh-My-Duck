@@ -1,0 +1,62 @@
+{
+  "runId": "71dac4ee-298c-4895-b3db-a9610bce50bb",
+  "runState": "succeeded",
+  "runError": null,
+  "sourceEventCount": 5507,
+  "renderedEventCount": 5492,
+  "terminalEventSequence": 5492,
+  "terminalEventType": "run.succeeded",
+  "terminalEventAt": "2026-09-30T21:16:22.241Z",
+  "sourceObserverFrameCount": 737,
+  "environment": "Isaac Lab Newton/BAM: nvidia-office-vln",
+  "renderedObserverFrameCount": 737,
+  "optionalCameraNames": [
+    "head_rgb.png"
+  ],
+  "width": 1920,
+  "height": 1080,
+  "fps": 10,
+  "frameCount": 1933,
+  "renderedWallDurationS": 2024.0260000228882,
+  "wallPlaybackSpeed": 24.0,
+  "readHoldCount": 26,
+  "expectedDurationS": 193.13787499468077,
+  "encodedDurationS": 193.3,
+  "textBoundaryChecks": "passed for every encoded frame",
+  "formalVerdict": "passed",
+  "recordedReasoningEvents": 0,
+  "keyframes": [
+    "/Users/yanjixin/Documents/Obsidian Vault/04 Extracurricular/Research and Project Ideas/Agentic MicroDuck/Oh-My-Duck/.cache/perception/video-review-03/oh-my-duck-office-vln-20260930-start.png",
+    "/Users/yanjixin/Documents/Obsidian Vault/04 Extracurricular/Research and Project Ideas/Agentic MicroDuck/Oh-My-Duck/.cache/perception/video-review-03/oh-my-duck-office-vln-20260930-motion_early.png",
+    "/Users/yanjixin/Documents/Obsidian Vault/04 Extracurricular/Research and Project Ideas/Agentic MicroDuck/Oh-My-Duck/.cache/perception/video-review-03/oh-my-duck-office-vln-20260930-motion_late.png",
+    "/Users/yanjixin/Documents/Obsidian Vault/04 Extracurricular/Research and Project Ideas/Agentic MicroDuck/Oh-My-Duck/.cache/perception/video-review-03/oh-my-duck-office-vln-20260930-verifier.png",
+    "/Users/yanjixin/Documents/Obsidian Vault/04 Extracurricular/Research and Project Ideas/Agentic MicroDuck/Oh-My-Duck/.cache/perception/video-review-03/oh-my-duck-office-vln-20260930-final.png"
+  ],
+  "sourceManifest": "/Users/yanjixin/Documents/Obsidian Vault/04 Extracurricular/Research and Project Ideas/Agentic MicroDuck/Oh-My-Duck/.cache/perception/replay-03/manifest.json",
+  "keyframePlaybackTimesS": {
+    "start": 0.0,
+    "motion_early": 75.93395832578288,
+    "motion_late": 115.93558332523381,
+    "verifier": 177.55712499619074,
+    "final": 193.03787499468078
+  },
+  "videoSha256": "39fe2c1f07d19f9c5bfc436a44ab5d0e5a0ebe31476f471173ef8cbd9bdae3fa",
+  "sourceManifestSha256": "dab973adbe38c1a1097f53fd2134b678926a39816b402b76e0d01849603855fe",
+  "sourceRunSha256": "fd8805f9c9262b9f5b95f3db3c21405a1a178f32f45b47cb659a771dd6e4e920",
+  "sourceEventsSha256": "de4665910c5078dadfa32cf29a37eb58e415cb3ae77d17365ebbdcbaa9a8060e",
+  "observerBackendSourceSha256": "d78166b12b5cfb5505c9b07ff032fdaeb9e434d5a156ecc6be9c13f1d3fff5d1",
+  "rendererSourceSha256": "5fa0aece66ee9ea1d85b186c0144db0118680bcf9abebadbb4a81980765865e8",
+  "timeSchedule": "merged_recorded_observer_and_read_hold_nodes",
+  "waitingWallPlaybackSpeed": 24.0,
+  "observerSimulationTimeRangeS": [
+    0.10000000000000002,
+    73.70000000000546
+  ],
+  "observerSimulationDurationS": 73.60000000000547,
+  "scheduledSimulationTimeFloorS": 73.60000000000545,
+  "observerScheduleNodes": 737,
+  "totalScheduleNodes": 764,
+  "motionIntervalRule": "max(wall_delta/waiting_wall_speed, adjacent_observer_simulation_delta)",
+  "observerIntervalPlaybackFloorPassed": true,
+  "minimumObserverIntervalPlaybackRatio": 1.0
+}

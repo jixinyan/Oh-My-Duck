@@ -11,8 +11,8 @@
     },
     "robot_backends": {
       "module": "oh_my_duck.robotics.backends",
-      "state": "cpu_apartment_and_newton_office_metric_tools_camera_and_native_navigation_verified",
-      "role": "CPU apartment and Newton Office native navigation verified; Newton meter/degree policy tools and scene/head RGB rendering verified; CPU metric behavior, multi-scene long navigation and hardware pending"
+      "state": "cpu_apartment_and_newton_office_gt_assisted_multistage_navigation_verified",
+      "role": "CPU apartment and actual Newton Office camera, perception and ordered-route navigation verified; long walking segments exceed strict endpoint tolerance; CPU metric behavior, multi-scene generalization and hardware pending"
     },
     "skills": {
       "module": "oh_my_duck.agentic.skills",
@@ -26,8 +26,8 @@
     },
     "harness": {
       "module": "oh_my_duck.integrations.edh_native",
-      "state": "native_edh_astra_newton_metric_walk_and_formal_navigation_verified",
-      "role": "Pinned EDH native session, SSH GPU worker, official policy metric walk, actual camera observations, measured stop, ActionGate, independent Verifier and completed plan verified; multi-scene long navigation pending"
+      "state": "native_edh_newton_gt_assisted_multistage_navigation_and_replanning_verified",
+      "role": "Pinned native session, official policy tools, frame-bound perception, measured stop, ordered route, replanning, independent Verifier and completed plan verified in one Office seed; image-only VLN and multi-scene generalization pending"
     },
     "voice": {
       "module": "oh_my_duck.voice",
@@ -46,8 +46,8 @@
     },
     "perception": {
       "module": "oh_my_duck.perception",
-      "state": "generic_interface_cpu_sensors_and_newton_office_rgb_tof_proximity_verified",
-      "role": "CPU apartment sensors and actual Newton Office RGB, out-of-range no-target, 64 original-wall ToF rays and central-distance proximity pause verified; object recognition pending"
+      "state": "newton_frame_bound_gt_targets_and_yolo26_inference_transport_verified_sam31_pending",
+      "role": "Current-frame target boxes, metric ray-hit distance and bearing; explicit native ground truth and isolated YOLO26 inference transport verified; SAM 3.1 checkpoint access, recognition accuracy and hardware acceptance pending"
     },
     "policies": {
       "module": "oh_my_duck.robotics.policies",
@@ -82,7 +82,52 @@
   },
   "execution": {
     "hardware_available": false,
-    "harness": "native_edh_cpu_apartment_and_newton_office_metric_walk_formal_goal_passed_single_seed",
+    "harness": "native_edh_cpu_apartment_and_newton_office_gt_assisted_multistage_route_passed_single_seed",
+    "vln_agentic_demo": {
+      "state": "gt_assisted_ordered_route_and_native_verdict_verified_long_walk_precision_pending",
+      "scene": "nvidia-office-vln",
+      "seed": 20260929,
+      "run_id": "71dac4ee-298c-4895-b3db-a9610bce50bb",
+      "formal_verdict": "passed",
+      "native_run_state": "succeeded",
+      "control_steps": 3689,
+      "raw_sim_steps": 14756,
+      "walk_calls": 3,
+      "rotate_calls": 7,
+      "desk_observations": 7,
+      "measured_walk_m": 4.166465637731523,
+      "ordered_waypoint_visits": 2,
+      "final_goal_error_m": 0.16169875482895682,
+      "final_desk_bound_distance_xy_m": 1.0433597456047963,
+      "stopped_samples": 80,
+      "non_ground_external_contact_samples": 0,
+      "strict_long_walk_endpoint_precision": "all_three_segments_failed_preserved_5cm_threshold",
+      "ground_truth_scope": ["visible_shape_masks", "ray_hit_distances", "bearing", "public_geometry", "route_coordinates", "odometry"],
+      "observer_frames": 737,
+      "head_frames": 22,
+      "events": 5507,
+      "video": "outputs/demos/oh-my-duck-office-vln-20260930.mp4",
+      "video_duration_s": 193.3,
+      "video_sha256": "39fe2c1f07d19f9c5bfc436a44ab5d0e5a0ebe31476f471173ef8cbd9bdae3fa",
+      "report": "docs/reports/perception-vln-demo-2026-09-30.md",
+      "session_state": "closed_resources_released",
+      "gpu_workers": "released",
+      "rl_training": "stopped"
+    },
+    "perception": {
+      "state": "actual_newton_gt_and_yolo26_inference_transport_verified",
+      "tool": "microduck.inspect_scene",
+      "environment": "environments/perception",
+      "actual_views": 2,
+      "valid_gt_targets": 21,
+      "yolo26_checkpoint_sha256": "646f8bc3fe0a656803d95c294f7852321748cb29d13466a1af8862e2db384a1b",
+      "distance_source": "simulator_ground_truth",
+      "sam31": "official_checkpoint_access_denied_joint_inference_unverified",
+      "recognition_accuracy": "not_accepted",
+      "hardware": "unverified",
+      "evidence": "docs/reports/evidence/perception-newton-20260930.json",
+      "guide": "docs/perception-navigation.md"
+    },
     "metric_policy_tools": {
       "state": "newton_office_measured_walk_rotate_and_stop_verified",
       "tools": ["microduck.walk", "microduck.rotate"],
