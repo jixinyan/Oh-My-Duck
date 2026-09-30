@@ -29,7 +29,7 @@ COMMANDS = {
     "voice-session": (None, "Run an explicit local recording and playback session"),
     "voice-service": (None, "Run an isolated ASR or TTS model service"),
     "sim": ("simulation.py", "Run interactive measured simulation tools through JSONL"),
-    "harness": ("harness.py", "Run the official apartment through native EDH"),
+    "harness": ("harness.py", "Run MicroDuck simulation scenes through native EDH"),
 }
 
 

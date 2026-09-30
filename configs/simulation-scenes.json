@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "asset_root": "data/scenes",
+  "runtime_mdl_modules": ["OmniPBR.mdl", "OmniGlass.mdl"],
+  "scenes": {
+    "nvidia-office-6.0": {
+      "source_family": "nvidia-isaac-sim",
+      "display_name": "NVIDIA Office",
+      "asset_version": "6.0",
+      "asset_origin": "https://omniverse-content-production.s3-us-west-2.amazonaws.com",
+      "asset_prefix": "Assets/Isaac/6.0/Isaac/Environments/Office/",
+      "usd_relative_path": "Assets/Isaac/6.0/Isaac/Environments/Office/office.usd",
+      "catalog_url": "https://docs.isaacsim.omniverse.nvidia.com/latest/assets/usd_assets_environments.html",
+      "license_url": "https://docs.isaacsim.omniverse.nvidia.com/latest/common/license-isaac-sim-additional.html"
+    },
+    "nvidia-hospital-6.0": {
+      "source_family": "nvidia-isaac-sim",
+      "display_name": "NVIDIA Hospital",
+      "asset_version": "6.0",
+      "asset_origin": "https://omniverse-content-production.s3-us-west-2.amazonaws.com",
+      "asset_prefix": "Assets/Isaac/6.0/Isaac/Environments/Hospital/",
+      "usd_relative_path": "Assets/Isaac/6.0/Isaac/Environments/Hospital/hospital.usd",
+      "catalog_url": "https://docs.isaacsim.omniverse.nvidia.com/latest/assets/usd_assets_environments.html",
+      "license_url": "https://docs.isaacsim.omniverse.nvidia.com/latest/common/license-isaac-sim-additional.html"
+    },
+    "nvidia-warehouse-6.0": {
+      "source_family": "nvidia-isaac-sim",
+      "display_name": "NVIDIA Full Warehouse",
+      "asset_version": "6.0",
+      "asset_origin": "https://omniverse-content-production.s3-us-west-2.amazonaws.com",
+      "asset_prefix": "Assets/Isaac/6.0/Isaac/Environments/Simple_Warehouse/",
+      "usd_relative_path": "Assets/Isaac/6.0/Isaac/Environments/Simple_Warehouse/full_warehouse.usd",
+      "catalog_url": "https://docs.isaacsim.omniverse.nvidia.com/latest/assets/usd_assets_environments.html",
+      "license_url": "https://docs.isaacsim.omniverse.nvidia.com/latest/common/license-isaac-sim-additional.html"
+    }
+  }
+}

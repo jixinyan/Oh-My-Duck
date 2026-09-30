@@ -12,7 +12,8 @@ def asset_source():
     return project_root() / "src/oh_my_duck/robotics/microduck/microduck"
 
 
-ROBOT_MODELS = {"walk": "robot_walk.xml", "groundcontact": "robot_groundcontact.xml"}
+ROBOT_MODELS = {"walk": "robot_walk.xml", "groundcontact": "robot_groundcontact.xml",
+                "allcollisions": "robot_allcollisions.xml"}
 
 
 def model_file(model="walk"):
@@ -37,6 +38,8 @@ def source_fingerprint(model="walk"):
                  project_root() / "environments/isaac-assets/uv.lock"):
         h.update(tool.name.encode() + b"\0")
         h.update(hashlib.sha256(tool.read_bytes()).digest())
+    if model == "allcollisions":
+        h.update(hashlib.sha256((package / "asset_names.py").read_bytes()).digest())
     return h.hexdigest()
 
 

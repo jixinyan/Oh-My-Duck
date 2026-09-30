@@ -30,6 +30,9 @@ class NewtonOfficialTaskManager(NewtonMJWarpManager):
                 # Ground uses explicit pairs with the official robot material.
                 actual.geom_contype[geom] = actual.geom_conaffinity[geom] = 0
                 continue
+            if label.startswith("/World/Environment/"):
+                actual.geom_contype[geom] = actual.geom_conaffinity[geom] = 1
+                continue
             ref = source_geom(label, reference)
             for name in (
                 "geom_contype",

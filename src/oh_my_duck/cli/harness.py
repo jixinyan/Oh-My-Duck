@@ -19,7 +19,7 @@ POLICY_REVISION = "1b56c396825c052a4e26e95cf2b8d8298af9e9b4"
 
 def main() -> int:
     root = project_root()
-    parser = argparse.ArgumentParser(description="Run the native EDH MicroDuck apartment deployment")
+    parser = argparse.ArgumentParser(description="Run a native EDH MicroDuck simulation deployment")
     source = parser.add_mutually_exclusive_group()
     source.add_argument("--provider-config", type=Path)
     source.add_argument("--remote-provider-config", type=str)
@@ -29,6 +29,8 @@ def main() -> int:
                         default=root / ".cache/edh" / EDH_REVISION)
     parser.add_argument("--cpu-python", type=Path,
                         default=root / ".cache/cpu-apartment-locked-venv/bin/python")
+    parser.add_argument("--simulation-python", type=Path)
+    parser.add_argument("--scene-config", type=Path)
     parser.add_argument("--policy-dir", type=Path,
                         default=root / ".cache/official-policies" / POLICY_REVISION)
     parser.add_argument("--data-dir", type=Path,
@@ -91,9 +93,22 @@ def main() -> int:
     if token is not None and (not isinstance(token, str) or not token or
                               any(char.isspace() for char in token)):
         raise ValueError("Provider credential is missing or invalid")
-    cpu_python = args.cpu_python.absolute()
-    if not cpu_python.is_file():
-        raise FileNotFoundError(cpu_python)
+    simulation_python = (args.simulation_python or args.cpu_python).absolute()
+    if not simulation_python.is_file():
+        raise FileNotFoundError(simulation_python)
+    scene_configuration = None
+    if args.scene_config is not None:
+        scene_path = args.scene_config.resolve(strict=True)
+        scene_configuration = json.loads(scene_path.read_text(encoding="utf-8"))
+        if not isinstance(scene_configuration, dict):
+            raise ValueError("Scene configuration must be a JSON object")
+        if scene_configuration.get("backend") != "isaac-newton":
+            raise ValueError("External scenes require the Isaac Newton backend")
+        for field in ("usd_path", "provenance_path", "public_map_path"):
+            if field in scene_configuration:
+                value = Path(scene_configuration[field])
+                scene_configuration[field] = str(
+                    (root / value).resolve(strict=True))
     catalog = args.policy_dir.resolve(strict=True)
     data_dir = args.data_dir.resolve()
     data_dir.mkdir(parents=True, exist_ok=True)
@@ -107,7 +122,7 @@ def main() -> int:
     environment = dict(os.environ)
     environment.update({
         "OMD_EDH_SOURCE": str(edh_source),
-        "OMD_CPU_PYTHON": str(cpu_python),
+        "OMD_CPU_PYTHON": str(simulation_python),
         "OMD_POLICY_DIR": str(catalog),
         "OMD_DATA_DIRECTORY": str(data_dir),
         "OMD_EDH_PORT": str(args.port),
@@ -117,6 +132,11 @@ def main() -> int:
         "TSX_TSCONFIG_PATH": str(edh_source / "tsconfig.runtime.json"),
         "TMPDIR": str(temp_dir),
     })
+    if scene_configuration is None:
+        environment.pop("OMD_SCENE_CONFIGURATION", None)
+    else:
+        environment["OMD_SCENE_CONFIGURATION"] = json.dumps(
+            scene_configuration, allow_nan=False)
     if token is None:
         environment.pop("EDH_MODEL_API_KEY", None)
     else:

@@ -1,0 +1,496 @@
+from __future__ import annotations
+
+import base64
+from copy import copy
+from io import BytesIO
+import math
+import json
+import hashlib
+from pathlib import Path
+import threading
+import time
+from types import SimpleNamespace
+from typing import Callable
+from uuid import uuid4
+
+import mujoco
+import mujoco_warp as mjw
+import numpy as np
+from PIL import Image
+import torch
+import warp as wp
+
+from oh_my_duck.robotics.backends.simulation import (
+    CpuMujocoBamBackend, MotionBusyError, SimulationBackend, _utc_now,
+)
+from oh_my_duck.robotics.microduck.protocol import HOME, JOINT_NAMES
+from oh_my_duck.robotics.microduck.official_policies import OfficialPolicyCatalogue
+from oh_my_duck.robotics.microduck.sim_sensors import tof_directions
+
+
+class IsaacNewtonBamBackend(CpuMujocoBamBackend):
+    def __init__(self, *, robot_id: str, catalog_dir: Path, scene_path: Path,
+                 device: str, floor_height_m: float = 0.0,
+                 scene_id: str = "isaac_external", robot_model: str = "allcollisions",
+                 provenance_path: Path | None = None, public_map_path: Path | None = None):
+        from isaaclab.assets import AssetBaseCfg
+        from isaaclab.envs import ManagerBasedEnv, ManagerBasedEnvCfg
+        from isaaclab.sensors import CameraCfg
+        from isaaclab.sim import PinholeCameraCfg, SimulationCfg, UsdFileCfg
+        from isaaclab_tasks.utils import launch_simulation
+        from isaaclab_newton.physics import NewtonCfg
+        from isaaclab_newton.physics.newton_manager import NewtonManager
+        from isaaclab_newton.renderers import NewtonWarpRendererCfg
+        from oh_my_duck.rl.backends.isaac_newton.bam_actuator import OfficialBamActuatorCfg
+        from oh_my_duck.rl.backends.isaac_newton.config import SceneCfg
+        from oh_my_duck.rl.backends.isaac_newton.paths import require_asset
+        from oh_my_duck.rl.backends.isaac_newton.task_binding.collisions import configure_scene
+        from oh_my_duck.rl.backends.isaac_newton.task_binding.environment import PhysicsOnlyTerms
+        from oh_my_duck.rl.backends.isaac_newton.task_binding.entity import NewtonEntity
+        from oh_my_duck.rl.backends.isaac_newton.task_binding.manager import OfficialTaskSolverCfg
+        from oh_my_duck.rl.backends.isaac_newton.task_binding.simulation import NewtonSimulation
+        from oh_my_duck.rl.tasks.recipes import build_environment
+        from oh_my_duck.rl.training.tasks import project_tasks
+        from oh_my_duck.rl.backends.isaac_newton.asset_names import get_isaac_allcollisions_cfg
+
+        if not device.startswith("cuda:") or not torch.cuda.is_available():
+            raise ValueError("Isaac/Newton requires an explicitly selected CUDA device")
+        if robot_model != "allcollisions" or not math.isfinite(floor_height_m):
+            raise ValueError("Runtime requires the official allcollisions model and finite floor height")
+        torch.cuda.set_device(device)
+        SimulationBackend.__init__(self, robot_id=robot_id, backend="isaac-newton",
+                                   policy_path=None, task_id=scene_id)
+        self._np, self._mujoco = np, mujoco
+        self.catalog = OfficialPolicyCatalogue(catalog_dir)
+        self.active_policy = self.catalog.get("velstand")
+        self.policy_sha256 = self.active_policy.sha256
+        self._scene_path = scene_path.resolve(strict=True)
+        self.scene_id = scene_id
+        self.floor_height_m = float(floor_height_m)
+        self.provenance = None if provenance_path is None else {
+            "path": str(provenance_path), "sha256": hashlib.sha256(provenance_path.read_bytes()).hexdigest()}
+        self.public_map = None if public_map_path is None else json.loads(public_map_path.read_text())
+        self._owner_thread = threading.get_ident()
+        self._stop_requested = threading.Event()
+        self._renderer = self._observer_renderer = None
+        task = project_tasks().get("Mjlab-Velocity-Flat-MicroDuck")
+        recipe = build_environment(task.binding("isaac-newton"), play=True)
+        recipe.scene.num_envs = 1
+        scene = SceneCfg(num_envs=1, env_spacing=1.0)
+        scene.terrain = None
+        scene.environment = AssetBaseCfg(
+            prim_path="/World/Environment", spawn=UsdFileCfg(usd_path=str(self._scene_path)))
+        scene.robot.spawn.usd_path = str(require_asset(robot_model))
+        configure_scene(scene, robot_model)
+        scene.robot.actuators = {"official_bam": OfficialBamActuatorCfg(
+            joint_names_expr=list(JOINT_NAMES), deployment=True)}
+        scene.head_camera = CameraCfg(
+            prim_path="{ENV_REGEX_NS}/HeadCamera", width=320, height=240,
+            data_types=["rgb"], update_period=0.0, update_latest_camera_pose=True,
+            spawn=PinholeCameraCfg(clipping_range=(0.01, 30.0)),
+            renderer_cfg=NewtonWarpRendererCfg())
+        scene.observer_camera = CameraCfg(
+            prim_path="{ENV_REGEX_NS}/ObserverCamera", width=1280, height=720,
+            data_types=["rgb"], update_period=0.0, update_latest_camera_pose=True,
+            spawn=PinholeCameraCfg(clipping_range=(0.01, 100.0)),
+            renderer_cfg=NewtonWarpRendererCfg())
+        native_cfg = ManagerBasedEnvCfg(
+            scene=scene, decimation=1, actions=PhysicsOnlyTerms(),
+            observations=PhysicsOnlyTerms(), events=PhysicsOnlyTerms(), seed=0,
+            sim=SimulationCfg(device=device, dt=0.005, render_interval=4,
+                              physics=NewtonCfg(solver_cfg=OfficialTaskSolverCfg(
+                                  robot_model=robot_model, iterations=10, ls_iterations=20,
+                                  njmax=5000, nconmax=5000), num_substeps=1)))
+        self._launch = launch_simulation(native_cfg, {"headless": True})
+        self._launch.__enter__()
+        self.native = ManagerBasedEnv(native_cfg)
+        self.sim = NewtonSimulation(self.native, recipe.sim)
+        self.robot = NewtonEntity(get_isaac_allcollisions_cfg(),
+                                  self.native.scene["robot"], self.sim)
+        self.model = copy(self.sim.mj_model)
+        self._geometry_normalizations = NewtonManager._builder.omd_scene_transform_audit
+        self.data = mujoco.MjData(self.model)
+        self._source_target_ranges = np.tile([-10.0, 10.0], (14, 1))
+        reference = self.robot.reference_model
+        self._reference_camera_id = reference.camera("head_camera").id
+        self._reference_tof_id = reference.site("tof").id
+        self._camera_body = self.robot.body_names.index(
+            reference.body(int(reference.cam_bodyid[self._reference_camera_id])).name.removeprefix("robot/"))
+        self._tof_body = self.robot.body_names.index(
+            reference.body(int(reference.site_bodyid[self._reference_tof_id])).name.removeprefix("robot/"))
+        self._camera_local_position = reference.cam_pos[self._reference_camera_id].copy()
+        self._camera_local_quaternion = reference.cam_quat[self._reference_camera_id].copy()
+        self._tof_local_position = reference.site_pos[self._reference_tof_id].copy()
+        self._tof_local_quaternion = reference.site_quat[self._reference_tof_id].copy()
+        self._robot_geom_ids = set(np.flatnonzero(
+            self.model.body_rootid[self.model.geom_bodyid] == self.robot.indexing.root_body_id).tolist())
+        self._environment_geom_ids = [i for i in range(self.model.ngeom)
+                                      if self.model.geom(i).name.startswith("/World/Environment/")]
+        if not self._environment_geom_ids:
+            raise RuntimeError("Newton solver contains no external scene geometry")
+        # MJCF 的机器人 collision group 为 3；ToF 只读取外部环境 group 0。
+        self.model.geom_group[list(self._robot_geom_ids)] = 3
+        self.model.geom_group[self._environment_geom_ids] = 0
+        self._tof_geom_groups = np.asarray([1, 0, 0, 0, 0, 0], dtype=np.uint8)
+        ground_paths = [] if self.public_map is None else self.public_map.get("ground_collider_paths", [])
+        self._ground_geom_ids = {i for i in self._environment_geom_ids
+                                 if self.model.geom_type[i] == mujoco.mjtGeom.mjGEOM_PLANE
+                                 or any(path in self.model.geom(i).name for path in ground_paths)}
+        if not self._ground_geom_ids:
+            raise RuntimeError("Scene requires identified native ground collision geometry")
+        self._contact_ids_wp = wp.from_torch(torch.arange(
+            self.sim.wp_data.naconmax, device=device, dtype=torch.int32))
+        self._contact_force_wp = wp.zeros(self.sim.wp_data.naconmax,
+                                          dtype=wp.spatial_vector, device=device)
+        self.policy_inference = SimpleNamespace(
+            command=np.zeros(13, dtype=np.float32), last_action=np.zeros(14, dtype=np.float32),
+            get_observations=self._policy_observation)
+        self.controller = SimpleNamespace(q_target=np.asarray(HOME, dtype=np.float32).copy())
+        self._pending_inference = None
+        self._applied_requests = {}
+        self._used_action_requests = set()
+        self._stopped_samples = 0
+        self._selected_at_s = 0.0
+        self._goal = None
+        self._goal_held_ticks = 0
+        self._goal_checked_sequence = -1
+        self._requested_command = {"twist": (0.0,) * 3, "head": (0.0,) * 4,
+                                   "body": (0.0,) * 6, "posture": "stand"}
+        self._reset_contact_evidence()
+        self._sensor_rng = np.random.default_rng(0)
+
+    def _require_owner(self) -> None:
+        if threading.get_ident() != self._owner_thread:
+            raise RuntimeError("Newton control must run on its owner thread")
+
+    def _snapshot(self) -> None:
+        self.data.qpos[:] = self.sim.data.qpos[0].detach().cpu().numpy()
+        self.data.qvel[:] = self.sim.data.qvel[0].detach().cpu().numpy()
+        self.data.time = self._simulation_time_s
+        if not np.isfinite(self.data.qpos).all() or not np.isfinite(self.data.qvel).all():
+            raise FloatingPointError("Newton GPU state contains nonfinite values")
+        # 当前 GPU 状态提供几何射线查询；此处没有执行 CPU 物理步。
+        mujoco.mj_kinematics(self.model, self.data)
+        mujoco.mj_comPos(self.model, self.data)
+        mujoco.mj_comVel(self.model, self.data)
+
+    def _policy_observation(self) -> np.ndarray:
+        data = self.robot.data
+        values = np.concatenate((
+            data.root_link_ang_vel_b[0].detach().cpu().numpy(),
+            data.projected_gravity_b[0].detach().cpu().numpy(),
+            data.joint_pos[0].detach().cpu().numpy() - np.asarray(HOME),
+            data.joint_vel[0].detach().cpu().numpy(), self.policy_inference.last_action,
+            self.policy_inference.command)).astype(np.float32)
+        if values.shape != (61,) or not np.isfinite(values).all():
+            raise FloatingPointError("Invalid Newton 61-dimensional policy observation")
+        return values
+
+    def _native_state(self) -> dict:
+        data = self.robot.data
+        position = data.root_link_pos_w[0].detach().cpu().numpy()
+        quaternion = data.root_link_quat_w[0].detach().cpu().numpy()
+        linear = data.root_link_lin_vel_b[0].detach().cpu().numpy()
+        angular = data.root_link_ang_vel_b[0].detach().cpu().numpy()
+        world = data.root_link_lin_vel_w[0].detach().cpu().numpy()
+        gravity = data.projected_gravity_b[0].detach().cpu().numpy()
+        tilt = math.acos(float(np.clip(-gravity[2], -1, 1)))
+        yaw = math.atan2(2 * (quaternion[0] * quaternion[3] + quaternion[1] * quaternion[2]),
+                         1 - 2 * (quaternion[2] ** 2 + quaternion[3] ** 2))
+        height = float(position[2] - self.floor_height_m)
+        count = int(wp.to_torch(self.sim.wp_data.nacon)[0].item())
+        return {"body_position_m": position.tolist(), "body_quaternion_wxyz": quaternion.tolist(),
+                "body_twist": [float(linear[0]), float(linear[1]), float(angular[2])],
+                "body_twist_world": [float(world[0]), float(world[1]), float(angular[2])],
+                "angular_velocity_rad_s": angular.tolist(), "projected_gravity": gravity.tolist(),
+                "joint_names": list(JOINT_NAMES),
+                "joint_position_rad": data.joint_pos[0].detach().cpu().tolist(),
+                "joint_velocity_rad_s": data.joint_vel[0].detach().cpu().tolist(),
+                "height_m": height, "tilt_rad": tilt, "fallen": height < 0.06 or tilt > 1.3,
+                "odometry": {"x_m": float(position[0]), "y_m": float(position[1]),
+                             "yaw_rad": yaw, "frame_id": "world", "source": "Newton GPU state"},
+                "native_contact_count": count,
+                "contact_evidence": {"non_ground_external_contact_samples_total": self._non_ground_contact_samples_total,
+                    "non_ground_external_contact_control_steps": self._non_ground_contact_control_steps,
+                    "first_non_ground_external_contact_sequence": self._first_non_ground_contact_sequence,
+                    "current_control_non_ground_external": self._current_control_non_ground_contacts,
+                    "current_control_ground_contact_samples": self._current_control_ground_contact_samples,
+                    "current_control_self_contact_samples": self._current_control_self_contact_samples}}
+
+    def _frame_pose(self, body_index, local_position, local_quaternion):
+        pose = self.robot.data.body_link_pose_w[0, body_index].detach().cpu().numpy()
+        rotation = np.zeros(9)
+        mujoco.mju_quat2Mat(rotation, pose[3:7])
+        position = pose[:3] + rotation.reshape(3, 3) @ local_position
+        quaternion = np.zeros(4)
+        mujoco.mju_mulQuat(quaternion, pose[3:7], local_quaternion)
+        matrix = np.zeros(9)
+        mujoco.mju_quat2Mat(matrix, quaternion)
+        return position, matrix.reshape(3, 3)
+
+    def _render_rgb(self, name: str, eye, lookat, up, width: int, height: int):
+        from oh_my_duck.rl.backends.isaac_newton.mdp import as_torch
+        camera = self.native.scene[name]
+        forward = np.asarray(lookat) - eye
+        forward /= np.linalg.norm(forward)
+        right = np.cross(forward, np.asarray(up))
+        right /= np.linalg.norm(right)
+        corrected_up = np.cross(right, forward)
+        quaternion = np.zeros(4)
+        mujoco.mju_mat2Quat(quaternion, np.column_stack((right, corrected_up, -forward)).ravel())
+        camera.set_world_poses(
+            positions=torch.as_tensor(np.asarray(eye)[None], device=self.sim.device, dtype=torch.float32),
+            orientations=torch.as_tensor(quaternion[[1, 2, 3, 0]][None], device=self.sim.device, dtype=torch.float32),
+            convention="opengl")
+        self.native.sim.render()
+        camera.update(0.0, force_recompute=True)
+        rgb = as_torch(camera.data.output["rgb"])[0, ..., :3].detach().cpu().numpy()
+        if rgb.shape != (height, width, 3) or rgb.dtype != np.uint8 or np.ptp(rgb) == 0:
+            raise ValueError("Newton renderer returned invalid RGB")
+        output = BytesIO()
+        Image.fromarray(rgb).save(output, format="PNG")
+        return base64.b64encode(output.getvalue()).decode("ascii")
+
+    def _sensor_frame(self) -> dict:
+        self._snapshot()
+        eye, rotation = self._frame_pose(self._camera_body, self._camera_local_position,
+                                         self._camera_local_quaternion)
+        rgb = self._render_rgb("head_camera", eye, eye - rotation[:, 2], rotation[:, 1], 320, 240)
+        origin, tof_rotation = self._frame_pose(self._tof_body, self._tof_local_position,
+                                               self._tof_local_quaternion)
+        distances, statuses, hit_geoms, raw_hit_geoms, hit_distances = [], [], [], [], []
+        geom = np.zeros(1, dtype=np.int32)
+        directions = (tof_rotation @ tof_directions().T).T
+        for direction in directions:
+            raw_hit = mujoco.mj_ray(self.model, self.data, origin, np.ascontiguousarray(direction),
+                                    None, 1, -1, geom)
+            raw_hit_geoms.append(self.model.geom(int(geom[0])).name if raw_hit >= 0 else None)
+            hit = mujoco.mj_ray(self.model, self.data, origin, np.ascontiguousarray(direction),
+                                self._tof_geom_groups, 1, -1, geom)
+            hit_geoms.append(self.model.geom(int(geom[0])).name if hit >= 0 else None)
+            hit_distances.append(float(hit) if hit >= 0 and math.isfinite(hit) else None)
+            valid = math.isfinite(hit) and 0 <= hit <= 4.0
+            measured = max(0.0, hit + self._sensor_rng.normal(0.0, 0.003 + 0.02 * hit / 4.0)) if valid else 0.0
+            distances.append(min(4000, int(measured * 1000.0)))
+            statuses.append(5 if valid else 255)
+        return {"rgb_png_base64": rgb, "rgb_width": 320, "rgb_height": 240,
+                "tof_distance_mm": distances, "tof_status": statuses, "tof_rows": 8, "tof_cols": 8,
+                "tof_hit_geoms": hit_geoms, "tof_unfiltered_hit_geoms": raw_hit_geoms,
+                "tof_hit_distance_m": hit_distances,
+                "tof_ray_origin_world_m": origin.tolist(), "tof_ray_directions_world": directions.tolist(),
+                "tof_hit_is_environment": [name is not None and name.startswith("/World/Environment/") for name in hit_geoms],
+                "tof_geometry_filter": "Environment group 0; robot MJCF collision group 3 excluded",
+                "camera_frame_id": "head_camera", "tof_frame_id": "tof",
+                "capture_time_s": self._simulation_time_s,
+                "camera_source": "Isaac NewtonWarpRenderer",
+                "tof_source": "Newton SolverMuJoCo geometry and current GPU pose"}
+
+    def _reset_contact_evidence(self):
+        self._non_ground_contact_samples_total = 0
+        self._non_ground_contact_control_steps = 0
+        self._first_non_ground_contact_sequence = None
+        self._current_control_non_ground_contacts = []
+        self._current_control_ground_contact_samples = 0
+        self._current_control_self_contact_samples = 0
+
+    def _sample_native_contacts(self, evidence):
+        self._contact_force_wp.zero_()
+        mjw.contact_force(self.sim.wp_model, self.sim.wp_data,
+                          self._contact_ids_wp, False, self._contact_force_wp)
+        count = int(wp.to_torch(self.sim.wp_data.nacon)[0].item())
+        geom = wp.to_torch(self.sim.wp_data.contact.geom)[:count].cpu().numpy()
+        forces = wp.to_torch(self._contact_force_wp)[:count, :3].cpu().numpy()
+        ground = self_contact = 0
+        for pair, force in zip(geom, forces):
+            first, second = int(pair[0]) in self._robot_geom_ids, int(pair[1]) in self._robot_geom_ids
+            magnitude = abs(float(force[0]))
+            if not math.isfinite(magnitude):
+                raise FloatingPointError("Newton contact force contains nonfinite values")
+            if not magnitude or not first and not second:
+                continue
+            if first and second:
+                self_contact += 1
+            elif int(pair[1] if first else pair[0]) in self._ground_geom_ids:
+                ground += 1
+            else:
+                other = int(pair[1] if first else pair[0])
+                name = self.model.geom(other).name
+                item = evidence.setdefault(name, {"geom": name, "contact_samples": 0, "max_normal_force_n": 0.0})
+                item["contact_samples"] += 1
+                item["max_normal_force_n"] = max(item["max_normal_force_n"], magnitude)
+                self._non_ground_contact_samples_total += 1
+        return ground, self_contact
+
+    def reset_episode(self, seed: int, goal: dict, spawn_pose: dict | None = None) -> dict:
+        self._require_owner()
+        if isinstance(seed, bool) or not isinstance(seed, int):
+            raise ValueError("seed must be an integer")
+        spawn = {"x_m": 0.0, "y_m": 0.0, "z_m": self.floor_height_m + 0.125,
+                 "yaw_rad": 0.0} if spawn_pose is None else spawn_pose
+        if set(spawn) != {"x_m", "y_m", "z_m", "yaw_rad"} or not all(math.isfinite(float(v)) for v in spawn.values()):
+            raise ValueError("spawn_pose requires finite x_m, y_m, z_m and yaw_rad")
+        self.floor_height_m = float(spawn["z_m"]) - 0.125
+        self.sim.reset()
+        self.native.scene.reset()
+        yaw = float(spawn["yaw_rad"])
+        pose = torch.tensor([[float(spawn["x_m"]), float(spawn["y_m"]),
+                              float(spawn["z_m"]), math.cos(yaw / 2), 0, 0, math.sin(yaw / 2)]],
+                            device=self.sim.device, dtype=torch.float32)
+        self.robot.data.write_root_pose(pose)
+        self.robot.data.write_root_velocity(torch.zeros(1, 6, device=self.sim.device))
+        self.robot.data.write_joint_position(torch.tensor([HOME], device=self.sim.device))
+        self.robot.data.write_joint_velocity(torch.zeros(1, 14, device=self.sim.device))
+        self.robot.data.joint_pos_target[:] = torch.tensor(HOME, device=self.sim.device)
+        self.robot.write_data_to_sim()
+        self.sim.forward()
+        self.episode_id = uuid4().hex
+        self._sequence = 0
+        self._simulation_time_s = 0.0
+        self._selected_at_s = 0.0
+        self.policy_inference.last_action.fill(0)
+        self.controller.q_target[:] = HOME
+        self._requested_command = {"twist": (0.0,) * 3, "head": (0.0,) * 4,
+                                   "body": (0.0,) * 6, "posture": "stand"}
+        self._stop_requested.clear()
+        self._pending_inference = None
+        self._applied_requests.clear()
+        self._used_action_requests.clear()
+        self._stopped_samples = 0
+        self._reset_contact_evidence()
+        self._sensor_rng = np.random.default_rng(seed)
+        self.bind_goal(goal)
+        return self.observe_control()
+
+    def bind_goal(self, goal: dict) -> dict:
+        self._require_owner()
+        if (set(goal) != {"kind", "target_xy_m", "distance_m", "hold_ticks"}
+                or goal["kind"] != "point" or len(goal["target_xy_m"]) != 2
+                or not all(math.isfinite(float(v)) for v in goal["target_xy_m"])
+                or not math.isfinite(float(goal["distance_m"])) or goal["distance_m"] <= 0
+                or type(goal["hold_ticks"]) is not int or not 1 <= goal["hold_ticks"] <= 500):
+            raise ValueError("Point goal requires target_xy_m, positive distance_m and bounded hold_ticks")
+        self._goal = goal.copy()
+        self._goal_held_ticks = 0
+        self._goal_checked_sequence = -1
+        return {"episode_id": self.episode_id, "goal": self._goal,
+                "supported_check_ids": ["goal_reached"]}
+
+    def _goal_measurement(self):
+        state = self._native_state()
+        position = np.asarray(state["body_position_m"])
+        distance = float(np.linalg.norm(position[:2] - self._goal["target_xy_m"]))
+        reached = distance <= self._goal["distance_m"] and state["height_m"] >= 0.09 and state["tilt_rad"] <= math.radians(25)
+        target = {"target_xy_m": self._goal["target_xy_m"], "distance_xy_m": distance,
+                  "threshold_m": self._goal["distance_m"], "source": "Newton GPU root pose"}
+        return reached, target, state, position.tolist()
+
+    def action_spec(self):
+        specification = super().action_spec()
+        specification["robot_model"] = "robot_allcollisions"
+        specification["head_body_behavior_status"] = "pending_scene_validation"
+        return specification
+
+    def list_policies(self):
+        result = super().list_policies()
+        result["scene"] = self.scene_id
+        return result
+
+    def public_scene_info(self):
+        self._require_owner()
+        return {"scene_id": self.scene_id, "source": str(self._scene_path), "frame_id": "world",
+                "source_kind": "USD imported into Newton SolverMuJoCo",
+                "floor_height_m": self.floor_height_m,
+                "environment_collision_geom_count": len(self._environment_geom_ids),
+                "ground_collision_geoms": [self.model.geom(i).name for i in sorted(self._ground_geom_ids)],
+                "signed_scale_normalizations": self._geometry_normalizations,
+                "provenance": self.provenance, "public_map": self.public_map,
+                "goal": self._goal,
+                "solver": "Newton SolverMuJoCo", "physics_dt_s": 0.005,
+                "control_hz": 50, "robot_model": "robot_allcollisions"}
+
+    def apply_policy_action(self, action: list[float], request_id: str,
+                            expected_sequence: int | None = None,
+                            should_stop: Callable[[], bool] | None = None):
+        self._require_owner()
+        if not request_id:
+            raise ValueError("request_id is required")
+        existing = self._applied_requests.get(request_id)
+        if existing is not None:
+            if list(action) != existing["executed_actions"] or expected_sequence not in (None, existing["action_sequence"]):
+                raise ValueError("request_id was reused with another action")
+            return existing
+        if request_id in self._used_action_requests:
+            raise ValueError("Interrupted action request cannot be replayed")
+        values = np.asarray(action, dtype=np.float32)
+        ticket = self._pending_inference
+        if (values.shape != (14,) or not np.isfinite(values).all() or ticket is None
+                or ticket["episode_id"] != self.episode_id or ticket["sequence"] != self._sequence
+                or ticket["policy"] != self.active_policy.name or not np.array_equal(values, ticket["action"])
+                or expected_sequence not in (None, self._sequence)):
+            raise ValueError("Action differs from the current policy inference ticket")
+        if self._stop_requested.is_set() or should_stop is not None and should_stop():
+            self._pending_inference = None
+            self._used_action_requests.add(request_id)
+            raise MotionBusyError("Motion stop was requested before actuation")
+        targets = np.asarray(HOME, dtype=np.float32) + values * self.active_policy.action_scale
+        if np.any(targets < -10) or np.any(targets > 10):
+            raise ValueError("Official policy exceeds the source target range")
+        source_sequence = self._sequence
+        self.controller.q_target[:] = targets
+        self.robot.data.joint_pos_target[:] = torch.as_tensor(targets, device=self.sim.device)
+        evidence, ground, self_contacts, executed = {}, 0, 0, 0
+        with torch.inference_mode():
+            for _ in range(4):
+                if self._stop_requested.is_set() or should_stop is not None and should_stop():
+                    break
+                self.robot.write_data_to_sim()
+                self.sim.step()
+                executed += 1
+                self._simulation_time_s += 0.005
+                g, s = self._sample_native_contacts(evidence)
+                ground += g
+                self_contacts += s
+        interrupted = executed != 4
+        if executed:
+            self.policy_inference.last_action[:] = values
+            self._sequence += 1
+            self._sampled_at = _utc_now()
+            self._tick_finished_at = time.monotonic()
+            self.data.time = self._simulation_time_s
+            self._current_control_non_ground_contacts = list(evidence.values())
+            self._current_control_ground_contact_samples = ground
+            self._current_control_self_contact_samples = self_contacts
+            if evidence:
+                self._non_ground_contact_control_steps += 1
+                if self._first_non_ground_contact_sequence is None:
+                    self._first_non_ground_contact_sequence = self._sequence
+            if executed == 4:
+                self._update_control_evidence()
+            else:
+                self._stopped_samples = self._goal_held_ticks = 0
+        self._pending_inference = None
+        self._used_action_requests.add(request_id)
+        result = self.observe_control()
+        result.update({"request_id": request_id, "executed_actions": values.tolist() if executed else [],
+                       "raw_sim_steps": executed, "interrupted": interrupted,
+                       "action_sequence": source_sequence, "policy_name": self.active_policy.name,
+                       "policy_sha256": self.active_policy.sha256})
+        if not interrupted:
+            self._applied_requests[request_id] = result
+        return result
+
+    def capture_observer(self, *, include_segmentation: bool = False):
+        self._require_owner()
+        if include_segmentation:
+            raise ValueError("Newton observer segmentation must be configured explicitly")
+        lookat = np.asarray(self._native_state()["body_position_m"])
+        eye = lookat + np.array([0.6, 0.6, 0.4])
+        return {"episode_id": self.episode_id, "sequence": self._sequence,
+                "simulation_time_s": self._simulation_time_s, "capture_time_s": self._simulation_time_s,
+                "camera_frame_id": "observer_follow", "rgb_width": 1280, "rgb_height": 720,
+                "rgb_png_base64": self._render_rgb("observer_camera", eye, lookat, (0, 0, 1), 1280, 720),
+                "camera": {"mode": "Newton follow camera", "lookat_world_m": lookat.tolist()}}
+
+    def close(self):
+        self.native.close()
+        self._launch.__exit__(None, None, None)

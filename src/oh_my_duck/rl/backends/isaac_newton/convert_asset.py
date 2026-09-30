@@ -24,8 +24,13 @@ def main():
     # A private build directory prevents stale converter suffixes and half-built assets.
     with tempfile.TemporaryDirectory(prefix="build-", dir=target.parent) as tmp:
         work = Path(tmp)
-        subprocess.run([str(project_root() / ".envs/mujoco/bin/python"), "-m", "oh_my_duck.rl.backends.isaac_newton.asset_reference",
-            str(asset_source() / filename), str(work / "reference.json")], check=True)
+        source_path = asset_source() / filename
+        reference_command = [str(project_root() / ".envs/mujoco/bin/python"), "-m", "oh_my_duck.rl.backends.isaac_newton.asset_reference",
+                             str(source_path), str(work / "reference.json")]
+        if args.model == "allcollisions":
+            source_path = work / filename
+            reference_command.append(str(source_path))
+        subprocess.run(reference_command, check=True)
         from isaacsim import SimulationApp
         app = SimulationApp({"headless": True})
         try:
@@ -33,7 +38,7 @@ def main():
             manager = omni.kit.app.get_app().get_extension_manager()
             manager.set_extension_enabled_immediate("isaacsim.asset.importer.mjcf", True)
             from isaacsim.asset.importer.mjcf import MJCFImporter, MJCFImporterConfig
-            cfg = MJCFImporterConfig(mjcf_path=str(asset_source() / filename), usd_path=str(work),
+            cfg = MJCFImporterConfig(mjcf_path=str(source_path), usd_path=str(work),
                 import_scene=False, merge_mesh=False, collision_from_visuals=False,
                 collision_type="Convex Hull", allow_self_collision=True, fix_base=False)
             produced = Path(MJCFImporter(cfg).import_mjcf()).resolve()

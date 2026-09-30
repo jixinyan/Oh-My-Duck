@@ -16,6 +16,16 @@ from oh_my_duck.rl.backends.isaac_newton.contracts import JOINT_NAMES
 from oh_my_duck.rl.backends.isaac_newton.official import bam_cfg
 
 
+def configured_bam(cfg):
+    configuration = bam_cfg()
+    if cfg.deployment:
+        configuration.vin_range = (7.4, 7.4)
+        configuration.vin_drop_gain_range = (0.1, 0.1)
+        configuration.delay_min_lag = 0
+        configuration.delay_max_lag = 0
+    return configuration
+
+
 class NewtonMotorData:
     def __init__(self, data):
         self.data = data
@@ -30,7 +40,7 @@ class NewtonMotorData:
 
 class OfficialBamActuator(ActuatorBase):
     def __init__(self, cfg, *args, **kwargs):
-        reference = bam_cfg().build(SimpleNamespace(), [], [])
+        reference = configured_bam(cfg).build(SimpleNamespace(), [], [])
         cfg.armature = float(reference._bam_model.actuator.get_extra_inertia())
         super().__init__(cfg, *args, **kwargs)
         if set(self.joint_names) != set(JOINT_NAMES):
@@ -55,7 +65,7 @@ class OfficialBamActuator(ActuatorBase):
         entity = SimpleNamespace(joint_names=self.joint_names, indexing=SimpleNamespace(
             joint_ids=torch.tensor(joint_ids, device=self._device),
             ctrl_ids=torch.empty(0, dtype=torch.long, device=self._device)))
-        config = bam_cfg()
+        config = configured_bam(self.cfg)
         official = config.build(entity, list(range(self.num_joints)), self.joint_names)
         model_view = WarpBridge(solver.mjw_model, nworld=self._num_envs)
         data_view = NewtonMotorData(WarpBridge(solver.mjw_data, nworld=self._num_envs))
@@ -107,6 +117,7 @@ class OfficialBamActuator(ActuatorBase):
 @configclass
 class OfficialBamActuatorCfg(ActuatorBaseCfg):
     class_type = OfficialBamActuator
+    deployment: bool = False
     stiffness = 0.0
     damping = 0.0
     friction = 0.0

@@ -97,7 +97,23 @@ class MicroDuckEnvironment:
         if self.backend is not None:
             raise RuntimeError("MicroDuck scene has already been initialized")
         catalog = Path(str(configuration["catalog_dir"])).resolve(strict=True)
-        self.backend = CpuMujocoBamBackend(robot_id="microduck", catalog_dir=catalog)
+        backend_name = configuration.get("backend", "cpu-mujoco-bam")
+        if backend_name == "cpu-mujoco-bam":
+            self.backend = CpuMujocoBamBackend(robot_id="microduck", catalog_dir=catalog)
+        elif backend_name == "isaac-newton":
+            from oh_my_duck.robotics.backends.isaac_official import IsaacNewtonBamBackend
+
+            self.backend = IsaacNewtonBamBackend(
+                robot_id="microduck", catalog_dir=catalog,
+                scene_path=Path(str(configuration["usd_path"])).resolve(strict=True),
+                device=str(configuration.get("device", "cuda:0")),
+                scene_id=str(configuration["scene_id"]),
+                provenance_path=Path(str(configuration["provenance_path"])).resolve(strict=True),
+                public_map_path=(Path(str(configuration["public_map_path"])).resolve(strict=True)
+                                 if "public_map_path" in configuration else None),
+            )
+        else:
+            raise ValueError(f"Unknown MicroDuck simulation backend: {backend_name}")
         state = self.backend.reset_episode(
             seed=int(configuration["seed"]),
             goal=require_object(configuration["goal"]),
@@ -114,7 +130,7 @@ class MicroDuckEnvironment:
         action_spec = {
             "schema_version": "physical.action_spec.v1",
             "embodiment_id": "microduck.xl330_bam",
-            "version": "official-apartment-allcollisions-xl330-bam-policy-offset-v1",
+            "version": f"{backend_name}-xl330-bam-policy-offset-v1",
             "coordinate_frame": "microduck.joint_order",
             "control_mode": "microduck.policy_offset",
             "frequency_hz": specification["control_hz"],
@@ -131,7 +147,11 @@ class MicroDuckEnvironment:
             supported_check_ids=("goal_reached",),
             active_view_directions=(),
             task_instruction=str(configuration["task_instruction"]),
-            scene_metadata={"scene": "official_microduck_apartment", "dimensions_m": [8, 6],
+            scene_metadata={"scene": configuration.get("scene_id", "official_microduck_apartment"),
+                            "backend": backend_name,
+                            **({"dimensions_m": [8, 6]} if backend_name == "cpu-mujoco-bam" else
+                               {"usd_path": configuration["usd_path"],
+                                "provenance_path": configuration["provenance_path"]}),
                             "policy_revision": str(configuration["policy_revision"]),
                             "seed": configuration["seed"], "spawn_pose": configuration.get("spawn_pose")},
         )
@@ -458,7 +478,7 @@ class MicroDuckWorkerSession(NativeWorkerSession):
                     result = await self._device.on_owner(apply_command)
                     self._bind_motion_segment(result, count)
                     result["max_control_steps"] = count
-            elif operation == "select_policy":
+            elif operation in ("select_policy", "transition_policy"):
                 async with self._control_lock:
                     await self._await_motion_cleanup()
                     self._require_control_lease(run_task_id)
@@ -468,14 +488,18 @@ class MicroDuckWorkerSession(NativeWorkerSession):
                             snapshot = self._gate.snapshot()
                             if snapshot["state"] not in ("paused", "ended") or not snapshot["device_confirmed"]:
                                 raise RuntimeError("Policy selection requires a confirmed stop boundary")
+                        if operation == "transition_policy" and (
+                                self._gate is None or snapshot["state"] != "ended" or
+                                snapshot["stop_reason"] != "episode_terminated"):
+                            raise RuntimeError("Policy transition requires a confirmed native episode termination")
                         policy = backend.catalog.get(args["policy_name"])
-                        if policy.kind != "perpetual":
-                            raise ValueError("Native EDH policy execution requires a perpetual policy")
                         if policy.action_scale != backend.active_policy.action_scale:
                             raise ValueError("Selected policy changes the admitted physical action scale")
                         if self._gate is not None:
                             backend.discard_pending_inference()
-                        selected = backend.select_policy(args["policy_name"], request_id=request["request_id"])
+                        select = (backend.transition_completed_policy if operation == "transition_policy"
+                                  else backend.select_policy)
+                        selected = select(args["policy_name"], request_id=request["request_id"])
                         specification = selected["action_spec"]
                         channels = [
                             {"name": name, "quantity": "normalized", "unit": "dimensionless",
@@ -542,9 +566,10 @@ class MicroDuckWorkerSession(NativeWorkerSession):
             elif operation == "catalog":
                 result = await self._device.on_owner(backend.list_policies)
                 for policy in result["policies"]:
-                    policy["executable_in_native_edh"] = (
-                        policy["executable_here"] and policy["kind"] == "perpetual")
-                    if policy["name"] == "alpha_walking":
+                    policy["executable_in_native_edh"] = policy["executable_here"]
+                    if (policy["name"] == "alpha_walking" and
+                            self._environment.configuration.get("backend", "cpu-mujoco-bam") ==
+                            "cpu-mujoco-bam"):
                         policy["apartment_command_calibration"] = {
                             "pure_lateral_and_in_place_yaw": "weak_response_in_cpu_apartment",
                             "coupled_forward_lateral": "measured_motion_with_positive_vx_and_vy",
@@ -558,25 +583,28 @@ class MicroDuckWorkerSession(NativeWorkerSession):
                 result = await self._finish_policy(args, request["run_task_id"])
             elif operation == "scene":
                 geometry = await self._device.on_owner(backend.public_scene_info)
-                result = {
-                    "scene": "scene_apartment.xml",
-                    "frame": "world",
-                    "direction": "+x east, +y north",
-                    "rooms": ["kitchen", "living_room", "corridor", "bedroom", "office", "bathroom"],
-                    "connections": [
-                        {"from": "corridor", "to": "office",
-                         "route": "east doorway slightly north of corridor center"},
-                        {"from": "corridor", "to": "bedroom",
-                         "route": "east doorway near the north end"},
-                        {"from": "corridor", "to": "bathroom",
-                         "route": "east doorway near the south end"},
-                        {"from": "corridor", "to": "kitchen",
-                         "route": "west doorway near the north end"},
-                        {"from": "corridor", "to": "living_room",
-                         "route": "west doorway near the south end"},
-                    ],
-                    "public_geometry": geometry,
-                }
+                if self._environment.configuration.get("backend", "cpu-mujoco-bam") == "isaac-newton":
+                    result = geometry
+                else:
+                    result = {
+                        "scene": "scene_apartment.xml",
+                        "frame": "world",
+                        "direction": "+x east, +y north",
+                        "rooms": ["kitchen", "living_room", "corridor", "bedroom", "office", "bathroom"],
+                        "connections": [
+                            {"from": "corridor", "to": "office",
+                             "route": "east doorway slightly north of corridor center"},
+                            {"from": "corridor", "to": "bedroom",
+                             "route": "east doorway near the north end"},
+                            {"from": "corridor", "to": "bathroom",
+                             "route": "east doorway near the south end"},
+                            {"from": "corridor", "to": "kitchen",
+                             "route": "west doorway near the north end"},
+                            {"from": "corridor", "to": "living_room",
+                             "route": "west doorway near the south end"},
+                        ],
+                        "public_geometry": geometry,
+                    }
             else:
                 raise ValueError("Unknown MicroDuck tool operation")
             self._require_control_lease(run_task_id)

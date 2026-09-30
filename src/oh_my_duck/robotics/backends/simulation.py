@@ -903,15 +903,46 @@ class CpuMujocoBamBackend(SimulationBackend):
             raise MotionBusyError("A policy action is awaiting execution")
         if self._stopped_samples < STOP_SAMPLES:
             raise MotionBusyError("Policy selection requires five measured stopped control samples")
+        return self._activate_policy(policy_name, request_id, preserve_last_action=False)
+
+    def transition_completed_policy(self, policy_name: str, request_id: str) -> dict:
+        self._require_owner()
+        if not request_id or self._pending_inference is not None:
+            raise MotionBusyError("Policy transition requires a request identity and no pending action")
+        duration = self.active_policy.duration_s
+        elapsed = float(self.data.time) - self._selected_at_s
+        if duration is None or elapsed < duration - 1e-9:
+            raise MotionBusyError("Policy transition requires an executed complete manifest duration")
+        previous = self.active_policy.name
+        state = self._native_state()
+        selected = self.catalog.get(policy_name)
+        if selected.action_scale != self.active_policy.action_scale:
+            raise ValueError("Policy transition changes the admitted action scale")
+        if selected.entry_pose == "standing" and (
+                state["height_m"] < 0.09 or state["tilt_rad"] > math.radians(25)):
+            raise MotionBusyError("Selected policy requires a measured standing entry pose")
+        result = self._activate_policy(policy_name, request_id, preserve_last_action=True)
+        result["transition"] = {"from_policy": previous,
+                                "completed_duration_s": duration,
+                                "elapsed_simulation_time_s": elapsed,
+                                "sequence": self._sequence,
+                                "body_position_m": state["body_position_m"],
+                                "body_twist": state["body_twist"],
+                                "physical_stop_confirmed": False}
+        return result
+
+    def _activate_policy(self, policy_name: str, request_id: str,
+                         *, preserve_last_action: bool) -> dict:
         selected = self.catalog.get(policy_name)
         if selected.mode == "roller":
-            raise ValueError("Roller policy requires a roller robot model; apartment uses allcollisions")
+            raise ValueError("Roller policy requires a roller robot model; current model is allcollisions")
         self.active_policy = selected
         self.policy_sha256 = selected.sha256
         self._selected_at_s = float(self.data.time)
         self._requested_command = {"twist": (0.0, 0.0, 0.0), "head": (0.0,) * 4,
                                    "body": (0.0,) * 6, "posture": "stand"}
-        self.policy_inference.last_action.fill(0.0)
+        if not preserve_last_action:
+            self.policy_inference.last_action.fill(0.0)
         self._stop_requested.clear()
         self._stopped_samples = 0
         return {"request_id": request_id, "policy_name": selected.name, "kind": selected.kind,

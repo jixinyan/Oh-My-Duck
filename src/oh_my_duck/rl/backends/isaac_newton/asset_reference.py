@@ -6,7 +6,14 @@ import mujoco
 
 
 def main():
-    model = mujoco.MjModel.from_xml_path(sys.argv[1])
+    if len(sys.argv) == 4:
+        from oh_my_duck.rl.backends.isaac_newton.asset_names import get_isaac_allcollisions_spec
+        spec = get_isaac_allcollisions_spec()
+        spec.meshdir = str(Path(sys.argv[1]).resolve().parent / "assets")
+        model = spec.compile()
+        spec.to_file(sys.argv[3])
+    else:
+        model = mujoco.MjModel.from_xml_path(sys.argv[1])
     bodies = []
     for i in range(1, model.nbody):
         bodies.append({"name": model.body(i).name, "mass": float(model.body_mass[i]),

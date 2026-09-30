@@ -2,6 +2,7 @@
 /.envs
 /.venv/
 /.cache
+/data/scenes/
 /artifacts
 /outputs
 /logs
