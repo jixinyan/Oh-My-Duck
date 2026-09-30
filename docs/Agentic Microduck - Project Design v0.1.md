@@ -12,13 +12,13 @@ tags:
   - project-design
 ---
 
-> 当前核查（客户端 2026-09-29）：上一轮 Walking 与两个 StandUp 完整训练均已完成，最终行为验收均未通过。Walking 低速干预的八组配对 run 已通过训练前门禁，六组正在完整训练并产生原生 PPO 更新，GPU0/1 两组等待其他项目释放。语音 HTTP 服务、Mac 内置扬声器与麦克风已经完成实际音频验证；合成期间停止后没有迟到播放，独立 CPU 服务验证完整会话播音和播音开始后的停止。录音回读与原文有「您好／你好」「小丫／小鸭」两处用字差异。当前没有可用真机，交互仿真草稿仍待真实后端验收。见[Walking 启动记录](reports/rl-walking-low-speed-launch-2026-09-29.md)、[语音交互验收](reports/voice-interaction-validation-2026-09-29.md)与[上一轮结果](reports/project-status-2026-09-29.md)。
+> 当前核查（2026-09-30）：上一轮 Walking 与两个 StandUp 完整训练的最终行为验收均未通过。用户已停止 Walking 低速干预的全部八组配对训练及预览、评估进程；checkpoint、输出与 W&B 文件保留，不自动恢复。语音 HTTP 服务、Mac 内置扬声器与麦克风完成实际音频验证。官方预训练策略已在 CPU MuJoCo/BAM 公寓中经原生 EDH ActionGate 执行，真实 Astra 会话完成图像与状态传感器读取、暂停、策略切换、恢复及 `finish_policy`。同一物理会话的首项 office 任务正式判定为 failed；第二项从目标外继续导航，独立 Verifier 判定 passed，run 状态 succeeded。当前没有可用真机。见[Walking 停止记录](reports/rl-walking-user-stop-2026-09-30.md)、[真实闭环记录](reports/harness-apartment-live-2026-09-30.md)与[实现进度](implementation-status.md)。
 
-> 2026-09-30 Walking 因果修复门禁完成时记录：将低速命令 tracking signal 作为独立、可恢复校验的单因素干预，默认关闭，不改变官方任务或 PPO 语义。8 个 run 的 smoke、导出、恢复、8192 容量和 CPU/BAM rehearsal 门禁已完成，当时按最小目标在门禁后停止；当前正式训练见[Walking 启动记录](reports/rl-walking-low-speed-launch-2026-09-29.md)，行为验收仍待完成，尚未封装为 locomotion tool。门禁证据见[门禁记录](reports/rl-walking-low-speed-gates-2026-09-30.md)。
+> 2026-09-30 Walking 因果修复门禁完成时记录：将低速命令 tracking signal 作为独立、可恢复校验的单因素干预，默认关闭，不改变官方任务或 PPO 语义。8 个 run 的 smoke、导出、恢复、8192 容量和 CPU/BAM rehearsal 门禁已完成，当时按最小目标在门禁后停止；后续启动与停止分别见[Walking 启动记录](reports/rl-walking-low-speed-launch-2026-09-29.md)和[停止记录](reports/rl-walking-user-stop-2026-09-30.md)，行为验收仍待完成，尚未封装为 locomotion tool。门禁证据见[门禁记录](reports/rl-walking-low-speed-gates-2026-09-30.md)。
 
 > 2026-09-30 保护变体：`Mjlab-ProtectiveFall-Flat-MicroDuck` 已注册为独立实验性入口，使用完整碰撞资产和保护 reward primitives；它不改变官方 VelStand/代表性任务，也不代表已有可调用 locomotion tool。只有完成 Newton、导出、CPU/BAM 与行为门禁后，才能把策略注册到上层 tool。
 
-> 2026-09-30 策略优先：上层 agent 未来通过工具调用已验证的 Walking、StandUp 等执行策略。当前 jd_B300 的完整策略产物尚未达到行为验收：Walking 无推扰前进响应约 0.3%，StandUp 在俯卧/仰卧恢复失败。先完成单因素因果修复、完整 RL 门禁和跨后端/CPU 回放，再将通过验收的策略封装为 tool；外部 Embodied-DeepSeek-Harness 目前只保留接口与确定性 mock，不提前实现本地 agent loop。
+> 2026-09-30 Harness 接入：`omd harness` 使用固定 EDH `main@8a5e685` 的原生会话、ActionGate、execution tools 和独立 Verifier。官方预训练 ONNX 策略接入 CPU MuJoCo/BAM 公寓；真实 Astra 会话已经读取 RGB、ToF、IMU、关节与里程计，执行 14 关节策略动作，并完成暂停、策略切换、恢复、`policy_stop` 及正式验证。同一物理会话的首项 office 任务获得 `goal_reached=false`；第二项继续实际运动后获得 `goal_reached=true` 与正式 passed 判定。原生 EDH 当前开放 perpetual 策略，episodic 策略仍需单独验收。jd_B300 的自训练 Walking/StandUp 产物未注册为已验收策略。
 
 > 2026-09-30 官方上游同步：官方 `microduck_rl` develop 与 `microduck` main 已复核到 `configs/upstream.json` 的提交。项目发布边界现支持官方前馈 API-1 与显式状态 LSTM API-2 的严格 float32/61→14 校验，并保留失败清空状态；相机 UYVY、8×8 ToF 逐射线保护和足底 odometry anchor 数据已有自有确定性适配。保护跌倒奖励项只作为独立实验接口，完整 VelStand expert-BC、TCP body server、硬件 provisioning 和实际 Newton 行为门禁仍待完成。详见 [官方上游复核](reports/upstream-review-2026-09-30.md)。
 
@@ -78,7 +78,7 @@ tags:
 
 本文件保留原文件名以维持链接，内容已随 2026-09-06 的用户决策更新至 v0.2。当前已开始工程实现；功能状态以本节及[实现进度](implementation-status.md)为准，设计提案不等于已验证能力。完整逐文件审计仍在进行，Isaac 迁移与真机试验尚未完成。
 
-**当前执行条件**：服务器任务通过 Alaya HTrain `submit` 提交；训练与评测均 headless，离屏保存视频。可按实际需要使用单节点多 GPU，不添加人为的任务数量或运行时长上限。现阶段没有真机，只验收仿真；外部 Harness 后续先使用确定性 mock。
+**当前执行条件**：服务器训练任务通过 Alaya HTrain `submit` 提交；训练与评测均 headless，离屏保存视频。可按实际需要使用单节点多 GPU。当前没有真机。上层任务使用固定 EDH 原生运行时与 CPU MuJoCo/BAM 仿真，正式成功以独立 Verifier 读取原生目标状态为准。
 
 **当前开发策略：先整体框架，后逐步填充功能。** 完整项目 scope 保持本文第 1–10 节的交互、工具、感知、声音、经验与训练设计。整体轻量框架已建立：契约、执行后端、技能、工具、感知、策略、Harness、语音、记录、训练及应用装配均有独立模块；接口占位与可运行实现明确区分。现有 MuJoCo 适配保留在框架内，隔离 Python 环境与主要依赖版本已可读取；worker设备检查、CPU MuJoCo基础仿真与EGL渲染已通过，官方平地 walking 已完成 64 环境、5 轮训练和官方 ONNX 导出；回放命令跟踪仍待解决。已建立本地 Git 与统一入口；远程 `https://github.com/jixinyan/Oh-My-Duck.git` 目前认证失败。详细状态与测试见 [implementation-status.md](implementation-status.md)。
 
@@ -350,7 +350,7 @@ flowchart LR
 
 ### 6.1 通用 harness 接口约束
 
-外部 harness 的最终 API 尚未提供。本项目先定义语义契约，实际名称、传输方式在 bridge 内映射。2026-09-30 已加入确定性 mock，真实 EDH transport 仍不可用：
+当前部署直接使用固定 EDH 源码的 `startServer`、`SessionEnvironment`、`EmbodiedBackend`、`execution.start`、ActionGate 与 Verifier。MicroDuck worker 负责实际传感器、官方策略推断和 MuJoCo/BAM 物理执行；上层通过 `additionalTools` 读取公开传感器并设置策略命令。正式目标检查由环境与 Verifier 执行：
 
 - 提交用户文本，并携带录音、会话和请求来源。
 - 注册工具描述、参数 schema 和实际设备能力。
@@ -358,7 +358,7 @@ flowchart LR
 - 接收待播报文本和工具调用。
 - 使用 harness 提供的任务标识与取消机制。
 
-开发时使用一个最小确定性 harness stub 验证接口，例如把预先配置的文本映射到已注册工具。stub 只验证请求、注册、参数校验、事件、experience 和取消边界，不实现替代版 agent loop 或长期记忆。
+策略每次产生 14 个关节 offset，ActionGate 批准后执行四个 0.005 秒 MuJoCo/BAM 子步。暂停先使旧 generation 失效并排空设备动作，随后发布新观测与停止确认。切换策略需要真实停止样本及确认边界；目标检查读取独立原生状态。
 
 ### 6.2 工具示例
 
@@ -676,7 +676,7 @@ recording:
 |---|---|---|---|
 | M0 上游基线 | 两仓库结构 / 依赖审计、版本锁定、官方策略基线、硬件能力清单 | 官方链路可重现；记录未验证项 | 可用 GPU、官方资产 / 策略 |
 | M1 训练与通用工具 | Isaac 行走任务、BAM 适配、官方兼容导出、基础工具、两个后端契约 | 同一工具脚本可运行；交叉评估通过；真机状态单独标记 | M0；硬件验证需要真机 |
-| M2 语音与固定声音 | 录音转写、setup 试听确认、持久声音、日常合成、播放中断、bridge | 重启 / 新会话不改变声音；语音能触发技能并反馈结果 | M1 工具；harness 或 stub |
+| M2 语音与固定声音 | 录音转写、setup 试听确认、持久声音、日常合成、播放中断、bridge | 重启 / 新会话不改变声音；语音能触发技能并反馈结果 | M1 工具；原生 Harness |
 | M3 主动感知 | RGB / ToF、read_sensor、look / inspect、受限接近或跟随示例 | 上层能查询进度；目标丢失与过期数据有明确行为 | 传感器、校准、策略 |
 | M4 开源可复现版本 | episode 回放、评测场景、扩展教程、完整参考应用 | 新用户按文档复现仿真演示；真机步骤与限制清楚 | M1–M3 |
 
@@ -714,7 +714,7 @@ recording:
 | BAM 与 solver 的耦合 | 先单关节 / 接触验证，再扩大训练 | M1 |
 | job 实际 GPU / 渲染环境 | 入口机可见 8×H200；worker 分配、CUDA 与 EGL 单独验证 | M0 / M2 |
 | 当前没有真机 | 本阶段专注仿真，硬件验收保持待完成 | 后续硬件阶段 |
-| harness 最终协议未提供 | 使用 bridge 与最小 stub，避免业务逻辑散落到工具 | M1 |
+| 原生 Harness 版本变化 | 固定 EDH 源码提交与依赖版本，保留实际会话和物理执行证据 | M1 |
 | setup / 录音 UI 载体未选 | 显式录音为暂定方式，保持设备无关接口 | M2 |
 | 远程音频路径与采集所有权 | 核查现有 worker，建立共享或受控采集 | M2 |
 | 固定声音效果 | 使用参考音频版本化；跨文本、跨会话试听 | M2 |

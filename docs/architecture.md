@@ -31,6 +31,7 @@ All first-party implementation lives in `src/oh_my_duck/`:
 
 ```text
 cli/                         unified public commands
+integrations/                native EDH worker and CPU simulation session adapter
 core/                        shared contracts and project configuration
 agentic/                     harness, tools, skills and application assembly
 robotics/                    execution backends, policies and Microduck models/motors
@@ -73,7 +74,7 @@ trainable on another backend; no diagnostic fallback is allowed.
 7. The recorder persists evidence. The harness decides what to remember and what to say.
 8. TTS consumes the confirmed active voice profile and the harness's response text.
 
-Current contracts are Python semantic contracts, not a frozen external wire protocol. The deterministic harness mock uses explicit text routes and never starts a model, planner or memory loop. The external Embodied DeepSeek Harness is kept behind the same bridge until its wire API is stable. No concrete robot backend or model is silently created by constructing a protocol.
+`integrations/edh/server.mjs` 使用固定 EDH 源码的 `startServer` 与 `createNativeWorkerEnvironment`。`integrations/edh/team.yaml` 和角色文件定义原生 Planner、Verifier 以及 MicroDuck 工具。`src/oh_my_duck/integrations/edh_native.py` 将真实 CPU MuJoCo/BAM、官方 ONNX 策略和原生 `NativeActionDevice` 连接；每次 14 关节动作经过 ActionGate 后执行四个 0.005 秒物理步。普通暂停时设备先排空已接纳动作，再发布真实 `pausing` 观测，随后确认停止。`finish_policy` 在已确认暂停边界调用原生 ActionGate 的 `policy_stop`，发布新鲜 `ended` 状态；独立 Verifier 随后读取原生目标检查。模型凭证只通过私有配置或环境变量传递。
 
 ## How to add functionality
 
@@ -91,7 +92,7 @@ Current contracts are Python semantic contracts, not a frozen external wire prot
 
 ## Current framework limits
 
-Qwen WAV transcription, voice design, confirmed voice storage and WAV synthesis have GPU validation. Microphone capture, playback interruption, sensor acquisition, real-robot transport and autonomous behavior remain unavailable. Isaac/Newton representative training has separate evidence in the implementation status. Tool handlers receive arguments after the catalog validates the supported JSON Schema subset; full EDH contract validation remains the responsibility of the eventual transport adapter. The JSONL recorder supports a single process with threads, without cross-process locking or a database durability guarantee.
+Qwen WAV transcription, voice design, confirmed voice storage and WAV synthesis have GPU validation. Mac microphone capture and playback interruption have separate validation. Native EDH 已接收真实 RGB、ToF、IMU、关节与里程计，策略动作改变了 CPU 仿真的世界位置。同一物理会话的两项 office 任务分别获得独立 Verifier 的 `goal_reached=false` 与 `goal_reached=true` 正式判定，第二项完成真实导航。单次任务成功尚未建立命令速度跟踪、重复成功率或真机传输的验收结论。Isaac/Newton 代表任务训练的结果单独记录在 implementation status。JSONL recorder 仅支持单进程线程并发。
 
 `configs/project.json` and `omd status` describe **software maturity**, not live robot capability discovery. Keep future device-specific discovery separate.
 
@@ -102,8 +103,7 @@ Qwen WAV transcription, voice design, confirmed voice storage and WAV synthesis 
 3. Add Newton training and sim2sim tests.
 4. Validate effective Walking and StandUp policies through the full RL gates,
    including cross-backend replay and CPU/BAM evidence.
-5. Expose only verified policies through robot execution and skill/tool
-   adapters, then bind the deterministic Harness mock to those contracts.
+5. 通过原生 EDH 部署注册官方策略与机器人工具，完成真实传感器、动作、停止和正式目标判定验收。
 6. Add voice, perception, replay and hardware functionality by milestone.
 
 The original Project Design and Execution Plan remain the product and milestone authorities. Update them together with this architecture document when changing boundaries.

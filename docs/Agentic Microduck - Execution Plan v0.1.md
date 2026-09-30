@@ -10,13 +10,13 @@ tags:
   - sim-to-real
 ---
 
-> 当前核查（客户端 2026-09-29）：Walking 低速干预的八组配对 run 已完成训练前门禁，六组完整训练已产生原生 PPO 更新；两组等待 GPU0/1 空闲。监督程序按固定步数生成预览，完整预算结束后执行标准双后端、CPU/BAM 和无推扰行为验收。上一轮三组完整训练的最终行为验收未通过。语音 HTTP 服务、Mac 内置扬声器播放、内置麦克风录制和合成期间停止后的无迟到播放已完成实际验证，独立 CPU 服务验证完整会话播音和播音开始后的停止；录音回读与原文存在「您好／你好」「小丫／小鸭」两处用字差异。后续还需诊断 StandUp 俯卧和仰卧恢复、接入 Microduck 音频设备与外部 Harness，并在真实后端验证交互仿真草稿；项目没有可用真机。见[Walking 启动记录](reports/rl-walking-low-speed-launch-2026-09-29.md)、[语音交互验收](reports/voice-interaction-validation-2026-09-29.md)与[上一轮结果](reports/project-status-2026-09-29.md)。
+> 当前核查（2026-09-30）：用户已停止 Walking 低速干预的全部八组配对训练及预览、评估进程；现有 checkpoint、输出与 W&B 文件保留，不自动恢复。完整预算及最终行为验收未完成，上一轮三组完整训练的最终行为验收未通过。语音 HTTP 服务、Mac 内置扬声器播放、内置麦克风录制与停止边界完成实际验证。原生 EDH 公寓接入已经使用真实 Astra、官方预训练 ONNX 策略及 CPU MuJoCo/BAM 执行工具、传感器与独立 Verifier 闭环；同一物理会话的首项 office 任务正式判定 failed，第二项继续导航后正式判定 passed。项目没有可用真机。见[Walking 停止记录](reports/rl-walking-user-stop-2026-09-30.md)、[真实闭环记录](reports/harness-apartment-live-2026-09-30.md)与[当前状态](implementation-status.md)。
 
-> 2026-09-30 Walking 门禁完成时记录：按低速命令 dead-zone 证据完成 `walking-low-speed-boost.json` 的四后端/框架配对训练前门禁，boost=1.0 只作用于 `0.01–0.2 m/s` 的非零线速度命令，默认控制组保持官方 recipe。8 个 run 准备完成后当时按最小目标停止；当前正式训练见[Walking 启动记录](reports/rl-walking-low-speed-launch-2026-09-29.md)，最终行为验收待完成。门禁证据见[门禁记录](reports/rl-walking-low-speed-gates-2026-09-30.md)。
+> 2026-09-30 Walking 门禁完成时记录：按低速命令 dead-zone 证据完成 `walking-low-speed-boost.json` 的四后端/框架配对训练前门禁，boost=1.0 只作用于 `0.01–0.2 m/s` 的非零线速度命令，默认控制组保持官方 recipe。8 个 run 准备完成后当时按最小目标停止；后续启动与停止分别见[Walking 启动记录](reports/rl-walking-low-speed-launch-2026-09-29.md)和[停止记录](reports/rl-walking-user-stop-2026-09-30.md)，最终行为验收待完成。门禁证据见[门禁记录](reports/rl-walking-low-speed-gates-2026-09-30.md)。
 
 > 2026-09-30 下一项配置迭代：保护跌倒变体已作为 `experimental_unvalidated` 入口接入任务注册，复用官方 VelStand 恢复层并叠加完整碰撞/伺服冲击保护。当前仅完成配置和 14-servo 编译回归，不启动训练；先完成代表性 Walking/StandUp 的因果修复与验收，再为该变体执行独立门禁。
 
-> 2026-09-30 执行顺序：先训练并验收有效的 Walking、StandUp 执行策略，再把通过验收的策略封装成上层 agent 可调用的 tool。当前 jd_B300 完整产物仍未通过行为验收，下一步是单因素因果修复和完整训练门禁；外部 Embodied-DeepSeek-Harness 仅保留语义接口与确定性 mock，真实 transport 和 agent loop 等待其项目稳定。
+> 2026-09-30 Harness 接入：固定 EDH `main@8a5e685` 已运行原生会话、ActionGate 和独立 Verifier；官方预训练 ONNX 策略连接 CPU MuJoCo/BAM 公寓。真实 Astra 会话完成传感器与图像读取、控制动作、暂停、策略切换、恢复及 `finish_policy`；Verifier 对第一项 office 任务判定 failed，对同一物理会话中继续实际导航的第二项任务判定 passed。原生 EDH 当前执行 perpetual 策略，episodic 策略尚未在该接入中开放。jd_B300 自训练 Walking/StandUp 仍须完成各自行为门禁后才能作为已验收工具。
 
 > 2026-09-30 上游迁移：已复核官方 `microduck_rl` develop 与 `microduck` main；下一项迁移已覆盖 API-2 LSTM 加载/失败 reset、UYVY/ToF 传感器适配、足底 odometry anchor 数据和保护跌倒 reward primitives。每项均有 CPU 回归；完整 VelStand expert-BC、TCP body server 与真实 Newton 任务门禁继续作为独立后续阶段，不能用接口存在代替行为验收。
 
@@ -72,7 +72,7 @@ tags:
 
 设计依据：[项目设计 v0.1](Agentic%20Microduck%20-%20Project%20Design%20v0.1.md)。本文件把设计拆成可以逐项开发、验收的工作单，不改变已确定的项目范围。文件名保留以维持引用；内容已按用户确认的双训练后端范围更新。当前第 01–02 步进行中，其他步骤按下表推进；设计文档与流程图不计作功能实现。
 
-**执行顺序：先建立完整项目框架与模块契约 → 审读并建立可独立使用的官方 MuJoCo 训练后端 → 完成 Isaac/Newton 后端与 sim2sim → 打通通用工具与 mock/真实 Harness → 加入语音和持久音色 → 加入感知与完整体验 → 发布可复现版本。**
+**执行顺序：建立项目框架与模块接口 → 维护官方 MuJoCo 和 Isaac/Newton 训练后端 → 完成原生 Harness 与官方预训练策略的任务验收 → 完成自训练策略门禁及 sim2sim → 接入语音、感知和完整体验 → 发布可复现版本。**
 
 第一个核心成果是：在 Isaac 中训练出行走策略，经官方格式导出和官方回放验证，能够进入真机验证。语音与复杂视觉任务建立在这条运动控制链路之上。
 
@@ -85,8 +85,8 @@ tags:
 - **已实现、验证进行中**：本地 Git 与 origin、图解 README / gitignore、统一 `omd.py` 入口、固定源码与模型版本、隔离环境安装、任务提交、公共命令序列、官方训练/导出适配、CPU MuJoCo/BAM headless 回放。
 - **第 01 步进行中**：关键路径与环境已核查；完整文件阅读覆盖和依赖审读仍需补全，不能将清单数量当作完整审计。
 - **第 02 步进行中**：隔离环境已安装，worker设备检查、CPU MuJoCo基础仿真与EGL渲染已通过；官方平地 walking 已完成 64 环境、5 轮训练和官方 ONNX 导出；回放命令跟踪仍待解决。整体框架已有轻量测试证据。实际通过状态随[实现进度与证据](implementation-status.md)同步。
-- **待实现**：Isaac/Newton Microduck 完整行走任务、BAM 迁移、跨后端评测，以及之后的工具与 Harness mock。
-- **延后**：当前没有真机；外部 Harness 未完成。硬件结果与真实 agent 闭环不作为本阶段已支持能力。
+- **待验收**：office 导航的重复成功率、命令速度跟踪、自训练策略行为、跨后端评测与真机执行。
+- **硬件状态**：当前没有可用真机；仿真中的真实 agent 行为与硬件结果分别记录。
 
 每次完成可验证结果，同步本节、设计文档和 `implementation-status.md`；测试失败保留 job 和日志记录。首轮细化见[Headless 执行计划](Headless%20Simulation%20-%20First%20Execution%20Plan.md)。
 
@@ -122,7 +122,7 @@ tags:
 | 15 | 完成目标交互、经验记录与整体演示 | 找球 / 接近 / 停止 / 反馈的可追溯体验 | M3 / M4 |
 | 16 | 整理安装、评测与扩展教程 | 他人能独立复现和扩展的开源 v0.1 | M4 |
 
-这是单条主线的建议顺序。第 08 步需要真机：如果设备暂未到位，记录为待验证，可以继续策略训练、仿真工具和电脑音频工作。没有有效策略和真机结果时不宣称 sim-to-real 或 locomotion tool 已完成。外部 Harness 尚未就绪时可使用确定性 stub 验证连接，但不能把 stub 演示算作自主 agent 已完成。
+第 08 步需要真机。设备暂未到位时继续策略训练、仿真工具和电脑音频工作。sim-to-real 与自训练 locomotion tool 均须分别完成实际行为验收。原生 Harness 公寓任务以真实模型、策略动作、传感器反馈和独立目标判定作为验收依据。
 
 ## 2. 每一步的工作与通过条件
 
@@ -298,19 +298,19 @@ tags:
 
 ### 第 10 步：接入通用 Harness，先完成文本控制
 
-**依赖**：有效的 Walking/StandUp 策略包、第 09 步工具契约；外部 Harness 协议或用于连接验证的 stub。2026-09-30 已完成确定性 protocol mock；真实 EDH transport 等待稳定 wire API。
+**依赖**：官方预训练策略目录、第 09 步机器人工具、固定 EDH 源码与真实模型连接。当前 `omd harness` 已启动原生部署并执行真实 CPU 公寓物理动作。
 
 工作内容：
 
 - 实现 bridge，把外部工具调用和事件映射到已定义的工具契约。
-- 只向 Harness 注册已通过行为门禁的策略技能，提交用户文本，回传进度和结果。
+- 注册注明 manifest 来源、行为状态与执行条件的官方策略；自训练策略须通过独立行为门禁后注册。提交用户任务，回传真实进度和结果。
 - 验证一个任务执行中可以查询状态，也能接受新的停止指令。
-- 使用真实 Harness 时验证工具选择、结果理解和取消；外部项目未完成时，stub 只做预设映射与协议检查，不宣称自主 agent 能力。
+- 在原生 Harness 中验证工具选择、图像与状态理解、暂停恢复、取消、连续任务及独立 Verifier 判定。
 - 保持规划、长期记忆与通用调度在外部项目中。
 
 **交付物**：bridge、文本参考应用、工具注册与事件示例。
 
-**通过条件**：用户输入“向前走”“你现在在做什么”“停下”，能观察到对应工具调用、实际结果与正确回复。使用 stub 的结果必须明确标注。
+**通过条件**：真实模型读取传感器、选择 manifest 策略并调整命令；每次物理动作经过 ActionGate；停止确认后 Verifier 根据原生目标状态给出正式结果。取消后不得出现旧 generation 动作，连续任务须使用新的 run_task_id 与有效 lease。
 
 **阶段成果**：具备语音接入前的完整控制链路，后续 ASR 只需提供文本。
 

@@ -11,13 +11,13 @@
     },
     "robot_backends": {
       "module": "oh_my_duck.robotics.backends",
-      "state": "interface_only",
-      "role": "Online simulation/real robot execution"
+      "state": "cpu_mujoco_bam_apartment_and_jsonl_execution_verified",
+      "role": "Official apartment CPU MuJoCo/BAM sensor capture and physical control; Newton interactive execution and hardware remain unverified"
     },
     "skills": {
       "module": "oh_my_duck.agentic.skills",
-      "state": "interface_only",
-      "role": "Skill declarations and execution lifecycle"
+      "state": "simulation_skill_registered_and_executed",
+      "role": "Registered simulation skill lifecycle with official policy command and sensor operations; learned locomotion behavior acceptance remains pending"
     },
     "tools": {
       "module": "oh_my_duck.agentic.tools",
@@ -25,9 +25,9 @@
       "role": "Expose only registered tool handlers"
     },
     "harness": {
-      "module": "oh_my_duck.agentic.harness",
-      "state": "deterministic_mock_protocol_verified_external_bridge_pending",
-      "role": "External EDH bridge boundary with a deterministic text-route mock; no local agent loop"
+      "module": "oh_my_duck.integrations.edh_native",
+      "state": "native_edh_model_tools_images_policy_actions_pause_resume_finish_verifier_retained_office_goal_passed",
+      "role": "Pinned EDH native session, ActionGate and Verifier with official ONNX policy and CPU MuJoCo/BAM apartment"
     },
     "voice": {
       "module": "oh_my_duck.voice",
@@ -41,18 +41,19 @@
     },
     "training": {
       "module": "oh_my_duck.rl.training",
-      "state": "walking_paired_full_training_six_running_two_waiting_behavior_pending",
+      "state": "walking_paired_training_stopped_by_user_behavior_pending",
       "role": "Independent simulation-backend and RL-framework selection, configured W&B training and evaluation"
     },
     "perception": {
       "module": "oh_my_duck.perception",
-      "state": "interface_only",
-      "role": "Active observation and evidence-backed target records"
+      "state": "generic_interface_only_cpu_sensor_path_verified_in_robot_backend",
+      "role": "Generic perception interface; CPU apartment head RGB, observer RGB, ToF, IMU, joint state and odometry are captured by the concrete robot backend; object recognition remains unverified"
     },
     "policies": {
       "module": "oh_my_duck.robotics.policies",
-      "state": "interface_only",
-      "role": "Distinct joint, velocity and action-sequence policy adapters"
+      "concrete_runtime_module": "oh_my_duck.robotics.microduck.official_policies",
+      "state": "generic_interface_plus_official_catalog_onnx_inference_and_gated_joint_execution_verified",
+      "role": "Pinned official ONNX catalog and 61-observation to 14-offset inference in the MicroDuck runtime; Walking command tracking and other behavior acceptance remain pending"
     },
     "application": {
       "module": "oh_my_duck.agentic.application",
@@ -81,7 +82,7 @@
   },
   "execution": {
     "hardware_available": false,
-    "harness": "external_edh_bridge_pending_deterministic_mock_available",
+    "harness": "native_edh_apartment_retained_second_task_formal_office_goal_passed",
     "server_jobs": "Direct independent GPU learners on jd_B300 authorized 2026-09-23; explicit idle-device allocation",
     "headless": true,
     "video": "offscreen_1280x720",
@@ -89,7 +90,7 @@
     "mujoco_video": "explicit_osmesa_on_current_host; native_newton_video_unchanged",
     "representative_videos_verified": 60,
     "checkpoint_previews": {
-      "state": "fixed_step_preview_workers_active",
+      "state": "stopped_by_user_artifacts_preserved",
       "gallery": "outputs/previews/fixed-8192-0908-01/index.html",
       "manifest": "outputs/previews/fixed-8192-0908-01/previews.json",
       "mode": "fixed_checkpoint_intervals_without_llm_polling",
@@ -103,7 +104,7 @@
       "additional_gallery": "outputs/previews/sb3-repair-0909-01/index.html",
       "auto_resume": false,
       "current_campaign": {
-        "state": "running_with_native_full_learners",
+        "state": "stopped_by_user_20260930_0110_utc",
         "roots": [
           "outputs/experiments/walking-low-speed-boost-full-20260930-01",
           "outputs/experiments/walking-low-speed-boost-full-20260930-02-newton-retry"
@@ -129,7 +130,7 @@
       "gpu_model_reported": "NVIDIA H20G",
       "gpu_count": 8,
       "compute_capability": "10.3",
-      "state": "cuda13_walking_paired_six_running_two_waiting",
+      "state": "cuda13_walking_paired_all_eight_stopped_by_user",
       "cuda_warp_mujoco_probe": "passed_on_gpu_6_with_torchscript_quaternion_and_rgb_readback",
       "headless_rendering": "egl_and_osmesa_passed",
       "historical_checkpoints_migrated": false,
@@ -194,7 +195,19 @@
   },
   "rl_framework_registry": "oh_my_duck.rl.training.frameworks:default_framework_registry",
   "rl_acceptance": {
-    "state": "walking_paired_full_training_active_final_behavior_pending",
+    "state": "walking_paired_training_stopped_by_user_final_behavior_pending",
+    "latest_status_20260930": {
+      "host": "jd_B300",
+      "stopped_at_utc": "2026-09-30T01:10:00Z",
+      "paired_runs": 8,
+      "running": 0,
+      "waiting": 0,
+      "preview_or_evaluation_processes": 0,
+      "auto_resume": false,
+      "artifacts_preserved": true,
+      "final_behavior_acceptance": "not_run",
+      "report": "docs/reports/rl-walking-user-stop-2026-09-30.md"
+    },
     "latest_status_20260929": {
       "host": "jd_B300",
       "source_commit": "b8c36b29b847f117043c961ac9ecb6a0b9b3deec",
@@ -590,15 +603,17 @@
       "historical_snapshot": true
     },
     "current_full_training_campaign": {
-      "state": "six_running_two_waiting_full_behavior_pending",
+      "state": "stopped_by_user_20260930_0110_utc_full_behavior_pending",
       "config": "configs/experiments/walking-low-speed-boost.json",
       "num_envs_per_run": 8192,
       "updates_per_run": 50000,
       "prepared": 8,
-      "full_training_started": 6,
-      "running": 6,
-      "waiting_for_free_gpu": 2,
+      "full_training_started": 8,
+      "running": 0,
+      "waiting_for_free_gpu": 0,
       "waiting_for_gpu5_release": 0,
+      "stopped_by_user": 8,
+      "auto_resume": false,
       "source_commit": "b8c36b29b847f117043c961ac9ecb6a0b9b3deec",
       "attempt_outputs": [
         "outputs/experiments/walking-low-speed-boost-full-20260930-01",
@@ -609,7 +624,7 @@
         "outputs/experiments/walking-low-speed-boost-20260930-02",
         "outputs/experiments/walking-low-speed-boost-20260930-03-newton-gates"
       ],
-      "report": "docs/reports/rl-walking-low-speed-launch-2026-09-29.md"
+      "report": "docs/reports/rl-walking-user-stop-2026-09-30.md"
     },
     "previous_full_training_campaign_20260908": {
       "config": "configs/experiments/representative-8192.json",
