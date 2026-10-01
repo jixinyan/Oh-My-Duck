@@ -32,10 +32,9 @@ class PerceptionModels:
         self.lock = Lock()
         self.model_hashes = {"yolo26": hashlib.sha256(self.yolo_path.read_bytes()).hexdigest()}
         if sam_path is not None:
-            from sam3.model_builder import build_sam3_predictor
+            from oh_my_duck.perception.sam31 import load_predictor
             checkpoint = sam_path.resolve(strict=True)
-            self.sam = build_sam3_predictor(checkpoint_path=str(checkpoint), version="sam3.1",
-                                            compile=False, use_fa3=False, async_loading_frames=False)
+            self.sam = load_predictor(checkpoint)
             self.model_hashes["sam3.1"] = hashlib.sha256(checkpoint.read_bytes()).hexdigest()
 
     @torch.inference_mode()
@@ -55,7 +54,7 @@ class PerceptionModels:
         if self.sam is not None:
             directory = self.output / uuid4().hex
             directory.mkdir()
-            image.save(directory / "000000.jpg")
+            image.save(directory / "000000.jpg", quality=100, subsampling=0)
             session = self.sam.handle_request({"type": "start_session", "resource_path": str(directory)})["session_id"]
             try:
                 response = self.sam.handle_request({"type": "add_prompt", "session_id": session,
@@ -97,6 +96,12 @@ class PerceptionModels:
                       "yolo_match": None if match is None else {"label": predictions.names[int(classes[match])],
                                                                "confidence": float(scores[match])}}
             targets.append(target)
+            if self.sam is not None:
+                overlay = np.asarray(annotated).copy()
+                overlay[mask] = (overlay[mask].astype(np.uint16) * 2 +
+                                 np.asarray([30, 220, 120], dtype=np.uint16)) // 3
+                annotated = Image.fromarray(overlay)
+                draw = ImageDraw.Draw(annotated)
             draw.rectangle(box.tolist(), outline="lime", width=2)
             draw.text((float(box[0]), float(box[1])), label, fill="white")
         output = BytesIO()

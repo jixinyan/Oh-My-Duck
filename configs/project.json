@@ -46,8 +46,8 @@
     },
     "perception": {
       "module": "oh_my_duck.perception",
-      "state": "newton_frame_bound_gt_targets_and_yolo26_inference_transport_verified_sam31_pending",
-      "role": "Current-frame target boxes, metric ray-hit distance and bearing; explicit native ground truth and isolated YOLO26 inference transport verified; SAM 3.1 checkpoint access, recognition accuracy and hardware acceptance pending"
+      "state": "newton_frame_bound_gt_and_sam31_yolo26_actual_rgbd_inference_verified",
+      "role": "Current-frame target masks, metric ray-hit distance and bearing; actual SAM3.1 + YOLO26 inference on Newton Office RGBD verified with the existing host checkpoint; recognition accuracy and hardware acceptance pending"
     },
     "policies": {
       "module": "oh_my_duck.robotics.policies",

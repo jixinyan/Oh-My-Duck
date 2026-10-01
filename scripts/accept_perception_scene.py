@@ -24,13 +24,16 @@ def main():
     config = json.loads(args.scene_config.read_text())
     backend = IsaacNewtonBamBackend(robot_id="perception-acceptance", catalog_dir=args.catalog,
         scene_path=root / config["usd_path"], device=config["device"], scene_id=config["scene_id"],
-        provenance_path=root / config["provenance_path"], public_map_path=root / config["public_map_path"])
+        provenance_path=root / config["provenance_path"], public_map_path=root / config["public_map_path"],
+        robot_model=config.get("robot_model", "allcollisions"), observer_renderer=config.get("observer_renderer", "newton_warp"))
     report = {"scope": "actual Newton RGB, segmentation, metric rays and optional model inference", "views": []}
     try:
         for index, yaw in enumerate((0.0, np.pi / 2)):
             pose = {**config["spawn_pose"], "yaw_rad": yaw}
             backend.reset_episode(20260930, config["goal"], pose)
             frame = backend.perception_frame()
+            (args.output / f"frame-{index}.json").write_text(json.dumps({key: value for key, value in frame.items()
+                if key not in {"rgb_png_base64", "points_world_npy_base64"}}, indent=2) + "\n")
             points = np.load(BytesIO(base64.b64decode(frame["points_world_npy_base64"])), allow_pickle=False)
             rgb = Image.open(BytesIO(base64.b64decode(frame["rgb_png_base64"])))
             assert points.shape == (rgb.height, rgb.width, 3)

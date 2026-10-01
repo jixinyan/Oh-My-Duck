@@ -38,7 +38,9 @@ PYTHONPATH=src CUDA_VISIBLE_DEVICES=0 .envs/perception/bin/python -m oh_my_duck.
 
 服务只监听 `127.0.0.1`，仿真 worker 通过 scene config 的 `perception_endpoint` 调用。每项响应记录实际 checkpoint SHA256 与源 RGB SHA256，客户端检查 episode 和物理 sequence。
 
-当前服务器账号访问 SAM 3.1 返回官方 403，联合模型运行尚未验收。YOLO26 已经在实际 Office RGB 上完成推理与距离数据传输检查；两次观测中，朝向办公桌的一次观测没有 YOLO 目标。该结果不能证明办公桌识别准确率。
+`jd_B300` 已有权重 `/home/jixin/workspace/checkpoints/sam3.1/sam3.1_multiplex.pt`，SHA256 为 `0567debeec80ba4ac6369540c6c248025283cb3ff2b92827509e57e2b3541cb6`。可以将该路径直接传给 `--sam`。锁定环境使用 `setuptools==80.9.0`，满足固定 SAM 源码的 `pkg_resources` 依赖；`sam31.load_predictor` 检查 checkpoint 参数、派生 RoPE buffer 与 multiplex `init_state` 参数，将公共 session 接口的参数传递给实际 multiplex 方法。
+
+联合服务已经在实际 Newton Office RGBD 上执行 SAM3.1 与 YOLO26。朝向为零的出生位置图像返回四个墙面分割、桌子、地面和植物，各项具有有效射线距离；另一朝向对同组提示返回空目标。YOLO 对部分分割的关联类别包含 `airplane` 和 `bench`。这些结果证明实际模型推理与距离传输可运行，识别准确率需要带有目标标注的独立评估。工具保留原始关联结果和空目标。
 
 ## 多阶段导航
 

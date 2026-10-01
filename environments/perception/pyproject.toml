@@ -4,6 +4,7 @@ version = "0.1.0"
 description = "YOLO26 and official SAM 3.1 perception service"
 requires-python = ">=3.12,<3.13"
 dependencies = [
+  "setuptools==80.9.0",
   "oh-my-duck", "ultralytics-opencv-headless>=8.4", "sam3", "torch==2.10.0", "torchvision==0.25.0",
   "numpy==1.26.4", "opencv-python-headless==4.11.0.86", "Pillow>=11", "einops",
   "decord", "pycocotools", "scipy", "psutil", "hydra-core", "requests",
