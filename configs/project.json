@@ -11,8 +11,8 @@
     },
     "robot_backends": {
       "module": "oh_my_duck.robotics.backends",
-      "state": "cpu_apartment_and_newton_office_gt_assisted_multistage_navigation_verified",
-      "role": "CPU apartment and actual Newton Office camera, perception and ordered-route navigation verified; long walking segments exceed strict endpoint tolerance; CPU metric behavior, multi-scene generalization and hardware pending"
+      "state": "cpu_apartment_newton_office_navigation_and_hospital_roller_crouch_verified",
+      "role": "Actual Newton Office ordered-route navigation and Hospital roller/crouch destination task verified; strict endpoint precision, multi-scene generalization and hardware pending"
     },
     "skills": {
       "module": "oh_my_duck.agentic.skills",
@@ -26,8 +26,8 @@
     },
     "harness": {
       "module": "oh_my_duck.integrations.edh_native",
-      "state": "native_edh_newton_gt_assisted_multistage_navigation_and_replanning_verified",
-      "role": "Pinned native session, official policy tools, frame-bound perception, measured stop, ordered route, replanning, independent Verifier and completed plan verified in one Office seed; image-only VLN and multi-scene generalization pending"
+      "state": "native_edh_office_navigation_and_hospital_multi_policy_task_verified",
+      "role": "Pinned native sessions, actual model perception, policy actions, measured stopping, independent Verifier and completed tasks verified in fixed Office and Hospital scenarios; Office multi-skill task, image-only VLN and generalization pending"
     },
     "voice": {
       "module": "oh_my_duck.voice",
@@ -53,7 +53,7 @@
       "module": "oh_my_duck.robotics.policies",
       "concrete_runtime_module": "oh_my_duck.robotics.microduck.official_policies",
       "state": "generic_interface_plus_official_catalog_onnx_inference_and_gated_joint_execution_verified",
-      "role": "Pinned ten-policy official ONNX catalog with 61-to-14 inference; CPU kick_left duration, explicit alpha_stand transition and measured stop verified; ball effects, other episodic behaviors and roller model acceptance pending"
+      "role": "Pinned ten-policy official ONNX catalog with 61-to-14 inference; actual Hospital roller/crouch task, Office sitstand/head/body/ground_pick physics and CPU kick_left execution verified; object carrying, ball effects and robust cross-scene behavior pending"
     },
     "application": {
       "module": "oh_my_duck.agentic.application",
@@ -82,7 +82,31 @@
   },
   "execution": {
     "hardware_available": false,
-    "harness": "native_edh_cpu_apartment_and_newton_office_gt_assisted_multistage_route_passed_single_seed",
+    "harness": "native_edh_cpu_apartment_office_navigation_and_hospital_roller_crouch_passed_fixed_scenarios",
+    "hospital_policy_demo": {
+      "state": "native_task_and_physical_replay_audit_passed",
+      "scene": "nvidia-hospital-rollers",
+      "run_id": "48317c87-66ce-4c91-a2f9-1157511b3df9",
+      "policies": ["roller", "crouch"],
+      "robot_model": "robot_groundcontact_rollers",
+      "control_steps": 677,
+      "raw_sim_steps": 2708,
+      "goal_error_m": 0.18840426140375358,
+      "goal_threshold_m": 0.3,
+      "goal_hold_ticks": 42,
+      "stopped_samples": 26,
+      "non_ground_external_contact_samples": 0,
+      "strict_metric_precision": "failed_0.5m_command_measured_1.147m_translation",
+      "model_observations": 3,
+      "valid_model_targets": 6,
+      "distance_source": "simulator_ground_truth",
+      "observer_renderer": "newton_warp",
+      "video": "outputs/demos/oh-my-duck-hospital-rollers-20261001-verified.mp4",
+      "video_duration_s": 63.4,
+      "video_sha256": "b866f28c4b1c67126bea2c5055c025f109cc1d3fbdf4c9abd95d3a1554fa1c34",
+      "session": "closed_resources_released",
+      "report": "docs/reports/multiskill-demos-2026-10-01.md"
+    },
     "vln_agentic_demo": {
       "state": "gt_assisted_ordered_route_and_native_verdict_verified_long_walk_precision_pending",
       "scene": "nvidia-office-vln",
@@ -115,14 +139,15 @@
       "rl_training": "stopped"
     },
     "perception": {
-      "state": "actual_newton_gt_and_yolo26_inference_transport_verified",
+      "state": "actual_newton_rgbd_sam31_yolo26_and_native_hospital_model_tools_verified",
       "tool": "microduck.inspect_scene",
       "environment": "environments/perception",
       "actual_views": 2,
       "valid_gt_targets": 21,
       "yolo26_checkpoint_sha256": "646f8bc3fe0a656803d95c294f7852321748cb29d13466a1af8862e2db384a1b",
       "distance_source": "simulator_ground_truth",
-      "sam31": "official_checkpoint_access_denied_joint_inference_unverified",
+      "sam31": "existing_local_checkpoint_actual_joint_inference_verified",
+      "sam31_checkpoint_sha256": "0567debeec80ba4ac6369540c6c248025283cb3ff2b92827509e57e2b3541cb6",
       "recognition_accuracy": "not_accepted",
       "hardware": "unverified",
       "evidence": "docs/reports/evidence/perception-newton-20260930.json",

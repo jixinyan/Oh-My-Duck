@@ -9,7 +9,8 @@
 [![Recorded CPU checks: 55 passed on 2026-09-23](https://img.shields.io/badge/recorded_CPU_checks-55_passed-2ea44f)](docs/reports/project-status-2026-09-23.md)
 [![Voice: Mac audio verified](https://img.shields.io/badge/voice-Mac_audio_verified-green)](docs/reports/voice-interaction-validation-2026-09-29.md)
 [![Isaac Office: agentic navigation verified](https://img.shields.io/badge/Isaac_Office-agentic_navigation_verified-green)](docs/reports/metric-camera-tools-2026-09-30.md)
-[![Policy tools: meters and degrees verified](https://img.shields.io/badge/policy_tools-meters_and_degrees_verified-green)](docs/metric-policy-tools.md)
+[![Isaac Hospital: roller and crouch verified](https://img.shields.io/badge/Isaac_Hospital-roller_and_crouch_verified-green)](docs/reports/multiskill-demos-2026-10-01.md)
+[![Office policy tools: meters and degrees verified](https://img.shields.io/badge/Office_policy_tools-meters_and_degrees_verified-green)](docs/metric-policy-tools.md)
 [![Hardware validation: pending](https://img.shields.io/badge/hardware_validation-pending-orange)](docs/implementation-status.md)
 
 **An interactive, extensible Microduck—with a persistent voice, shared experiences, and skills you can train.**
@@ -52,6 +53,8 @@ External Isaac USD scenes enter through `omd harness --scene-config`; the native
 `microduck.inspect_scene(prompt, source)` provides frame-bound target boxes, surface distance and bearing. Its isolated SAM3.1 + YOLO26 service runs actual text-prompt segmentation and box association on Newton Office RGBD, using the existing local SAM3.1 checkpoint on the GPU host. Actual wall, desk, floor and plant masks returned valid simulator ray distances; empty detections and incorrect YOLO class associations remain visible in the results. Recognition accuracy and hardware perception require separate evaluation. The explicit `simulator_ground_truth` source uses visible native shape masks and Newton ray-hit distances. See [perception and navigation tools](docs/perception-navigation.md).
 
 A real native-Harness Office task now navigates three stages with repeated desk observations, walking turns, measured stopping and replanning after stalled turns. Its explicitly authorized simulator-ground-truth route passed the independent Verifier after 3689 control steps; final goal error was 0.162 m and desk-bound clearance was 1.043 m. A 193.3-second MP4 records the duck, perception captures and agentic trace. Three long walking segments exceeded the tools' strict 5 cm endpoint tolerance and retain their failed states. See the [navigation demo and validation scope](docs/reports/perception-vln-demo-2026-09-30.md).
+
+The furnished NVIDIA Hospital now runs the official roller robot with four passive wheel joints, `roller` locomotion and an episodic `crouch` policy. A real native-Harness task used SAM3.1 + YOLO26 on current head images, measured wheel rotation, lowered and recovered the body, and passed independent destination verification. Its 63.4-second MP4 combines actual scene cameras and public agentic trace. The requested 0.5 m roller command traveled about 1.15 m and failed strict endpoint precision; the final destination passed at 0.188 m error. Office sit/stand, head/body control and ground-pick reaching passed independent physics measurements, while its multi-skill agentic navigation remains incomplete. Object carrying, recognition accuracy and RTX rendering remain unverified. See the [multi-skill evidence and videos](docs/reports/multiskill-demos-2026-10-01.md).
 
 ## Train with MuJoCo or Isaac / Newton
 

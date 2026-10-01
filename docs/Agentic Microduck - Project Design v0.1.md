@@ -3,7 +3,7 @@ title: Agentic Microduck — 项目概览与详细设计
 version: 0.2
 status: Implementation in progress
 created: 2026-09-05
-updated: 2026-09-30
+updated: 2026-10-01
 tags:
   - microduck
   - embodied-ai
@@ -12,9 +12,11 @@ tags:
   - project-design
 ---
 
+> 多 policy 执行（2026-10-01）：Newton/BAM 可使用官方 roller 模型，保持 61 个 observation、14 个 servo action 和 50 Hz，另外返回四个 passive wheel joint 的实际测量。原生 Harness 在 NVIDIA Hospital 调用 `roller`、`crouch` 和实际 SAM3.1 + YOLO26，独立目标检查通过，生成 63.4 秒 agentic MP4。Office 坐立、头部控制和 ground_pick 已通过独立物理测量；完整多动作导航尚未完成。roller 米制终点精度、识别准确率、RTX 渲染、物体携带与真机尚待验收。见[当前验证范围](reports/multiskill-demos-2026-10-01.md)。
+
 > 多阶段导航（2026-09-30）：原生 Harness 在 Newton Office 完成大厅、绕行和办公桌接近，7 次当前桌子观测、3 次 walk 与 7 次 rotate 调用形成实际闭环。执行 3689 控制步，独立 Verifier passed、run succeeded，桌前几何距离 1.0434 米，实际相机和 agentic trace 生成 193.3 秒 MP4。所有 GT 感知、公共地图与路线坐标明确标注；3 段长行走的严格终点精度未通过，保留实际 failed 状态与重新规划过程。会话与 GPU worker 已释放，RL 保持停止。单一场景行为、图像输入独立 VLN policy、多场景泛化与真机的范围分别记录。见[验证记录](reports/perception-vln-demo-2026-09-30.md)。
 
-> 感知工具（2026-09-30）：`microduck.inspect_scene` 将当前 head RGB 的目标框、距离、bearing 和标注图像作为原生 Harness 工具结果返回。实际 Newton 的两个相机朝向获得 21 个有效 ground truth 目标；独立 YOLO26 服务完成真实图像推理与距离传输检查。SAM 3.1 文本分割与 YOLO 框关联适配已编写，官方权重授权、联合推理与识别准确率尚待验收。多阶段导航使用明确授权的 simulator ground truth，独立检查按顺序通过 checkpoint 与最终直立保持。接口和验证范围见[感知与导航工具](perception-navigation.md)。
+> 感知工具（2026-09-30）：`microduck.inspect_scene` 返回当前 head RGB 的目标框、距离、bearing 和标注图像。实际 Newton 的两个相机朝向获得 21 个有效 ground truth 目标；独立 SAM3.1 + YOLO26 服务使用 jd_B300 已有 checkpoint，完成实际 Office RGBD 的墙面、桌子、地面与植物分割及有效射线距离检查。模型空目标和 YOLO 类别关联结果原样保留，识别准确率与真机需要独立评估。多阶段导航使用明确授权的 simulator ground truth，独立检查按顺序通过 checkpoint 与最终直立保持。接口和验证范围见[感知与导航工具](perception-navigation.md)。
 
 > 当前工具与相机（2026-09-30）：原生 Harness 可调用 `microduck.walk(distance_m)` 与 `microduck.rotate(angle_deg)`，距离/角度目标由当前物理 odometry 控制，停止后检查 0.05 米/5 度误差及五个实际停止样本。Newton Office 已验证 0.4/1.0 米和 +45°/−45°/+270°；转向伴随平移并返回测量值。head RGB 使用官方 optical pose 与近裁剪，observer 取景包含机器人和场景，原生 segmentation 检查通过。真实 Astra/high 的距离工具任务完成 313 控制步并获得独立 Verifier passed，原始事件与相机生成 60.3 秒 agentic MP4。RL 保持停止；CPU 距离/角度、多场景长导航、物体效果与真机待验证。见[工具接口](metric-policy-tools.md)及[验证记录](reports/metric-camera-tools-2026-09-30.md)。
 

@@ -1,0 +1,99 @@
+{
+  "status": "passed",
+  "run_id": "48317c87-66ce-4c91-a2f9-1157511b3df9",
+  "policies_with_physical_progress": [
+    "roller",
+    "crouch"
+  ],
+  "native_executions": [
+    {
+      "schema_version": "physical.execution.v1",
+      "execution_id": "9e6dd500-8e3f-40e1-99f0-6606b51a166b",
+      "task_scope": {
+        "task_id": "48317c87-66ce-4c91-a2f9-1157511b3df9",
+        "goal_id": "nvidia-hospital-rollers-reached",
+        "attempt_id": "attempt-1"
+      },
+      "state": "ended",
+      "control_steps": 677,
+      "policy_calls": 677,
+      "raw_sim_steps": 2708,
+      "device_confirmed": true,
+      "observation_refs": [
+        "microduck:f53fab951382497ab5085c2d2ce62671:677:8835f916320449ae944ae91c60188d8b"
+      ],
+      "state_version": 696,
+      "elapsed_wall_time_s": 349.1356820636429,
+      "clock_id": "c4b3295d-dfab-444c-8867-0d31aa031f18",
+      "recorded_at": "2026-10-01T01:45:25.355Z",
+      "stop_reason": "episode_terminated",
+      "boundary_event_id": "0cefbdb9-6843-4f39-9697-cf8ac9f50e51",
+      "boundary_at": "2026-10-01T01:45:25.355Z"
+    }
+  ],
+  "observer_frames": 135,
+  "model_observations": 3,
+  "valid_model_targets": 6,
+  "final_native_evidence": {
+    "robot_world_position_m": [
+      9.231739044189453,
+      7.011995315551758,
+      0.1126234158873558
+    ],
+    "target": {
+      "target_xy_m": [
+        9.36,
+        7.15
+      ],
+      "distance_xy_m": 0.18840426140375358,
+      "threshold_m": 0.3,
+      "source": "Newton GPU root pose",
+      "route_visits": [],
+      "required_waypoints": 0
+    },
+    "height_m": 0.11162341386079788,
+    "tilt_rad": 0.06046446315209224,
+    "upright_minimum_height_m": 0.09,
+    "upright_maximum_tilt_rad": 0.4363323129985824,
+    "native_contact_count": 16,
+    "held_ticks": 42,
+    "required_hold_ticks": 5
+  },
+  "verdict_id": "60590ac9-8755-4b51-a13e-706fbb40fe8b",
+  "stop_reason": "episode_terminated",
+  "final_stopped_samples": 26,
+  "failed_metric_commands": [
+    {
+      "operation": "walk",
+      "requested": 0.5,
+      "request_id": "1be26fc4-74d9-4cc5-a750-4365ee1b8808",
+      "unit": "m",
+      "measured": 1.1308314989385013,
+      "error": 0.6595773647077877,
+      "tolerance": 0.05,
+      "start_position_m": [
+        8.075213432312012,
+        7.148573875427246,
+        0.11930232495069504
+      ],
+      "start_yaw_rad": 0.05411967048967191,
+      "body_position_m": [
+        9.214807510375977,
+        7.017428398132324,
+        0.115174800157547
+      ],
+      "translation_xy_m": 1.147115425305305,
+      "yaw_rad": -0.1810838378618934,
+      "unwrapped_yaw_rad": -0.1810838378618934,
+      "sequence": 502,
+      "stopped_samples": 5,
+      "phase": "failed",
+      "completed": false,
+      "correction_attempts": 0
+    }
+  ],
+  "non_ground_external_contact_samples": 0,
+  "passive_wheel_observations": 5,
+  "scope": "actual policy progress, native boundaries, image provenance and formal navigation; object effects require separate measurements",
+  "auditor_sha256": "7c40f211c6a7e332a51b0db944edbf9b7e3261fb1ba7953e2538867f87692777"
+}
