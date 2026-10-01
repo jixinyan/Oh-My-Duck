@@ -109,6 +109,8 @@ class MicroDuckEnvironment:
                 scene_path=Path(str(configuration["usd_path"])).resolve(strict=True),
                 device=str(configuration.get("device", "cuda:0")),
                 scene_id=str(configuration["scene_id"]),
+                robot_model=str(configuration.get("robot_model", "allcollisions")),
+                observer_renderer=str(configuration.get("observer_renderer", "newton_warp")),
                 provenance_path=Path(str(configuration["provenance_path"])).resolve(strict=True),
                 public_map_path=(Path(str(configuration["public_map_path"])).resolve(strict=True)
                                  if "public_map_path" in configuration else None),
@@ -464,8 +466,10 @@ class MicroDuckWorkerSession(NativeWorkerSession):
                         measured = backend._native_state()
                         motion = MetricMotion(operation, args, measured)
                         motion.request_id = request["request_id"]
-                        selected = ({"policy_name": "alpha_walking"} if backend.active_policy.name == "alpha_walking"
-                                    else backend.select_policy("alpha_walking", request["request_id"] + ":policy"))
+                        locomotion = ("roller" if getattr(backend, "robot_model", "allcollisions") == "groundcontact_rollers"
+                                      else "alpha_walking")
+                        selected = ({"policy_name": locomotion} if backend.active_policy.name == locomotion
+                                    else backend.select_policy(locomotion, request["request_id"] + ":policy"))
                         command = backend.set_command(motion.command(measured), request["request_id"])
                         return motion, selected, command
                     motion, selected, command = await self._device.on_owner(prepare_metric)
@@ -576,6 +580,8 @@ class MicroDuckWorkerSession(NativeWorkerSession):
                           "sequence": observed["sequence"], "observed_at": observed["observed_at"],
                           "measurements": {key: measured[key] for key in fields},
                           "motion_guard": self._motion_guard}
+                if args["sensor"] == "joint_state" and "passive_joints" in measured:
+                    result["measurements"]["passive_joints"] = measured["passive_joints"]
             elif operation == "inspect_scene":
                 await self._await_motion_cleanup()
                 snapshot = self._require_gate().snapshot()
@@ -606,6 +612,7 @@ class MicroDuckWorkerSession(NativeWorkerSession):
                           "policy_name": measured["policy_name"],
                           "body_position_m": measured["body_position_m"],
                           "body_twist": measured["body_twist"], "fallen": measured["fallen"],
+                          "height_m": measured["height_m"], "tilt_rad": measured["tilt_rad"],
                           "stopped_samples": measured["stopped_samples"],
                           "required_stopped_samples": STOP_SAMPLES,
                           "metric_motion": None if self._metric_motion is None else self._metric_motion.result,

@@ -11,11 +11,12 @@ def reference_model(model):
         MICRODUCK_WALK_ROBOT_CFG,
         MICRODUCK_STANDUP_ROBOT_CFG,
     )
-    from oh_my_duck.rl.backends.isaac_newton.asset_names import get_isaac_allcollisions_cfg
+    from oh_my_duck.rl.backends.isaac_newton.asset_names import get_isaac_allcollisions_cfg, get_isaac_rollers_cfg
 
     return (
         {"walk": MICRODUCK_WALK_ROBOT_CFG, "groundcontact": MICRODUCK_STANDUP_ROBOT_CFG,
-         "allcollisions": get_isaac_allcollisions_cfg()}[model]
+         "allcollisions": get_isaac_allcollisions_cfg(),
+         "groundcontact_rollers": get_isaac_rollers_cfg()}[model]
         .build()
         .compile()
     )

@@ -27,7 +27,7 @@ def main():
         source_path = asset_source() / filename
         reference_command = [str(project_root() / ".envs/mujoco/bin/python"), "-m", "oh_my_duck.rl.backends.isaac_newton.asset_reference",
                              str(source_path), str(work / "reference.json")]
-        if args.model == "allcollisions":
+        if args.model in {"allcollisions", "groundcontact_rollers"}:
             source_path = work / filename
             reference_command.append(str(source_path))
         subprocess.run(reference_command, check=True)

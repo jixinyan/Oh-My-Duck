@@ -1,0 +1,15 @@
+{
+  "backend": "isaac-newton",
+  "scene_id": "nvidia-hospital-rollers",
+  "usd_path": "data/scenes/nvidia-hospital-6.0/source/Assets/Isaac/6.0/Isaac/Environments/Hospital/hospital.usd",
+  "provenance_path": "data/scenes/nvidia-hospital-6.0/asset-provenance.json",
+  "public_map_path": "data/scenes/nvidia-hospital-6.0/public-map-showcase.json",
+  "perception_endpoint": "http://127.0.0.1:8785",
+  "robot_model": "groundcontact_rollers",
+  "observer_renderer": "newton_warp",
+  "device": "cuda:0",
+  "spawn_pose": {"x_m": 7.96, "y_m": 7.15, "z_m": 0.126, "yaw_rad": 0.0},
+  "goal": {"kind": "point", "target_xy_m": [9.36, 7.15], "distance_m": 0.3, "hold_ticks": 5},
+  "task_instruction": "Use the official roller and crouch policies with actual passive wheel hinges in the furnished hospital. Demonstrate controlled rolling, crouch-glide, recovery and measured stopping at the final world-coordinate destination. Observe the actual scene and record wheel movement.",
+  "budget": {"max_control_steps": 8000, "max_wall_time_s": 2400}
+}

@@ -49,10 +49,12 @@ tasks.finish 要求所有计划项目为 done 或明确 abandoned；最终目标
 为 done，并引用当前 attempt 和最新确认停止边界的 passed verdict。
 需要保存的报告和 evidence 在 tasks.finish 前写入；任务完成后输出已保存的结果。
 
-初始 policy 为 velstand。每条命令执行 5–100 个实际控制步，默认 75 步。
+通过 policy_catalog 与 task_progress 确认当前机器人和 policy。标准模型初始使用
+velstand，带轮模型初始使用 roller。每条命令执行 5–100 个实际控制步，默认 75 步。
 初始 execution 的零命令完成并取得五个停止样本后，导航调用 walk(distance_m)
 或 rotate(angle_deg)，随后调用 execution.resume。距离为当前身体朝向的有符号米数；
-角度为绕世界 +Z 的有符号度数，正数为逆时针。工具自动选择 alpha_walking，
+角度为绕世界 +Z 的有符号度数，正数为逆时针。工具为标准模型选择 alpha_walking，
+为带轮模型选择 roller。
 使用实际位置和连续累计 yaw 控制目标、制动与停止，在内部接续有界命令。
 到达暂停边界后读取 task_progress.metric_motion，检查 completed、error、tolerance
 和 stopped_samples。参数达到范围限制、障碍触发或运动未满足误差要求时，根据实际
@@ -70,8 +72,10 @@ select_policy 要求当前 Gate 确认暂停或结束，并具有至少五个测
 perpetual、scripted 和 episodic policy 均通过相同的原生动作接口执行。
 episodic policy 到达 manifest 时长后产生 episode_terminated 边界。
 需要接续动作时，调用 transition_policy 明确选择后续 policy；该操作保留实际
-位姿、速度和上一动作，随后设置有界命令并启动新的 execution。接续站立使用
-alpha_stand，检查实际恢复与停止。entry_pose 要求必须满足。
+位姿、速度和上一动作。等待独立 Verifier 对当前目标给出正式结果；当前目标尚未完成时，
+调用 tasks.retry，记录接续 policy 与后续导航的具体变化，取得新的 attempt，设置有界命令
+并调用 execution.start。标准模型接续站立使用 alpha_stand，带轮模型使用 roller，检查实际
+恢复与停止。entry_pose 要求必须满足。
 动作时长结束只证明该网络完成执行窗口；拾取、踢球和翻滚的效果需要各自的物理证据。
 
 scene_info 提供当前场景的公共几何、地图和坐标定义。根据实际家具和通道安排路线，

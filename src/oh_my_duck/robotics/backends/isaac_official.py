@@ -27,6 +27,7 @@ from oh_my_duck.robotics.microduck.protocol import HOME, JOINT_NAMES
 from oh_my_duck.robotics.microduck.official_policies import OfficialPolicyCatalogue
 from oh_my_duck.robotics.microduck.sim_sensors import camera_optical_pose, tof_directions
 from oh_my_duck.perception.rgbd import measure_target
+from oh_my_duck.core.paths import project_root
 
 
 @wp.kernel
@@ -40,7 +41,8 @@ class IsaacNewtonBamBackend(CpuMujocoBamBackend):
     def __init__(self, *, robot_id: str, catalog_dir: Path, scene_path: Path,
                  device: str, floor_height_m: float = 0.0,
                  scene_id: str = "isaac_external", robot_model: str = "allcollisions",
-                 provenance_path: Path | None = None, public_map_path: Path | None = None):
+                 provenance_path: Path | None = None, public_map_path: Path | None = None,
+                 observer_renderer: str = "newton_warp"):
         from isaaclab.assets import AssetBaseCfg
         from isaaclab.envs import ManagerBasedEnv, ManagerBasedEnvCfg
         from isaaclab.sensors import CameraCfg
@@ -59,18 +61,23 @@ class IsaacNewtonBamBackend(CpuMujocoBamBackend):
         from oh_my_duck.rl.backends.isaac_newton.task_binding.simulation import NewtonSimulation
         from oh_my_duck.rl.tasks.recipes import build_environment
         from oh_my_duck.rl.training.tasks import project_tasks
-        from oh_my_duck.rl.backends.isaac_newton.asset_names import get_isaac_allcollisions_cfg
+        from oh_my_duck.rl.backends.isaac_newton.asset_names import get_isaac_allcollisions_cfg, get_isaac_rollers_cfg
 
         if not device.startswith("cuda:") or not torch.cuda.is_available():
             raise ValueError("Isaac/Newton requires an explicitly selected CUDA device")
-        if robot_model != "allcollisions" or not math.isfinite(floor_height_m):
-            raise ValueError("Runtime requires the official allcollisions model and finite floor height")
+        factories = {"allcollisions": get_isaac_allcollisions_cfg,
+                     "groundcontact_rollers": get_isaac_rollers_cfg}
+        if robot_model not in factories or not math.isfinite(floor_height_m):
+            raise ValueError("Runtime requires a supported official robot model and finite floor height")
+        if observer_renderer not in {"newton_warp", "isaac_rtx"}:
+            raise ValueError("Unknown observer renderer")
+        self.robot_model, self.observer_renderer = robot_model, observer_renderer
         torch.cuda.set_device(device)
         SimulationBackend.__init__(self, robot_id=robot_id, backend="isaac-newton",
                                    policy_path=None, task_id=scene_id)
         self._np, self._mujoco = np, mujoco
         self.catalog = OfficialPolicyCatalogue(catalog_dir)
-        self.active_policy = self.catalog.get("velstand")
+        self.active_policy = self.catalog.get("roller" if robot_model == "groundcontact_rollers" else "velstand")
         self.policy_sha256 = self.active_policy.sha256
         self._scene_path = scene_path.resolve(strict=True)
         self.scene_id = scene_id
@@ -96,12 +103,18 @@ class IsaacNewtonBamBackend(CpuMujocoBamBackend):
             prim_path="{ENV_REGEX_NS}/HeadCamera", width=320, height=240,
             data_types=["rgb", "depth", "instance_segmentation_fast"], update_period=0.0, update_latest_camera_pose=True,
             spawn=PinholeCameraCfg(clipping_range=(0.01, 30.0)),
-            renderer_cfg=NewtonWarpRendererCfg(colorize_instance_segmentation=False))
+            renderer_cfg=NewtonWarpRendererCfg(colorize_instance_segmentation=False, enable_shadows=True))
+        if observer_renderer == "isaac_rtx":
+            from isaaclab_physx.renderers import IsaacRtxRendererCfg
+            observer_cfg = IsaacRtxRendererCfg()
+        else:
+            observer_cfg = NewtonWarpRendererCfg(colorize_instance_segmentation=False, enable_shadows=True)
         scene.observer_camera = CameraCfg(
             prim_path="{ENV_REGEX_NS}/ObserverCamera", width=1280, height=720,
-            data_types=["rgb", "instance_segmentation_fast"], update_period=0.0, update_latest_camera_pose=True,
+            data_types=(["rgb"] if observer_renderer == "isaac_rtx" else ["rgb", "instance_segmentation_fast"]),
+            update_period=0.0, update_latest_camera_pose=True,
             spawn=PinholeCameraCfg(clipping_range=(0.01, 100.0)),
-            renderer_cfg=NewtonWarpRendererCfg(colorize_instance_segmentation=False))
+            renderer_cfg=observer_cfg)
         native_cfg = ManagerBasedEnvCfg(
             scene=scene, decimation=1, actions=PhysicsOnlyTerms(),
             observations=PhysicsOnlyTerms(), events=PhysicsOnlyTerms(), seed=0,
@@ -109,14 +122,27 @@ class IsaacNewtonBamBackend(CpuMujocoBamBackend):
                               physics=NewtonCfg(solver_cfg=OfficialTaskSolverCfg(
                                   robot_model=robot_model, iterations=10, ls_iterations=20,
                                   njmax=5000, nconmax=5000), num_substeps=1)))
-        self._launch = launch_simulation(native_cfg, {"headless": True})
+        self._launch = launch_simulation(native_cfg, {"headless": True, "device": device})
         self._launch.__enter__()
         self.native = ManagerBasedEnv(native_cfg)
         self.sim = NewtonSimulation(self.native, recipe.sim)
-        self.robot = NewtonEntity(get_isaac_allcollisions_cfg(),
+        self.robot = NewtonEntity(factories[robot_model](),
                                   self.native.scene["robot"], self.sim)
+        self._servo_joint_ids = [self.robot.joint_names.index(name) for name in JOINT_NAMES]
         self.model = copy(self.sim.mj_model)
         self._geometry_normalizations = NewtonManager._builder.omd_scene_transform_audit
+        audit_bytes = (json.dumps(self._geometry_normalizations, indent=2, allow_nan=False) + "\n").encode()
+        audit_hash = hashlib.sha256(audit_bytes).hexdigest()
+        audit_path = project_root() / "outputs/runtime-scene-audits" / f"{audit_hash}.json"
+        audit_path.parent.mkdir(parents=True, exist_ok=True)
+        if audit_path.exists():
+            if audit_path.read_bytes() != audit_bytes:
+                raise RuntimeError("Stored scene transform audit differs from its hash")
+        else:
+            with audit_path.open("xb") as audit_file:
+                audit_file.write(audit_bytes)
+        self._geometry_audit_reference = {"count": len(self._geometry_normalizations),
+                                          "path": str(audit_path), "sha256": audit_hash}
         self.data = mujoco.MjData(self.model)
         self._source_target_ranges = np.tile([-10.0, 10.0], (14, 1))
         reference = self.robot.reference_model
@@ -190,8 +216,8 @@ class IsaacNewtonBamBackend(CpuMujocoBamBackend):
         values = np.concatenate((
             data.root_link_ang_vel_b[0].detach().cpu().numpy(),
             data.projected_gravity_b[0].detach().cpu().numpy(),
-            data.joint_pos[0].detach().cpu().numpy() - np.asarray(HOME),
-            data.joint_vel[0].detach().cpu().numpy(), self.policy_inference.last_action,
+            data.joint_pos[0, self._servo_joint_ids].detach().cpu().numpy() - np.asarray(HOME),
+            data.joint_vel[0, self._servo_joint_ids].detach().cpu().numpy(), self.policy_inference.last_action,
             self.policy_inference.command)).astype(np.float32)
         if values.shape != (61,) or not np.isfinite(values).all():
             raise FloatingPointError("Invalid Newton 61-dimensional policy observation")
@@ -215,8 +241,11 @@ class IsaacNewtonBamBackend(CpuMujocoBamBackend):
                 "body_twist_world": [float(world[0]), float(world[1]), float(angular[2])],
                 "angular_velocity_rad_s": angular.tolist(), "projected_gravity": gravity.tolist(),
                 "joint_names": list(JOINT_NAMES),
-                "joint_position_rad": data.joint_pos[0].detach().cpu().tolist(),
-                "joint_velocity_rad_s": data.joint_vel[0].detach().cpu().tolist(),
+                "joint_position_rad": data.joint_pos[0, self._servo_joint_ids].detach().cpu().tolist(),
+                "joint_velocity_rad_s": data.joint_vel[0, self._servo_joint_ids].detach().cpu().tolist(),
+                "passive_joints": {name: {"position_rad": float(data.joint_pos[0, i]),
+                                          "velocity_rad_s": float(data.joint_vel[0, i])}
+                                   for i, name in enumerate(self.robot.joint_names) if name.startswith("passive_")},
                 "height_m": height, "tilt_rad": tilt, "fallen": height < 0.06 or tilt > 1.3,
                 "odometry": {"x_m": float(position[0]), "y_m": float(position[1]),
                              "yaw_rad": yaw, "frame_id": "world", "source": "Newton GPU state"},
@@ -254,7 +283,7 @@ class IsaacNewtonBamBackend(CpuMujocoBamBackend):
             orientations=torch.as_tensor(quaternion[[1, 2, 3, 0]][None], device=self.sim.device, dtype=torch.float32),
             convention="opengl")
         self.native.sim.render()
-        if name not in self._clipped_cameras:
+        if camera.cfg.renderer_cfg.renderer_type == "newton_warp" and name not in self._clipped_cameras:
             rays = camera._render_data.camera_rays
             directions = wp.to_torch(rays)[..., 1, :]
             if not torch.isfinite(directions).all() or not torch.all(directions[..., 2] < 0):
@@ -266,14 +295,18 @@ class IsaacNewtonBamBackend(CpuMujocoBamBackend):
         rgb = as_torch(camera.data.output["rgb"])[0, ..., :3].detach().cpu().numpy()
         if rgb.shape != (height, width, 3) or rgb.dtype != np.uint8 or np.ptp(rgb) == 0:
             raise ValueError("Newton renderer returned invalid RGB")
-        segmentation = as_torch(camera.data.output["instance_segmentation_fast"])[0, ..., 0].detach().cpu().numpy()
-        ids, counts = np.unique(segmentation, return_counts=True)
+        if "instance_segmentation_fast" in camera.data.output:
+            segmentation = as_torch(camera.data.output["instance_segmentation_fast"])[0, ..., 0].detach().cpu().numpy()
+            ids, counts = np.unique(segmentation, return_counts=True)
+        else:
+            ids, counts = [], []
         visible = [{"shape_id": int(index), "shape": self._shape_labels[int(index)], "pixels": int(count)}
                    for index, count in zip(ids, counts, strict=True) if 0 <= index < len(self._shape_labels)]
         self._render_evidence[name] = {"eye_world_m": np.asarray(eye).tolist(),
                                       "forward_world": forward.tolist(), "up_world": corrected_up.tolist(),
                                       "near_plane_m": camera.cfg.spawn.clipping_range[0],
                                       "rgb_mean": float(rgb.mean()), "rgb_std": float(rgb.std()),
+                                      "renderer": camera.cfg.renderer_cfg.renderer_type,
                                       "visible_shapes": visible}
         output = BytesIO()
         Image.fromarray(rgb).save(output, format="PNG")
@@ -367,9 +400,11 @@ class IsaacNewtonBamBackend(CpuMujocoBamBackend):
                             device=self.sim.device, dtype=torch.float32)
         self.robot.data.write_root_pose(pose)
         self.robot.data.write_root_velocity(torch.zeros(1, 6, device=self.sim.device))
-        self.robot.data.write_joint_position(torch.tensor([HOME], device=self.sim.device))
-        self.robot.data.write_joint_velocity(torch.zeros(1, 14, device=self.sim.device))
-        self.robot.data.joint_pos_target[:] = torch.tensor(HOME, device=self.sim.device)
+        positions = self.robot.data.default_joint_pos.clone()
+        positions[:, self._servo_joint_ids] = torch.tensor(HOME, device=self.sim.device)
+        self.robot.data.write_joint_position(positions)
+        self.robot.data.write_joint_velocity(torch.zeros_like(positions))
+        self.robot.data.joint_pos_target[:] = positions
         self.robot.write_data_to_sim()
         self.sim.forward()
         self.episode_id = uuid4().hex
@@ -500,27 +535,44 @@ class IsaacNewtonBamBackend(CpuMujocoBamBackend):
 
     def action_spec(self):
         specification = super().action_spec()
-        specification["robot_model"] = "robot_allcollisions"
+        specification["robot_model"] = f"robot_{self.robot_model}"
         specification["head_body_behavior_status"] = "pending_scene_validation"
         return specification
 
-    def list_policies(self):
-        result = super().list_policies()
-        result["scene"] = self.scene_id
-        return result
-
     def public_scene_info(self):
         self._require_owner()
+        public_map = None if self.public_map is None else dict(self.public_map)
+        if public_map is not None and "obstacles" in public_map:
+            position = self._native_state()["body_position_m"][:2]
+            centers = [position, self._goal["target_xy_m"]] if self._goal is not None else [position]
+            public_map["obstacles"] = [item for item in public_map["obstacles"] if any(
+                sum(max(item["min"][i] - center[i], center[i] - item["max"][i], 0) ** 2
+                    for i in range(2)) <= 16 for center in centers)]
+            public_map["query_regions"] = {"centers_xy_m": centers, "radius_m": 4,
+                "returned_obstacle_count": len(public_map["obstacles"]),
+                "stored_obstacle_count": len(self.public_map["obstacles"]),
+                "coverage": "Intersection with stored authored map; query again after movement"}
         return {"scene_id": self.scene_id, "source": str(self._scene_path), "frame_id": "world",
                 "source_kind": "USD imported into Newton SolverMuJoCo",
                 "floor_height_m": self.floor_height_m,
                 "environment_collision_geom_count": len(self._environment_geom_ids),
                 "ground_collision_geoms": [self.model.geom(i).name for i in sorted(self._ground_geom_ids)],
-                "signed_scale_normalizations": self._geometry_normalizations,
-                "provenance": self.provenance, "public_map": self.public_map,
+                "signed_scale_normalizations": self._geometry_audit_reference,
+                "provenance": self.provenance, "public_map": public_map,
                 "goal": self._goal,
                 "solver": "Newton SolverMuJoCo", "physics_dt_s": 0.005,
-                "control_hz": 50, "robot_model": "robot_allcollisions"}
+                "control_hz": 50, "robot_model": self.robot_model,
+                "observer_renderer": self.observer_renderer}
+
+    def list_policies(self):
+        result = super().list_policies()
+        result["scene"] = self.scene_id
+        result["robot_model"] = self.robot_model
+        for policy in result["policies"]:
+            policy["executable_here"] = (policy["required_robot_mode"] != "groundcontact_rollers"
+                                          or self.robot_model == "groundcontact_rollers")
+            policy["current_scene_behavior_status"] = "requires_actual_scene_validation"
+        return result
 
     def apply_policy_action(self, action: list[float], request_id: str,
                             expected_sequence: int | None = None,
@@ -551,7 +603,7 @@ class IsaacNewtonBamBackend(CpuMujocoBamBackend):
             raise ValueError("Official policy exceeds the source target range")
         source_sequence = self._sequence
         self.controller.q_target[:] = targets
-        self.robot.data.joint_pos_target[:] = torch.as_tensor(targets, device=self.sim.device)
+        self.robot.data.joint_pos_target[:, self._servo_joint_ids] = torch.as_tensor(targets, device=self.sim.device)
         evidence, ground, self_contacts, executed = {}, 0, 0, 0
         with torch.inference_mode():
             for _ in range(4):

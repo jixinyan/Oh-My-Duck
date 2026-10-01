@@ -7,8 +7,10 @@ import mujoco
 
 def main():
     if len(sys.argv) == 4:
-        from oh_my_duck.rl.backends.isaac_newton.asset_names import get_isaac_allcollisions_spec
-        spec = get_isaac_allcollisions_spec()
+        from oh_my_duck.rl.backends.isaac_newton.asset_names import get_isaac_allcollisions_spec, get_isaac_rollers_spec
+        factory = {"robot_allcollisions.xml": get_isaac_allcollisions_spec,
+                   "robot_groundcontact_rollers.xml": get_isaac_rollers_spec}[Path(sys.argv[1]).name]
+        spec = factory()
         spec.meshdir = str(Path(sys.argv[1]).resolve().parent / "assets")
         model = spec.compile()
         spec.to_file(sys.argv[3])

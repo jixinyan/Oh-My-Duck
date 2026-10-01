@@ -942,7 +942,7 @@ class CpuMujocoBamBackend(SimulationBackend):
     def _activate_policy(self, policy_name: str, request_id: str,
                          *, preserve_last_action: bool) -> dict:
         selected = self.catalog.get(policy_name)
-        if selected.mode == "roller":
+        if selected.mode == "roller" and getattr(self, "robot_model", "allcollisions") != "groundcontact_rollers":
             raise ValueError("Roller policy requires a roller robot model; current model is allcollisions")
         self.active_policy = selected
         self.policy_sha256 = selected.sha256

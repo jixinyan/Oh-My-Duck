@@ -13,7 +13,8 @@ def asset_source():
 
 
 ROBOT_MODELS = {"walk": "robot_walk.xml", "groundcontact": "robot_groundcontact.xml",
-                "allcollisions": "robot_allcollisions.xml"}
+                "allcollisions": "robot_allcollisions.xml",
+                "groundcontact_rollers": "robot_groundcontact_rollers.xml"}
 
 
 def model_file(model="walk"):
@@ -38,7 +39,7 @@ def source_fingerprint(model="walk"):
                  project_root() / "environments/isaac-assets/uv.lock"):
         h.update(tool.name.encode() + b"\0")
         h.update(hashlib.sha256(tool.read_bytes()).digest())
-    if model == "allcollisions":
+    if model in {"allcollisions", "groundcontact_rollers"}:
         h.update(hashlib.sha256((package / "asset_names.py").read_bytes()).digest())
     return h.hexdigest()
 
