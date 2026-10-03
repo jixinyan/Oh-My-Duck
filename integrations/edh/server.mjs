@@ -364,7 +364,13 @@ const server = await startServer({
             policyTimeoutS: 30,
             catalog,
           };
-          const native = await createNativeWorkerEnvironment(worker, services, validator);
+          let native;
+          try {
+            native = await createNativeWorkerEnvironment(worker, services, validator);
+          } catch (error) {
+            console.error(error);
+            throw error;
+          }
           return {
             describeTasks: native.describeTasks,
             async createTaskBackend(taskId, options) {

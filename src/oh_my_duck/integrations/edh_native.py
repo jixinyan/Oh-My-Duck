@@ -833,7 +833,8 @@ class MicroDuckWorkerSession(NativeWorkerSession):
                   list(motion.command(state)["twist"]) != list(self._motion_segment["command"]["twist"])):
                 command = await self._device.on_owner(lambda: backend.set_command(
                     motion.command(state), request_id="metric:" + uuid4().hex))
-                self._bind_motion_segment(command, self.MAX_COMMAND_STEPS, preserve_guard=True)
+                self._bind_motion_segment(command, self.MAX_COMMAND_STEPS,
+                                          preserve_guard=previous_phase == motion.phase)
                 guard = None
             if guard is not None:
                 guard["metric_request_id"] = motion.request_id

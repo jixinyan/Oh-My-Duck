@@ -97,7 +97,7 @@ class MetricMotion:
                 velocity = state["body_twist_world"]
                 along_speed = velocity[0] * math.cos(self.start_yaw) + velocity[1] * math.sin(self.start_yaw)
                 reached = reached or (remaining * along_speed > 0 and
-                                     abs(remaining) <= max(0.025, abs(along_speed)))
+                                     abs(remaining) <= max(0.025, 1.4 * abs(along_speed)))
             self.previous_distance_error = remaining
             tolerance = self.DISTANCE_TOLERANCE_M
         else:
