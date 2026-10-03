@@ -132,7 +132,7 @@ def tof_frame(
         if hit < 0.0 or hit > max_range_m:
             continue
         sigma = 0.003 + 0.02 * (hit / max_range_m)
-        measured = max(0.0, float(hit) + float(random.normal(0.0, sigma)))
+        measured = min(max_range_m, max(0.0, float(hit) + float(random.normal(0.0, sigma))))
         distances[zone] = int(measured * 1000.0)
         statuses[zone] = TOF_STATUS_VALID
     return distances, statuses
