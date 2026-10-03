@@ -75,7 +75,10 @@ class MetricMotion:
             if abs(angular) < 0.3:
                 angular = math.copysign(min(limit, 0.3), self.target - self.unwrapped_yaw)
             return {"twist": [0.0, 0.0, round(max(-limit, min(limit, angular)), 2)]}
-        return {"twist": [0.2, 0.25, math.copysign(self.speed, self.target - self.unwrapped_yaw)]}
+        remaining = self.target - self.unwrapped_yaw
+        toward_speed = math.copysign(1.0, remaining) * state["body_twist"][2]
+        angular = max(min(self.speed, 0.2), min(self.speed, 2.0 * abs(remaining) - 0.25 * toward_speed))
+        return {"twist": [0.2, 0.25, round(math.copysign(angular, remaining), 2)]}
 
     def observe(self, sample, state, stopped_samples):
         sequence = sample["sequence"]

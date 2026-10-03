@@ -1,0 +1,29 @@
+{
+  "schema_version": 1,
+  "suites": {
+    "apartment-feet": {
+      "scene_config": "configs/simulation-demo/apartment-metric.json",
+      "cases": [
+        {"id": "forward-turn", "seed": 20261003, "operations": ["walk", "rotate"], "distance_m": 0.5, "angle_deg": 45},
+        {"id": "reverse-turn", "seed": 20261004, "operations": ["walk", "rotate"], "distance_m": -0.5, "angle_deg": -45},
+        {"id": "long-forward", "seed": 20261005, "operations": ["walk"], "distance_m": 1.0, "angle_deg": 90}
+      ]
+    },
+    "office-feet": {
+      "scene_config": "configs/simulation-demo/office.json",
+      "cases": [
+        {"id": "forward-turn", "seed": 20261003, "operations": ["walk", "rotate"], "distance_m": 0.5, "angle_deg": 45},
+        {"id": "reverse-turn", "seed": 20261004, "operations": ["walk", "rotate"], "distance_m": -0.5, "angle_deg": -45},
+        {"id": "long-forward", "seed": 20261005, "operations": ["walk"], "distance_m": 1.0, "angle_deg": 90}
+      ]
+    },
+    "hospital-rollers": {
+      "scene_config": "configs/simulation-demo/hospital-rollers.json",
+      "cases": [
+        {"id": "forward-turn", "seed": 20261003, "operations": ["walk", "rotate"], "distance_m": 0.5, "angle_deg": 45},
+        {"id": "reverse-turn", "seed": 20261004, "operations": ["walk", "rotate"], "distance_m": -0.5, "angle_deg": -45},
+        {"id": "long-forward", "seed": 20261005, "operations": ["walk"], "distance_m": 1.0, "angle_deg": 90}
+      ]
+    }
+  }
+}

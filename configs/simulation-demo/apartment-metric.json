@@ -1,0 +1,8 @@
+{
+  "backend": "cpu-mujoco-bam",
+  "scene_id": "official-microduck-apartment",
+  "spawn_pose": {"x_m": -2.5, "y_m": -1.9, "yaw_rad": 0.0},
+  "goal": {"kind": "room", "room": "office", "hold_ticks": 5},
+  "task_instruction": "Measure bounded distance and rotation commands in the furnished apartment and stop while upright.",
+  "budget": {"max_control_steps": 5000, "max_wall_time_s": 1200}
+}

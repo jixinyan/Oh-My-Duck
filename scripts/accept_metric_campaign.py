@@ -1,0 +1,108 @@
+import argparse
+import hashlib
+import json
+import os
+from pathlib import Path
+import subprocess
+import sys
+
+from jsonschema import Draft202012Validator
+
+
+PLAN_SCHEMA = {
+    "type": "object", "required": ["schema_version", "suites"], "additionalProperties": False,
+    "properties": {
+        "schema_version": {"const": 1},
+        "suites": {"type": "object", "minProperties": 1, "additionalProperties": {
+            "type": "object", "required": ["scene_config", "cases"], "additionalProperties": False,
+            "properties": {
+                "scene_config": {"type": "string", "minLength": 1},
+                "cases": {"type": "array", "minItems": 1, "items": {
+                    "type": "object", "required": ["id", "seed", "operations", "distance_m", "angle_deg"],
+                    "additionalProperties": False,
+                    "properties": {
+                        "id": {"type": "string", "pattern": "^[a-z][a-z0-9-]*$"},
+                        "seed": {"type": "integer", "minimum": 0},
+                        "operations": {"type": "array", "minItems": 1, "uniqueItems": True,
+                                       "items": {"enum": ["walk", "rotate"]}},
+                        "distance_m": {"type": "number"}, "angle_deg": {"type": "number"},
+                        "speed_m_s": {"type": "number", "minimum": 0.1, "maximum": 0.4},
+                        "angular_speed_deg_s": {"type": "number", "minimum": 10, "maximum": 55},
+                    },
+                }},
+            },
+        }},
+    },
+}
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Run sequential real policy-tool cases; stop on the first failure.")
+    parser.add_argument("--plan", type=Path, default=Path("configs/experiments/metric-policy-acceptance.json"))
+    parser.add_argument("--suite", required=True)
+    parser.add_argument("--catalog", type=Path, required=True)
+    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--gpu", type=int)
+    args = parser.parse_args()
+    root = Path(__file__).resolve().parents[1]
+    plan = json.loads(args.plan.read_text())
+    Draft202012Validator(PLAN_SCHEMA).validate(plan)
+    suite = plan["suites"][args.suite]
+    cases = suite["cases"]
+    if len({case["id"] for case in cases}) != len(cases):
+        raise ValueError("Metric campaign requires unique case identifiers")
+    scene = root / suite["scene_config"]
+    configuration = json.loads(scene.read_text())
+    backend = configuration["backend"]
+    if backend not in {"cpu-mujoco-bam", "isaac-newton"}:
+        raise ValueError("Metric campaign requires an actual supported simulation backend")
+    if backend == "isaac-newton" and (args.gpu is None or args.gpu < 0):
+        raise ValueError("Newton campaign requires an explicitly allocated physical GPU")
+    if backend == "cpu-mujoco-bam" and args.gpu is not None:
+        raise ValueError("CPU campaign does not allocate a GPU")
+    environment = dict(os.environ)
+    environment["CUDA_VISIBLE_DEVICES"] = str(args.gpu) if args.gpu is not None else ""
+    environment["PYTHONPATH"] = os.pathsep.join([
+        str(root / "src"),
+        str(root / ".cache/edh/8a5e685b22d032207f53db20454f0992a4ad60fd/harness/physical-runtime/src"),
+    ])
+    temporary = root / ".cache/tmp"
+    temporary.mkdir(parents=True, exist_ok=True)
+    environment["TMPDIR"] = str(temporary)
+    args.output.mkdir(parents=True, exist_ok=False)
+    record = {"passed": False, "suite": args.suite, "backend": backend,
+              "physical_gpu": args.gpu,
+              "plan_sha256": hashlib.sha256(args.plan.read_bytes()).hexdigest(), "cases": []}
+    try:
+        for case in cases:
+            destination = args.output / case["id"]
+            entry = {"case": case, "passed": False, "result": str(destination / "result.json")}
+            record["cases"].append(entry)
+            command = [sys.executable, str(root / "scripts/accept_metric_policy_tools.py"),
+                       "--scene-config", str(scene), "--catalog", str(args.catalog.resolve(strict=True)),
+                       "--output", str(destination), "--seed", str(case["seed"]),
+                       "--distance", str(case["distance_m"]), "--angle", str(case["angle_deg"]),
+                       "--speed", str(case.get("speed_m_s", 0.4)),
+                       "--angular-speed", str(case.get("angular_speed_deg_s", 45)),
+                       "--operations", *case["operations"]]
+            print(f"Starting actual {args.suite}/{case['id']}", flush=True)
+            with (args.output / (case["id"] + ".log")).open("w") as log:
+                subprocess.run(command, cwd=root, env=environment, stdout=log, stderr=subprocess.STDOUT, check=True)
+            result_path = destination / "result.json"
+            result = json.loads(result_path.read_text())
+            if not result["passed"] or not result["resources_released"]:
+                raise AssertionError("Metric case requires physical acceptance and resource release")
+            entry.update(passed=True, result_sha256=hashlib.sha256(result_path.read_bytes()).hexdigest(),
+                         measurements=result["measurements"])
+            print(json.dumps({"case": case["id"], "passed": True,
+                              "errors": [item["evidence"]["error"] for item in result["measurements"]]}), flush=True)
+        record["passed"] = True
+    finally:
+        error = sys.exception()
+        if error is not None:
+            record["failure"] = {"type": type(error).__name__, "message": str(error)}
+        (args.output / "campaign.json").write_text(json.dumps(record, indent=2) + "\n")
+
+
+if __name__ == "__main__":
+    main()
