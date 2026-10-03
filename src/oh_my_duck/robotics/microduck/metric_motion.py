@@ -28,6 +28,7 @@ class MetricMotion:
             self.speed = self._number(arguments, "speed_m_s", 0.1, 0.4, 0.4)
             self.target = [self.start_position[0] + self.amount * math.cos(self.start_yaw),
                            self.start_position[1] + self.amount * math.sin(self.start_yaw)]
+            self.previous_distance_error = self.amount
         elif operation == "rotate":
             self.amount = self._number(arguments, "angle_deg", -360, 360)
             if abs(self.amount) < 10:
@@ -80,7 +81,9 @@ class MetricMotion:
             error = math.hypot(position[0] - self.target[0], position[1] - self.target[1])
             progress = ((position[0] - self.start_position[0]) * math.cos(self.start_yaw) +
                         (position[1] - self.start_position[1]) * math.sin(self.start_yaw))
-            reached = error <= 0.025 or math.copysign(1, self.amount) * progress >= abs(self.amount)
+            remaining = self.amount - progress
+            reached = error <= 0.025 or self.previous_distance_error * remaining <= 0
+            self.previous_distance_error = remaining
             tolerance = self.DISTANCE_TOLERANCE_M
         else:
             angle_error = self.target - self.unwrapped_yaw

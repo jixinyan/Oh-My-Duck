@@ -12,6 +12,7 @@ COMMANDS = {
     "tasks": (None, "List official task inventory and the representative reproduction scope"),
     "frameworks": (None, "List RL frameworks, backend compatibility and validation status"),
     "status": (None, "Show component implementation status without initializing hardware"),
+    "doctor": (None, "Check installed runtime dependencies, actual services, policies and scene assets"),
     "setup": ("bootstrap.py", "Fetch pinned sources/models and prepare a backend environment"),
     "preview": ("preview.py", "Render checkpoint videos and a local gallery; optionally watch training"),
     "diagnose": ("diagnostics.py", "Run frozen-policy reward and transfer diagnostics on allocated GPUs"),
@@ -48,6 +49,17 @@ def main():
     if command not in COMMANDS:
         print(f"Unknown command {command!r}. Use --help.", file=sys.stderr)
         return 2
+    if command in {"voice", "voice-session", "voice-task", "voice-service", "doctor"}:
+        module_name = {
+            "voice": "oh_my_duck.cli.voice",
+            "voice-session": "oh_my_duck.cli.voice_session",
+            "voice-task": "oh_my_duck.cli.voice_task",
+            "voice-service": "oh_my_duck.voice.service",
+            "doctor": "oh_my_duck.cli.doctor",
+        }[command]
+        module = importlib.import_module(module_name)
+        sys.argv = [sys.argv[0], *sys.argv[2:]]
+        return module.main()
     root = project_root()
     if command == "tasks":
         parser = argparse.ArgumentParser(description=COMMANDS[command][1])
@@ -74,16 +86,6 @@ def main():
         parser.parse_args(sys.argv[2:])
         print((root / "configs/project.json").read_text())
         return 0
-    if command in {"voice", "voice-session", "voice-task", "voice-service"}:
-        module_name = {
-            "voice": "oh_my_duck.cli.voice",
-            "voice-session": "oh_my_duck.cli.voice_session",
-            "voice-task": "oh_my_duck.cli.voice_task",
-            "voice-service": "oh_my_duck.voice.service",
-        }[command]
-        module = importlib.import_module(module_name)
-        sys.argv = [sys.argv[0], *sys.argv[2:]]
-        return module.main()
     filename = COMMANDS[command][0]
     module = importlib.import_module("oh_my_duck.rl.experiments." + filename.removesuffix(".py") if command in {"campaign", "preview", "diagnose"}
                                     else "oh_my_duck.cli." + filename.removesuffix(".py") if command in {"sim", "harness"}
