@@ -8,7 +8,8 @@ class MetricMotion:
     DISTANCE_TOLERANCE_M = 0.05
     ANGLE_TOLERANCE_DEG = 5.0
 
-    def __init__(self, operation: str, arguments: dict[str, Any], state: dict[str, Any]):
+    def __init__(self, operation: str, arguments: dict[str, Any], state: dict[str, Any],
+                 robot_model: str = "allcollisions"):
         self.operation = operation
         self.start_position = list(state["body_position_m"])
         self.start_yaw = float(state["odometry"]["yaw_rad"])
@@ -19,6 +20,7 @@ class MetricMotion:
         self.result: dict[str, Any] | None = None
         self.request_id: str | None = None
         self.correction_attempts = 0
+        self.robot_model = robot_model
         if operation == "walk":
             self.amount = self._number(arguments, "distance_m", -10, 10)
             if abs(self.amount) < 0.1:
@@ -44,13 +46,26 @@ class MetricMotion:
         return float(value)
 
     def command(self, state):
-        if self.phase != "moving":
+        if self.phase not in {"moving", "braking"}:
             return {"twist": [0.0, 0.0, 0.0]}
         if self.operation == "walk":
+            position = state["body_position_m"]
+            remaining = ((self.target[0] - position[0]) * math.cos(self.start_yaw) +
+                         (self.target[1] - position[1]) * math.sin(self.start_yaw))
+            world_velocity = state["body_twist_world"]
+            velocity = world_velocity[0] * math.cos(self.start_yaw) + world_velocity[1] * math.sin(self.start_yaw)
+            if self.phase == "braking":
+                forward = 0.0
+            elif self.robot_model == "groundcontact_rollers":
+                forward = max(-self.speed, min(self.speed, 2.0 * remaining - 1.5 * velocity))
+            else:
+                forward = math.copysign(min(self.speed, max(0.06, abs(remaining))), remaining)
             yaw_error = math.atan2(math.sin(self.start_yaw - self.last_yaw),
                                    math.cos(self.start_yaw - self.last_yaw))
-            return {"twist": [math.copysign(self.speed, self.amount), 0.0,
-                               max(-0.6, min(0.6, 1.5 * yaw_error))]}
+            return {"twist": [round(forward, 2), 0.0,
+                               0.0 if self.phase == "braking" else round(max(-0.6, min(0.6, 1.5 * yaw_error)), 2)]}
+        if self.phase == "braking":
+            return {"twist": [0.0, 0.0, 0.0]}
         return {"twist": [0.2, 0.25, math.copysign(self.speed, self.target - self.unwrapped_yaw)]}
 
     def observe(self, sample, state, stopped_samples):
@@ -92,7 +107,7 @@ class MetricMotion:
         elif self.phase == "braking" and stopped_samples >= 5:
             if error <= tolerance:
                 self.phase = "complete"
-            elif self.operation == "rotate" and self.correction_attempts < 3:
+            elif self.correction_attempts < 3:
                 self.correction_attempts += 1
                 self.phase = "moving"
             else:

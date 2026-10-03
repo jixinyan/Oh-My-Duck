@@ -277,11 +277,16 @@ class MicroDuckWorkerSession(NativeWorkerSession):
             raise ValueError("MicroDuck command requires 5 to 100 control steps")
         return count
 
-    def _bind_motion_segment(self, command_result: dict[str, Any], count: int) -> None:
+    def _bind_motion_segment(self, command_result: dict[str, Any], count: int,
+                             preserve_guard: bool = False) -> None:
         self._motion_guard = None
         self._guard_tof_boundary_id = None
         gate = self._gate
         snapshot = gate.snapshot() if gate is not None else None
+        guard = (self._motion_segment["guard"] if preserve_guard else
+                 MotionGuard(command_result["command"], command_result["effective_after_sequence"], count))
+        if preserve_guard:
+            guard.update_command(command_result["command"], command_result["effective_after_sequence"], count)
         self._motion_segment = {
             "run_task_id": self._run_task_id,
             "execution_id": None if snapshot is None or snapshot["state"] == "ended"
@@ -294,8 +299,7 @@ class MicroDuckWorkerSession(NativeWorkerSession):
             "max_control_steps": count,
             "command": command_result["command"],
             "request_id": command_result["request_id"],
-            "guard": MotionGuard(command_result["command"],
-                                 command_result["effective_after_sequence"], count),
+            "guard": guard,
         }
 
     def _guard_for_sample(self, sample: dict[str, Any], snapshot: dict[str, Any]) -> dict[str, Any] | None:
@@ -464,7 +468,8 @@ class MicroDuckWorkerSession(NativeWorkerSession):
                         if backend._stopped_samples < STOP_SAMPLES:
                             raise RuntimeError("Metric motion requires five measured stopped samples")
                         measured = backend._native_state()
-                        motion = MetricMotion(operation, args, measured)
+                        motion = MetricMotion(operation, args, measured,
+                            robot_model=getattr(backend, "robot_model", "allcollisions"))
                         motion.request_id = request["request_id"]
                         locomotion = ("roller" if getattr(backend, "robot_model", "allcollisions") == "groundcontact_rollers"
                                       else "alpha_walking")
@@ -824,10 +829,11 @@ class MicroDuckWorkerSession(NativeWorkerSession):
                              "episode_id": sample["episode_id"], "sequence": sample["sequence"],
                              "command": segment["command"], "used_control_steps": used,
                              "max_control_steps": segment["max_control_steps"], "metric_motion": evidence}
-            elif previous_phase != motion.phase or guard is not None:
+            elif (previous_phase != motion.phase or guard is not None or
+                  list(motion.command(state)["twist"]) != list(self._motion_segment["command"]["twist"])):
                 command = await self._device.on_owner(lambda: backend.set_command(
                     motion.command(state), request_id="metric:" + uuid4().hex))
-                self._bind_motion_segment(command, self.MAX_COMMAND_STEPS)
+                self._bind_motion_segment(command, self.MAX_COMMAND_STEPS, preserve_guard=True)
                 guard = None
             if guard is not None:
                 guard["metric_request_id"] = motion.request_id

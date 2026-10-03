@@ -27,6 +27,7 @@ COMMANDS = {
     "eval": ("run.py", "Replay a policy headlessly and optionally save video"),
     "voice": (None, "Manage confirmed voice profiles and file inference"),
     "voice-session": (None, "Run an explicit local recording and playback session"),
+    "voice-task": (None, "Submit a recorded voice instruction to the native Harness and generate feedback"),
     "voice-service": (None, "Run an isolated ASR or TTS model service"),
     "sim": ("simulation.py", "Run interactive measured simulation tools through JSONL"),
     "harness": ("harness.py", "Run MicroDuck simulation scenes through native EDH"),
@@ -73,10 +74,11 @@ def main():
         parser.parse_args(sys.argv[2:])
         print((root / "configs/project.json").read_text())
         return 0
-    if command in {"voice", "voice-session", "voice-service"}:
+    if command in {"voice", "voice-session", "voice-task", "voice-service"}:
         module_name = {
             "voice": "oh_my_duck.cli.voice",
             "voice-session": "oh_my_duck.cli.voice_session",
+            "voice-task": "oh_my_duck.cli.voice_task",
             "voice-service": "oh_my_duck.voice.service",
         }[command]
         module = importlib.import_module(module_name)

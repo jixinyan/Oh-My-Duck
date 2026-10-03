@@ -52,6 +52,14 @@ async def run(args):
         await session.resume({"owner_id": "planner", "execution_id": prior["execution_id"],
                               "boundary_id": prior["boundary_event_id"], "state_version": prior["state_version"]})
         await wait_boundary(session)
+        for _ in range(3):
+            progress = await call("progress", {})
+            if progress["stopped_samples"] >= 5:
+                break
+            await call("set_command", {"command": {"twist": [0, 0, 0]}, "max_control_steps": 75})
+            await resume()
+        else:
+            raise AssertionError("Warmup did not establish five actual stopped samples")
 
     try:
         edh = root / ".cache/edh/8a5e685b22d032207f53db20454f0992a4ad60fd"

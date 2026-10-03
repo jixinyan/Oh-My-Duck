@@ -10,6 +10,7 @@ from oh_my_duck.core.contracts.events import EpisodeEvent
 from oh_my_duck.core.contracts.identity import ExecutionDomain, Identity
 from oh_my_duck.core.contracts.sensors import PayloadRef
 from oh_my_duck.experience.jsonl import JsonlEpisodeRecorder
+from oh_my_duck.integrations.native_client import NativeTaskClient
 from oh_my_duck.voice.base import AudioDevice
 from oh_my_duck.voice.remote import RemoteVoiceServices
 
@@ -18,9 +19,11 @@ class VoiceSession:
     def __init__(
         self, device: AudioDevice, services: RemoteVoiceServices, *, persona_id: str,
         robot_id: str, domain: ExecutionDomain, log_path: Path | None,
+        tasks: NativeTaskClient | None = None,
     ):
         self.device = device
         self.services = services
+        self.tasks = tasks
         self.identity = Identity(persona_id, robot_id, domain)
         self.session_id = uuid4().hex
         self.episode_id = uuid4().hex
@@ -61,9 +64,26 @@ class VoiceSession:
 
         task.add_done_callback(completed)
 
-    async def _transcribe(self, request_id: str, audio: PayloadRef, language_hint: str | None) -> None:
+    async def _transcribe(self, request_id: str, audio: PayloadRef, language_hint: str | None,
+                          execute: bool, generation: int) -> None:
         result = await self.services.transcribe(audio, language_hint=language_hint)
         self.emit("voice.transcription.completed", asdict(result), request_id)
+        if execute:
+            async with self._transition:
+                if generation != self._generation:
+                    self.emit("voice.task.discarded", {"text": result.text}, request_id)
+                    return
+                submitted = await self.tasks.submit(result.text)
+                self.emit("voice.task.started", {**submitted, "transcription": asdict(result)}, request_id)
+            run = await self.tasks.wait()
+            self.emit("voice.task.ended", {"run_id": run["id"], "state": run["state"],
+                "verdicts": run["verdicts"], "error": run["error"]}, request_id)
+            if generation != self._generation:
+                return
+            text = {"succeeded": "任务已经完成。", "failed": "任务执行失败，请查看任务记录。",
+                "cancelled": "任务已经中断。", "interrupted": "任务已经中断。",
+                "unknown": "任务状态无法确认，请查看任务记录。"}[run["state"]]
+            await self._speak(request_id, text, generation)
 
     async def _watch_playback(self, playback_id: str, request_id: str, metadata: dict) -> None:
         try:
@@ -155,7 +175,9 @@ class VoiceSession:
                 {"recording_id": recording_id, "audio": self.last_audio.uri,
                  "audio_sha256": self.last_audio.sha256}, request_id,
             )
-        elif command == "transcribe":
+        elif command in {"transcribe", "execute_recording"}:
+            if command == "execute_recording" and self.tasks is None:
+                raise RuntimeError("execute_recording 需要配置原生 Harness session")
             if "audio" in message:
                 audio = PayloadRef(Path(message["audio"]).expanduser().resolve(strict=True).as_uri(), "audio/wav")
             else:
@@ -164,7 +186,8 @@ class VoiceSession:
                 audio = self.last_audio
             self._start_request(
                 request_id, command,
-                self._transcribe(request_id, audio, message.get("language_hint")),
+                self._transcribe(request_id, audio, message.get("language_hint"),
+                    command == "execute_recording", self._generation),
             )
         elif command == "speak":
             if self.device.status()["recording_id"] is not None:
@@ -192,6 +215,10 @@ class VoiceSession:
                         "recording_id": state["recording_id"],
                         "audio": self.last_audio.uri, "audio_sha256": self.last_audio.sha256,
                     })
+                if self.tasks is not None:
+                    robot = await self.tasks.stop()
+                    stopped["robot"] = robot
+                    self.emit("voice.task.stop_confirmed", robot, request_id)
                 self.emit("voice.stopped", stopped, request_id)
         else:
             raise ValueError(f"未知命令: {command}")
@@ -202,6 +229,8 @@ class VoiceSession:
         reader = asyncio.StreamReader()
         transport = None
         try:
+            if self.tasks is not None:
+                await self.tasks.open()
             transport, _protocol = await loop.connect_read_pipe(
                 lambda: asyncio.StreamReaderProtocol(reader), sys.stdin
             )
@@ -242,7 +271,11 @@ class VoiceSession:
                 if self._watchers:
                     await asyncio.gather(*tuple(self._watchers), return_exceptions=True)
             finally:
-                await self.services.close()
+                try:
+                    if self.tasks is not None:
+                        await self.tasks.close()
+                finally:
+                    await self.services.close()
             self.emit("voice.session.closed", self.device.status())
             if self._fatal.done():
                 self._fatal.result()

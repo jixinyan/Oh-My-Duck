@@ -22,6 +22,15 @@ class MotionGuard:
         self.max_control_steps = max_control_steps
         self._history: list[tuple[int, float, float, float]] = []
 
+    def update_command(self, command: Mapping[str, Any], effective_after_sequence: int,
+                       max_control_steps: int) -> None:
+        updated = MotionGuard(command, effective_after_sequence, max_control_steps)
+        if effective_after_sequence < self.effective_after_sequence:
+            raise ValueError("Motion command sequence moved backwards")
+        self.command = updated.command
+        self.effective_after_sequence = updated.effective_after_sequence
+        self.max_control_steps = updated.max_control_steps
+
     def observe(self, sample: Mapping[str, Any]) -> dict[str, Any] | None:
         sequence = sample["sequence"]
         position = sample["body_position_m"]
