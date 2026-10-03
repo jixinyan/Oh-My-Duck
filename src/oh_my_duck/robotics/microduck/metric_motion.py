@@ -55,6 +55,8 @@ class MetricMotion:
                          (self.target[1] - position[1]) * math.sin(self.start_yaw))
             world_velocity = state["body_twist_world"]
             velocity = world_velocity[0] * math.cos(self.start_yaw) + world_velocity[1] * math.sin(self.start_yaw)
+            cross_track = (-(self.target[0] - position[0]) * math.sin(self.start_yaw) +
+                           (self.target[1] - position[1]) * math.cos(self.start_yaw))
             if self.phase == "braking":
                 forward = 0.0
             elif self.robot_model == "groundcontact_rollers":
@@ -63,9 +65,15 @@ class MetricMotion:
                     forward = math.copysign(min(self.speed, 0.3), remaining)
             else:
                 forward = math.copysign(self.speed, remaining)
-            yaw_error = math.atan2(math.sin(self.start_yaw - self.last_yaw),
-                                   math.cos(self.start_yaw - self.last_yaw))
-            return {"twist": [round(forward, 2), 0.0,
+            heading = self.start_yaw
+            lateral = 0.0
+            if self.robot_model == "allcollisions" and self.phase == "moving":
+                heading += math.atan2(math.copysign(1.0, remaining) * cross_track,
+                                      max(0.3, abs(remaining)))
+                lateral = max(-0.3, min(0.3, 2.0 * cross_track))
+            yaw_error = math.atan2(math.sin(heading - self.last_yaw),
+                                   math.cos(heading - self.last_yaw))
+            return {"twist": [round(forward, 2), round(lateral, 2),
                                0.0 if self.phase == "braking" else round(max(-0.6, min(0.6, 1.5 * yaw_error)), 2)]}
         if self.phase == "braking":
             return {"twist": [0.0, 0.0, 0.0]}
@@ -93,11 +101,14 @@ class MetricMotion:
             progress = ((position[0] - self.start_position[0]) * math.cos(self.start_yaw) +
                         (position[1] - self.start_position[1]) * math.sin(self.start_yaw))
             remaining = self.amount - progress
-            reached = error <= 0.025 or self.previous_distance_error * remaining <= 0
+            reached = error <= 0.025 or (self.previous_distance_error * remaining <= 0 and
+                                        error <= self.DISTANCE_TOLERANCE_M)
             if self.robot_model == "allcollisions":
                 velocity = state["body_twist_world"]
                 along_speed = velocity[0] * math.cos(self.start_yaw) + velocity[1] * math.sin(self.start_yaw)
-                reached = reached or abs(remaining) <= max(0.025, 0.18 * abs(along_speed))
+                cross_track = math.sqrt(max(0.0, error ** 2 - remaining ** 2))
+                reached = reached or (cross_track <= 0.025 and
+                                     abs(remaining) <= max(0.025, 0.18 * abs(along_speed)))
             elif self.robot_model == "groundcontact_rollers":
                 velocity = state["body_twist_world"]
                 along_speed = velocity[0] * math.cos(self.start_yaw) + velocity[1] * math.sin(self.start_yaw)
