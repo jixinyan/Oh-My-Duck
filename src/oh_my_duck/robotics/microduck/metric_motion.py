@@ -72,6 +72,8 @@ class MetricMotion:
         if self.robot_model == "groundcontact_rollers":
             angular = 2.0 * (self.target - self.unwrapped_yaw) - 0.5 * state["body_twist"][2]
             limit = min(self.speed, 0.4)
+            if abs(angular) < 0.3:
+                angular = math.copysign(min(limit, 0.3), self.target - self.unwrapped_yaw)
             return {"twist": [0.0, 0.0, round(max(-limit, min(limit, angular)), 2)]}
         return {"twist": [0.2, 0.25, math.copysign(self.speed, self.target - self.unwrapped_yaw)]}
 
@@ -106,7 +108,7 @@ class MetricMotion:
             progress = math.degrees(self.unwrapped_yaw - self.start_yaw)
             reached = error <= 0.5 or self.previous_angle_error * angle_error <= 0
             if self.robot_model == "groundcontact_rollers":
-                reached = reached or error <= self.ANGLE_TOLERANCE_DEG
+                reached = reached or error <= 2.5
             self.previous_angle_error = angle_error
             tolerance = self.ANGLE_TOLERANCE_DEG
         self.result = {"operation": self.operation, "requested": self.amount,

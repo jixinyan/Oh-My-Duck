@@ -121,7 +121,8 @@ class IsaacNewtonBamBackend(CpuMujocoBamBackend):
             sim=SimulationCfg(device=device, dt=0.005, render_interval=4,
                               physics=NewtonCfg(solver_cfg=OfficialTaskSolverCfg(
                                   robot_model=robot_model, iterations=10, ls_iterations=20,
-                                  njmax=5000, nconmax=5000), num_substeps=1)))
+                                  njmax=5000, nconmax=5000), num_substeps=1,
+                                  use_cuda_graph=False)))
         self._launch = launch_simulation(native_cfg, {"headless": True, "device": device})
         self._launch.__enter__()
         self.native = ManagerBasedEnv(native_cfg)
