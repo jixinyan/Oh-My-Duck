@@ -107,8 +107,6 @@ class MetricMotion:
             error = abs(math.degrees(angle_error))
             progress = math.degrees(self.unwrapped_yaw - self.start_yaw)
             reached = error <= 0.5 or self.previous_angle_error * angle_error <= 0
-            if self.robot_model == "groundcontact_rollers":
-                reached = reached or error <= 2.5
             self.previous_angle_error = angle_error
             tolerance = self.ANGLE_TOLERANCE_DEG
         self.result = {"operation": self.operation, "requested": self.amount,
