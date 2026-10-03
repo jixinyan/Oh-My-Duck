@@ -6,7 +6,7 @@
 
 ```bash
 mkdir -p .cache/tmp
-TMPDIR="$PWD/.cache/tmp" uv sync --project environments/voice-client --frozen
+TMPDIR="$PWD/.cache/tmp" uv sync --project environments/voice-client --locked --no-editable
 TMPDIR="$PWD/.cache/tmp" uv sync --project environments/voice-asr --frozen
 TMPDIR="$PWD/.cache/tmp" uv sync --project environments/voice --frozen
 ```
@@ -53,5 +53,31 @@ TMPDIR="$PWD/.cache/tmp" environments/voice-client/.venv/bin/python omd.py voice
 ```
 
 长请求先发出 `voice.request.accepted`，完成后发出转写或播放事件。每个事件包含 session、episode、request 身份与 UTC 时间。`voice.playback.completed` 表示 PortAudio 播放自然完成；`voice.stopped` 在设备停止确认之后发出。录音启动之前会停止当前播放，录音期间的播放请求会报错。中断合成时，即使远端 GPU 已开始推理，过期请求也不会自动播放其结果。音频设备或模型服务错误会写入事件并终止会话，保留现场错误供调用者处理。
+
+## 原生 Harness 任务
+
+`voice-session` 接受完整的 `--harness-url`、`--harness-profile` 和 `--harness-scenario` 参数。打开会话时核对原生 session 的执行领域；`--domain simulation` 要求 simulation，`--domain real` 要求 hardware。服务地址使用本机回环地址。
+
+```bash
+environments/voice-client/.venv/bin/python omd.py voice-session \
+  --persona '语音验收小鸭' --robot-id microduck --domain simulation \
+  --input-device 'MacBook Pro Microphone' --output-device 'MacBook Pro Speakers' \
+  --harness-url http://127.0.0.1:4318 \
+  --harness-profile nvidia-office-6.0 --harness-scenario navigate-nvidia-office-6.0 \
+  --data-dir outputs/voice/session-new --log outputs/voice/session-new/events.jsonl
+```
+
+完成录音后发送 `execute_recording`，也可以通过绝对路径指定已有 WAV：
+
+```json
+{"request_id":"task-1","command":"execute_recording","audio":"/absolute/path/command.wav","language_hint":"Chinese"}
+{"request_id":"stop-1","command":"stop"}
+```
+
+`execute_recording` 将 ASR 文本原样传入原生任务，记录 catalogue digest、run ID、正式 verdict 和音色版本；任务完成后使用已确认音色播放状态反馈。原生 Harness 负责规划、工具选择、执行权限、记忆与独立 Verifier。录音和播音均属于 Microduck 语音模块。
+
+`stop` 同时中断音频请求和原生任务，只有收到 native execution 的终止与 device confirmation 才发出 `voice.task.stop_confirmed` 和 `voice.stopped`。过期合成结果不会播放。物理制动检查由运动工具提供；执行中断记录原生控制边界和动作计数。设备、模型、传输与确认错误会终止会话并保留记录。
+
+文件方式执行完整任务使用 `voice-task`；操作示例和实际结果见[上线验收](release-readiness.md)。2026-10-03 已完成录音文件、Qwen ASR、真实模型、Newton/BAM、正式目标验证和固定音色合成闭环。Microduck 音频设备尚待验证。
 
 设备调用依据 [python-sounddevice Stream API](https://python-sounddevice.readthedocs.io/en/0.5.3/api/streams.html)；HTTP 调用依据 [HTTPX QuickStart](https://www.python-httpx.org/quickstart/)；服务请求与响应依据 [FastAPI Request](https://fastapi.tiangolo.com/advanced/using-request-directly/)及[自定义响应](https://fastapi.tiangolo.com/advanced/custom-response/)。

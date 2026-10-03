@@ -378,9 +378,28 @@ const server = await startServer({
               runSockets.set(options.runId, { port: controlPort, secret: controlSecret });
               const close = backend.close.bind(backend);
               const stop = backend.stop.bind(backend);
+              let latestStatus;
+              const observeStatus = backend.subscribe(({ status }) => {
+                latestStatus = structuredClone(status);
+              });
               backend.stop = async () => {
                 try {
                   await stop();
+                  if (latestStatus && !(latestStatus.state === 'ended' && latestStatus.device_confirmed)) {
+                    await new Promise((resolveStop, rejectStop) => {
+                      const timer = setTimeout(() => {
+                        unsubscribeStop();
+                        rejectStop(new Error('Native execution termination was not confirmed.'));
+                      }, 60_000);
+                      const unsubscribeStop = backend.subscribe(({ status }) => {
+                        if (status.state === 'ended' && status.device_confirmed) {
+                          clearTimeout(timer);
+                          unsubscribeStop();
+                          resolveStop();
+                        }
+                      });
+                    });
+                  }
                 } catch (error) {
                   console.error(error);
                   throw error;
@@ -390,6 +409,7 @@ const server = await startServer({
                 try {
                   await close();
                 } finally {
+                  observeStatus();
                   runSockets.delete(options.runId);
                 }
               };

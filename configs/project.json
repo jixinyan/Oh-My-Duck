@@ -3,6 +3,22 @@
   "name": "Oh My Duck",
   "scope": "Agentic Microduck: training, skills, perception, voice and traceable experience",
   "entry_point": "omd.py",
+  "release_readiness": {
+    "state": "acceptance_in_progress",
+    "report": "docs/reports/end-to-end-2026-10-03.md",
+    "native_voice_task": "5dfb18d9-b31b-4226-bc94-9391ddd847ac",
+    "native_voice_task_state": "succeeded",
+    "native_target_error_m": 0.090916,
+    "standard_feet_metric_distance_error_m": 0.024196026,
+    "standard_feet_metric_angle_error_deg": 0.522913718,
+    "runtime_doctor": "passed_voice_client_and_newton",
+    "package_build": "passed_wheel_and_sdist",
+    "voice_profile_tests": "10_passed",
+    "video": "outputs/demos/oh-my-duck-voice-native-20261003-verified.mp4",
+    "video_sha256": "d5e3f9ff1ffa380147e755d10fecacb0ca1f63227dc5f4a6a54be0da66380fe8",
+    "pending": ["active_task_interruption", "roller_metric_precision", "hardware_acceptance"],
+    "rl_training": "stopped"
+  },
   "components": {
     "contracts": {
       "module": "oh_my_duck.core.contracts",
@@ -31,8 +47,8 @@
     },
     "voice": {
       "module": "oh_my_duck.voice",
-      "state": "qwen_http_mac_audio_voice_session_playback_and_stop_verified",
-      "role": "Qwen ASR/TTS over HTTP with confirmed voice profiles and Mac audio capture; VoiceSession normal playback, active playback stop, and no late playback after GPU synthesis stop verified; Microduck audio hardware and Harness integration pending"
+      "state": "recorded_qwen_native_harness_newton_task_and_fixed_voice_verified",
+      "role": "Recorded Qwen ASR, actual native model task, Newton/BAM policy actions, independent Verifier and confirmed voice feedback verified; Mac audio checks separate; active task interruption and Microduck audio hardware pending"
     },
     "recording": {
       "module": "oh_my_duck.experience",

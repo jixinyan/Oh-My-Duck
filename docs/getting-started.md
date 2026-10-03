@@ -3,6 +3,9 @@
 The [README](../README.md) describes the whole project; [implementation status](implementation-status.md)
 records measured progress. All first-party code is under `src/oh_my_duck`.
 
+The [release readiness guide](release-readiness.md) covers recorded voice,
+native agent execution, official policies and the required acceptance evidence.
+
 ## Prepare isolated dependencies
 
 ```bash
@@ -23,7 +26,9 @@ environments. See [Newton details](isaac-newton.md) for dependency and physics g
 
 Single-GPU development, training and evaluation run directly on this host. Select a
 GPU explicitly with `CUDA_VISIBLE_DEVICES` when needed. Every output directory and
-run name must be new; W&B stays offline.
+run name must be new. W&B uses the mode in `configs/training.json` and the verified
+`oh-my-duck` account; `WANDB_MODE` can explicitly select the mode. Current RL
+training is stopped and requires a new user instruction to resume.
 
 ```bash
 CUDA_VISIBLE_DEVICES=0 python omd.py train --backend mujoco --rl-framework rsl-rl -- Mjlab-Velocity-Flat-MicroDuck --env.scene.num-envs 64 --agent.max-iterations 5 --agent.run-name walk_smoke

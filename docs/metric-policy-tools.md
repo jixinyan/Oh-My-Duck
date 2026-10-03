@@ -4,8 +4,8 @@
 
 | 工具 | 参数 | 物理执行与测量 |
 |---|---|---|
-| `microduck.walk` | `distance_m`；可选 `speed_m_s` | 自动选择 `alpha_walking`，沿调用时的身体朝向前进或后退；检查停止后与目标坐标的距离 |
-| `microduck.rotate` | `angle_deg`；可选 `angular_speed_deg_s` | 使用 `alpha_walking` 执行带平移的转向；累计实际 yaw，检查停止后的角度误差，返回 `translation_xy_m` |
+| `microduck.walk` | `distance_m`；可选 `speed_m_s` | 标准脚模型选择 `alpha_walking`，轮滑模型选择 `roller`；沿调用时的身体朝向前进或后退，检查停止后的目标距离 |
+| `microduck.rotate` | `angle_deg`；可选 `angular_speed_deg_s` | 选择当前模型对应的 locomotion policy；累计实际 yaw，检查停止后的角度误差，返回 `translation_xy_m` |
 | `microduck.select_policy` | `policy_name` | 在确认暂停且具有五个实际停止样本时选择 manifest policy |
 | `microduck.transition_policy` | `policy_name` | 在原生 episodic 结束边界接续 policy，保留身体位姿、速度和上一动作 |
 | `microduck.read_sensor` | `sensor` | 读取 `head_rgb`、`tof`、`imu`、`joint_state` 或 `odometry` |
@@ -18,6 +18,8 @@
 `task_progress.metric_motion` 包含 `requested`、`measured`、`unit`、`error`、`tolerance`、`phase`、`completed` 和原生 `sequence`。转向同时返回实际平移距离。障碍或停滞产生 `blocked`，停止后超出误差要求产生 `failed`，用户中断产生 `interrupted`。只有经过测量的目标与停止条件同时满足时，才返回 `completed=true`。目标动作结束后，`finish_policy` 仍检查确认边界与零命令停止证据；正式任务由独立 Verifier 判定。
 
 官方 catalog 保留十个 policy 的文件 hash、命令编码与执行条件。当前 `allcollisions` 机器人通过统一工具接口接入八个 policy；`roller` 与 `crouch` 要求对应的 roller 机器人模型。拾取、踢球、翻滚等物体效果需要各自的物理检查。距离和角度行为验证范围见[验证记录](reports/metric-camera-tools-2026-09-30.md)。
+
+2026-10-03 的标准脚模型实际检查覆盖 0.5 米与 45°：停止后的距离误差为 0.024196 米，角度误差为 0.522914°，均具有五个停止样本。转向同时产生 0.208189 米平移。控制器使用实际速度估计停止距离，每个控制步更新命令，目标停止后最多进行三次距离或角度修正。停滞检查分别记录运动与制动阶段，运动阶段的命令更新保留连续测量历史。见[验收记录](reports/end-to-end-2026-10-03.md)。
 
 两个仿真后端共用工具与控制器，odometry 分别来自当前 MuJoCo 或 Newton 物理状态。真机后端需要提供同单位的位姿、速度与停止证据，目前没有真机行为验证。
 

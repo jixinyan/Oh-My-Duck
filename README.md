@@ -7,7 +7,8 @@
 [![Status: active development](https://img.shields.io/badge/status-active_development-blue)](docs/implementation-status.md)
 [![RL behavior: pending](https://img.shields.io/badge/RL_behavior-pending-orange)](docs/reports/rl-walking-low-speed-launch-2026-09-29.md)
 [![Recorded CPU checks: 55 passed on 2026-09-23](https://img.shields.io/badge/recorded_CPU_checks-55_passed-2ea44f)](docs/reports/project-status-2026-09-23.md)
-[![Voice: Mac audio verified](https://img.shields.io/badge/voice-Mac_audio_verified-green)](docs/reports/voice-interaction-validation-2026-09-29.md)
+[![Voice: native task verified](https://img.shields.io/badge/voice-native_task_verified-green)](docs/reports/end-to-end-2026-10-03.md)
+[![Release: acceptance in progress](https://img.shields.io/badge/release-acceptance_in_progress-blue)](docs/release-readiness.md)
 [![Isaac Office: agentic navigation verified](https://img.shields.io/badge/Isaac_Office-agentic_navigation_verified-green)](docs/reports/metric-camera-tools-2026-09-30.md)
 [![Isaac Hospital: roller and crouch verified](https://img.shields.io/badge/Isaac_Hospital-roller_and_crouch_verified-green)](docs/reports/multiskill-demos-2026-10-01.md)
 [![Office policy tools: meters and degrees verified](https://img.shields.io/badge/Office_policy_tools-meters_and_degrees_verified-green)](docs/metric-policy-tools.md)
@@ -74,7 +75,7 @@ Training and evaluation run headlessly. `omd preview` creates checkpoint videos 
 
 Voice setup is a deliberate choice: **describe → generate → listen → confirm → save**. Daily TTS uses the active voice profile; restarting or switching execution backends does not silently choose a new voice.
 
-Qwen3 ASR, VoiceDesign and Base TTS have been verified on the target GPU with WAV files. The command-line flow generates a candidate, saves it after explicit confirmation, and reuses the same voice profile across processes. A Mac speaker and microphone completed real playback and recording through the HTTP voice services; stopping a session during GPU synthesis prevented late playback. Separate CPU service checks verified a complete `VoiceSession.speak` playback and stopping after playback began. The microphone recording returned “您好，我是小丫。我们现在检查语音连接。” for the synthesized text “你好，我是小鸭。我们现在检查语音连接。” Microduck audio hardware and Harness integration remain open. See [voice usage](docs/voice-profiles.md), [Mac audio validation](docs/reports/voice-interaction-validation-2026-09-29.md), and [GPU validation](docs/reports/voice-validation-2026-09-26.md).
+Qwen3 ASR, VoiceDesign and Base TTS use confirmed voice profiles across processes. Recorded speech now runs through the native Harness, actual model tools, official policies, Newton/BAM, independent Verifier and fixed-voice feedback. The verified Office task completed 480 control steps with a final target error of 0.090916 m. A 91.4-second agentic MP4 includes actual simulation views, public task trace, recorded instruction and synthesized feedback. `voice-task` runs this file-based workflow; `voice-session` provides device recording, playback and native task submission. Mac microphone and speaker behavior has separate verification. Microduck audio hardware remains pending. See [voice interaction](docs/voice-interaction.md), [acceptance evidence](docs/reports/end-to-end-2026-10-03.md), and [release readiness](docs/release-readiness.md).
 
 Episodes preserve what was heard, observed, requested, executed and spoken—including cancellation and partial playback. Simulation and real-world experiences remain labeled separately. The external harness decides how to summarize and retrieve this evidence.
 
