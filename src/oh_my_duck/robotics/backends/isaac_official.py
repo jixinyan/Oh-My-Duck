@@ -51,6 +51,7 @@ class IsaacNewtonBamBackend(CpuMujocoBamBackend):
         from isaaclab_newton.physics import NewtonCfg
         from isaaclab_newton.physics.newton_manager import NewtonManager
         from isaaclab_newton.renderers import NewtonWarpRendererCfg
+        from mjlab.sim import MujocoCfg, SimulationCfg as TaskSimulationCfg
         from oh_my_duck.rl.backends.isaac_newton.bam_actuator import OfficialBamActuatorCfg
         from oh_my_duck.rl.backends.isaac_newton.config import SceneCfg
         from oh_my_duck.rl.backends.isaac_newton.paths import require_asset
@@ -59,8 +60,6 @@ class IsaacNewtonBamBackend(CpuMujocoBamBackend):
         from oh_my_duck.rl.backends.isaac_newton.task_binding.entity import NewtonEntity
         from oh_my_duck.rl.backends.isaac_newton.task_binding.manager import OfficialTaskSolverCfg
         from oh_my_duck.rl.backends.isaac_newton.task_binding.simulation import NewtonSimulation
-        from oh_my_duck.rl.tasks.recipes import build_environment
-        from oh_my_duck.rl.training.tasks import project_tasks
         from oh_my_duck.rl.backends.isaac_newton.asset_names import get_isaac_allcollisions_cfg, get_isaac_rollers_cfg
 
         if not device.startswith("cuda:") or not torch.cuda.is_available():
@@ -88,9 +87,8 @@ class IsaacNewtonBamBackend(CpuMujocoBamBackend):
         self._owner_thread = threading.get_ident()
         self._stop_requested = threading.Event()
         self._renderer = self._observer_renderer = None
-        task = project_tasks().get("Mjlab-Velocity-Flat-MicroDuck")
-        recipe = build_environment(task.binding("isaac-newton"), play=True)
-        recipe.scene.num_envs = 1
+        task_sim_cfg = TaskSimulationCfg(nconmax=35, njmax=1500,
+            mujoco=MujocoCfg(timestep=0.005, iterations=10, ls_iterations=20))
         scene = SceneCfg(num_envs=1, env_spacing=1.0)
         scene.terrain = None
         scene.environment = AssetBaseCfg(
@@ -121,12 +119,11 @@ class IsaacNewtonBamBackend(CpuMujocoBamBackend):
             sim=SimulationCfg(device=device, dt=0.005, render_interval=4,
                               physics=NewtonCfg(solver_cfg=OfficialTaskSolverCfg(
                                   robot_model=robot_model, iterations=10, ls_iterations=20,
-                                  njmax=5000, nconmax=5000), num_substeps=1,
-                                  use_cuda_graph=False)))
+                                  njmax=5000, nconmax=5000), num_substeps=1)))
         self._launch = launch_simulation(native_cfg, {"headless": True, "device": device})
         self._launch.__enter__()
         self.native = ManagerBasedEnv(native_cfg)
-        self.sim = NewtonSimulation(self.native, recipe.sim)
+        self.sim = NewtonSimulation(self.native, task_sim_cfg)
         self.robot = NewtonEntity(factories[robot_model](),
                                   self.native.scene["robot"], self.sim)
         self._servo_joint_ids = [self.robot.joint_names.index(name) for name in JOINT_NAMES]
