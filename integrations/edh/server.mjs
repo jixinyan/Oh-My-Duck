@@ -378,11 +378,13 @@ const server = await startServer({
               runSockets.set(options.runId, { port: controlPort, secret: controlSecret });
               const close = backend.close.bind(backend);
               const stop = backend.stop.bind(backend);
+              const subscribe = backend.subscribe.bind(backend);
               let latestStatus;
-              const observeStatus = backend.subscribe(({ status }) => {
+              let stopPromise;
+              const observeStatus = subscribe(({ status }) => {
                 latestStatus = structuredClone(status);
               });
-              backend.stop = async () => {
+              const stopConfirmed = async () => {
                 try {
                   await stop();
                   if (latestStatus && !(latestStatus.state === 'ended' && latestStatus.device_confirmed)) {
@@ -391,7 +393,7 @@ const server = await startServer({
                         unsubscribeStop();
                         rejectStop(new Error('Native execution termination was not confirmed.'));
                       }, 60_000);
-                      const unsubscribeStop = backend.subscribe(({ status }) => {
+                      const unsubscribeStop = subscribe(({ status }) => {
                         if (status.state === 'ended' && status.device_confirmed) {
                           clearTimeout(timer);
                           unsubscribeStop();
@@ -405,8 +407,20 @@ const server = await startServer({
                   throw error;
                 }
               };
+              backend.stop = () => {
+                stopPromise ??= stopConfirmed();
+                return stopPromise;
+              };
+              backend.subscribe = (listener) => {
+                const unsubscribe = subscribe(listener);
+                return async () => {
+                  await backend.stop();
+                  unsubscribe();
+                };
+              };
               backend.close = async () => {
                 try {
+                  await backend.stop();
                   await close();
                 } finally {
                   observeStatus();
