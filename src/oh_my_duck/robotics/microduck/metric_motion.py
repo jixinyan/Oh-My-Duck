@@ -20,6 +20,8 @@ class MetricMotion:
         self.result: dict[str, Any] | None = None
         self.request_id: str | None = None
         self.correction_attempts = 0
+        self.rotation_settling_delta = 0.0
+        self.rotation_braking_yaw = None
         self.robot_model = robot_model
         if operation == "walk":
             self.amount = self._number(arguments, "distance_m", -10, 10)
@@ -83,7 +85,7 @@ class MetricMotion:
             if abs(angular) < 0.3:
                 angular = math.copysign(min(limit, 0.3), self.target - self.unwrapped_yaw)
             return {"twist": [0.0, 0.0, round(max(-limit, min(limit, angular)), 2)]}
-        remaining = self.target - self.unwrapped_yaw
+        remaining = self.target - self.rotation_settling_delta - self.unwrapped_yaw
         toward_speed = math.copysign(1.0, remaining) * state["body_twist"][2]
         angular = max(min(self.speed, 0.2), min(self.speed, 2.0 * abs(remaining) - 0.25 * toward_speed))
         return {"twist": [0.2, 0.25, round(math.copysign(angular, remaining), 2)]}
@@ -102,7 +104,8 @@ class MetricMotion:
                         (position[1] - self.start_position[1]) * math.sin(self.start_yaw))
             remaining = self.amount - progress
             reached = error <= 0.025 or (self.previous_distance_error * remaining <= 0 and
-                                        error <= self.DISTANCE_TOLERANCE_M)
+                                        (self.robot_model != "allcollisions" or
+                                         error <= self.DISTANCE_TOLERANCE_M))
             if self.robot_model == "allcollisions":
                 velocity = state["body_twist_world"]
                 along_speed = velocity[0] * math.cos(self.start_yaw) + velocity[1] * math.sin(self.start_yaw)
@@ -120,8 +123,9 @@ class MetricMotion:
             angle_error = self.target - self.unwrapped_yaw
             error = abs(math.degrees(angle_error))
             progress = math.degrees(self.unwrapped_yaw - self.start_yaw)
-            reached = error <= 0.5 or self.previous_angle_error * angle_error <= 0
-            self.previous_angle_error = angle_error
+            aim_error = angle_error - self.rotation_settling_delta
+            reached = abs(math.degrees(aim_error)) <= 0.5 or self.previous_angle_error * aim_error <= 0
+            self.previous_angle_error = aim_error
             tolerance = self.ANGLE_TOLERANCE_DEG
         self.result = {"operation": self.operation, "requested": self.amount,
                        "request_id": self.request_id,
@@ -138,14 +142,21 @@ class MetricMotion:
             self.phase = "failed"
         elif self.phase == "moving" and reached:
             self.phase = "braking"
+            if self.operation == "rotate":
+                self.rotation_braking_yaw = self.unwrapped_yaw
         elif self.phase == "braking" and stopped_samples >= 5:
             if error <= tolerance:
                 self.phase = "complete"
             elif self.correction_attempts < 3:
                 self.correction_attempts += 1
+                if self.operation == "rotate" and self.robot_model == "allcollisions":
+                    self.rotation_settling_delta = self.unwrapped_yaw - self.rotation_braking_yaw
+                    self.previous_angle_error = self.target - self.rotation_settling_delta - self.unwrapped_yaw
                 self.phase = "moving"
             else:
                 self.phase = "failed"
         self.result.update(phase=self.phase, completed=self.phase == "complete",
                            correction_attempts=self.correction_attempts)
+        if self.operation == "rotate":
+            self.result["measured_settling_delta_deg"] = math.degrees(self.rotation_settling_delta)
         return self.result
