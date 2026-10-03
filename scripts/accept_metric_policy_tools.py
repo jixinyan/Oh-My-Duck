@@ -82,7 +82,9 @@ async def run(args):
         progress = await call("progress", {})
         if progress["stopped_samples"] < 5 or progress["fallen"]:
             raise AssertionError("Warmup did not establish five actual upright stopped samples")
-        for operation, parameters in (("walk", {"distance_m": args.distance}), ("rotate", {"angle_deg": args.angle})):
+        operations = {"walk": {"distance_m": args.distance}, "rotate": {"angle_deg": args.angle}}
+        for operation in args.operations:
+            parameters = operations[operation]
             phase = operation
             await call(operation, parameters)
             await resume()
@@ -113,6 +115,7 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--distance", type=float, default=0.4)
     parser.add_argument("--angle", type=float, default=45)
+    parser.add_argument("--operations", nargs="+", choices=("walk", "rotate"), default=["walk", "rotate"])
     asyncio.run(run(parser.parse_args()))
 
 

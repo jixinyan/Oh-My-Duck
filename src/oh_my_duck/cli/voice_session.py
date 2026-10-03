@@ -35,7 +35,8 @@ def main() -> int:
     )
     services = RemoteVoiceServices(args.asr_url, args.tts_url, args.data_dir / "speech")
     tasks = None if not all(harness_arguments) else NativeTaskClient(
-        *harness_arguments, args.data_dir / "tasks" / uuid4().hex)
+        *harness_arguments, args.data_dir / "tasks" / uuid4().hex,
+        expected_source="simulation" if args.domain == "simulation" else "hardware")
     try:
         asyncio.run(VoiceSession(
             device, services, persona_id=args.persona, robot_id=args.robot_id,

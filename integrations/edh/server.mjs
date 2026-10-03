@@ -371,6 +371,15 @@ const server = await startServer({
               const backend = await native.createTaskBackend(taskId, options);
               runSockets.set(options.runId, { port: controlPort, secret: controlSecret });
               const close = backend.close.bind(backend);
+              const stop = backend.stop.bind(backend);
+              backend.stop = async () => {
+                try {
+                  await stop();
+                } catch (error) {
+                  console.error(error);
+                  throw error;
+                }
+              };
               backend.close = async () => {
                 try {
                   await close();

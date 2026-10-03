@@ -11,7 +11,8 @@ TERMINAL_STATES = {"succeeded", "failed", "cancelled", "interrupted", "unknown"}
 
 
 class NativeTaskClient:
-    def __init__(self, url: str, profile_id: str, scenario: str, output: Path):
+    def __init__(self, url: str, profile_id: str, scenario: str, output: Path,
+                 expected_source: str | None = None):
         endpoint = httpx.URL(url)
         if (endpoint.scheme != "http" or endpoint.host not in {"127.0.0.1", "localhost"}
                 or endpoint.username or endpoint.password or endpoint.query or endpoint.fragment
@@ -20,6 +21,9 @@ class NativeTaskClient:
         if not profile_id.strip() or not scenario.strip():
             raise ValueError("profile_id 和 scenario 必须有内容")
         self.profile_id, self.scenario = profile_id, scenario
+        if expected_source not in {None, "simulation", "hardware"}:
+            raise ValueError("expected_source 必须是 simulation 或 hardware")
+        self.expected_source = expected_source
         self.output = output.resolve()
         self.output.mkdir(parents=True, exist_ok=False)
         self._client = httpx.AsyncClient(base_url=str(endpoint).rstrip("/"), trust_env=False,
@@ -34,6 +38,9 @@ class NativeTaskClient:
 
     async def _request(self, method, route, body=None):
         response = await self._client.request(method, route, **({} if body is None else {"json": body}))
+        if response.is_error:
+            self._save(f"http-{uuid4().hex}-error.json", {"method": method, "route": route,
+                "status": response.status_code, "response": response.json()})
         response.raise_for_status()
         return response.json()
 
@@ -44,13 +51,17 @@ class NativeTaskClient:
             {"profileId": self.profile_id, "requestId": str(uuid4())})
         self.session_id = record["id"]
         self._save("session.json", record)
+        source = record["configuration"]["mode"]
+        if source not in {"simulation", "hardware"} or self.expected_source not in {None, source}:
+            raise ValueError("Harness session 与所选执行领域不一致")
         return record
 
     async def status(self):
         if self.run_id is None:
             raise RuntimeError("尚未提交 Harness task")
         run = await self._request("GET", f"/api/runs/{quote(self.run_id, safe='')}?events=none")
-        if run["id"] != self.run_id or run["source"] not in {"simulation", "hardware"}:
+        if (run["id"] != self.run_id or run["source"] not in {"simulation", "hardware"}
+                or self.expected_source not in {None, run["source"]}):
             raise ValueError("Harness task 身份或来源不一致")
         self._save(f"{self.run_id}-status.json", run)
         return run

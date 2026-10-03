@@ -59,6 +59,8 @@ class MetricMotion:
                 forward = 0.0
             elif self.robot_model == "groundcontact_rollers":
                 forward = max(-self.speed, min(self.speed, 2.0 * remaining - 1.5 * velocity))
+                if abs(forward) < 0.2:
+                    forward = math.copysign(min(self.speed, 0.2), remaining)
             else:
                 forward = math.copysign(self.speed, remaining)
             yaw_error = math.atan2(math.sin(self.start_yaw - self.last_yaw),
@@ -91,6 +93,11 @@ class MetricMotion:
                 velocity = state["body_twist_world"]
                 along_speed = velocity[0] * math.cos(self.start_yaw) + velocity[1] * math.sin(self.start_yaw)
                 reached = reached or abs(remaining) <= max(0.025, 0.18 * abs(along_speed))
+            elif self.robot_model == "groundcontact_rollers":
+                velocity = state["body_twist_world"]
+                along_speed = velocity[0] * math.cos(self.start_yaw) + velocity[1] * math.sin(self.start_yaw)
+                reached = reached or (remaining * along_speed > 0 and
+                                     abs(remaining) <= max(0.025, abs(along_speed)))
             self.previous_distance_error = remaining
             tolerance = self.DISTANCE_TOLERANCE_M
         else:
