@@ -29,7 +29,7 @@ def main():
     parser.add_argument("--catalog", type=Path)
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
-    root = project_root()
+    root = project_root() if args.runtime == "isaac-newton" or args.scene_config is not None else None
     result = {"scope": "Installed runtime and asset/service readiness; behavioral acceptance separate",
         "runtime": args.runtime, "checks": {}}
     checks = result["checks"]

@@ -40,6 +40,8 @@ async def run(args):
                         break
                     if before["state"] in {"succeeded", "failed", "cancelled", "interrupted", "unknown"}:
                         raise AssertionError("Task ended before an active-motion interruption")
+                    if before["clarification"] is not None:
+                        raise AssertionError("Task requested clarification before active-motion interruption")
                     await asyncio.sleep(0.1)
             await session.send("operator-stop", "stop")
             stopped = await session.next("voice.stopped")
@@ -64,7 +66,7 @@ async def run(args):
         if any(event["kind"] == "voice.playback.started" and event["request_id"] == "voice-command"
                 for event in session.events):
             raise AssertionError("Interrupted task feedback was played")
-        result = {"passed": True, "scope": "Actual Qwen ASR, model task, Newton actions and native execution interruption",
+        result = {"passed": True, "scope": "Actual Qwen ASR, model task, simulation actions and native execution interruption",
             "input_source": "Provided recorded WAV; live microphone capture separate",
             "physical_braking": "Metric tool stopping acceptance is separate from execution-clock interruption",
             "transcription": transcription, "before": before, "stop": stopped, "after": after,
