@@ -44,6 +44,7 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--gpu", type=int)
     args = parser.parse_args()
+    args.output = args.output.resolve()
     root = Path(__file__).resolve().parents[1]
     plan = json.loads(args.plan.read_text())
     Draft202012Validator(PLAN_SCHEMA).validate(plan)
@@ -72,12 +73,17 @@ def main():
     args.output.mkdir(parents=True, exist_ok=False)
     record = {"passed": False, "suite": args.suite, "backend": backend,
               "physical_gpu": args.gpu,
-              "plan_sha256": hashlib.sha256(args.plan.read_bytes()).hexdigest(), "cases": []}
+              "plan_sha256": hashlib.sha256(args.plan.read_bytes()).hexdigest(),
+              "planned_cases": len(cases), "cases": []}
+    destination_record = args.output / "campaign.json"
+    destination_record.write_text(json.dumps(record, indent=2) + "\n")
     try:
         for case in cases:
             destination = args.output / case["id"]
-            entry = {"case": case, "passed": False, "result": str(destination / "result.json")}
+            entry = {"case": case, "passed": False, "state": "running",
+                     "result": str(destination / "result.json")}
             record["cases"].append(entry)
+            destination_record.write_text(json.dumps(record, indent=2) + "\n")
             command = [sys.executable, str(root / "scripts/accept_metric_policy_tools.py"),
                        "--scene-config", str(scene), "--catalog", str(args.catalog.resolve(strict=True)),
                        "--output", str(destination), "--seed", str(case["seed"]),
@@ -92,8 +98,9 @@ def main():
             result = json.loads(result_path.read_text())
             if not result["passed"] or not result["resources_released"]:
                 raise AssertionError("Metric case requires physical acceptance and resource release")
-            entry.update(passed=True, result_sha256=hashlib.sha256(result_path.read_bytes()).hexdigest(),
+            entry.update(passed=True, state="passed", result_sha256=hashlib.sha256(result_path.read_bytes()).hexdigest(),
                          measurements=result["measurements"])
+            destination_record.write_text(json.dumps(record, indent=2) + "\n")
             print(json.dumps({"case": case["id"], "passed": True,
                               "errors": [item["evidence"]["error"] for item in result["measurements"]]}), flush=True)
         record["passed"] = True
@@ -101,7 +108,9 @@ def main():
         error = sys.exception()
         if error is not None:
             record["failure"] = {"type": type(error).__name__, "message": str(error)}
-        (args.output / "campaign.json").write_text(json.dumps(record, indent=2) + "\n")
+            if record["cases"] and not record["cases"][-1]["passed"]:
+                record["cases"][-1]["state"] = "failed"
+        destination_record.write_text(json.dumps(record, indent=2) + "\n")
 
 
 if __name__ == "__main__":

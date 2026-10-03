@@ -23,15 +23,14 @@ class TofRangePhysicsTests(unittest.TestCase):
         measurements = []
         for _ in range(100):
             distances, statuses = tof_frame(model, data, model.site("tof").id,
-                                        directions=np.array([[1.0, 0.0, 0.0]]),
-                                        max_range_m=maximum, rng=generator)
+                                            directions=np.array([[1.0, 0.0, 0.0]]),
+                                            max_range_m=maximum, rng=generator)
             self.assertEqual(statuses, [5])
             self.assertGreaterEqual(distances[0], 0)
             self.assertLessEqual(distances[0], int(maximum * 1000))
             measurements.extend(distances)
         self.assertEqual(max(measurements), int(maximum * 1000))
         self.assertLess(min(measurements), int(maximum * 1000))
-
 
     def test_actual_surface_beyond_sensor_range_reports_no_target(self):
         model = mujoco.MjModel.from_xml_string("""<mujoco><worldbody>
@@ -42,8 +41,8 @@ class TofRangePhysicsTests(unittest.TestCase):
         data = mujoco.MjData(model)
         mujoco.mj_forward(model, data)
         distances, statuses = tof_frame(model, data, model.site("tof").id,
-                                    directions=np.array([[1.0, 0.0, 0.0]]),
-                                    rng=np.random.default_rng(20261003))
+                                        directions=np.array([[1.0, 0.0, 0.0]]),
+                                        rng=np.random.default_rng(20261003))
         self.assertEqual(distances, [0])
         self.assertEqual(statuses, [255])
 

@@ -2,6 +2,7 @@ import argparse
 import asyncio
 import base64
 import hashlib
+from importlib.metadata import version
 import json
 import os
 from pathlib import Path
@@ -24,6 +25,9 @@ def provenance(root, args, configuration):
             "scene_config_sha256": hashlib.sha256(args.scene_config.read_bytes()).hexdigest(),
             "policy_revision": OFFICIAL_REVISION,
             "catalog_manifest_sha256": hashlib.sha256((args.catalog / "manifest.json").read_bytes()).hexdigest(),
+            "runtime_versions": {name: version(name) for name in
+                                 ("mujoco", "better-actuator-models", "onnxruntime", "numpy")},
+            "python_version": sys.version,
             "cuda_visible_devices": os.environ.get("CUDA_VISIBLE_DEVICES"),
             "configuration": {key: value for key, value in configuration.items()
                               if key != "control_secret"},
