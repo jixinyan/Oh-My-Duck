@@ -16,7 +16,13 @@
     "voice_profile_tests": "10_passed",
     "video": "outputs/demos/oh-my-duck-voice-native-20261003-verified.mp4",
     "video_sha256": "d5e3f9ff1ffa380147e755d10fecacb0ca1f63227dc5f4a6a54be0da66380fe8",
-    "pending": ["active_task_interruption", "roller_metric_precision", "hardware_acceptance"],
+    "voice_interruption_cpu": "passed_4a4b3357-257c-40d0-a4e5-00bb2d1e2830",
+    "voice_interruption_newton": "passed_21ff8bf8-cd08-414f-ab88-14dc6d9a9659",
+    "newton_process_initialization": "passed_native_180_second_budget_office_existing_kernel_cache",
+    "roller_metric_distance_error_m": 0.0183367995,
+    "roller_metric_angle_error_deg": 3.893902414,
+    "demo_environment": "locked_and_actual_render_decode_passed",
+    "pending": ["hardware_acceptance", "multi_scene_navigation_generalization", "image_only_vln", "perception_accuracy", "object_interaction_acceptance", "trained_policy_behavior_acceptance", "fresh_install_kernel_compilation"],
     "rl_training": "stopped"
   },
   "components": {
@@ -28,7 +34,7 @@
     "robot_backends": {
       "module": "oh_my_duck.robotics.backends",
       "state": "cpu_apartment_newton_office_navigation_and_hospital_roller_crouch_verified",
-      "role": "Actual Newton Office ordered-route navigation and Hospital roller/crouch destination task verified; strict endpoint precision, multi-scene generalization and hardware pending"
+      "role": "Actual Newton Office ordered-route navigation, Hospital roller/crouch destination task and fixed-scene 0.5m/45deg metric commands verified; other command settings, multi-scene generalization and hardware pending"
     },
     "skills": {
       "module": "oh_my_duck.agentic.skills",
@@ -48,7 +54,7 @@
     "voice": {
       "module": "oh_my_duck.voice",
       "state": "recorded_qwen_native_harness_newton_task_and_fixed_voice_verified",
-      "role": "Recorded Qwen ASR, actual native model task, Newton/BAM policy actions, independent Verifier and confirmed voice feedback verified; Mac audio checks separate; active task interruption and Microduck audio hardware pending"
+      "role": "Recorded Qwen ASR, actual native model task, Newton/BAM policy actions, independent Verifier and confirmed voice feedback verified; actual CPU and Newton policy task interruption, session cleanup and no late playback verified; Microduck audio hardware pending"
     },
     "recording": {
       "module": "oh_my_duck.experience",

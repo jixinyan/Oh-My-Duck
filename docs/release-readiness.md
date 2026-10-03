@@ -30,13 +30,35 @@ environments/voice-client/.venv/bin/python omd.py voice-task \
 
 Acceptance requires a real native model task, actual pretrained policy actions, current sensor observations, a passed independent Verifier result, confirmed execution termination and session cleanup. Metric motion checks also require measured distance/angle error and five upright stopped samples. Operator interruption must confirm the native execution boundary and demonstrate that control and physics counters remain unchanged afterwards. Physical braking and execution-clock interruption are recorded separately.
 
+## Record the agentic video
+
+Keep the native server running while exporting the completed task. Use the run ID from the voice result, the matching server data directory, and new output paths:
+
+```bash
+TMPDIR="$PWD/.cache/tmp" uv sync --project environments/demo --locked
+environments/demo/.venv/bin/python scripts/record_harness_demo.py export --base-url http://127.0.0.1:4318 \
+  --run-id RUN_ID --data-directory .cache/harness-data --output outputs/demos/run-new
+environments/demo/.venv/bin/python scripts/render_microduck_run.py --export outputs/demos/run-new \
+  --output outputs/demos/run-new-silent.mp4 --review-dir outputs/demos/run-new-review
+environments/demo/.venv/bin/python scripts/add_voice_to_demo.py --video outputs/demos/run-new-silent.mp4 \
+  --voice-result outputs/acceptance/voice-task-new/result.json \
+  --instruction-audio /absolute/path/command.wav --output outputs/demos/run-new-voice.mp4
+```
+
+The renderer uses actual public events and source camera images. The audio step checks both WAV hashes against the task result, requires a successful native run with a passed Verifier result, and fully decodes the finished MP4. The generated manifest preserves source and output hashes, model identity and voice profile revision. The isolated `environments/demo` dependencies are locked; the renderer also requires `ffmpeg` and `ffprobe` on PATH. Supply `--font /absolute/path/unicode.ttf` on Linux for a font that covers the trace text; macOS uses Arial Unicode by default.
+
 ## Evidence available on 2026-10-03
 
 | Capability | Evidence | Scope |
 |---|---|---|
 | Recorded speech → native agent → Newton → Verifier → fixed voice | Run `5dfb18d9-b31b-4226-bc94-9391ddd847ac`, succeeded; target error 0.090916 m; 480 control steps | NVIDIA Office, one seed, simulator ground truth |
 | Standard-foot metric tools | 0.5 m request: 0.024196 m final error; 45° request: 0.522914° error; five stopped samples | Official `alpha_walking`, Newton/BAM and native ActionGate |
+| Roller metric tools | 0.5 m request: 0.018337 m final error; 45° request: 3.893902° error; five stopped samples | Official `roller`, Hospital, one seed; zero external-contact samples |
 | Runtime readiness | Local voice client and remote Newton doctor passed | Installed dependencies, actual model services, scene assets and ten-policy catalogue |
 | Agentic video with speech | 91.4 s, 1920 × 1080 MP4, full decoding passed | Actual public events and camera frames; recorded input and confirmed-voice feedback |
+| Voice task interruption | CPU run `4a4b3357-257c-40d0-a4e5-00bb2d1e2830` and Newton run `21ff8bf8-cd08-414f-ab88-14dc6d9a9659`; device-confirmed termination; no actions for two seconds afterwards | Actual ASR, model and policy actions; both sessions closed with resources released |
+| Newton process initialization | Office worker initialized within the pinned native 180-second budget | Fresh process on the shared host with existing compiled-kernel cache |
 
 The [acceptance report](reports/end-to-end-2026-10-03.md) records paths, revisions and hashes. RL remains stopped. Hardware behavior, recognition accuracy, object carrying, image-only VLN, RTX rendering and broad scene generalization require their own acceptance. Release scope and public capability statements must use these evidence boundaries.
+
+The deployment backend directly constructs the same simulation configuration as the maintained Walking recipe. The interactive worker preserves Newton CUDA graphs, SolverMuJoCo, BAM and the 50 Hz control cadence. Office process initialization passed the pinned native 180-second budget with the existing compiled-kernel cache; installation-time compilation and startup under other host loads need separate measurements.
