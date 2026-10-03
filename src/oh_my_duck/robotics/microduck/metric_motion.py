@@ -67,6 +67,10 @@ class MetricMotion:
                                0.0 if self.phase == "braking" else round(max(-0.6, min(0.6, 1.5 * yaw_error)), 2)]}
         if self.phase == "braking":
             return {"twist": [0.0, 0.0, 0.0]}
+        if self.robot_model == "groundcontact_rollers":
+            angular = 2.0 * (self.target - self.unwrapped_yaw) - 0.5 * state["body_twist"][2]
+            limit = min(self.speed, 0.4)
+            return {"twist": [0.0, 0.0, round(max(-limit, min(limit, angular)), 2)]}
         return {"twist": [0.2, 0.25, math.copysign(self.speed, self.target - self.unwrapped_yaw)]}
 
     def observe(self, sample, state, stopped_samples):
