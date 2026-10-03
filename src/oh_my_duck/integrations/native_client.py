@@ -23,7 +23,7 @@ class NativeTaskClient:
         self.output = output.resolve()
         self.output.mkdir(parents=True, exist_ok=False)
         self._client = httpx.AsyncClient(base_url=str(endpoint).rstrip("/"), trust_env=False,
-            timeout=httpx.Timeout(connect=10, read=240, write=30, pool=10))
+            timeout=httpx.Timeout(connect=10, read=600, write=30, pool=10))
         self.session_id = None
         self.run_id = None
         self._submission = asyncio.Lock()
