@@ -12,6 +12,8 @@ tags:
   - project-design
 ---
 
+> 当前距离与角度控制器在 CPU 公寓通过三个独立会话，覆盖前进、后退和两个旋转方向，最大误差为 0.035112 米与 0.737881°。五次动作确认直立停止，外部障碍接触累计为零。批量验收使用实际原生会话、官方 policy 和 MuJoCo/BAM，保存来源与会话关闭证据；当前控制器的 Newton 验收待执行。GPU 使用范围为 2–4，RL 保持停止。见[完整测量](reports/metric-acceptance-matrix-2026-10-03.md)。
+
 > 2026-10-03：完整录音任务经 Qwen ASR、原生 Harness、官方 policy、Newton/BAM 与独立 Verifier 通过，并使用已确认音色生成反馈。语音模块通过 `voice-task` 和 `voice-session` 接入任务，保留指令、事件、传感器、动作边界和正式 verdict。CPU MuJoCo/BAM 与 Newton 的任务中断及会话释放通过；标准脚与轮滑模型的 0.5 米、45°工具取得满足误差要求的实际停止结果。`doctor` 检查实际依赖与服务，视频制作使用独立锁定环境。上线状态以[验收要求](release-readiness.md)和[当前证据](reports/end-to-end-2026-10-03.md)为准。
 
 > 多 policy 执行（2026-10-01）：Newton/BAM 可使用官方 roller 模型，保持 61 个 observation、14 个 servo action 和 50 Hz，另外返回四个 passive wheel joint 的实际测量。原生 Harness 在 NVIDIA Hospital 调用 `roller`、`crouch` 和实际 SAM3.1 + YOLO26，独立目标检查通过，生成 63.4 秒 agentic MP4。Office 坐立、头部控制和 ground_pick 已通过独立物理测量；完整多动作导航尚未完成。roller 米制终点精度、识别准确率、RTX 渲染、物体携带与真机尚待验收。见[当前验证范围](reports/multiskill-demos-2026-10-01.md)。

@@ -10,6 +10,8 @@ tags:
   - sim-to-real
 ---
 
+> 当前标准脚控制器完成 CPU 公寓的三个独立会话：+0.5 米、−0.5 米、+1.0 米与 ±45°全部满足距离、角度、直立停止和零外部接触要求。批量入口已保存固定源码与依赖版本、场景、原始状态、相机和关闭结果。后续执行当前控制器的 Newton Office 检查及 Hospital 轮滑批量检查；GPU 使用范围为 2–4，RL 保持停止。见[验收计划与结果](reports/metric-acceptance-matrix-2026-10-03.md)。
+
 > 2026-10-03：录音文件、Qwen ASR、原生任务、官方动作、Newton/BAM、独立 Verifier 与固定音色反馈已通过实际闭环，并生成 91.4 秒 MP4。标准脚与轮滑模型的 0.5 米、45°检查通过，安装包、实际服务身份检查和十项音色资料测试通过。CPU MuJoCo/BAM 与 Newton 的执行中断及会话释放通过；Office 新进程初始化符合原生 Harness 的 180 秒时限，使用已有 kernel 缓存。其他命令设置、多场景泛化、图像输入独立 VLN policy、识别准确率、物体效果、训练 policy 行为和真机需要独立证据。操作和状态见[上线要求](release-readiness.md)及[验证记录](reports/end-to-end-2026-10-03.md)。
 
 > 多 policy 验收（2026-10-01）：Hospital 的真实模型调用、官方 roller/crouch、实际 wheel joint 测量、独立目标判定和 63.4 秒 MP4 已完成。Office 多动作导航的模型请求未完成；独立物理检查已确认坐立、头部控制、ground_pick 与直立恢复。后续执行目标包括 roller 米制控制精度、Office 完整导航、模型识别准确率、可用 RTX 环境和物体效果。当前会话已关闭，RL 保持停止。见[验证范围与证据](reports/multiskill-demos-2026-10-01.md)。

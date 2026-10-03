@@ -11,6 +11,16 @@
     "native_target_error_m": 0.090916,
     "standard_feet_metric_distance_error_m": 0.024196026,
     "standard_feet_metric_angle_error_deg": 0.522913718,
+    "current_feet_controller_newton": "revalidation_pending",
+    "cpu_metric_matrix": {
+      "state": "three_sessions_five_motions_passed",
+      "source_revision": "3265a3d38c405a7ae0e3354ef175b472955b7f54",
+      "maximum_distance_error_m": 0.0351120087,
+      "maximum_angle_error_deg": 0.7378814204,
+      "campaign": "outputs/acceptance/metric-campaign-apartment-20261003-05/campaign.json",
+      "report": "docs/reports/metric-acceptance-matrix-2026-10-03.md"
+    },
+    "allowed_physical_gpus": [2, 3, 4],
     "runtime_doctor": "passed_voice_client_and_newton",
     "package_build": "passed_wheel_and_sdist",
     "voice_profile_tests": "10_passed",
@@ -22,7 +32,7 @@
     "roller_metric_distance_error_m": 0.0183367995,
     "roller_metric_angle_error_deg": 3.893902414,
     "demo_environment": "locked_and_actual_render_decode_passed",
-    "pending": ["hardware_acceptance", "multi_scene_navigation_generalization", "image_only_vln", "perception_accuracy", "object_interaction_acceptance", "trained_policy_behavior_acceptance", "fresh_install_kernel_compilation"],
+    "pending": ["current_feet_controller_newton_revalidation", "hospital_roller_metric_matrix", "hardware_acceptance", "multi_scene_navigation_generalization", "image_only_vln", "perception_accuracy", "object_interaction_acceptance", "trained_policy_behavior_acceptance", "fresh_install_kernel_compilation"],
     "rl_training": "stopped"
   },
   "components": {
@@ -34,7 +44,7 @@
     "robot_backends": {
       "module": "oh_my_duck.robotics.backends",
       "state": "cpu_apartment_newton_office_navigation_and_hospital_roller_crouch_verified",
-      "role": "Actual Newton Office ordered-route navigation, Hospital roller/crouch destination task and fixed-scene 0.5m/45deg metric commands verified; other command settings, multi-scene generalization and hardware pending"
+      "role": "Native CPU apartment metric matrix verified for the current foot controller; Newton Office navigation and Hospital roller/crouch tasks have pinned-source evidence; current-controller Newton revalidation, multi-scene generalization and hardware pending"
     },
     "skills": {
       "module": "oh_my_duck.agentic.skills",
@@ -176,7 +186,7 @@
       "guide": "docs/perception-navigation.md"
     },
     "metric_policy_tools": {
-      "state": "newton_office_measured_walk_rotate_and_stop_verified",
+      "state": "cpu_apartment_metric_matrix_verified_current_newton_revalidation_pending",
       "tools": ["microduck.walk", "microduck.rotate"],
       "policy": "alpha_walking",
       "distance_tolerance_m": 0.05,
@@ -185,7 +195,12 @@
       "verified_distance_m": [0.4, 1.0],
       "verified_angle_deg": [45, -45, 270],
       "rotation": "walking_turn_with_measured_translation_xy_m",
-      "cpu_metric_behavior": "pending",
+      "cpu_metric_behavior": "three_sessions_five_motions_passed_fixed_apartment_pose",
+      "cpu_verified_distance_m": [0.5, -0.5, 1.0],
+      "cpu_verified_angle_deg": [45, -45],
+      "current_feet_controller_newton": "revalidation_pending",
+      "matrix_plan": "configs/experiments/metric-policy-acceptance.json",
+      "matrix_report": "docs/reports/metric-acceptance-matrix-2026-10-03.md",
       "hardware_behavior": "pending",
       "report": "docs/reports/metric-camera-tools-2026-09-30.md"
     },

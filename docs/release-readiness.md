@@ -30,6 +30,19 @@ environments/voice-client/.venv/bin/python omd.py voice-task \
 
 Acceptance requires a real native model task, actual pretrained policy actions, current sensor observations, a passed independent Verifier result, confirmed execution termination and session cleanup. Metric motion checks also require measured distance/angle error and five upright stopped samples. Operator interruption must confirm the native execution boundary and demonstrate that control and physics counters remain unchanged afterwards. Physical braking and execution-clock interruption are recorded separately.
 
+## Metric policy matrix
+
+Run the declared cases in the locked CPU apartment environment:
+
+```bash
+TMPDIR="$PWD/.cache/tmp" uv sync --project environments/cpu-apartment --locked
+environments/cpu-apartment/.venv/bin/python scripts/accept_metric_campaign.py \
+  --suite apartment-feet --catalog POLICY_DIRECTORY \
+  --output outputs/acceptance/apartment-matrix-new
+```
+
+The pinned native Harness source must be available in `.cache/edh/8a5e685b22d032207f53db20454f0992a4ad60fd`. The campaign checks all declared cases, stops at the first failure and preserves per-case events, state samples, images, provenance and resource-release evidence. Output paths must be new. `office-feet` and `hospital-rollers` use the locked Isaac/Newton environment and require `--gpu` with an allocated physical device. Current authorized host devices are 2–4; inspect their ownership and activity before running a GPU suite. Current-controller Newton behavior is pending. See the [CPU measurements](reports/metric-acceptance-matrix-2026-10-03.md).
+
 ## Record the agentic video
 
 Keep the native server running while exporting the completed task. Use the run ID from the voice result, the matching server data directory, and new output paths:
@@ -53,6 +66,7 @@ The renderer uses actual public events and source camera images. The audio step 
 |---|---|---|
 | Recorded speech → native agent → Newton → Verifier → fixed voice | Run `5dfb18d9-b31b-4226-bc94-9391ddd847ac`, succeeded; target error 0.090916 m; 480 control steps | NVIDIA Office, one seed, simulator ground truth |
 | Standard-foot metric tools | 0.5 m request: 0.024196 m final error; 45° request: 0.522914° error; five stopped samples | Official `alpha_walking`, Newton/BAM and native ActionGate |
+| Current foot controller, CPU matrix | Three independent sessions; +0.5/−0.5/+1.0 m and ±45°; maximum errors 0.035112 m and 0.737881° | Fixed apartment pose, actual native tools, zero obstacle contacts and closed sessions; Newton revalidation pending |
 | Roller metric tools | 0.5 m request: 0.018337 m final error; 45° request: 3.893902° error; five stopped samples | Official `roller`, Hospital, one seed; zero external-contact samples |
 | Runtime readiness | Local voice client and remote Newton doctor passed | Installed dependencies, actual model services, scene assets and ten-policy catalogue |
 | Agentic video with speech | 91.4 s, 1920 × 1080 MP4, full decoding passed | Actual public events and camera frames; recorded input and confirmed-voice feedback |
