@@ -43,6 +43,18 @@ environments/cpu-apartment/.venv/bin/python scripts/accept_metric_campaign.py \
 
 The pinned native Harness source must be available in `.cache/edh/8a5e685b22d032207f53db20454f0992a4ad60fd`. The campaign checks all declared cases, stops at the first failure and preserves per-case events, state samples, images, provenance and resource-release evidence. Output paths must be new. `office-feet` and `hospital-rollers` use the locked Isaac/Newton environment and require `--gpu` with an allocated physical device. Current authorized host devices are 2–4; inspect their ownership and activity before running a GPU suite. Current-controller Newton behavior is pending. See the [CPU measurements](reports/metric-acceptance-matrix-2026-10-03.md).
 
+Every new case also runs an independent artifact check before campaign acceptance. Recompute a saved campaign with:
+
+```bash
+environments/cpu-apartment/.venv/bin/python scripts/verify_metric_campaign.py \
+  --campaign outputs/acceptance/apartment-matrix-new \
+  --output outputs/acceptance/apartment-matrix-new/verification.json
+```
+
+The verifier uses native tool admissions and continuous physical samples to reconstruct position and accumulated yaw. It checks unchanged 0.05 m / 5° thresholds, five consecutive measured stop samples, upright endpoints, zero obstacle contacts, 14-servo actions, four physics substeps per action and confirmed termination. It compares observer PNG bytes and timestamps with native events, decodes images, verifies result hashes and checks runner/scene hashes against the recorded Git revision. Saved cases must cover the complete declared plan and share one source revision. Existing verification output files are rejected. These checks measure policy-tool execution; independent model task verdicts have their own acceptance.
+
+Current resource authorization permits at most one physical GPU from devices 2–4. Run Newton suites sequentially on that device and confirm resource release before the next workload. RL remains stopped.
+
 ## Record the agentic video
 
 Keep the native server running while exporting the completed task. Use the run ID from the voice result, the matching server data directory, and new output paths:

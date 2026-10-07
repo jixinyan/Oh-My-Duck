@@ -21,6 +21,8 @@
       "report": "docs/reports/metric-acceptance-matrix-2026-10-03.md"
     },
     "allowed_physical_gpus": [2, 3, 4],
+    "maximum_concurrent_physical_gpus": 1,
+    "metric_artifact_verifier": "saved_cpu_matrix_recomputed_from_native_physical_samples",
     "runtime_doctor": "passed_voice_client_and_newton",
     "package_build": "passed_wheel_and_sdist",
     "voice_profile_tests": "10_passed",
@@ -201,6 +203,7 @@
       "current_feet_controller_newton": "revalidation_pending",
       "matrix_plan": "configs/experiments/metric-policy-acceptance.json",
       "matrix_report": "docs/reports/metric-acceptance-matrix-2026-10-03.md",
+      "artifact_verifier": "scripts/verify_metric_campaign.py",
       "hardware_behavior": "pending",
       "report": "docs/reports/metric-camera-tools-2026-09-30.md"
     },

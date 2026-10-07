@@ -3,7 +3,7 @@ title: Agentic Microduck — 项目概览与详细设计
 version: 0.2
 status: Implementation in progress
 created: 2026-09-05
-updated: 2026-10-03
+updated: 2026-10-06
 tags:
   - microduck
   - embodied-ai
@@ -11,6 +11,8 @@ tags:
   - sim-to-real
   - project-design
 ---
+
+> 2026-10-06：运动验收的独立复核根据连续物理样本重新计算距离和累计转角，并核查停止、接触、动作时序、相机事件及源码 hash。已有 CPU 公寓三个会话通过复核。GPU 仅使用 2–4 中最多一张设备，RL 保持停止。操作见[验收说明](release-readiness.md#metric-policy-matrix)。
 
 > 当前距离与角度控制器在 CPU 公寓通过三个独立会话，覆盖前进、后退和两个旋转方向，最大误差为 0.035112 米与 0.737881°。五次动作确认直立停止，外部障碍接触累计为零。批量验收使用实际原生会话、官方 policy 和 MuJoCo/BAM，保存来源与会话关闭证据；当前控制器的 Newton 验收待执行。GPU 使用范围为 2–4，RL 保持停止。见[完整测量](reports/metric-acceptance-matrix-2026-10-03.md)。
 

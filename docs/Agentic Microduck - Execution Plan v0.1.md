@@ -3,12 +3,14 @@ title: Agentic Microduck — 分步执行计划
 version: 0.2
 status: In progress
 created: 2026-09-06
-updated: 2026-10-03
+updated: 2026-10-06
 tags:
   - microduck
   - implementation-plan
   - sim-to-real
 ---
+
+> 2026-10-06：批量运动入口在每个会话结束后独立复核保存的物理样本、相机事件、停止与资源释放，复核通过后才接受该项结果。已有 CPU 公寓三个会话通过完整复核。Newton Office 与 Hospital 按计划顺序执行，共用 GPU2–4 中的一张设备；RL 保持停止。见[验收操作](release-readiness.md#metric-policy-matrix)。
 
 > 当前标准脚控制器完成 CPU 公寓的三个独立会话：+0.5 米、−0.5 米、+1.0 米与 ±45°全部满足距离、角度、直立停止和零外部接触要求。批量入口已保存固定源码与依赖版本、场景、原始状态、相机和关闭结果。后续执行当前控制器的 Newton Office 检查及 Hospital 轮滑批量检查；GPU 使用范围为 2–4，RL 保持停止。见[验收计划与结果](reports/metric-acceptance-matrix-2026-10-03.md)。
 

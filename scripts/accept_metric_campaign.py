@@ -7,6 +7,7 @@ import subprocess
 import sys
 
 from jsonschema import Draft202012Validator
+from verify_metric_campaign import verify_case
 
 
 PLAN_SCHEMA = {
@@ -98,7 +99,11 @@ def main():
             result = json.loads(result_path.read_text())
             if not result["passed"] or not result["resources_released"]:
                 raise AssertionError("Metric case requires physical acceptance and resource release")
+            verification = verify_case(destination, case)
+            verification_path = destination / "verification.json"
+            verification_path.write_text(json.dumps(verification, indent=2) + "\n")
             entry.update(passed=True, state="passed", result_sha256=hashlib.sha256(result_path.read_bytes()).hexdigest(),
+                         verification_sha256=hashlib.sha256(verification_path.read_bytes()).hexdigest(),
                          measurements=result["measurements"])
             destination_record.write_text(json.dumps(record, indent=2) + "\n")
             print(json.dumps({"case": case["id"], "passed": True,
