@@ -121,7 +121,8 @@ class IsaacNewtonBamBackend(CpuMujocoBamBackend):
             sim=SimulationCfg(device=device, dt=0.005, render_interval=4,
                               physics=NewtonCfg(solver_cfg=OfficialTaskSolverCfg(
                                   robot_model=robot_model, iterations=iterations, ls_iterations=ls_iterations,
-                                  njmax=5000, nconmax=5000), num_substeps=1)))
+                                  njmax=5000, nconmax=5000), num_substeps=1,
+                                  use_cuda_graph=robot_model != "allcollisions")))
         self._launch = launch_simulation(native_cfg, {"headless": True, "device": device})
         self._launch.__enter__()
         self.native = ManagerBasedEnv(native_cfg)
@@ -563,6 +564,7 @@ class IsaacNewtonBamBackend(CpuMujocoBamBackend):
                 "solver": "Newton SolverMuJoCo", "physics_dt_s": 0.005,
                 "solver_iterations": int(self.sim.mj_model.opt.iterations),
                 "solver_ls_iterations": int(self.sim.mj_model.opt.ls_iterations),
+                "physics_cuda_graph": self.robot_model != "allcollisions",
                 "control_hz": 50, "robot_model": self.robot_model,
                 "observer_renderer": self.observer_renderer}
 
