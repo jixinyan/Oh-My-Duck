@@ -1,11 +1,81 @@
 import argparse
 import hashlib
+from io import BytesIO
 import json
 import math
 from pathlib import Path
 
 import numpy as np
 from PIL import Image
+
+
+def verify_office_skills(events):
+    tools = [event["detail"] for event in events if event["type"] == "tool.completed"]
+    progress = [item["result"] for item in tools if item["tool"] == "microduck.task_progress"]
+    if len({row["episode_id"] for row in progress}) != 1:
+        raise AssertionError("Office skills must preserve the physical episode")
+
+    def endpoint(policy, predicate, after=-1):
+        for row in progress:
+            guard = row["motion_guard"]
+            if (row["policy_name"] == policy and row["sequence"] > after and guard is not None
+                    and guard["used_control_steps"] >= 100 and predicate(guard["command"])):
+                if not row["execution"]["device_confirmed"]:
+                    raise AssertionError("Skill measurement lacks a confirmed native boundary")
+                return row
+        raise AssertionError(f"Measured command endpoint missing for {policy}")
+
+    sit = endpoint("sitstand", lambda command: command["posture"] == "sit")
+    stand = endpoint("sitstand", lambda command: command["posture"] == "stand", sit["sequence"])
+    if (stand["height_m"] < 0.09 or stand["height_m"] - sit["height_m"] < 0.03
+            or sit["stopped_samples"] < 5 or stand["stopped_samples"] < 5):
+        raise AssertionError("Office sit/stand lacks measured height change and stopping")
+    head = endpoint("alpha_stand", lambda command: command["head"] == [0, 0.2, 0.4, 0]
+                    and command["body"] == [0, 0, 0.01, 0, 0, 0], stand["sequence"])
+    neutral = endpoint("alpha_stand", lambda command: not any(command["head"] + command["body"]),
+                       head["sequence"])
+
+    def joints(sequence):
+        rows = [item["result"]["measurements"] for item in tools if item["tool"] == "microduck.read_sensor"
+                and item["result"]["sensor"] == "joint_state" and item["result"]["sequence"] == sequence]
+        if not rows:
+            raise AssertionError("Skill endpoint lacks current joint-state measurements")
+        row = rows[-1]
+        if len(row["joint_names"]) != 14 or len(set(row["joint_names"])) != 14:
+            raise AssertionError("Skill joint-state servo identity differs")
+        return dict(zip(row["joint_names"], row["joint_position_rad"], strict=True))
+
+    active_joints, neutral_joints = joints(head["sequence"]), joints(neutral["sequence"])
+    yaw_delta = abs(active_joints["head_yaw"] - neutral_joints["head_yaw"])
+    if yaw_delta < 0.1 or neutral["stopped_samples"] < 5:
+        raise AssertionError("Office head control lacks measured joint change and neutral stopping")
+    reaching = endpoint("ground_pick", lambda command: not any(command["twist"]), neutral["sequence"])
+    if reaching["height_m"] > 0.1 or neutral["height_m"] - reaching["height_m"] < 0.01:
+        raise AssertionError("Ground-pick policy lacks measured lowered posture")
+    selections = [item["result"] for item in tools if item["tool"] == "microduck.select_policy"
+                  and item["result"]["policy_name"] == "ground_pick"]
+    selection = selections[-1]
+    if selection["kind"] != "episodic" or selection["encoding"] != "phase":
+        raise AssertionError("Ground-pick manifest differs from its episodic protocol")
+    ended = [row for row in progress if row["policy_name"] == "ground_pick"
+             and row["execution"]["state"] == "ended"]
+    start = reaching["command_segment"]["effective_after_sequence"]
+    if not ended or not math.isclose(ended[-1]["sequence"] - start, selection["duration_s"] * 50):
+        raise AssertionError("Ground-pick did not complete its measured physical duration")
+    recovery = endpoint("alpha_stand", lambda command: not any(command["twist"] + command["head"]
+                                                                + command["body"]), ended[-1]["sequence"])
+    if recovery["height_m"] < 0.09 or recovery["fallen"] or recovery["stopped_samples"] < 5:
+        raise AssertionError("Office recovery lacks measured upright stopping")
+    observations = [item["result"] for item in tools if item["tool"] == "microduck.inspect_scene"
+                    and item["result"]["detection_source"] == "sam3.1"]
+    if len({row["sequence"] for row in observations}) < 2:
+        raise AssertionError("Office skills lack refreshed actual model perception")
+    return {"seated_height_m": sit["height_m"], "standing_height_m": stand["height_m"],
+            "head_yaw_change_rad": yaw_delta, "head_command_height_m": head["height_m"],
+            "neutral_height_m": neutral["height_m"], "reaching_height_m": reaching["height_m"],
+            "episodic_controls": ended[-1]["sequence"] - start,
+            "recovery_height_m": recovery["height_m"], "recovery_stopped_samples": recovery["stopped_samples"],
+            "physical_episode_preserved": True}
 
 
 def main():
@@ -15,6 +85,7 @@ def main():
     parser.add_argument("--robot-model", required=True)
     parser.add_argument("--stop-reason", choices=("policy_stop", "episode_terminated"), required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--office-skills", action="store_true")
     args = parser.parse_args()
     root = args.export.resolve(strict=True)
     manifest = json.loads((root / "manifest.json").read_text())
@@ -101,7 +172,7 @@ def main():
         pixels = path.read_bytes()
         if hashlib.sha256(pixels).hexdigest() != frame["image"]["attachmentId"].removeprefix("sha256:"):
             raise AssertionError("Frame differs from the original native attachment")
-        with Image.open(path) as image:
+        with Image.open(BytesIO(pixels)) as image:
             if image.size != (frame["image"]["width"], frame["image"]["height"]) or np.asarray(image).std() <= 0:
                 raise AssertionError("Native image has invalid dimensions or uniform pixels")
         if frame["kind"] == "simulation.frame" and frame["image"]["name"] == "observer_follow.png":
@@ -137,6 +208,10 @@ def main():
               "passive_wheel_observations": len(wheel_samples) if args.robot_model == "robot_groundcontact_rollers" else 0,
               "scope": "actual policy progress, native boundaries, image provenance and formal navigation; object effects require separate measurements",
               "auditor_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest()}
+    if args.office_skills:
+        if args.robot_model != "allcollisions" or args.stop_reason != "policy_stop":
+            raise AssertionError("Office skills require the standard-foot robot and policy stop")
+        report["office_skills"] = verify_office_skills(events)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     with args.output.open("x") as output:
         output.write(json.dumps(report, indent=2, allow_nan=False) + "\n")
