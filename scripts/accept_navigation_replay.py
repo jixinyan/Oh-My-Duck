@@ -36,6 +36,8 @@ def verify_navigation(root, configuration, minimum_distance):
     policy = "roller" if robot == "groundcontact_rollers" else "alpha_walking"
     admissions = {item["result"]["request_id"]: item["result"] for item in tools
                   if item["tool"] in {"microduck.walk", "microduck.rotate"}}
+    require(len(admissions) == sum(item["tool"] in {"microduck.walk", "microduck.rotate"} for item in tools),
+            "Metric tool request identities are duplicated")
     for admission in admissions.values():
         spec = admission["action_spec"]
         require(admission["policy_name"] == policy and spec["robot_model"] == "robot_" + robot
@@ -47,7 +49,10 @@ def verify_navigation(root, configuration, minimum_distance):
             "Navigation requires one continuous physical episode")
     require(all(row["contact_evidence"]["non_ground_external_contact_samples_total"] == 0
                 for row in progress), "Recorded route has external obstacle contacts")
-    audit_motion_guard_pauses(events, run["id"])
+    pause_events = [event for event in events if not (
+        event["type"] == "tool.completed" and event["detail"].get("tool") == "microduck.task_progress"
+        and event["detail"]["result"]["execution"]["state"] == "ended")]
+    audit_motion_guard_pauses(pause_events, run["id"])
     endpoints = {}
     for row in progress:
         motion = row["metric_motion"]
@@ -83,6 +88,7 @@ def verify_navigation(root, configuration, minimum_distance):
                     and row["stopped_samples"] >= 5 and motion["stopped_samples"] >= 5,
                     "Completed metric motion lacks measured upright stopping")
         endpoints[motion["request_id"]] = motion
+    require(set(endpoints) == set(admissions), "An admitted metric action has no recorded terminal physical result")
     distance = sum(row["translation_xy_m"] for row in endpoints.values() if row["operation"] == "walk")
     require(distance >= minimum_distance, "Measured walking segment displacement is below the declared minimum")
     terminal = {event["detail"]["execution"]["execution_id"]: event["detail"]["execution"]
@@ -104,6 +110,13 @@ def verify_navigation(root, configuration, minimum_distance):
             and final["execution"]["boundary_id"] == verdict["boundary_event_id"]
             and final["execution"]["device_confirmed"] and final["stopped_samples"] >= 5
             and not final["fallen"], "Final formal verdict lacks matching physical stopping")
+    segment = final["command_segment"]
+    require(segment["used_control_steps"] >= 75 and not any(segment["command"]["twist"]
+            + segment["command"]["head"] + segment["command"]["body"]),
+            "Final navigation lacks 75 actual zero-command controls")
+    finish = [item["result"] for item in tools if item["tool"] == "microduck.finish_policy"]
+    require(finish and finish[-1]["accepted"] and finish[-1]["stop_confirmation"]["stopped_samples"] >= 5,
+            "Final navigation has no admitted measured policy stopping")
     check = next(item for item in verdict["checks"] if item["check_id"] == "goal_reached")
     evidence = json.loads(check["reason"])["evidence"]
     target, goal = evidence["target"], configuration["goal"]
@@ -153,6 +166,13 @@ def verify_navigation(root, configuration, minimum_distance):
             "final_error_m": target["distance_xy_m"], "stopped_samples": final["stopped_samples"],
             "observer_frames": observers, "observations": len(inspections), "verdict_id": verdict["verdict_id"],
             "metric_results": list(endpoints.values()), "executions": list(terminal.values()),
+            "non_ground_external_contact_samples": final["contact_evidence"]["non_ground_external_contact_samples_total"],
+            "walk_calls": calls.count("microduck__walk"), "rotate_calls": calls.count("microduck__rotate"),
+            "models": run["configuration"]["models"],
+            "solver_settings": {key: scene[key] for key in
+                                ("solver", "solver_iterations", "solver_ls_iterations", "physics_cuda_graph")},
+            "source_artifacts_sha256": {name: hashlib.sha256((root / name).read_bytes()).hexdigest()
+                                        for name in ("manifest.json", "source/run.json", "source/events.json", "frames.json")},
             "scope": "GT-assisted fixed-scene native navigation; walk segment displacement is not continuous path length"}
 
 
