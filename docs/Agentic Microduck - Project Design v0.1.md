@@ -3,7 +3,7 @@ title: Agentic Microduck — 项目概览与详细设计
 version: 0.2
 status: Implementation in progress
 created: 2026-09-05
-updated: 2026-10-06
+updated: 2026-10-07
 tags:
   - microduck
   - embodied-ai
@@ -11,6 +11,8 @@ tags:
   - sim-to-real
   - project-design
 ---
+
+> 2026-10-07：完整 Office 多动作任务通过真实模型、原生 Harness、Newton/BAM 与独立 Verifier。四个官方 policy 展示坐立、头部控制、伸头、连续状态的站立恢复和导航；999 个控制步，最终目标误差 0.045512 米，80 个连续停止样本，外部障碍接触为零。标准脚部署使用官方 sitstand 的 30/50 求解参数与 Newton 直接执行，轮滑保留 10/20 与 CUDA graph，训练配置保持原有设置。实际模型感知调用与图像来源通过检查，识别准确率和图像输入独立 VLN 需要单独验收。见[完整证据](reports/office-skills-acceptance-2026-10-07.md)。
 
 > 2026-10-06：当前标准脚控制器在 CPU 公寓与 Newton Office 各通过三个会话，两个场景分别覆盖 +0.5 米、−0.5 米、+1.0 米与 ±45°。CPU 最大位置/角度误差为 0.035112 米/3.777766°，Office 为 0.022884 米/4.519054°。十次动作全部确认直立停止、零外部接触和资源释放。独立复核根据连续物理样本重新计算距离与累计角度，并核查相机、源码和执行计数。见[完整测量](reports/metric-controller-acceptance-2026-10-06.md)。
 

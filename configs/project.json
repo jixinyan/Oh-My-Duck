@@ -9,6 +9,9 @@
     "native_voice_task": "5dfb18d9-b31b-4226-bc94-9391ddd847ac",
     "native_voice_task_state": "succeeded",
     "native_target_error_m": 0.090916,
+    "office_native_multiskill_task": "b2e0fe5d-beaf-4cc5-bbc9-4278610abbe7",
+    "office_native_multiskill_task_state": "succeeded_and_independent_physical_audit_passed",
+    "office_native_multiskill_report": "docs/reports/office-skills-acceptance-2026-10-07.md",
     "standard_feet_metric_distance_error_m": 0.024196026,
     "standard_feet_metric_angle_error_deg": 0.522913718,
     "current_feet_controller_newton": "three_sessions_five_motions_passed",
@@ -52,7 +55,7 @@
     "roller_metric_distance_error_m": 0.0183367995,
     "roller_metric_angle_error_deg": 3.893902414,
     "demo_environment": "locked_and_actual_render_decode_passed",
-    "pending": ["office_native_multiskill_task", "hardware_acceptance", "multi_scene_navigation_generalization", "image_only_vln", "perception_accuracy", "object_interaction_acceptance", "trained_policy_behavior_acceptance", "fresh_install_kernel_compilation"],
+    "pending": ["hardware_acceptance", "multi_scene_navigation_generalization", "image_only_vln", "perception_accuracy", "object_interaction_acceptance", "trained_policy_behavior_acceptance", "fresh_install_kernel_compilation"],
     "rl_training": "stopped"
   },
   "components": {
@@ -78,8 +81,8 @@
     },
     "harness": {
       "module": "oh_my_duck.integrations.edh_native",
-      "state": "native_edh_office_navigation_and_hospital_multi_policy_task_verified",
-      "role": "Pinned native sessions, actual model perception, policy actions, measured stopping, independent Verifier and completed tasks verified in fixed Office and Hospital scenarios; Office multi-skill task, image-only VLN and generalization pending"
+      "state": "native_edh_office_multiskill_and_hospital_multi_policy_tasks_verified",
+      "role": "Pinned native sessions, actual model perception, four-policy Office skills and navigation, Hospital roller/crouch actions, measured stopping and independent Verifier passed in fixed scenarios; image-only VLN and generalization pending"
     },
     "voice": {
       "module": "oh_my_duck.voice",
@@ -135,6 +138,41 @@
   "execution": {
     "hardware_available": false,
     "harness": "native_edh_cpu_apartment_office_navigation_and_hospital_roller_crouch_passed_fixed_scenarios",
+    "office_policy_demo": {
+      "state": "native_task_and_independent_physical_skill_audit_passed",
+      "scene": "nvidia-office-skills",
+      "run_id": "b2e0fe5d-beaf-4cc5-bbc9-4278610abbe7",
+      "physics_source_revision": "341e9035045a61faf67529835f47ffbb866ee4de",
+      "policies": ["sitstand", "alpha_stand", "ground_pick", "alpha_walking"],
+      "robot_model": "robot_allcollisions",
+      "physical_gpu": 4,
+      "solver_iterations": 30,
+      "solver_ls_iterations": 50,
+      "physics_cuda_graph": false,
+      "control_steps": 999,
+      "raw_sim_steps": 3996,
+      "goal_error_m": 0.0455121518,
+      "goal_threshold_m": 0.2,
+      "goal_hold_ticks": 147,
+      "stopped_samples": 80,
+      "head_yaw_change_rad": 0.3332593311,
+      "sitstand_height_change_m": 0.0548489168,
+      "reaching_height_m": 0.0872113481,
+      "recovery_height_m": 0.1160684973,
+      "model_observations": 6,
+      "valid_model_targets": 0,
+      "non_ground_external_contact_samples": 0,
+      "physical_episode_preserved": true,
+      "distance_source": "simulator_ground_truth",
+      "observer_renderer": "newton_warp",
+      "session": "closed_resources_released",
+      "acceptance": "outputs/acceptance/office-native-skills-20261007-03.json",
+      "video": "outputs/demos/oh-my-duck-office-skills-20261007-demo.mp4",
+      "video_duration_s": 169.1,
+      "video_sha256": "d2c4ef0514d77b105a0b868a3d2f28787cceff1f85c1c34749991bc0be406608",
+      "video_audit": "all_frames_sources_physics_time_text_bounds_and_full_decode_passed",
+      "report": "docs/reports/office-skills-acceptance-2026-10-07.md"
+    },
     "hospital_policy_demo": {
       "state": "native_task_and_physical_replay_audit_passed",
       "scene": "nvidia-hospital-rollers",

@@ -72,10 +72,11 @@ environments/demo/.venv/bin/python scripts/add_voice_to_demo.py --video outputs/
 
 The renderer uses actual public events and source camera images. The audio step checks both WAV hashes against the task result, requires a successful native run with a passed Verifier result, and fully decodes the finished MP4. The generated manifest preserves source and output hashes, model identity and voice profile revision. The isolated `environments/demo` dependencies are locked; the renderer also requires `ffmpeg` and `ffprobe` on PATH. Supply `--font /absolute/path/unicode.ttf` on Linux for a font that covers the trace text; macOS uses Arial Unicode by default.
 
-## Evidence available on 2026-10-06
+## Evidence available on 2026-10-07
 
 | Capability | Evidence | Scope |
 |---|---|---|
+| Complete Office skill and navigation task | Four official policies; 999 controls; measured sitting/standing, head yaw, reaching and standing recovery; final error 0.045512 m, 80 stopped samples and zero external-obstacle contacts | Actual model, native retry, continuous scene, independent Verifier and physical artifact audit; six actual perception queries retained empty detections; see [measurements and reproduction](reports/office-skills-acceptance-2026-10-07.md) |
 | Recorded speech → native agent → Newton → Verifier → fixed voice | Run `5dfb18d9-b31b-4226-bc94-9391ddd847ac`, succeeded; target error 0.090916 m; 480 control steps | NVIDIA Office, one seed, simulator ground truth |
 | Standard-foot metric tools | 0.5 m request: 0.024196 m final error; 45° request: 0.522914° error; five stopped samples | Official `alpha_walking`, Newton/BAM and native ActionGate |
 | Current foot controller, CPU and Newton matrices | Three independent sessions per scene; +0.5/−0.5/+1.0 m and ±45°; CPU maximum errors 0.035112 m / 3.777766°, Office 0.022884 m / 4.519054° | Fixed apartment and Office poses, independently recomputed native samples, zero obstacle contacts and closed sessions; measured on 2026-10-06 |
@@ -87,4 +88,4 @@ The renderer uses actual public events and source camera images. The audio step 
 
 The [acceptance report](reports/end-to-end-2026-10-03.md) records paths, revisions and hashes. RL remains stopped. Hardware behavior, recognition accuracy, object carrying, image-only VLN, RTX rendering and broad scene generalization require their own acceptance. Release scope and public capability statements must use these evidence boundaries.
 
-The deployment backend directly constructs the same simulation configuration as the maintained Walking recipe. The interactive worker preserves Newton CUDA graphs, SolverMuJoCo, BAM and the 50 Hz control cadence. Office process initialization passed the pinned native 180-second budget with the existing compiled-kernel cache; installation-time compilation and startup under other host loads need separate measurements.
+The standard-foot interactive deployment uses the official sitstand 30/50 solver iteration settings and direct Newton execution. Roller deployment uses 10/20 iterations and CUDA graphs. Both retain SolverMuJoCo, BAM and the 50 Hz control cadence; training configurations remain unchanged. Office process initialization passed the pinned native 180-second budget with the existing compiled-kernel cache; installation-time compilation and startup under other host loads need separate measurements.

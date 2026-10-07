@@ -3,12 +3,14 @@ title: Agentic Microduck — 分步执行计划
 version: 0.2
 status: In progress
 created: 2026-09-06
-updated: 2026-10-06
+updated: 2026-10-07
 tags:
   - microduck
   - implementation-plan
   - sim-to-real
 ---
+
+> 2026-10-07：Office 的坐立、头部控制、伸头、站立恢复及导航已完成原生模型任务与独立物理复核；四个官方 policy、999 个控制步，最终目标误差 0.045512 米，连续停止 80 个样本，零外部障碍接触。任务与会话完成，GPU worker 和感知服务释放。后续验收包括多场景长导航、图像输入独立 VLN、带有独立标注的识别准确率、物体效果、训练 policy 行为、首次安装编译和真机。GPU 同时最多使用一张设备，RL 保持停止。见[证据与运行设置](reports/office-skills-acceptance-2026-10-07.md)。
 
 > 2026-10-06：当前标准脚控制器在 CPU 公寓和 Newton Office 各通过三个独立会话，每个场景覆盖 +0.5 米、−0.5 米、+1.0 米与 ±45°，共十次运动。距离/角度误差、直立停止、零外部接触、相机字节、执行计数、源码和资源释放全部通过独立复核。CPU 最大误差为 0.035112 米/3.777766°，Office 为 0.022884 米/4.519054°。见[测量记录](reports/metric-controller-acceptance-2026-10-06.md)。
 
