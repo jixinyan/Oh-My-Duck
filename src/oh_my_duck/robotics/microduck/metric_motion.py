@@ -82,13 +82,9 @@ class MetricMotion:
                                0.0 if self.phase == "braking" else round(max(-0.6, min(0.6, 1.5 * yaw_error)), 2)]}
         if self.phase == "braking":
             return {"twist": [0.0, 0.0, 0.0]}
-        if self.robot_model == "groundcontact_rollers":
-            angular = 2.0 * (self.target - self.unwrapped_yaw) - 0.5 * state["body_twist"][2]
-            limit = min(self.speed, 0.4)
-            if abs(angular) < 0.3:
-                angular = math.copysign(min(limit, 0.3), self.target - self.unwrapped_yaw)
-            return {"twist": [0.0, 0.0, round(max(-limit, min(limit, angular)), 2)]}
         remaining = self.target - self.rotation_settling_delta - self.unwrapped_yaw
+        if self.robot_model == "groundcontact_rollers":
+            return {"twist": [0.0, 0.0, round(math.copysign(self.speed, remaining), 2)]}
         return {"twist": [0.2, 0.25, round(math.copysign(self.speed, remaining), 2)]}
 
     def observe_progress(self, sequence, error):
@@ -167,7 +163,7 @@ class MetricMotion:
                 self.phase = "complete"
             elif self.correction_attempts < 3:
                 self.correction_attempts += 1
-                if self.operation == "rotate" and self.robot_model == "allcollisions":
+                if self.operation == "rotate":
                     self.rotation_settling_delta = self.unwrapped_yaw - self.rotation_braking_yaw
                     self.previous_angle_error = self.target - self.rotation_settling_delta - self.unwrapped_yaw
                 self.phase = "moving"
