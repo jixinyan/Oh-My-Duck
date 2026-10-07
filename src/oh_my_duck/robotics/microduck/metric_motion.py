@@ -131,6 +131,7 @@ class MetricMotion:
                                      abs(remaining) <= max(0.025, 1.3 * abs(along_speed)))
             self.previous_distance_error = remaining
             tolerance = self.DISTANCE_TOLERANCE_M
+            progress_error = error
         else:
             angle_error = self.target - self.unwrapped_yaw
             error = abs(math.degrees(angle_error))
@@ -139,6 +140,7 @@ class MetricMotion:
             reached = abs(math.degrees(aim_error)) <= 0.5 or self.previous_angle_error * aim_error <= 0
             self.previous_angle_error = aim_error
             tolerance = self.ANGLE_TOLERANCE_DEG
+            progress_error = abs(math.degrees(aim_error))
         self.result = {"operation": self.operation, "requested": self.amount,
                        "request_id": self.request_id,
                        "unit": "m" if self.operation == "walk" else "deg",
@@ -157,7 +159,7 @@ class MetricMotion:
             self.progress_history.clear()
             if self.operation == "rotate":
                 self.rotation_braking_yaw = self.unwrapped_yaw
-        elif self.phase == "moving" and self.observe_progress(sequence, error):
+        elif self.phase == "moving" and self.observe_progress(sequence, progress_error):
             self.phase = "failed"
             self.result["reason"] = "metric_progress_stalled"
         elif self.phase == "braking" and stopped_samples >= 5:
