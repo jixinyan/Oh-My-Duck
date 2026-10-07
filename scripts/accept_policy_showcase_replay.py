@@ -20,7 +20,11 @@ def verify_office_skills(events):
             guard = row["motion_guard"]
             if (row["policy_name"] == policy and row["sequence"] > after and guard is not None
                     and guard["used_control_steps"] >= 100 and predicate(guard["command"])):
-                if not row["execution"]["device_confirmed"]:
+                segment = row["command_segment"]
+                if (not row["execution"]["device_confirmed"]
+                        or row["execution"]["state"] not in {"paused", "ended"}
+                        or row["sequence"] - segment["effective_after_sequence"] != segment["used_control_steps"]
+                        or segment["used_control_steps"] != guard["used_control_steps"]):
                     raise AssertionError("Skill measurement lacks a confirmed native boundary")
                 return row
         raise AssertionError(f"Measured command endpoint missing for {policy}")
@@ -106,6 +110,8 @@ def main():
                     or spec["control_hz"] != 50 or spec["physics_steps_per_action"] != 4 or spec["physics_dt_s"] != 0.005):
                 raise AssertionError("Policy selection differs from the actual robot and canonical control timing")
     progress = [item["result"] for item in tools if item["tool"] == "microduck.task_progress"]
+    if any(row["contact_evidence"]["non_ground_external_contact_samples_total"] != 0 for row in progress):
+        raise AssertionError("Showcase contains measured external-obstacle contact")
     for policy in args.policies:
         if not any(row["policy_name"] == policy and row["sequence"] > 0 for row in progress):
             raise AssertionError(f"Actual physical progress missing for policy {policy}")

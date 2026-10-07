@@ -15,7 +15,7 @@
 
 调用示例：`microduck.walk({"distance_m": 1.0})`、`microduck.rotate({"angle_deg": -45})`。动作准备要求当前原生 execution 已确认暂停，并具有至少五个实际停止样本。调用 `execution.resume` 后，控制器在每个实际控制步检查目标；内部命令每段最多 100 个控制步。到达目标后执行零 twist，取得五个停止样本后暂停。停止后的目标距离误差需要不超过 0.05 米，角度误差需要不超过 5 度。
 
-`task_progress.metric_motion` 包含 `requested`、`measured`、`unit`、`error`、`tolerance`、`phase`、`completed` 和原生 `sequence`。转向同时返回实际平移距离。障碍或停滞产生 `blocked`，停止后超出误差要求产生 `failed`，用户中断产生 `interrupted`。只有经过测量的目标与停止条件同时满足时，才返回 `completed=true`。目标动作结束后，`finish_policy` 仍检查确认边界与零命令停止证据；正式任务由独立 Verifier 判定。
+`task_progress.metric_motion` 包含 `requested`、`measured`、`unit`、`error`、`tolerance`、`phase`、`completed` 和原生 `sequence`。转向同时返回实际平移距离。MotionGuard 的障碍或运动停滞检查产生 `blocked`；目标进度不足返回 `failed` 和 `reason="metric_progress_stalled"`；停止后超出误差要求产生 `failed`，用户中断产生 `interrupted`。只有经过测量的目标与停止条件同时满足时，才返回 `completed=true`。目标动作结束后，`finish_policy` 仍检查确认边界与零命令停止证据；正式任务由独立 Verifier 判定。
 
 官方 catalog 保留十个 policy 的文件 hash、命令编码与执行条件。当前 `allcollisions` 机器人通过统一工具接口接入八个 policy；`roller` 与 `crouch` 要求对应的 roller 机器人模型。拾取、踢球、翻滚等物体效果需要各自的物理检查。距离和角度行为验证范围见[验证记录](reports/metric-camera-tools-2026-09-30.md)。
 
@@ -25,6 +25,6 @@
 
 两个仿真后端共用工具与控制器，odometry 分别来自当前 MuJoCo 或 Newton 物理状态。真机后端需要提供同单位的位姿、速度与停止证据，目前没有真机行为验证。
 
-当前标准脚控制器在 CPU 公寓的三个独立会话中通过 +0.5 米、−0.5 米、+1.0 米与 ±45°检查。最大位置误差为 0.035112 米，最大角度误差为 0.737881°，五次动作均确认直立停止，外部障碍接触累计为零。行走按完整目标位置修正横向距离与朝向，转向根据本次制动后测得的角度变化进行有界修正。当前控制器的 Newton 验收待执行。参数、来源与检查范围见[批量验收记录](reports/metric-acceptance-matrix-2026-10-03.md)。
+当前标准脚控制器在 CPU 公寓与 Newton Office 各三个独立会话中通过 +0.5 米、−0.5 米、+1.0 米与 ±45°检查。CPU 最大位置/角度误差为 0.035112 米/3.777766°，Office 为 0.022884 米/4.519054°；十次动作均确认直立停止，外部障碍接触累计为零。行走按完整目标位置修正横向距离与朝向，转向根据实际制动角度完成最多三次修正。50 个控制步内目标进度不足时报告失败并确认停止；修正阶段的进度使用当前制动补偿目标，最终误差使用原始请求。参数、来源与检查范围见[批量验收记录](reports/metric-controller-acceptance-2026-10-06.md)。
 
 head RGB 使用官方 `head_camera` site 的 +X 前向与 +Z 上向生成 OpenGL optical frame。CPU MuJoCo 使用原生相机裁剪；Newton 在 pinhole 射线中应用 0.01 米近裁剪平面。Newton 观察相机跟随机器人，位置为身体位置加 `(2.0, -2.0, 1.4)` 米，观察目标位于身体上方 0.35 米。RGB 保留实际渲染值，原生 segmentation 提供可见机器人与场景几何的证据。
