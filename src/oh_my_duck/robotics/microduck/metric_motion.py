@@ -3,6 +3,8 @@ from __future__ import annotations
 import math
 from typing import Any
 
+from oh_my_duck.robotics.microduck.motion_guard import MotionGuard
+
 
 class MetricMotion:
     DISTANCE_TOLERANCE_M = 0.05
@@ -22,6 +24,7 @@ class MetricMotion:
         self.correction_attempts = 0
         self.rotation_settling_delta = 0.0
         self.rotation_braking_yaw = None
+        self.progress_history: list[tuple[int, float]] = []
         self.robot_model = robot_model
         if operation == "walk":
             self.amount = self._number(arguments, "distance_m", -10, 10)
@@ -88,6 +91,17 @@ class MetricMotion:
         remaining = self.target - self.rotation_settling_delta - self.unwrapped_yaw
         return {"twist": [0.2, 0.25, round(math.copysign(self.speed, remaining), 2)]}
 
+    def observe_progress(self, sequence, error):
+        self.progress_history.append((sequence, error))
+        while (self.progress_history and
+               sequence - self.progress_history[0][0] > MotionGuard.STALL_WINDOW_STEPS):
+            self.progress_history.pop(0)
+        if sequence - self.progress_history[0][0] < MotionGuard.STALL_WINDOW_STEPS:
+            return False
+        threshold = (MotionGuard.STALL_TRANSLATION_M if self.operation == "walk" else
+                     math.degrees(MotionGuard.STALL_YAW_RAD))
+        return self.progress_history[0][1] - error < threshold
+
     def observe(self, sample, state, stopped_samples):
         sequence = sample["sequence"]
         if sequence <= self.last_sequence:
@@ -140,8 +154,12 @@ class MetricMotion:
             self.phase = "failed"
         elif self.phase == "moving" and reached:
             self.phase = "braking"
+            self.progress_history.clear()
             if self.operation == "rotate":
                 self.rotation_braking_yaw = self.unwrapped_yaw
+        elif self.phase == "moving" and self.observe_progress(sequence, error):
+            self.phase = "failed"
+            self.result["reason"] = "metric_progress_stalled"
         elif self.phase == "braking" and stopped_samples >= 5:
             if error <= tolerance:
                 self.phase = "complete"
@@ -151,6 +169,7 @@ class MetricMotion:
                     self.rotation_settling_delta = self.unwrapped_yaw - self.rotation_braking_yaw
                     self.previous_angle_error = self.target - self.rotation_settling_delta - self.unwrapped_yaw
                 self.phase = "moving"
+                self.progress_history.clear()
             else:
                 self.phase = "failed"
         self.result.update(phase=self.phase, completed=self.phase == "complete",

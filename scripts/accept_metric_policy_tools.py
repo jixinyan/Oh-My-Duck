@@ -148,6 +148,9 @@ async def run(args):
                       termination=termination)
     finally:
         error = sys.exception()
+        record["final_execution_status"] = session._status
+        record["final_metric_motion"] = (session._metric_motion.result
+                                          if session._metric_motion is not None else None)
         if error is not None:
             record["failure"] = {"type": type(error).__name__, "message": str(error)}
         record["passed"] = False
