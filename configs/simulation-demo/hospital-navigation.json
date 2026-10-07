@@ -18,6 +18,6 @@
       {"target_xy_m": [9.7, 9.4], "distance_m": 0.35}
     ]
   },
-  "task_instruction": "Navigate the furnished hospital using the official roller policy. Visit the east checkpoint at (9.7,7.2), the north checkpoint at (9.7,9.4), then the west destination at (8.1,9.4), in world meters. Use fresh head RGB, simulator-ground-truth wall observations, odometry, ToF and the authored scene map. Measure progress after each bounded metric walk or rotation, account for actual turn translation, and stop upright at the final destination. Preserve native planning and independent final verification.",
+  "task_instruction": "Navigate the furnished hospital using the official roller policy. Visit the east checkpoint at (9.7,7.2), the north checkpoint at (9.7,9.4), then the west destination at (8.1,9.4), in world meters. Use fresh head RGB, simulator-ground-truth object observations, odometry, ToF and the authored scene map. Measure progress after each bounded metric walk or rotation, account for actual turn translation, and stop upright at the final destination. Preserve native planning and independent final verification.",
   "budget": {"max_control_steps": 12000, "max_wall_time_s": 3600}
 }
