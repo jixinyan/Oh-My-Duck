@@ -34,15 +34,20 @@ def verify_navigation(root, configuration, minimum_distance):
             and scene["solver"] == "Newton SolverMuJoCo", "Native scene differs from the declared benchmark")
     robot = configuration.get("robot_model", "allcollisions")
     policy = "roller" if robot == "groundcontact_rollers" else "alpha_walking"
+    require(scene["robot_model"] == robot and scene["control_hz"] == 50
+            and scene["physics_dt_s"] == 0.005, "Native robot or control timing differs")
+    joints = [item["result"]["measurements"] for item in tools
+              if item["tool"] == "microduck.read_sensor" and item["result"]["sensor"] == "joint_state"]
+    require(joints and all(len(set(row["joint_names"])) == len(row["joint_position_rad"])
+                          == len(row["joint_velocity_rad_s"]) == 14 for row in joints),
+            "Route lacks actual fourteen-servo measurements")
     admissions = {item["result"]["request_id"]: item["result"] for item in tools
                   if item["tool"] in {"microduck.walk", "microduck.rotate"}}
     require(len(admissions) == sum(item["tool"] in {"microduck.walk", "microduck.rotate"} for item in tools),
             "Metric tool request identities are duplicated")
     for admission in admissions.values():
-        spec = admission["action_spec"]
-        require(admission["policy_name"] == policy and spec["robot_model"] == "robot_" + robot
-                and len(set(spec["joint_names"])) == 14 and spec["control_hz"] == 50
-                and spec["physics_steps_per_action"] == 4 and spec["physics_dt_s"] == 0.005,
+        require(admission["prepared"] and admission["policy_name"] == policy
+                and admission["distance_tolerance_m"] == 0.05 and admission["angle_tolerance_deg"] == 5,
                 "Route policy or official action timing differs")
     progress = [item["result"] for item in tools if item["tool"] == "microduck.task_progress"]
     require(len(progress) >= 3 and len({row["episode_id"] for row in progress}) == 1,
@@ -51,14 +56,20 @@ def verify_navigation(root, configuration, minimum_distance):
                 for row in progress), "Recorded route has external obstacle contacts")
     pause_events = [event for event in events if not (
         event["type"] == "tool.completed" and event["detail"].get("tool") == "microduck.task_progress"
+        and event["detail"]["result"]["execution"] is not None
         and event["detail"]["result"]["execution"]["state"] == "ended")]
-    audit_motion_guard_pauses(pause_events, run["id"])
+    audit_motion_guard_pauses(pause_events, run["id"],
+                             warmup_policy="roller" if robot == "groundcontact_rollers" else "velstand")
     endpoints = {}
     for row in progress:
         motion = row["metric_motion"]
         if motion is None or motion["phase"] in {"moving", "braking"}:
             continue
         admission = admissions[motion["request_id"]]
+        require(motion["operation"] == admission["operation"] and motion["phase"] in {"complete", "failed", "blocked"}
+                and motion["start_position_m"] == admission["start_position_m"]
+                and motion["start_yaw_rad"] == admission["start_yaw_rad"],
+                "Metric result differs from its original admitted target")
         require(row["sequence"] == motion["sequence"] and
                 row["body_position_m"] == motion["body_position_m"], "Metric endpoint differs from current physics")
         start, position = motion["start_position_m"], row["body_position_m"]
@@ -107,18 +118,26 @@ def verify_navigation(root, configuration, minimum_distance):
     require(verdict["status"] == "passed" and execution["stop_reason"] == "policy_stop"
             and execution["boundary_event_id"] == verdict["boundary_event_id"]
             and final["execution"]["execution_id"] == execution["execution_id"]
-            and final["execution"]["boundary_id"] == verdict["boundary_event_id"]
+            and final["sequence"] == execution["control_steps"]
             and final["execution"]["device_confirmed"] and final["stopped_samples"] >= 5
             and not final["fallen"], "Final formal verdict lacks matching physical stopping")
     segment = final["command_segment"]
-    require(segment["used_control_steps"] >= 75 and not any(segment["command"]["twist"]
-            + segment["command"]["head"] + segment["command"]["body"]),
+    command = next(item["result"] for item in tools if item["tool"] == "microduck.set_command"
+                   and item["result"]["request_id"] == segment["request_id"])
+    require(segment["used_control_steps"] >= 75 and not any(command["command"]["twist"]
+            + command["command"]["head"] + command["command"]["body"])
+            and final["command_block"] == [0] * 13,
             "Final navigation lacks 75 actual zero-command controls")
     finish = [item["result"] for item in tools if item["tool"] == "microduck.finish_policy"]
-    require(finish and finish[-1]["accepted"] and finish[-1]["stop_confirmation"]["stopped_samples"] >= 5,
+    require(finish and finish[-1]["accepted"] and finish[-1]["stop_confirmation"]["stopped_samples"] >= 5
+            and finish[-1]["execution"] == execution,
             "Final navigation has no admitted measured policy stopping")
     check = next(item for item in verdict["checks"] if item["check_id"] == "goal_reached")
-    evidence = json.loads(check["reason"])["evidence"]
+    physical = json.loads(check["reason"])
+    evidence = physical["evidence"]
+    require(physical["sequence"] == final["sequence"] and physical["episode_id"] == final["episode_id"]
+            and evidence["robot_world_position_m"] == final["body_position_m"],
+            "Formal terminal evidence differs from the final measured physical state")
     target, goal = evidence["target"], configuration["goal"]
     require(check["value"] is True and target["target_xy_m"] == goal["target_xy_m"]
             and target["threshold_m"] == goal["distance_m"]

@@ -17,7 +17,7 @@ def require_one(events: list[dict], event_type: str) -> dict:
     return matches[0]
 
 
-def audit_motion_guard_pauses(events: list[dict], run_id: str) -> None:
+def audit_motion_guard_pauses(events: list[dict], run_id: str, warmup_policy: str = "velstand") -> None:
     completed_commands = [event for event in events if event["type"] == "tool.completed" and
                           event["detail"].get("tool") == "microduck.set_command"]
     commands = {event["detail"]["result"]["request_id"]: event
@@ -63,7 +63,7 @@ def audit_motion_guard_pauses(events: list[dict], run_id: str) -> None:
                     segment.get("max_control_steps") == segment.get("used_control_steps") == 75 and
                     guard["reason"] == "command_segment_complete" and
                     guard["sequence"] == guard["used_control_steps"] == guard["max_control_steps"] == 75 and
-                    progress["policy_name"] == "velstand" and progress["stopped_samples"] >= 5 and
+                    progress["policy_name"] == warmup_policy and progress["stopped_samples"] >= 5 and
                     progress["command_block"] == [0] * 13 and
                     guard["command"]["twist"] == [0, 0, 0] and
                     guard["command"]["head"] == [0] * 4 and guard["command"]["body"] == [0] * 6 and

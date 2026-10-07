@@ -17,6 +17,18 @@ Instructions are in the matching `office-vln-instruction.md` and `hospital-navig
 
 Start `omd.py harness` with the pinned EDH source, actual model provider, locked Isaac/Newton worker environment, scene configuration and a new data directory. On a remote NVIDIA host, provide `--worker-host`, `--worker-root`, `--worker-python`, `--worker-edh-source`, `--worker-policy-dir` and one explicit `--worker-cuda-device`. Check actual process ownership and activity before allocation. Authorized devices are 2–4, with at most one physical GPU concurrently. Run the scene sessions sequentially and confirm resource release between them. RL remains stopped.
 
+`run_navigation_acceptance.py` 使用已启动的原生服务，创建会话并提交指令，保存任务身份和状态，等待终态，确认资源释放，导出原始记录并运行独立复核。复核通过且会话已经释放资源后才写入 `result.json`。错误终止执行，已有输出目录禁止重复使用。关闭会话之后保留服务进程，原始事件和图像通过原生持久记录导出。
+
+```bash
+python scripts/run_navigation_acceptance.py \
+  --base-url http://127.0.0.1:4361 \
+  --scene-config configs/simulation-demo/office-vln.json \
+  --instruction configs/simulation-demo/office-vln-instruction.md \
+  --data-directory .cache/harness-office-new \
+  --output outputs/acceptance/office-navigation-new \
+  --minimum-distance-m 3
+```
+
 The scene ID is the native launch profile. Its scenario ID is `navigate-` followed by the scene ID:
 
 ```bash
@@ -28,6 +40,8 @@ python scripts/record_harness_demo.py task \
   --scenario navigate-nvidia-hospital-navigation \
   --instruction configs/simulation-demo/hospital-navigation-instruction.md \
   --output .cache/navigation-new-task.json
+python scripts/record_harness_demo.py close \
+  --base-url http://127.0.0.1:4360 --session .cache/navigation-new-session.json
 python scripts/record_harness_demo.py export \
   --base-url http://127.0.0.1:4360 --run-id RUN_ID \
   --data-directory .cache/harness-navigation-new \
@@ -35,11 +49,9 @@ python scripts/record_harness_demo.py export \
 python scripts/accept_navigation_replay.py outputs/demos/navigation-new \
   --scene-config configs/simulation-demo/hospital-navigation.json \
   --minimum-distance-m 3 --output outputs/acceptance/navigation-new.json
-python scripts/record_harness_demo.py close \
-  --base-url http://127.0.0.1:4360 --session .cache/navigation-new-session.json
 ```
 
-Export requires a terminal native run. Preserve unsuccessful runs in separate directories. Close sessions and verify that their GPU workers exit regardless of task outcome. The [release readiness guide](release-readiness.md#record-the-agentic-video) describes rendering the original scene cameras and public agentic trace with source hashes and full MP4 decoding.
+Export requires a terminal native run. In the manual workflow, wait for that terminal state before closing, then confirm `closed` / `released` before export. Preserve unsuccessful runs in separate directories. Verify that GPU workers exit regardless of task outcome. The [release readiness guide](release-readiness.md#record-the-agentic-video) describes rendering the original scene cameras and public agentic trace with source hashes and full MP4 decoding.
 
 ## Artifact requirements
 

@@ -6,4 +6,6 @@ The benchmark's ordered route checkpoints are center (-17.5,32.2), right detour 
 
 Start with zero-command velstand warmup until it has paused and recorded five stopped samples. After each prepared walk or rotate, call execution.resume and wait until its confirmed pause, then inspect task_progress.metric_motion and current pose. Completed metric motion requires its measured error tolerance and five stopped samples. If a turn reports failed, obtain current progress and ToF, then prepare the remaining turn or a new route segment from the current pose. Do not finish until both ordered checkpoints and the final goal have been physically visited.
 
+执行过程中调用 microduck.read_sensor(sensor="joint_state")，保存全部十四个 servo 的实际位置、速度与英文名称。
+
 At final arrival execute at least 75 actual zero-twist control steps, confirm physical stopping, call finish_policy with the current execution identity, and wait for the independent Verifier. Write the final evidence and plan completion using the current passed verdict before calling native tasks.finish.

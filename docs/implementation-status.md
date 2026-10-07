@@ -1,5 +1,7 @@
 # Implementation status
 
+> 2026-10-07：Hospital 轮滑的有序导航通过真实模型、原生 Harness、Newton/BAM、独立 Verifier 和原始记录复核。三段行走端点位移累计 5.438808 米，1903 控制步 / 7612 物理子步，最终误差 0.095637 米，80 个连续停止样本，累计外部接触为零。完整 MP4 为 170 秒，393 张原始图片与公开 agentic trace 保留；会话和 worker 已释放。两次动作的严格精度未通过，实际结果与后续规划完整保存。自动验收入口、路线参数与证据见[导航验收](reports/navigation-acceptance-2026-10-07.md)。
+
 > 2026-10-07：完整 Office 原生任务通过四个官方 policy 的技能和导航验收：坐立高度变化 0.054849 米，head yaw 变化 0.333259 rad，ground_pick 完成 140 个控制步，直立恢复后连续停止 97 个样本。999 个控制步与 3996 个物理子步，独立 Verifier passed，run succeeded，最终目标误差 0.045512 米，连续停止 80 个样本，外部障碍接触为零。六次当前图像的 SAM3.1 + YOLO26 调用保留空目标结果，距离和导航使用 simulator ground truth。标准脚部署使用官方 sitstand 的 30/50 求解参数与 Newton 直接执行，会话及服务已释放。见[完整测量](reports/office-skills-acceptance-2026-10-07.md)。GPU 同时最多使用一张设备；RL 保持停止。
 
 > 2026-10-07：同一控制器源码在 CPU 公寓、Newton Office、Newton Hospital 完成九个独立会话和十五次运动，每个场景覆盖 +0.5 米、−0.5 米、+1.0 米与 ±45°。CPU 最大距离/角度误差为 0.035112 米/3.777766°，Office 为 0.021602 米/4.952898°，Hospital 为 0.049210 米/3.746165°。全部动作确认直立停止、零外部障碍接触与会话释放；连续物理样本、相机字节、执行计数和来源在本地独立复核通过。见[完整测量](reports/metric-controller-acceptance-2026-10-07.md)。
@@ -188,7 +190,7 @@ is prepared but not launched. Default task recipes and native PPO algorithms rem
 | Source organization | First-party code consolidated under `src/oh_my_duck`; obsolete `training/` packages removed |
 | CLI/application | Unified entry point, `doctor` runtime checks and `voice-task` recorded native workflow; wheel build and installed voice commands verified |
 | Core contracts/tool catalog/recording | 已验证 schema、工具登记与 JSONL；原生 Harness 完整事件和 PNG 导出、SHA256 检查及 1080p agentic MP4 已完成实际验证 |
-| Agentic Harness, skills, robot execution | 固定 EDH 原生会话、SSH GPU worker、真实模型、官方 ONNX、ActionGate 与独立 Verifier 已运行；CPU 公寓与 Newton Office 的固定场景导航正式 passed。CPU 公寓、Newton Office 标准脚与 Hospital 轮滑各通过三个距离/角度会话；Office 完整多动作任务与多场景长距离导航待验收 |
+| Agentic Harness, skills, robot execution | 固定 EDH 原生会话、SSH GPU worker、真实模型、官方 ONNX、ActionGate 与独立 Verifier 已运行；CPU 公寓与 Newton Office 的固定场景导航、Office 四个 policy 的完整多动作任务和 Hospital 轮滑有序路线通过。三个场景各通过三个距离/角度会话；全部长距离请求精度、图像输入独立 VLN、多场景泛化与真机待验收 |
 | Perception and policy adapters | 官方十项 policy 目录及 61-to-14 推断，CPU episodic 时长/接续、Newton Office 的 velstand/alpha_walking、head RGB optical pose/近裁剪、observer 场景取景、ToF、IMU 与 odometry 已验证；实际 RGB 与 segmentation 证据保留，物体识别与各 policy 物体效果待验证 |
 | Voice interaction | Qwen ASR、已确认音色 TTS、原生 Harness、Newton/BAM 与独立 Verifier 的录音任务闭环已经通过；Mac 音频设备、合成中断与 CPU MuJoCo/BAM、Newton 任务执行中断通过，会话释放资源。Microduck 音频设备待验收。见[闭环记录](reports/end-to-end-2026-10-03.md)与[设备检查](reports/voice-interaction-validation-2026-09-29.md) |
 | MuJoCo RL | Both representative tasks × both native PPO frameworks passed the single-GPU lifecycle and completed replay |
