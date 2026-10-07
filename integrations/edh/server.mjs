@@ -198,6 +198,7 @@ function workerTransport(controlPort) {
 }
 
 function tool(operation, properties, required, services) {
+  const metricRecovery = ' A blocked motion retains its guard. At that confirmed stopped boundary, read fresh ToF and use set_command with a changed twist for bounded recovery. Resume, measure progress, then issue a zero-twist hold and confirm five stopped samples before preparing another metric action. Changing the requested distance or angle alone does not clear the guard.';
   return (assignment) => ({
     name: `microduck__${operation}`,
     description: {
@@ -210,8 +211,8 @@ function tool(operation, properties, required, services) {
       read_sensor: 'Read a current physical MicroDuck RGB, ToF, IMU, joint, or odometry sensor.',
       inspect_scene: 'Inspect current head RGB for a named object and return visible targets, bounding boxes, surface distance in meters and bearing in degrees. Select models for YOLO26/SAM service inference, or simulator_ground_truth for explicit native shape masks and ray-hit distances. The result labels detection, mask and distance sources. Requires a confirmed paused execution. Positive bearing means left. Reobserve after movement; targets are tied to one episode and sequence.',
       task_progress: 'Read current physical position, velocity, contact evidence, bounded-command status, and native motion-pause reason.',
-      walk: 'Prepare the official locomotion policy (alpha_walking for standard feet, roller for the roller model) to move a signed distance in meters along the current heading. Positive moves forward; negative moves backward. Requires a confirmed paused execution and five measured stopped samples. Call execution.resume afterward. Native odometry controls completion and braking; read task_progress.metric_motion after the pause.',
-      rotate: 'Prepare the official locomotion policy (alpha_walking for standard feet, roller for the roller model) to turn by a signed angle in degrees. This maneuver includes translation; the measured translation_xy_m is reported. Positive is counterclockwise around world +Z; negative is clockwise. Requires a confirmed paused execution and five measured stopped samples. Call execution.resume afterward. Accumulated measured yaw controls completion and braking; read task_progress.metric_motion after the pause.',
+      walk: 'Prepare the official locomotion policy (alpha_walking for standard feet, roller for the roller model) to move a signed distance in meters along the current heading. Positive moves forward; negative moves backward. Requires a confirmed paused execution and five measured stopped samples. Call execution.resume afterward. Native odometry controls completion and braking; read task_progress.metric_motion after the pause.' + metricRecovery,
+      rotate: 'Prepare the official locomotion policy (alpha_walking for standard feet, roller for the roller model) to turn by a signed angle in degrees. This maneuver includes translation; the measured translation_xy_m is reported. Positive is counterclockwise around world +Z; negative is clockwise. Requires a confirmed paused execution and five measured stopped samples. Call execution.resume afterward. Accumulated measured yaw controls completion and braking; read task_progress.metric_motion after the pause.' + metricRecovery,
     }[operation],
     parameters: { type: 'object', properties, required, additionalProperties: false },
     output: {
@@ -296,7 +297,7 @@ const server = await startServer({
       }, ['execution_id', 'generation', 'boundary_id'], { images }),
       'microduck.set_command': tool('set_command', {
         command: { type: 'object', properties: {
-          twist: { type: 'array', items: { type: 'number' }, minItems: 3, maxItems: 3 },
+          twist: { type: 'array', description: 'Body-frame forward and lateral velocity in meters/second, then yaw velocity in radians/second.', items: { type: 'number' }, minItems: 3, maxItems: 3 },
           head: { type: 'array', items: { type: 'number' }, minItems: 4, maxItems: 4 },
           body: { type: 'array', items: { type: 'number' }, minItems: 6, maxItems: 6 },
           posture: { type: 'string', enum: ['sit', 'stand'] },

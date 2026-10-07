@@ -40,13 +40,20 @@ def main():
         raise ValueError("Harness endpoint must be an HTTP(S) origin")
     if not math.isfinite(args.minimum_distance_m) or args.minimum_distance_m <= 0:
         raise ValueError("Minimum measured distance must be positive and finite")
-    configuration = json.loads(args.scene_config.read_text())
-    instruction = args.instruction.read_text()
+    scene_bytes = args.scene_config.read_bytes()
+    instruction_bytes = args.instruction.read_bytes()
+    configuration = json.loads(scene_bytes)
+    instruction = instruction_bytes.decode("utf-8")
+    sources = {"scene_config_sha256": hashlib.sha256(scene_bytes).hexdigest(),
+               "instruction_sha256": hashlib.sha256(instruction_bytes).hexdigest(),
+               "runner_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+               "auditor_sha256": hashlib.sha256(Path(__file__).with_name("accept_navigation_replay.py").read_bytes()).hexdigest()}
     if not instruction.strip() or configuration["backend"] != "isaac-newton":
         raise ValueError("Navigation requires an instruction and a Newton scene")
     args.data_directory.resolve(strict=True)
     args.output.mkdir(parents=True, exist_ok=False)
     save_json(args.output / "scene.json", configuration)
+    save_json(args.output / "sources.json", sources)
     (args.output / "instruction.md").write_text(instruction)
     origin = args.base_url.rstrip("/")
     opening = {"profileId": configuration["scene_id"], "requestId": str(uuid4())}
@@ -80,10 +87,7 @@ def main():
         close_session(origin, session, args.output)
         export_run(origin, task["runId"], args.output / "replay", args.data_directory)
         report = verify_navigation((args.output / "replay").resolve(strict=True), configuration, args.minimum_distance_m)
-        report.update(scene_config_sha256=hashlib.sha256(args.scene_config.read_bytes()).hexdigest(),
-                      instruction_sha256=hashlib.sha256(args.instruction.read_bytes()).hexdigest(),
-                      runner_sha256=hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
-                      auditor_sha256=hashlib.sha256(Path(__file__).with_name("accept_navigation_replay.py").read_bytes()).hexdigest())
+        report.update(sources)
         save_json(args.output / "physical-acceptance.json", report)
     finally:
         if session is None:

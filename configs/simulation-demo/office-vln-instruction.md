@@ -8,4 +8,6 @@ Start with zero-command velstand warmup until it has paused and recorded five st
 
 执行过程中调用 microduck.read_sensor(sensor="joint_state")，保存全部十四个 servo 的实际位置、速度与英文名称。
 
+当 metric_motion.phase 为 blocked 时，读取当前暂停位置的 ToF，使用 microduck.set_command 提交符合当前场景的 changed twist 和 5–100 个控制步，调用 execution.resume 并等待确认暂停，检查当前进度。twist 的前向和横向速度单位为米/秒，yaw 速度单位为弧度/秒。随后执行零 twist 的保持，确认五个停止样本，再根据实际位置和朝向准备下一次 metric action。恢复过程保存原始 blocked 结果。
+
 At final arrival execute at least 75 actual zero-twist control steps, confirm physical stopping, call finish_policy with the current execution identity, and wait for the independent Verifier. Write the final evidence and plan completion using the current passed verdict before calling native tasks.finish.
