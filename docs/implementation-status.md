@@ -1,8 +1,8 @@
 # Implementation status
 
-> 2026-10-06：批量运动验收加入独立文件复核。程序根据原生工具接纳记录与连续物理样本重新计算距离和累计转角，检查五个停止样本、直立终点、零外部接触、14 个 servo action、四个物理子步、相机原始字节及源码 hash。已有 CPU 公寓的三个会话全部通过复核。GPU 使用范围为 2–4，同时最多使用一张设备；RL 保持停止。见[操作说明](release-readiness.md#metric-policy-matrix)。
+> 2026-10-06：当前标准脚控制器完成 CPU 公寓和 Newton Office 各三个独立会话，共十次运动，覆盖每个场景的 +0.5 米、−0.5 米、+1.0 米和 ±45°。CPU 最大误差为 0.035112 米与 3.777766°，Office 最大误差为 0.022884 米与 4.519054°。所有动作确认直立停止、零外部障碍接触和会话资源释放。独立程序重新计算原始物理样本，核查相机字节、来源与执行计数，六个会话全部通过。见[完整测量](reports/metric-controller-acceptance-2026-10-06.md)。
 
-> 当前距离与角度控制器已在 CPU 公寓通过三个独立会话，覆盖 +0.5 米、−0.5 米、+1.0 米及 ±45°。最大位置误差为 0.035112 米，最大角度误差为 0.737881°；五次动作确认直立停止，外部障碍接触累计为零，会话释放资源。实际 MuJoCo 射线的量程测试通过，批量入口保存源码、依赖、场景、事件、状态与相机证据。当前控制器的 Newton 验收待执行。GPU 仅允许使用 2–4，本轮没有启动 GPU 工作；RL 保持停止。见[测量与来源](reports/metric-acceptance-matrix-2026-10-03.md)。
+> 旋转保持请求的 angular command，使用实际制动角度修正终点；每次请求最多三次修正。50 个控制步的目标进度监测通过 `metric_progress_stalled` 报告停滞，并执行零命令停止。ONNX Runtime 在初始化前关闭遥测，macOS 的三个实际仿真子进程正常退出。Hospital 轮滑批量验收、Office 完整多动作任务及其他上线事项继续推进。GPU 使用范围为 2–4，同时最多使用一张设备；RL 保持停止。
 
 > 2026-10-03：录音指令经 Qwen ASR、原生 Harness、真实模型、官方 policy、Newton/BAM 与独立 Verifier 完成任务，并生成固定音色反馈。Office 任务 succeeded，目标误差 0.090916 米，480 控制步与 1920 物理子步；91.4 秒 MP4 包含实际画面、公开 agentic trace 和语音。标准脚 0.5 米工具误差 0.024196 米，45°工具误差 0.522914°；轮滑模型对应误差为 0.018337 米和 3.893902°，四项均取得五个实际停止样本。安装包、项目目录之外的语音入口、实际服务检查和十项音色资料测试通过。CPU MuJoCo/BAM 与 Newton 的执行期间中断通过，停止确认之后两秒内动作计数保持不变，会话释放资源。Office 新进程初始化符合原生 Harness 的 180 秒时限，使用已有 kernel 缓存。其他命令设置、多场景泛化、识别准确率、物体效果、训练 policy 行为和真机需要独立证据。见[上线要求](release-readiness.md)与[完整证据](reports/end-to-end-2026-10-03.md)。
 
@@ -186,7 +186,7 @@ is prepared but not launched. Default task recipes and native PPO algorithms rem
 | Source organization | First-party code consolidated under `src/oh_my_duck`; obsolete `training/` packages removed |
 | CLI/application | Unified entry point, `doctor` runtime checks and `voice-task` recorded native workflow; wheel build and installed voice commands verified |
 | Core contracts/tool catalog/recording | 已验证 schema、工具登记与 JSONL；原生 Harness 完整事件和 PNG 导出、SHA256 检查及 1080p agentic MP4 已完成实际验证 |
-| Agentic Harness, skills, robot execution | 固定 EDH 原生会话、SSH GPU worker、真实模型、官方 ONNX、ActionGate 与独立 Verifier 已运行；CPU 公寓与 Newton Office 的固定场景导航正式 passed。当前控制器的 CPU 距离/角度批量检查通过；当前 Newton 控制器与多场景长距离导航待验收 |
+| Agentic Harness, skills, robot execution | 固定 EDH 原生会话、SSH GPU worker、真实模型、官方 ONNX、ActionGate 与独立 Verifier 已运行；CPU 公寓与 Newton Office 的固定场景导航正式 passed。当前控制器在两个场景各通过三个距离/角度验收会话；Hospital 轮滑批量检查与多场景长距离导航待验收 |
 | Perception and policy adapters | 官方十项 policy 目录及 61-to-14 推断，CPU episodic 时长/接续、Newton Office 的 velstand/alpha_walking、head RGB optical pose/近裁剪、observer 场景取景、ToF、IMU 与 odometry 已验证；实际 RGB 与 segmentation 证据保留，物体识别与各 policy 物体效果待验证 |
 | Voice interaction | Qwen ASR、已确认音色 TTS、原生 Harness、Newton/BAM 与独立 Verifier 的录音任务闭环已经通过；Mac 音频设备、合成中断与 CPU MuJoCo/BAM、Newton 任务执行中断通过，会话释放资源。Microduck 音频设备待验收。见[闭环记录](reports/end-to-end-2026-10-03.md)与[设备检查](reports/voice-interaction-validation-2026-09-29.md) |
 | MuJoCo RL | Both representative tasks × both native PPO frameworks passed the single-GPU lifecycle and completed replay |

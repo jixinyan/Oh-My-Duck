@@ -12,9 +12,9 @@ tags:
   - project-design
 ---
 
-> 2026-10-06：运动验收的独立复核根据连续物理样本重新计算距离和累计转角，并核查停止、接触、动作时序、相机事件及源码 hash。已有 CPU 公寓三个会话通过复核。GPU 仅使用 2–4 中最多一张设备，RL 保持停止。操作见[验收说明](release-readiness.md#metric-policy-matrix)。
+> 2026-10-06：当前标准脚控制器在 CPU 公寓与 Newton Office 各通过三个会话，两个场景分别覆盖 +0.5 米、−0.5 米、+1.0 米与 ±45°。CPU 最大位置/角度误差为 0.035112 米/3.777766°，Office 为 0.022884 米/4.519054°。十次动作全部确认直立停止、零外部接触和资源释放。独立复核根据连续物理样本重新计算距离与累计角度，并核查相机、源码和执行计数。见[完整测量](reports/metric-controller-acceptance-2026-10-06.md)。
 
-> 当前距离与角度控制器在 CPU 公寓通过三个独立会话，覆盖前进、后退和两个旋转方向，最大误差为 0.035112 米与 0.737881°。五次动作确认直立停止，外部障碍接触累计为零。批量验收使用实际原生会话、官方 policy 和 MuJoCo/BAM，保存来源与会话关闭证据；当前控制器的 Newton 验收待执行。GPU 使用范围为 2–4，RL 保持停止。见[完整测量](reports/metric-acceptance-matrix-2026-10-03.md)。
+> metric controller 根据实际状态完成目标、制动和最多三次修正。旋转的修正进度使用当前制动补偿目标，最终误差检查使用原始请求。50 个控制步内目标进度不足时返回 `metric_progress_stalled` 并确认停止。Hospital 轮滑矩阵与 Office 完整多动作任务需要独立验收。GPU 使用范围为 2–4，同时最多使用一张设备，RL 保持停止。操作见[验收说明](release-readiness.md#metric-policy-matrix)。
 
 > 2026-10-03：完整录音任务经 Qwen ASR、原生 Harness、官方 policy、Newton/BAM 与独立 Verifier 通过，并使用已确认音色生成反馈。语音模块通过 `voice-task` 和 `voice-session` 接入任务，保留指令、事件、传感器、动作边界和正式 verdict。CPU MuJoCo/BAM 与 Newton 的任务中断及会话释放通过；标准脚与轮滑模型的 0.5 米、45°工具取得满足误差要求的实际停止结果。`doctor` 检查实际依赖与服务，视频制作使用独立锁定环境。上线状态以[验收要求](release-readiness.md)和[当前证据](reports/end-to-end-2026-10-03.md)为准。
 

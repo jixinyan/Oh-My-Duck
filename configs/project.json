@@ -11,18 +11,27 @@
     "native_target_error_m": 0.090916,
     "standard_feet_metric_distance_error_m": 0.024196026,
     "standard_feet_metric_angle_error_deg": 0.522913718,
-    "current_feet_controller_newton": "revalidation_pending",
+    "current_feet_controller_newton": "three_sessions_five_motions_passed",
     "cpu_metric_matrix": {
       "state": "three_sessions_five_motions_passed",
-      "source_revision": "3265a3d38c405a7ae0e3354ef175b472955b7f54",
+      "source_revision": "6e2757e8d02e3bd52353f445b45bc9890e84e69b",
       "maximum_distance_error_m": 0.0351120087,
-      "maximum_angle_error_deg": 0.7378814204,
-      "campaign": "outputs/acceptance/metric-campaign-apartment-20261003-05/campaign.json",
-      "report": "docs/reports/metric-acceptance-matrix-2026-10-03.md"
+      "maximum_angle_error_deg": 3.7777661791,
+      "campaign": "outputs/acceptance/metric-apartment-rotation-20261006-04/campaign.json",
+      "report": "docs/reports/metric-controller-acceptance-2026-10-06.md"
+    },
+    "newton_office_metric_matrix": {
+      "state": "three_sessions_five_motions_passed",
+      "source_revision": "dca35a13a71f3f070c5a4a0037ba86dd78610d84",
+      "maximum_distance_error_m": 0.0228842549,
+      "maximum_angle_error_deg": 4.5190540695,
+      "physical_gpu": 4,
+      "campaign": "outputs/acceptance/metric-office-feet-20261006-04/campaign.json",
+      "report": "docs/reports/metric-controller-acceptance-2026-10-06.md"
     },
     "allowed_physical_gpus": [2, 3, 4],
     "maximum_concurrent_physical_gpus": 1,
-    "metric_artifact_verifier": "saved_cpu_matrix_recomputed_from_native_physical_samples",
+    "metric_artifact_verifier": "cpu_and_newton_office_matrices_recomputed_from_native_physical_samples",
     "runtime_doctor": "passed_voice_client_and_newton",
     "package_build": "passed_wheel_and_sdist",
     "voice_profile_tests": "10_passed",
@@ -34,7 +43,7 @@
     "roller_metric_distance_error_m": 0.0183367995,
     "roller_metric_angle_error_deg": 3.893902414,
     "demo_environment": "locked_and_actual_render_decode_passed",
-    "pending": ["current_feet_controller_newton_revalidation", "hospital_roller_metric_matrix", "hardware_acceptance", "multi_scene_navigation_generalization", "image_only_vln", "perception_accuracy", "object_interaction_acceptance", "trained_policy_behavior_acceptance", "fresh_install_kernel_compilation"],
+    "pending": ["hospital_roller_metric_matrix", "hardware_acceptance", "multi_scene_navigation_generalization", "image_only_vln", "perception_accuracy", "object_interaction_acceptance", "trained_policy_behavior_acceptance", "fresh_install_kernel_compilation"],
     "rl_training": "stopped"
   },
   "components": {
@@ -46,7 +55,7 @@
     "robot_backends": {
       "module": "oh_my_duck.robotics.backends",
       "state": "cpu_apartment_newton_office_navigation_and_hospital_roller_crouch_verified",
-      "role": "Native CPU apartment metric matrix verified for the current foot controller; Newton Office navigation and Hospital roller/crouch tasks have pinned-source evidence; current-controller Newton revalidation, multi-scene generalization and hardware pending"
+      "role": "Current foot controller passed native CPU apartment and Newton Office metric matrices; Newton Office navigation and Hospital roller/crouch tasks have pinned-source evidence; multi-scene generalization and hardware pending"
     },
     "skills": {
       "module": "oh_my_duck.agentic.skills",
@@ -188,7 +197,7 @@
       "guide": "docs/perception-navigation.md"
     },
     "metric_policy_tools": {
-      "state": "cpu_apartment_metric_matrix_verified_current_newton_revalidation_pending",
+      "state": "cpu_apartment_and_newton_office_metric_matrices_verified",
       "tools": ["microduck.walk", "microduck.rotate"],
       "policy": "alpha_walking",
       "distance_tolerance_m": 0.05,
@@ -200,9 +209,9 @@
       "cpu_metric_behavior": "three_sessions_five_motions_passed_fixed_apartment_pose",
       "cpu_verified_distance_m": [0.5, -0.5, 1.0],
       "cpu_verified_angle_deg": [45, -45],
-      "current_feet_controller_newton": "revalidation_pending",
+      "current_feet_controller_newton": "three_sessions_five_motions_passed",
       "matrix_plan": "configs/experiments/metric-policy-acceptance.json",
-      "matrix_report": "docs/reports/metric-acceptance-matrix-2026-10-03.md",
+      "matrix_report": "docs/reports/metric-controller-acceptance-2026-10-06.md",
       "artifact_verifier": "scripts/verify_metric_campaign.py",
       "hardware_behavior": "pending",
       "report": "docs/reports/metric-camera-tools-2026-09-30.md"
