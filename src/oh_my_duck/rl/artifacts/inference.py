@@ -5,6 +5,10 @@ host thread overhead; EGL video correctness is validated separately and is not
 guaranteed by the inference thread setting.
 """
 
+import os
+
+os.environ["ORT_DISABLE_TELEMETRY"] = "1"
+
 
 def cpu_session(path, **kwargs):
     import onnxruntime as ort

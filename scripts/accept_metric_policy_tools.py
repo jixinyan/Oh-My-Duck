@@ -29,6 +29,7 @@ def provenance(root, args, configuration):
                                  ("mujoco", "better-actuator-models", "onnxruntime", "numpy")},
             "python_version": sys.version,
             "cuda_visible_devices": os.environ.get("CUDA_VISIBLE_DEVICES"),
+            "onnxruntime_telemetry_disabled": os.environ.get("ORT_DISABLE_TELEMETRY") == "1",
             "configuration": {key: value for key, value in configuration.items()
                               if key != "control_secret"},
             "commands": {"operations": args.operations, "distance_m": args.distance,
