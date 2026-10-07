@@ -17,29 +17,29 @@
     "current_feet_controller_newton": "three_sessions_five_motions_passed",
     "cpu_metric_matrix": {
       "state": "three_sessions_five_motions_passed",
-      "source_revision": "6e2757e8d02e3bd52353f445b45bc9890e84e69b",
+      "source_revision": "1640fda2ecf5c081beaf09a4796635a707f06c8d",
       "maximum_distance_error_m": 0.0351120087,
       "maximum_angle_error_deg": 3.7777661791,
-      "campaign": "outputs/acceptance/metric-apartment-rotation-20261006-04/campaign.json",
-      "report": "docs/reports/metric-controller-acceptance-2026-10-06.md"
+      "campaign": "outputs/acceptance/metric-apartment-feet-20261007-07/campaign.json",
+      "report": "docs/reports/metric-controller-acceptance-2026-10-07.md"
     },
     "newton_office_metric_matrix": {
       "state": "three_sessions_five_motions_passed",
-      "source_revision": "dca35a13a71f3f070c5a4a0037ba86dd78610d84",
-      "maximum_distance_error_m": 0.0228842549,
-      "maximum_angle_error_deg": 4.5190540695,
+      "source_revision": "1640fda2ecf5c081beaf09a4796635a707f06c8d",
+      "maximum_distance_error_m": 0.0216022218,
+      "maximum_angle_error_deg": 4.9528984434,
       "physical_gpu": 4,
-      "campaign": "outputs/acceptance/metric-office-feet-20261006-04/campaign.json",
-      "report": "docs/reports/metric-controller-acceptance-2026-10-06.md"
+      "campaign": "outputs/acceptance/metric-office-feet-20261007-07/campaign.json",
+      "report": "docs/reports/metric-controller-acceptance-2026-10-07.md"
     },
     "newton_hospital_roller_metric_matrix": {
       "state": "three_sessions_five_motions_passed",
-      "source_revision": "b0b4c2afe264c1b92222d2fc088d8fb9ccbc5c11",
-      "maximum_distance_error_m": 0.0432110332,
-      "maximum_angle_error_deg": 4.1621238436,
+      "source_revision": "1640fda2ecf5c081beaf09a4796635a707f06c8d",
+      "maximum_distance_error_m": 0.0492103333,
+      "maximum_angle_error_deg": 3.7461654681,
       "physical_gpu": 4,
-      "campaign": "outputs/acceptance/metric-hospital-rollers-20261006-05/campaign.json",
-      "report": "docs/reports/metric-controller-acceptance-2026-10-06.md"
+      "campaign": "outputs/acceptance/metric-hospital-rollers-20261007-07/campaign.json",
+      "report": "docs/reports/metric-controller-acceptance-2026-10-07.md"
     },
     "allowed_physical_gpus": [2, 3, 4],
     "maximum_concurrent_physical_gpus": 1,
