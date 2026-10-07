@@ -150,7 +150,8 @@ class MetricMotion:
                        "phase": self.phase, "completed": False}
         if state["fallen"]:
             self.phase = "failed"
-        elif self.phase == "moving" and reached:
+        # 目标范围内已经停止时执行零命令制动，随后重新测量最终误差。
+        elif self.phase == "moving" and (reached or (error <= tolerance and stopped_samples >= 5)):
             self.phase = "braking"
             self.progress_history.clear()
             if self.operation == "rotate":
