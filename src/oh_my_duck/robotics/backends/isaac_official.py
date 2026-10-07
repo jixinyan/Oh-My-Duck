@@ -87,8 +87,10 @@ class IsaacNewtonBamBackend(CpuMujocoBamBackend):
         self._owner_thread = threading.get_ident()
         self._stop_requested = threading.Event()
         self._renderer = self._observer_renderer = None
-        task_sim_cfg = TaskSimulationCfg(nconmax=35, njmax=1500,
-            mujoco=MujocoCfg(timestep=0.005, iterations=10, ls_iterations=20))
+        # 全部碰撞几何的坐姿使用官方 sitstand 的接触求解参数。
+        iterations, ls_iterations = (30, 50) if robot_model == "allcollisions" else (10, 20)
+        task_sim_cfg = TaskSimulationCfg(nconmax=200 if robot_model == "allcollisions" else 35, njmax=1500,
+            mujoco=MujocoCfg(timestep=0.005, iterations=iterations, ls_iterations=ls_iterations))
         scene = SceneCfg(num_envs=1, env_spacing=1.0)
         scene.terrain = None
         scene.environment = AssetBaseCfg(
@@ -118,7 +120,7 @@ class IsaacNewtonBamBackend(CpuMujocoBamBackend):
             observations=PhysicsOnlyTerms(), events=PhysicsOnlyTerms(), seed=0,
             sim=SimulationCfg(device=device, dt=0.005, render_interval=4,
                               physics=NewtonCfg(solver_cfg=OfficialTaskSolverCfg(
-                                  robot_model=robot_model, iterations=10, ls_iterations=20,
+                                  robot_model=robot_model, iterations=iterations, ls_iterations=ls_iterations,
                                   njmax=5000, nconmax=5000), num_substeps=1)))
         self._launch = launch_simulation(native_cfg, {"headless": True, "device": device})
         self._launch.__enter__()
@@ -559,6 +561,8 @@ class IsaacNewtonBamBackend(CpuMujocoBamBackend):
                 "provenance": self.provenance, "public_map": public_map,
                 "goal": self._goal,
                 "solver": "Newton SolverMuJoCo", "physics_dt_s": 0.005,
+                "solver_iterations": int(self.sim.mj_model.opt.iterations),
+                "solver_ls_iterations": int(self.sim.mj_model.opt.ls_iterations),
                 "control_hz": 50, "robot_model": self.robot_model,
                 "observer_renderer": self.observer_renderer}
 
