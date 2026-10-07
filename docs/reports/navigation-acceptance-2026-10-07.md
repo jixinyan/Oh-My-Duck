@@ -31,7 +31,55 @@
 
 动作验收保持 0.05 米 / 5° 和五个实际停止样本。导航目标验收独立检查路线和最终姿态。模型读取失败动作的最终位置与角度，继续完成后续路线。旋转伴随实际平移，模型在 westward turn 的 5.6 厘米平移之后重新计算行走距离。ToF 的 invalid 返回和空目标查询保留原始结果。
 
-## 来源与复核
+## Office 有序导航测量
+
+Office 使用相同不可变物理源码、官方 `alpha_walking`、标准脚模型和 Newton/BAM。原生 run `a8dd0f45-4480-4e60-a89a-0b783f2627c0` 保持一个物理 episode，从中心 checkpoint 继续右侧绕行，返回桌面方向，最后到达 `(-16.884420,34.319298)`。最终目标误差为 0.116789 米，五个连续停止样本，外部障碍接触累计为零。
+
+| 测量 | 结果 |
+|---|---|
+| 原生任务状态 | `failed`，`Execution budget is exhausted` |
+| 行走段端点位移累计 | 3.052359 米 |
+| 执行计数 | 2627 个 policy call / 控制步，10508 个物理子步 |
+| 最终停止保持 | `set_command` 接纳 75 步零命令，`execution.resume` 因时间预算拒绝，实际未执行 |
+| 正式结束与 Verifier | 没有 `finish_policy`、passed verdict 或 `tasks.finish` |
+| 原始记录 | 4266 个事件、549 张图片，其中 525 张 observer 图片，11 次 GT 感知 |
+| 主机 / physical GPU | `jd_B300` / 2 |
+| 会话 | `530c4cc2-75de-4730-8c25-3f898649acf6`，`closed` / `released`，worker 已退出 |
+| 原始导出 | `outputs/acceptance/office-navigation-20261007-05/replay` |
+| 诊断测量 | `outputs/acceptance/office-navigation-20261007-05/diagnostic.json` |
+
+| 原始请求 | 实测值 | 目标误差 | 动作结果 |
+|---|---|---|---|
+| `rotate(88)` 度 | 87.343004 度 | 0.656996 度 | `complete` |
+| `walk(1.35)` 米 | 1.334821 米沿初始朝向位移 | 0.018105 米 | `complete` |
+| `rotate(-78)` 度 | −7.947516 度 | 70.052484 度 | `blocked` |
+| `rotate(-65)` 度 | −6.482787 度 | 58.517213 度 | `blocked` |
+| `walk(0.30)` 米 | 0.282908 米沿初始朝向位移 | 0.021449 米 | `complete` |
+| `rotate(85)` 度 | 82.712099 度 | 2.287901 度 | `complete` |
+| `walk(1.45)` 米 | 1.434270 米沿初始朝向位移 | 0.017960 米 | `complete` |
+
+两次顺时针转弯在长行走之后触发 `motion_stalled`。模型读取新鲜 ToF，调用改变 twist 的有界命令，执行零命令保持并测得停止，继续完成右侧绕行。全部 motion guard 和原有精度要求保持启用。当前标准脚旋转命令为 `[0.2,0.25,signed_yaw_rate]`；本次记录证明顺时针响应需要后续因果实验，具体原因尚未确认。
+
+最后行走暂停边界记录的 elapsed wall time 为 2358.263400 秒。模型检查位置和图像、提交零命令，随后恢复时已超过配置中的 2400 秒预算；关闭时记录 2415.571954 秒。自动入口关闭资源并导出记录，独立复核拒绝 native `failed`，成功文件没有生成。到达目标范围与正式任务通过分别记录。后续要求是在原有预算内完成恢复、停止保持、独立 Verifier 和原生任务结束，并验证长行走后的顺时针控制。
+
+| 其他 Office 会话 | 原生结果与资源状态 |
+|---|---|
+| `office-navigation-20261007-02`，GPU4 | 初始化超出原生 180 秒时限，未创建任务；会话关闭、worker 退出 |
+| `office-navigation-20261007-03`，GPU2 | 初始化 138.838 秒；左转和行走通过，顺时针转弯停滞；后续模型流返回 `server_error`，run failed；自动导出与资源释放完成 |
+| `office-navigation-20261007-04`，GPU4 | 初始化超出 180 秒时限；自动入口按 opening request 身份保存会话并确认关闭、释放；未创建任务 |
+
+初始化超时和模型请求失败的原始记录分别保留，原因需要独立诊断。本次 GPU2 成功初始化与 GPU4 超时分别定义，首次安装和初始化可靠性仍需验收。RL 保持停止，整个执行期间本项目同时最多使用一张 GPU。
+
+Office 工具与自动入口源码为 `09b4242`，物理 worker 源码为 `4feebc37dadd45cb487305117c8a6a2f421951b2`。执行前的 scene、instruction、runner 和 auditor SHA256 保存于 `outputs/acceptance/office-navigation-20261007-05/sources.json`。
+
+| Office 原始来源 | SHA256 |
+|---|---|
+| manifest | `b535394ae7e28018109406899eda2a09cd06913d9b08e1167b56cad3a710ce31` |
+| run JSON | `1f12e3feb5a8512f454f8891650bc0a8a889cb737f976f38c291c1c98f17b151` |
+| events JSON | `836e85290386e88da3d6c8dbba4f09574fa999e000f0fe13002e497045477f2c` |
+| frames JSON | `34ae08554665b6148c215299896b58dd54851c198dfbcf984f18b3075ef2bd3c` |
+
+## Hospital 来源与复核
 
 | 来源或产物 | 身份 |
 |---|---|
@@ -61,5 +109,9 @@
 `outputs/demos/oh-my-duck-hospital-navigation-20261007.mp4` 为 170 秒、1920 × 1080、10 fps、1700 帧的视频，包含实际 Newton/Warp 的 observer 场景相机、head RGB、公开 Planner 文字、计划、工具参数、运动误差与独立 Verifier 的结果。模型等待时间按 16× 压缩，全部 380 张 observer 图片保留相邻帧的实际物理时间间隔。图片来源、视频时间、每帧文字范围和完整 FFmpeg 解码通过检查；公开 trace 没有 private reasoning。
 
 MP4 SHA256：`29977ffbeca444e30047b1dd205867f2e2c8dbd0fde029ba390189e0708267a5`。同名 JSON 保存来源 SHA256、相机与事件数量、播放时间安排和编码参数。
+
+Office 诊断视频 `outputs/demos/oh-my-duck-office-navigation-20261007-budget.mp4` 为 213.9 秒、1920 × 1080、10 fps、2139 帧，保留全部 525 张实际 observer 图片、head RGB、公开 Planner 和工具参数。终态显示 `run.failed`，formal verdict 为 null。视频来源 SHA256、每帧文字范围、相邻 observer 的实际物理时间和完整 FFmpeg 解码通过检查。MP4 SHA256 为 `5aa3b8e986bebe486b74888d0710a0aa538d7305cef89fdeee4fed29ba1aa4c5`。
+
+复核同时重跑 Hospital 原始导出以及已保存的 Qwen 语音 Newton 原始导出，均通过对应检查。工具入口通过 Node 语法检查，Python 入口通过编译检查，实际 CLI status 能读取当前结果与 pending 项目。全部本项目导航 worker 和录制服务已经退出。
 
 验收范围为指定 seed、出生位置和授权 GT 信息下的路线。行走段端点位移累计与连续路径长度分别定义。长距离动作的全部请求精度、图像输入独立 VLN、识别准确率、多场景泛化、物体携带、自训练 policy 行为和真机仍需独立验收。RL 保持停止。

@@ -15,6 +15,7 @@
 [![Metric matrix: 3 scenes, 15 motions passed](https://img.shields.io/badge/metric_matrix-3_scenes_15_motions_passed-green)](docs/reports/metric-controller-acceptance-2026-10-07.md)
 [![Office: 4 policies passed](https://img.shields.io/badge/Office-4_policies_passed-green)](docs/reports/office-skills-acceptance-2026-10-07.md)
 [![Hospital: ordered navigation passed](https://img.shields.io/badge/Hospital-ordered_navigation_passed-green)](docs/reports/navigation-acceptance-2026-10-07.md)
+[![Office current route: completion pending](https://img.shields.io/badge/Office_current_route-completion_pending-orange)](docs/reports/navigation-acceptance-2026-10-07.md#office-有序导航测量)
 [![Hardware validation: pending](https://img.shields.io/badge/hardware_validation-pending-orange)](docs/implementation-status.md)
 
 **An interactive, extensible Microduck—with a persistent voice, shared experiences, and skills you can train.**
@@ -57,6 +58,8 @@ External Isaac USD scenes enter through `omd harness --scene-config`; the native
 ![Actual Newton Office robot frame and head RGB with recorded Planner text, metric tool feedback and a passed independent verdict.](docs/assets/office-agentic/metric-demo.png)
 
 Hospital 的官方 `roller` 完成东向、北向和西向三阶段导航，行走段端点位移累计 5.44 米，独立 Verifier 与原始记录复核通过。最终误差 9.56 厘米，连续停止 80 个样本，累计外部障碍接触为零；170 秒 MP4 包含实际场景、head RGB、工具参数和公开 agentic trace。两次未满足动作精度要求的结果完整保留，模型根据当前测量继续完成路线。[导航证据](docs/reports/navigation-acceptance-2026-10-07.md)与[自动验收入口](docs/navigation-acceptance.md)记录固定场景范围、原始图片和资源释放。
+
+当前控制器的 Office 有序路线测得 3.05 米行走段累计位移，最终目标误差 11.68 厘米，零外部接触；两次顺时针转弯触发停滞并通过传感器与有界命令继续运动。最终停止保持因 2400 秒时间预算拒绝，run failed，没有正式 Verifier 结果。自动入口已保存 4266 个事件、549 张原始图片并释放 worker；顺时针响应、预算内正式完成和初始化可靠性继续验收。[Office 测量](docs/reports/navigation-acceptance-2026-10-07.md#office-有序导航测量)。
 
 `microduck.inspect_scene(prompt, source)` provides frame-bound target boxes, surface distance and bearing. Its isolated SAM3.1 + YOLO26 service runs actual text-prompt segmentation and box association on Newton Office RGBD, using the existing local SAM3.1 checkpoint on the GPU host. Actual wall, desk, floor and plant masks returned valid simulator ray distances; empty detections and incorrect YOLO class associations remain visible in the results. Recognition accuracy and hardware perception require separate evaluation. The explicit `simulator_ground_truth` source uses visible native shape masks and Newton ray-hit distances. See [perception and navigation tools](docs/perception-navigation.md).
 
