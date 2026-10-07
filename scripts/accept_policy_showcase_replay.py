@@ -216,7 +216,7 @@ def main():
               "scope": "actual policy progress, native boundaries, image provenance and formal navigation; object effects require separate measurements",
               "auditor_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest()}
     if args.office_skills:
-        if args.robot_model != "allcollisions" or args.stop_reason != "policy_stop":
+        if args.robot_model != "robot_allcollisions" or args.stop_reason != "policy_stop":
             raise AssertionError("Office skills require the standard-foot robot and policy stop")
         report["office_skills"] = verify_office_skills(events)
     args.output.parent.mkdir(parents=True, exist_ok=True)
