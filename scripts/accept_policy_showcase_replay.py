@@ -72,7 +72,8 @@ def verify_office_skills(events):
         raise AssertionError("Office recovery lacks measured upright stopping")
     observations = [item["result"] for item in tools if item["tool"] == "microduck.inspect_scene"
                     and item["result"]["detection_source"] == "sam3.1"]
-    if len({row["sequence"] for row in observations}) < 2:
+    if (len({row["sequence"] for row in observations}) < 3
+            or not any(row["sequence"] > recovery["sequence"] for row in observations)):
         raise AssertionError("Office skills lack refreshed actual model perception")
     return {"seated_height_m": sit["height_m"], "standing_height_m": stand["height_m"],
             "head_yaw_change_rad": yaw_delta, "head_command_height_m": head["height_m"],
