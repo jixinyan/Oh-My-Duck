@@ -12,7 +12,7 @@ tags:
 
 > 2026-10-06：当前标准脚控制器在 CPU 公寓和 Newton Office 各通过三个独立会话，每个场景覆盖 +0.5 米、−0.5 米、+1.0 米与 ±45°，共十次运动。距离/角度误差、直立停止、零外部接触、相机字节、执行计数、源码和资源释放全部通过独立复核。CPU 最大误差为 0.035112 米/3.777766°，Office 为 0.022884 米/4.519054°。见[测量记录](reports/metric-controller-acceptance-2026-10-06.md)。
 
-> 后续执行 Hospital 轮滑批量检查、Office 完整多动作任务及多场景导航，每项保存独立来源、物理状态与正式 Verifier 结果。运行中目标进度不足时报告 `metric_progress_stalled` 并确认停止。GPU 使用范围为 2–4，同时最多使用一张设备；RL 保持停止。见[验收操作](release-readiness.md#metric-policy-matrix)。
+> Hospital 轮滑的三个会话完成 +0.5 米、−0.5 米、+1.0 米与 ±45°，最大误差为 0.043211 米与 4.162124°，动作、直立停止、零外部接触和资源释放全部通过独立复核。三个场景共九个会话、十五次运动。后续执行 Office 完整多动作任务及多场景导航，保存独立来源、物理状态与正式 Verifier 结果。GPU 使用范围为 2–4，同时最多使用一张设备；RL 保持停止。见[验收操作](release-readiness.md#metric-policy-matrix)。
 
 > 2026-10-03：录音文件、Qwen ASR、原生任务、官方动作、Newton/BAM、独立 Verifier 与固定音色反馈已通过实际闭环，并生成 91.4 秒 MP4。标准脚与轮滑模型的 0.5 米、45°检查通过，安装包、实际服务身份检查和十项音色资料测试通过。CPU MuJoCo/BAM 与 Newton 的执行中断及会话释放通过；Office 新进程初始化符合原生 Harness 的 180 秒时限，使用已有 kernel 缓存。其他命令设置、多场景泛化、图像输入独立 VLN policy、识别准确率、物体效果、训练 policy 行为和真机需要独立证据。操作和状态见[上线要求](release-readiness.md)及[验证记录](reports/end-to-end-2026-10-03.md)。
 

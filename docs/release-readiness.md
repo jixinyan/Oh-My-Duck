@@ -72,14 +72,14 @@ environments/demo/.venv/bin/python scripts/add_voice_to_demo.py --video outputs/
 
 The renderer uses actual public events and source camera images. The audio step checks both WAV hashes against the task result, requires a successful native run with a passed Verifier result, and fully decodes the finished MP4. The generated manifest preserves source and output hashes, model identity and voice profile revision. The isolated `environments/demo` dependencies are locked; the renderer also requires `ffmpeg` and `ffprobe` on PATH. Supply `--font /absolute/path/unicode.ttf` on Linux for a font that covers the trace text; macOS uses Arial Unicode by default.
 
-## Evidence available on 2026-10-03
+## Evidence available on 2026-10-06
 
 | Capability | Evidence | Scope |
 |---|---|---|
 | Recorded speech → native agent → Newton → Verifier → fixed voice | Run `5dfb18d9-b31b-4226-bc94-9391ddd847ac`, succeeded; target error 0.090916 m; 480 control steps | NVIDIA Office, one seed, simulator ground truth |
 | Standard-foot metric tools | 0.5 m request: 0.024196 m final error; 45° request: 0.522914° error; five stopped samples | Official `alpha_walking`, Newton/BAM and native ActionGate |
 | Current foot controller, CPU and Newton matrices | Three independent sessions per scene; +0.5/−0.5/+1.0 m and ±45°; CPU maximum errors 0.035112 m / 3.777766°, Office 0.022884 m / 4.519054° | Fixed apartment and Office poses, independently recomputed native samples, zero obstacle contacts and closed sessions; measured on 2026-10-06 |
-| Roller metric tools | 0.5 m request: 0.018337 m final error; 45° request: 3.893902° error; five stopped samples | Official `roller`, Hospital, one seed; zero external-contact samples |
+| Roller metric matrix | Three independent sessions; +0.5/−0.5/+1.0 m and ±45°; maximum errors 0.043211 m / 4.162124° | Official `roller`, fixed Hospital pose, independently recomputed physical samples, zero external contacts and closed sessions; measured on 2026-10-06 |
 | Runtime readiness | Local voice client and remote Newton doctor passed | Installed dependencies, actual model services, scene assets and ten-policy catalogue |
 | Agentic video with speech | 91.4 s, 1920 × 1080 MP4, full decoding passed | Actual public events and camera frames; recorded input and confirmed-voice feedback |
 | Voice task interruption | CPU run `4a4b3357-257c-40d0-a4e5-00bb2d1e2830` and Newton run `21ff8bf8-cd08-414f-ab88-14dc6d9a9659`; device-confirmed termination; no actions for two seconds afterwards | Actual ASR, model and policy actions; both sessions closed with resources released |
