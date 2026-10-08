@@ -5,7 +5,6 @@ from pathlib import Path
 from time import perf_counter
 from urllib.parse import unquote, urlsplit
 
-from huggingface_hub import HfApi
 import soundfile as sf
 
 from oh_my_duck.core.contracts.sensors import PayloadRef
@@ -95,6 +94,8 @@ def main() -> int:
             "peak_cuda_memory_bytes": _peak_cuda_memory_bytes(args.device),
         }, ensure_ascii=False))
     elif args.command == "confirm":
+        from huggingface_hub import HfApi
+
         from oh_my_duck.voice.qwen import BASE_MODEL
 
         revision = HfApi().model_info(BASE_MODEL).sha
