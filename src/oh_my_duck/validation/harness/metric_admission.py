@@ -18,9 +18,13 @@ from oh_my_duck.validation.metric.case import require_upright_stop
 async def run(arguments):
     root = project_root()
     configuration = json.loads(arguments.scene_config.read_text())
+    for name in ("usd_path", "provenance_path", "public_map_path"):
+        if name in configuration:
+            configuration[name] = str((root / configuration[name]).resolve(strict=True))
     port, secret, task_id = available_port(), secrets.token_hex(32), uuid4().hex
     configuration.update(native_task_id="metric-admission", catalog_dir=str(arguments.catalog.resolve(strict=True)),
-                         policy_revision=OFFICIAL_REVISION, control_port=port, control_secret=secret)
+                         policy_revision=OFFICIAL_REVISION, control_port=port, control_secret=secret,
+                         seed=arguments.seed)
     arguments.output.mkdir(parents=True, exist_ok=False)
     events, samples, calls = [], [], []
     record = {"passed": False, "formal_navigation_acceptance_performed": False,
@@ -150,4 +154,5 @@ def main():
     parser.add_argument("--catalog", type=Path, required=True)
     parser.add_argument("--edh-source", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--seed", type=int, default=20261003)
     asyncio.run(run(parser.parse_args()))
