@@ -6,7 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { createInterface } from 'node:readline';
 import { identifyModelClient } from './model-transport.mjs';
 import { createRequire } from 'node:module';
-import { validateSceneConfiguration } from './scene-configuration.mjs';
+import { perceptionSources, validateSceneConfiguration } from './scene-configuration.mjs';
 
 const omdRoot = fileURLToPath(new URL('../../', import.meta.url));
 const edhRoot = resolve(process.env.OMD_EDH_SOURCE ?? '');
@@ -31,6 +31,7 @@ if (!['chat-completions', 'responses'].includes(modelAPI))
 const sceneConfiguration = process.env.OMD_SCENE_CONFIGURATION
   ? JSON.parse(process.env.OMD_SCENE_CONFIGURATION) : null;
 if (sceneConfiguration !== null) await validateSceneConfiguration(sceneConfiguration, edhRoot);
+const availablePerceptionSources = perceptionSources(sceneConfiguration);
 const [{ ContractValidator }, { OpenAICompatibleAdapter, OpenAIResponsesAdapter }, serverModule] = await Promise.all([
   import(resolve(edhRoot, 'harness/contracts/src/index.ts')),
   import(resolve(edhRoot, 'harness/agent-runtime/models/src/index.ts')),
@@ -190,7 +191,7 @@ function tool(operation, properties, required, services) {
       finish_policy: 'End the current policy at a confirmed paused boundary; the native independent Verifier then checks the goal.',
       set_command: 'Set a bounded policy command at a confirmed paused boundary. Each command runs for 5–100 actual control steps. After proximity, contact, or stall, read fresh ToF and change twist before renewed motion; zero twist remains available for stopping.',
       read_sensor: 'Read a current physical MicroDuck RGB, ToF, IMU, joint, or odometry sensor.',
-      inspect_scene: 'Inspect current head RGB for a named object and return visible targets, bounding boxes, surface distance in meters and bearing in degrees. Select models for YOLO26/SAM service inference, or simulator_ground_truth for explicit native shape masks and ray-hit distances. The result labels detection, mask and distance sources. Requires a confirmed paused execution. Positive bearing means left. Reobserve after movement; targets are tied to one episode and sequence.',
+      inspect_scene: `Inspect current head RGB for a named object and return visible targets, bounding boxes, surface distance in meters and bearing in degrees. Available sources: ${availablePerceptionSources.join(', ')}. simulator_ground_truth uses native geometry; models uses the configured YOLO26/SAM service. The result labels detection, mask and distance sources. Requires a confirmed paused execution. Positive bearing means left. Reobserve after movement; targets are tied to one episode and sequence.`,
       task_progress: 'Read current physical position, velocity, contact evidence, bounded-command status, and native motion-pause reason.',
       observe: 'Read head RGB, ToF, IMU, all joints, odometry, metric progress, motion guard, current boundary and remaining native budget in one confirmed paused sample. Optional prompt and source must be provided together to include frame-bound perception. This reads fresh ToF for guarded recovery. Reuse this result for the current boundary.',
       wait_for_motion: 'Wait up to 90 seconds for the currently admitted native policy motion to reach a confirmed paused or ended boundary, then return measured progress and remaining budget. Call after execution.start or execution.resume; inspect the result before preparing another action. This does not issue actions or confirm physical rest.',
@@ -295,11 +296,11 @@ const server = await startServer({
       'microduck.wait_for_motion': tool('wait_for_motion', {}, [], { images }),
       'microduck.observe': tool('observe', {
         prompt: { type: 'string', minLength: 1, maxLength: 120 },
-        source: { type: 'string', enum: ['models', 'simulator_ground_truth'] },
+        source: { type: 'string', enum: availablePerceptionSources },
       }, [], { images }),
       'microduck.inspect_scene': tool('inspect_scene', {
         prompt: { type: 'string', minLength: 1, maxLength: 120 },
-        source: { type: 'string', enum: ['models', 'simulator_ground_truth'] },
+        source: { type: 'string', enum: availablePerceptionSources },
       }, ['prompt', 'source'], { images }),
       'microduck.walk': tool('walk', {
         distance_m: { type: 'number', minimum: -10, maximum: 10 },

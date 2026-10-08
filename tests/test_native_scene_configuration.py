@@ -7,7 +7,7 @@ import sys
 from jsonschema import ValidationError
 import pytest
 
-from oh_my_duck.integrations.edh.scene_configuration import validate_scene_configuration
+from oh_my_duck.integrations.edh.scene_configuration import perception_sources, validate_scene_configuration
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -57,3 +57,23 @@ def test_cpu_scene_rejects_cuda_assignment_before_sdk_loading():
     assert result.returncode != 0
     assert "CPU apartment scenes require no CUDA device assignment" in result.stderr
     assert "FileNotFoundError" not in result.stderr
+
+
+@pytest.mark.parametrize("backend", ["apartment-metric", "office"])
+@pytest.mark.parametrize("endpoint", [None, "", "http://example.com:9000", "http://127.0.0.1:0",
+                                    "http://127.0.0.1:65536", "http://127.0.0.1:9000/inspect",
+                                    "http://127.0.0.1:9000?key=value", "http://user@127.0.0.1:9000"])
+def test_unavailable_perception_endpoint_fails_at_configuration(backend, endpoint):
+    configuration = json.loads((SCENES / f"{backend}.json").read_text())
+    configuration["perception_endpoint"] = endpoint
+    with pytest.raises((ValidationError, ValueError)):
+        validate_scene_configuration(configuration)
+
+
+@pytest.mark.parametrize("endpoint", ["http://127.0.0.1:1", "http://127.0.0.1:80/", "http://127.0.0.1:65535"])
+def test_perception_sources_match_scene_service_configuration(endpoint):
+    configuration = json.loads((SCENES / "apartment-metric.json").read_text())
+    assert perception_sources(configuration) == ("simulator_ground_truth",)
+    configuration["perception_endpoint"] = endpoint
+    validate_scene_configuration(configuration)
+    assert perception_sources(configuration) == ("simulator_ground_truth", "models")

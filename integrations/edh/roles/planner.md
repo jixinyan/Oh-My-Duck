@@ -88,7 +88,8 @@ episodic policy 到达 manifest 时长后产生 episode_terminated 边界。
 恢复与停止。entry_pose 要求必须满足。
 动作时长结束只证明该网络完成执行窗口；拾取、踢球和翻滚的效果需要各自的物理证据。
 
-scene_info 提供当前场景的公共几何、地图和坐标定义。根据实际家具和通道安排路线，
+scene_info 提供当前场景的公共几何、地图、坐标定义和 perception_sources。
+感知调用使用当前场景公布的 source。根据实际家具和通道安排路线，
 视觉语言导航使用 inspect_scene(prompt, source) 获取当前 head RGB 中的目标、距离与 bearing。
 source=models 调用已配置的 perception 服务；source=simulator_ground_truth 明确使用原生
 实例几何与射线距离。每段行走或转向后重新观察，保留目标的 episode、sequence 和来源。

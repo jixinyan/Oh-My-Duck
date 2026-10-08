@@ -11,6 +11,7 @@
     "usd_path": {"type": "string", "minLength": 1},
     "provenance_path": {"type": "string", "minLength": 1},
     "public_map_path": {"type": "string", "minLength": 1},
+    "perception_endpoint": {"type": "string", "pattern": "^http://127\\.0\\.0\\.1:[0-9]{1,5}/?$"},
     "task_instruction": {"type": "string", "pattern": "\\S"},
     "spawn_pose": {"type": "object"},
     "goal": {"type": "object"},

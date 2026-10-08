@@ -415,6 +415,7 @@ class MicroDuckWorkerSession(NativeWorkerSession):
                 prompt = args["prompt"]
                 if not isinstance(prompt, str) or not prompt.strip() or len(prompt) > 120:
                     raise ValueError("Perception prompt must contain 1–120 characters")
+                self._environment.require_perception_source(args["source"])
                 if args["source"] == "simulator_ground_truth":
                     result = await self._device.on_owner(lambda: backend.inspect_scene(prompt))
                 elif args["source"] == "models":
@@ -441,6 +442,8 @@ class MicroDuckWorkerSession(NativeWorkerSession):
                         raise ValueError("Perception prompt and source must be supplied together")
                     if prompt is not None and (not isinstance(prompt, str) or not prompt.strip() or len(prompt) > 120):
                         raise ValueError("Perception prompt must contain 1–120 characters")
+                    if source is not None:
+                        self._environment.require_perception_source(source)
                     observed = await self._device.on_owner(self._control_observation)
                     perception = None
                     if source == "simulator_ground_truth":
@@ -514,6 +517,7 @@ class MicroDuckWorkerSession(NativeWorkerSession):
                         ],
                         "public_geometry": geometry,
                     }
+                result["perception_sources"] = list(self._environment.perception_sources)
             else:
                 raise ValueError("Unknown MicroDuck tool operation")
             self._require_control_lease(run_task_id)

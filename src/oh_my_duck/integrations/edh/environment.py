@@ -15,6 +15,7 @@ from physical_harness.environments import (
 from physical_harness.execution.worker import require_object
 
 from oh_my_duck.robotics.backends.simulation import CpuMujocoBamBackend
+from oh_my_duck.integrations.edh.scene_configuration import perception_sources
 
 
 def _wire_time() -> str:
@@ -24,6 +25,7 @@ def _wire_time() -> str:
 class MicroDuckEnvironment:
     def __init__(self, configuration: Mapping[str, object]) -> None:
         self.configuration = dict(configuration)
+        self.perception_sources = perception_sources(self.configuration)
         self.backend: CpuMujocoBamBackend | None = None
         self._description: NativeEnvironmentDescription | None = None
         self._last_sequence = -1
@@ -32,6 +34,11 @@ class MicroDuckEnvironment:
         self._navigation_samples: dict[str, dict[str, Any]] = {}
         self._pending_policy_evidence: dict[str, Any] | None = None
         self._last_action_inference: dict[str, Any] | None = None
+
+    def require_perception_source(self, source: str) -> None:
+        if source not in self.perception_sources:
+            raise ValueError(f"Perception source {source!r} is unavailable; available sources: "
+                             f"{', '.join(self.perception_sources)}")
 
     def _backend(self) -> CpuMujocoBamBackend:
         if self.backend is None:
@@ -160,6 +167,7 @@ class MicroDuckEnvironment:
                                {"usd_path": configuration["usd_path"],
                                 "provenance_path": configuration["provenance_path"]}),
                             "policy_revision": self.backend.catalog.revision,
+                            "perception_sources": list(self.perception_sources),
                             "seed": configuration["seed"], "spawn_pose": configuration.get("spawn_pose")},
         )
         return self._observation(state)
