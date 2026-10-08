@@ -274,9 +274,10 @@ def latest(events: list[dict], times: list[float], wall: float, event_type: str,
 
 
 def latest_tool_result(events: list[dict], times: list[float], wall: float,
-                       tool_name: str) -> dict | None:
+                       tool_name: str | tuple[str, ...]) -> dict | None:
+    names = (tool_name,) if isinstance(tool_name, str) else tool_name
     for event in reversed(events[:bisect_right(times, wall)]):
-        if event["type"] == "tool.completed" and event["detail"].get("tool") == tool_name:
+        if event["type"] == "tool.completed" and event["detail"].get("tool") in names:
             result = event["detail"].get("result")
             if not isinstance(result, dict):
                 raise ValueError(f"Recorded {tool_name} result is not an object")
@@ -346,7 +347,7 @@ def tool_summary(event: dict) -> str:
         visible = selected(result, ("effective_after_sequence", "command"))
     elif tool in ("microduck.walk", "microduck.rotate"):
         visible = selected(result, ("prepared", "arguments", "policy_name", "next_action"))
-    elif tool == "microduck.task_progress":
+    elif tool in ("microduck.task_progress", "microduck.observe", "microduck.wait_for_motion"):
         reason, distance, samples = progress_motion_evidence(result)
         position = result.get("body_position_m")
         coordinates = ("未记录" if position is None else
@@ -358,6 +359,10 @@ def tool_summary(event: dict) -> str:
         if motion := result.get("metric_motion"):
             text += (f"\n{motion['operation']} {motion['measured']:.3f}/{motion['requested']:.3f} {motion['unit']}"
                      f" · error {motion['error']:.3f} · {motion['phase']}")
+        if isinstance(execution, dict) and "remaining_wall_time_s" in execution:
+            text += f"\nremaining {execution['remaining_wall_time_s']:.1f} s / {execution['remaining_actions']} controls"
+        if perception := result.get("perception"):
+            text += f"\n{perception['prompt']} · {perception['distance_source']} · {len(perception['targets'])} targets"
         return text
     elif tool == "microduck.select_policy":
         visible = selected(result, ("policy_name", "kind", "encoding", "duration_s"))
@@ -500,7 +505,8 @@ def render_frame(run: dict, events: list[dict], times: list[float], cameras: dic
     else:
         draw_text(draw, (330, 540), "Waiting for recorded observer frame",
                   fonts["body"], MUTED, 1110, 590)
-    progress = latest_tool_result(events, times, wall, "microduck.task_progress")
+    progress = latest_tool_result(events, times, wall,
+                                  ("microduck.task_progress", "microduck.observe", "microduck.wait_for_motion"))
     if progress is not None:
         reason, distance, samples = progress_motion_evidence(progress)
         guard = progress.get("motion_guard")

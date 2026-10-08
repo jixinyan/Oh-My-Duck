@@ -10,6 +10,10 @@
 | `microduck.transition_policy` | `policy_name` | 在原生 episodic 结束边界接续 policy，保留身体位姿、速度和上一动作 |
 | `microduck.read_sensor` | `sensor` | 读取 `head_rgb`、`tof`、`imu`、`joint_state` 或 `odometry` |
 | `microduck.task_progress` | 无参数 | 返回运动目标、测量值、误差、停止样本、接触证据与原生 execution 边界 |
+| `microduck.observe` | 可选 `prompt` 与 `source`，同时提供 | 在确认暂停边界返回 head RGB、ToF、IMU、servo、odometry、进度和剩余执行时间；感知来源为 `simulator_ground_truth` 或 `models` |
+| `microduck.wait_for_motion` | 无参数 | 等待当前原生运动确认暂停或结束，返回实际进度与剩余执行时间 |
+
+`observe` 的传感器使用同一个 episode 和 sequence。附带感知时检查图像来源与该物理边界一致；ToF 读取可供 MotionGuard 的当前暂停边界检查使用。CPU 公寓支持基础观测，感知需要后端提供当前帧感知接口。`wait_for_motion` 最多等待 90 秒，调用超时向调用者报告，运动状态仍由原生 execution 管理。已经确认的边界可以再次读取，读取不会推进物理时间。进度中的 `execution.remaining_wall_time_s` 来自原生预算；Planner 应保留终点停止、`finish_policy`、独立 Verifier 与 `tasks.finish` 所需时间。
 
 `distance_m` 的绝对值为 0.1–10 米，正数前进、负数后退。`speed_m_s` 为 0.1–0.4 米/秒，默认 0.4。`angle_deg` 的绝对值为 10–360 度，正数绕世界 +Z 逆时针、负数顺时针。`angular_speed_deg_s` 为 10–55 度/秒，默认 45。速度参数表示传入 policy 的命令，实际动作按 odometry 测量。
 

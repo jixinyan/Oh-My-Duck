@@ -102,6 +102,10 @@ class MicroDuckEnvironment:
         if backend_name == "cpu-mujoco-bam":
             self.backend = CpuMujocoBamBackend(robot_id="microduck", catalog_dir=catalog)
         elif backend_name == "isaac-newton":
+            from oh_my_duck.robotics.runtime_startup import RuntimeStartup
+
+            startup = RuntimeStartup(str(configuration["scene_id"]), str(configuration.get("robot_model", "allcollisions")))
+            startup.mark("backend_import")
             from oh_my_duck.robotics.backends.isaac_official import IsaacNewtonBamBackend
 
             self.backend = IsaacNewtonBamBackend(
@@ -111,6 +115,7 @@ class MicroDuckEnvironment:
                 scene_id=str(configuration["scene_id"]),
                 robot_model=str(configuration.get("robot_model", "allcollisions")),
                 observer_renderer=str(configuration.get("observer_renderer", "newton_warp")),
+                startup=startup,
                 provenance_path=Path(str(configuration["provenance_path"])).resolve(strict=True),
                 public_map_path=(Path(str(configuration["public_map_path"])).resolve(strict=True)
                                  if "public_map_path" in configuration else None),
@@ -270,6 +275,51 @@ class MicroDuckWorkerSession(NativeWorkerSession):
             await task
             if self._motion_cleanup_task is task:
                 self._motion_cleanup_task = None
+
+    def _progress_result(self, observed: dict) -> dict:
+        measured = observed["measurements"]
+        gate = self._gate
+        snapshot = None if gate is None else gate.snapshot()
+        return {
+            "episode_id": observed["episode_id"], "sequence": observed["sequence"],
+            "simulation_time_s": observed["simulation_time_s"],
+            **{key: measured[key] for key in ("policy_name", "body_position_m", "body_twist", "fallen",
+                "height_m", "tilt_rad", "command_block", "contact_evidence")},
+            "stopped_samples": measured["stopped_samples"],
+            "required_stopped_samples": STOP_SAMPLES,
+            "metric_motion": None if self._metric_motion is None else self._metric_motion.result,
+            "motion_guard": self._motion_guard,
+            "command_segment": None if self._motion_segment is None else {
+                "request_id": self._motion_segment["request_id"],
+                "effective_after_sequence": self._motion_segment["effective_after_sequence"],
+                "max_control_steps": self._motion_segment["max_control_steps"],
+                "used_control_steps": max(0, observed["sequence"] - self._motion_segment["effective_after_sequence"]),
+            },
+            "execution": None if snapshot is None else {
+                **{key: snapshot[key] for key in ("execution_id", "generation", "state", "device_confirmed",
+                    "boundary_id", "remaining_actions", "stop_reason")},
+                "remaining_wall_time_s": gate.remaining_wall_time(),
+            },
+        }
+
+    async def _wait_motion_boundary(self) -> None:
+        # shield 保留原生执行；调用超时由调用者处理，停止仍需确认原生边界。
+        async with asyncio.timeout(90):
+            snapshot = self._require_gate().snapshot()
+            if snapshot["state"] not in ("paused", "ended") or not snapshot["device_confirmed"]:
+                pump = self._pump
+                if pump is not None:
+                    await asyncio.shield(pump)
+            await self._await_motion_cleanup()
+        snapshot = self._require_gate().snapshot()
+        if snapshot["state"] not in ("paused", "ended") or not snapshot["device_confirmed"]:
+            raise RuntimeError("Native execution has no confirmed motion boundary")
+
+    def _control_observation(self) -> dict:
+        backend = self._environment._backend()
+        observed = backend.observe_control()
+        observed["measurements"]["stopped_samples"] = backend._stopped_samples
+        return observed
 
     def _command_steps(self, arguments: dict[str, Any]) -> int:
         count = arguments.get("max_control_steps", self.DEFAULT_COMMAND_STEPS)
@@ -604,40 +654,54 @@ class MicroDuckWorkerSession(NativeWorkerSession):
                     result = await asyncio.to_thread(PerceptionClient(endpoint).inspect, frame, prompt)
                 else:
                     raise ValueError("Unknown perception source")
-            elif operation == "progress":
-                def progress_on_owner():
-                    observation = backend.observe_control()
-                    observation["measurements"]["stopped_samples"] = backend._stopped_samples
-                    return observation
-                observed = await self._device.on_owner(progress_on_owner)
-                measured = observed["measurements"]
-                gate_state = self._require_gate().snapshot() if self._gate is not None else None
-                result = {"episode_id": observed["episode_id"], "sequence": observed["sequence"],
-                          "simulation_time_s": observed["simulation_time_s"],
-                          "policy_name": measured["policy_name"],
-                          "body_position_m": measured["body_position_m"],
-                          "body_twist": measured["body_twist"], "fallen": measured["fallen"],
-                          "height_m": measured["height_m"], "tilt_rad": measured["tilt_rad"],
-                          "stopped_samples": measured["stopped_samples"],
-                          "required_stopped_samples": STOP_SAMPLES,
-                          "metric_motion": None if self._metric_motion is None else self._metric_motion.result,
-                          "command_block": measured["command_block"],
-                          "contact_evidence": measured["contact_evidence"],
-                          "motion_guard": self._motion_guard,
-                          "command_segment": None if self._motion_segment is None else {
-                              "request_id": self._motion_segment["request_id"],
-                              "effective_after_sequence": self._motion_segment["effective_after_sequence"],
-                              "max_control_steps": self._motion_segment["max_control_steps"],
-                              "used_control_steps": max(0, observed["sequence"] -
-                                                        self._motion_segment["effective_after_sequence"]),
-                          },
-                          "execution": None if gate_state is None else {
-                              "execution_id": gate_state["execution_id"],
-                              "generation": gate_state["generation"],
-                              "state": gate_state["state"],
-                              "device_confirmed": gate_state["device_confirmed"],
-                              "boundary_id": gate_state["boundary_id"],
-                          }}
+            elif operation in ("progress", "wait_for_motion"):
+                if operation == "wait_for_motion":
+                    await self._wait_motion_boundary()
+                observed = await self._device.on_owner(self._control_observation)
+                result = self._progress_result(observed)
+            elif operation == "observe":
+                async with self._control_lock:
+                    await self._await_motion_cleanup()
+                    self._require_control_lease(run_task_id)
+                    snapshot = self._require_gate().snapshot()
+                    if snapshot["state"] not in ("paused", "ended") or not snapshot["device_confirmed"]:
+                        raise RuntimeError("Combined observation requires a confirmed paused execution boundary")
+                    prompt, source = args.get("prompt"), args.get("source")
+                    if (prompt is None) != (source is None):
+                        raise ValueError("Perception prompt and source must be supplied together")
+                    if prompt is not None and (not isinstance(prompt, str) or not prompt.strip() or len(prompt) > 120):
+                        raise ValueError("Perception prompt must contain 1–120 characters")
+                    observed = await self._device.on_owner(self._control_observation)
+                    perception = None
+                    if source == "simulator_ground_truth":
+                        perception = await self._device.on_owner(lambda: backend.inspect_scene(prompt))
+                    elif source == "models":
+                        from oh_my_duck.perception.client import PerceptionClient
+                        frame = await self._device.on_owner(backend.perception_frame)
+                        perception = await asyncio.to_thread(PerceptionClient(
+                            self._environment.configuration["perception_endpoint"]).inspect, frame, prompt)
+                    elif source is not None:
+                        raise ValueError("Unknown perception source")
+                    current = self._require_gate().snapshot()
+                    if (any(current[key] != snapshot[key] for key in ("execution_id", "generation", "state",
+                            "boundary_id", "device_confirmed")) or
+                            (perception is not None and (perception["episode_id"] != observed["episode_id"] or
+                            perception["sequence"] != observed["sequence"]))):
+                        raise RuntimeError("Physical boundary changed during combined observation")
+                    self._require_control_lease(run_task_id)
+                    if (self._motion_guard is not None and snapshot["state"] == "paused" and
+                            snapshot["execution_id"] == self._motion_guard["execution_id"] and
+                            observed["sequence"] >= self._motion_guard["sequence"]):
+                        self._guard_tof_boundary_id = snapshot["boundary_id"]
+                    result = self._progress_result(observed)
+                    result.update(observed_at=observed["observed_at"], measurements={
+                        key: observed["measurements"][key] for key in ("tof_distance_mm", "tof_status",
+                            "tof_rows", "tof_cols", "tof_frame_id", "angular_velocity_rad_s", "projected_gravity",
+                            "joint_names", "joint_position_rad", "joint_velocity_rad_s", "odometry")},
+                        perception=perception, rgb_png_base64=(observed["measurements"]["rgb_png_base64"]
+                            if perception is None else perception.pop("rgb_png_base64")))
+                    if "passive_joints" in observed["measurements"]:
+                        result["measurements"]["passive_joints"] = observed["measurements"]["passive_joints"]
             elif operation == "catalog":
                 result = await self._device.on_owner(backend.list_policies)
                 for policy in result["policies"]:

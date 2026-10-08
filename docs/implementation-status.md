@@ -1,5 +1,7 @@
 # Implementation status
 
+> 2026-10-07：`microduck.observe` 提供同一暂停边界的相机、64 项 ToF、IMU、14 个 servo、odometry、运动进度和剩余执行时间；`microduck.wait_for_motion` 等待原生运动边界。CPU 五动作连续序列完成实际运动与资源释放检查。固定提交的完整验收和统一 GPU 验收按[运行说明](runtime-release-acceptance.md)执行，GPU 验收结果尚待记录。
+
 > 2026-10-07：当前控制器的 Office 有序路线 run `a8dd0f45-4480-4e60-a89a-0b783f2627c0` 为 failed，最终保持恢复调用超出原有 2400 秒预算，没有正式 Verifier。三段行走全部满足 0.05 米精度，端点位移累计 3.052359 米，最终目标误差 0.116789 米；两次顺时针旋转停滞，模型根据新鲜 ToF 和有界命令继续绕行。2627 控制步 / 10508 物理子步，零外部接触，4266 个事件与 549 张原始图片完整保存，自动入口关闭会话并释放 worker。后续需要验证长行走后的顺时针响应、预算内正式结束和 180 秒初始化可靠性。见[导航测量](reports/navigation-acceptance-2026-10-07.md#office-有序导航测量)。
 
 > 2026-10-07：Hospital 轮滑的有序导航通过真实模型、原生 Harness、Newton/BAM、独立 Verifier 和原始记录复核。三段行走端点位移累计 5.438808 米，1903 控制步 / 7612 物理子步，最终误差 0.095637 米，80 个连续停止样本，累计外部接触为零。完整 MP4 为 170 秒，393 张原始图片与公开 agentic trace 保留；会话和 worker 已释放。两次动作的严格精度未通过，实际结果与后续规划完整保存。自动验收入口、路线参数与证据见[导航验收](reports/navigation-acceptance-2026-10-07.md)。

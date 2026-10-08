@@ -9,6 +9,7 @@ import re
 import subprocess
 
 from PIL import Image, ImageStat
+from metric_plan import case_motions
 
 
 def require(condition, message):
@@ -51,7 +52,11 @@ def verify_case(directory, expected):
     require(provenance["source_diff_sha256"] == hashlib.sha256(b"").hexdigest(),
             "Acceptance source difference is not empty")
     require(provenance["configuration"]["seed"] == expected["seed"], "Case seed mismatch")
-    require(provenance["commands"]["operations"] == expected["operations"], "Case operation mismatch")
+    motions = case_motions(expected)
+    operations = [motion["operation"] for motion in motions]
+    require(provenance["commands"]["operations"] == operations, "Case operation mismatch")
+    if "motions" in provenance["commands"]:
+        require(provenance["commands"]["motions"] == motions, "Case motion parameters differ")
     indexed = {}
     episode = samples[0]["episode_id"]
     for sample in samples:
@@ -76,6 +81,25 @@ def verify_case(directory, expected):
     boundary = result["terminal_boundary"]
     execution = result["termination"]["execution"]
     count = len(indexed) - 1
+    for tool in tools:
+        if tool["operation"] == "observe":
+            observed = tool["result"]
+            measured = observed["measurements"]
+            require(observed["episode_id"] == episode and observed["sequence"] in indexed and
+                    observed["body_position_m"] == indexed[observed["sequence"]]["body_position_m"],
+                    "Combined observation differs from original physics")
+            require(len(set(measured["joint_names"])) == len(measured["joint_position_rad"]) ==
+                    len(measured["joint_velocity_rad_s"]) == 14 and len(measured["tof_distance_mm"]) == 64,
+                    "Combined observation has incomplete sensors")
+            require(all(0 <= value <= 4000 for value in measured["tof_distance_mm"]), "Observed ToF is out of range")
+            require(observed["execution"]["state"] in {"paused", "ended"} and
+                    observed["execution"]["device_confirmed"] and
+                    observed["execution"]["remaining_actions"] >= 0 and
+                    observed["execution"]["remaining_wall_time_s"] >= 0,
+                    "Combined observation lacks a confirmed native boundary or budget")
+            with Image.open(BytesIO(base64.b64decode(observed["rgb_png_base64"], validate=True))) as image:
+                require(image.size == (320, 240) and max(ImageStat.Stat(image.convert("RGB")).stddev) > 1,
+                        "Combined observation has invalid head camera pixels")
     require(boundary["state"] == "ended" and boundary["device_confirmed"] and
             not boundary["dispatch_in_flight"] and boundary["error"] is None,
             "Native execution lacks a confirmed terminal boundary")
@@ -85,17 +109,18 @@ def verify_case(directory, expected):
             execution["control_steps"] == execution["policy_calls"] and execution["raw_sim_steps"] == 4 * count,
             "Execution counters disagree with physical samples")
     measurements = result["measurements"]
-    require([item["operation"] for item in measurements] == expected["operations"],
+    require([item["operation"] for item in measurements] == operations,
             "Measured operations differ from the declared case")
     errors = []
-    for item in measurements:
+    for item, motion in zip(measurements, motions, strict=True):
         evidence, progress = item["evidence"], item["progress"]
         operation = item["operation"]
         key = "distance_m" if operation == "walk" else "angle_deg"
         speed_key = "speed_m_s" if operation == "walk" else "angular_speed_deg_s"
-        close(item["arguments"][key], expected[key])
-        close(item["arguments"][speed_key], expected.get(speed_key, 0.4 if operation == "walk" else 45))
-        close(evidence["requested"], expected[key])
+        parameters = motion["arguments"]
+        close(item["arguments"][key], parameters[key])
+        close(item["arguments"][speed_key], parameters[speed_key])
+        close(evidence["requested"], parameters[key])
         admissions = [tool for tool in tools if tool["operation"] == operation and
                       tool["result"].get("request_id") == evidence["request_id"]]
         require(len(admissions) == 1, "Measured operation has no unique native tool admission")
@@ -115,7 +140,7 @@ def verify_case(directory, expected):
         if operation == "walk":
             yaw = first["yaw_rad"]
             measured = dx * math.cos(yaw) + dy * math.sin(yaw)
-            error = math.hypot(dx - expected[key] * math.cos(yaw), dy - expected[key] * math.sin(yaw))
+            error = math.hypot(dx - parameters[key] * math.cos(yaw), dy - parameters[key] * math.sin(yaw))
             tolerance = 0.05
         else:
             turn = 0.0
@@ -123,7 +148,7 @@ def verify_case(directory, expected):
                 delta = indexed[sequence]["yaw_rad"] - indexed[sequence - 1]["yaw_rad"]
                 turn += math.atan2(math.sin(delta), math.cos(delta))
             measured = math.degrees(turn)
-            error = abs(expected[key] - measured)
+            error = abs(parameters[key] - measured)
             tolerance = 5.0
         close(evidence["measured"], measured)
         close(evidence["error"], error)

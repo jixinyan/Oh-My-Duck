@@ -37,7 +37,8 @@ def verify_navigation(root, configuration, minimum_distance):
     require(scene["robot_model"] == robot and scene["control_hz"] == 50
             and scene["physics_dt_s"] == 0.005, "Native robot or control timing differs")
     joints = [item["result"]["measurements"] for item in tools
-              if item["tool"] == "microduck.read_sensor" and item["result"]["sensor"] == "joint_state"]
+              if item["tool"] == "microduck.observe" or
+              (item["tool"] == "microduck.read_sensor" and item["result"]["sensor"] == "joint_state")]
     require(joints and all(len(set(row["joint_names"])) == len(row["joint_position_rad"])
                           == len(row["joint_velocity_rad_s"]) == 14 for row in joints),
             "Route lacks actual fourteen-servo measurements")
@@ -49,13 +50,14 @@ def verify_navigation(root, configuration, minimum_distance):
         require(admission["prepared"] and admission["policy_name"] == policy
                 and admission["distance_tolerance_m"] == 0.05 and admission["angle_tolerance_deg"] == 5,
                 "Route policy or official action timing differs")
-    progress = [item["result"] for item in tools if item["tool"] == "microduck.task_progress"]
+    progress_tools = {"microduck.task_progress", "microduck.observe", "microduck.wait_for_motion"}
+    progress = [item["result"] for item in tools if item["tool"] in progress_tools]
     require(len(progress) >= 3 and len({row["episode_id"] for row in progress}) == 1,
             "Navigation requires one continuous physical episode")
     require(all(row["contact_evidence"]["non_ground_external_contact_samples_total"] == 0
                 for row in progress), "Recorded route has external obstacle contacts")
     pause_events = [event for event in events if not (
-        event["type"] == "tool.completed" and event["detail"].get("tool") == "microduck.task_progress"
+        event["type"] == "tool.completed" and event["detail"].get("tool") in progress_tools
         and event["detail"]["result"]["execution"] is not None
         and event["detail"]["result"]["execution"]["state"] == "ended")]
     audit_motion_guard_pauses(pause_events, run["id"],
@@ -156,6 +158,8 @@ def verify_navigation(root, configuration, minimum_distance):
                 "Native checkpoint visit is out of order or outside its radius")
         previous = visit["sequence"]
     inspections = [item["result"] for item in tools if item["tool"] == "microduck.inspect_scene"]
+    inspections.extend(item["result"]["perception"] for item in tools
+                       if item["tool"] == "microduck.observe" and item["result"]["perception"] is not None)
     require(len({row["sequence"] for row in inspections}) >= 3 and all(
         row["distance_source"] == "simulator_ground_truth" for row in inspections),
         "Navigation lacks refreshed, explicitly sourced observations")

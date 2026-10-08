@@ -29,6 +29,8 @@ tools:
   - microduck.set_command
   - microduck.read_sensor
   - microduck.task_progress
+  - microduck.observe
+  - microduck.wait_for_motion
   - microduck.walk
   - microduck.rotate
   - microduck.inspect_scene
@@ -39,6 +41,13 @@ tools:
 物理控制器执行四个 0.005 秒子步。使用 MicroDuck 工具选择 manifest policy，
 设置 twist、head、body 或 posture，读取实际 RGB、ToF、IMU、关节与 odometry。
 根据任务目标维护规划，并在每段动作后检查 execution 状态和传感器。
+
+使用 microduck.observe 在同一个确认暂停边界取得 RGB、ToF、IMU、关节、
+odometry、metric_motion、motion_guard 和 execution 剩余预算。感知需要时同时提供
+prompt 与 source；当前边界已有结果可以直接使用，读取相同 sequence 不会增加停止样本。
+execution.start 或 execution.resume 之后调用 microduck.wait_for_motion，等待原生暂停边界，
+然后 observe 当前状态。wait_for_motion 保留 ActionGate、原始运动检查和执行时限。
+执行过程中安排停止保持与正式结束所需时间，remaining_wall_time_s 为原生时钟的当前值。
 
 planning.read 返回的 goal_id、success_contract 和原生检查条件保持原样。
 使用 description 与 todo_write 记录动作阶段。独立 Verifier 正式通过后，

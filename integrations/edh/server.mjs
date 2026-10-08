@@ -211,6 +211,8 @@ function tool(operation, properties, required, services) {
       read_sensor: 'Read a current physical MicroDuck RGB, ToF, IMU, joint, or odometry sensor.',
       inspect_scene: 'Inspect current head RGB for a named object and return visible targets, bounding boxes, surface distance in meters and bearing in degrees. Select models for YOLO26/SAM service inference, or simulator_ground_truth for explicit native shape masks and ray-hit distances. The result labels detection, mask and distance sources. Requires a confirmed paused execution. Positive bearing means left. Reobserve after movement; targets are tied to one episode and sequence.',
       task_progress: 'Read current physical position, velocity, contact evidence, bounded-command status, and native motion-pause reason.',
+      observe: 'Read head RGB, ToF, IMU, all joints, odometry, metric progress, motion guard, current boundary and remaining native budget in one confirmed paused sample. Optional prompt and source must be provided together to include frame-bound perception. This reads fresh ToF for guarded recovery. Reuse this result for the current boundary.',
+      wait_for_motion: 'Wait up to 90 seconds for the currently admitted native policy motion to reach a confirmed paused or ended boundary, then return measured progress and remaining budget. Call after execution.start or execution.resume; inspect the result before preparing another action. This does not issue actions or confirm physical rest.',
       walk: 'Prepare the official locomotion policy (alpha_walking for standard feet, roller for the roller model) to move a signed distance in meters along the current heading. Positive moves forward; negative moves backward. Requires a confirmed paused execution and five measured stopped samples. Call execution.resume afterward. Native odometry controls completion and braking; read task_progress.metric_motion after the pause.' + metricRecovery,
       rotate: 'Prepare the official locomotion policy (alpha_walking for standard feet, roller for the roller model) to turn by a signed angle in degrees. This maneuver includes translation; the measured translation_xy_m is reported. Positive is counterclockwise around world +Z; negative is clockwise. Requires a confirmed paused execution and five measured stopped samples. Call execution.resume afterward. Accumulated measured yaw controls completion and braking; read task_progress.metric_motion after the pause.' + metricRecovery,
     }[operation],
@@ -229,8 +231,8 @@ function tool(operation, properties, required, services) {
         policy_catalog: 'catalog', scene_info: 'scene', task_progress: 'progress',
       }[operation] ?? operation;
       const result = await control(runId, workerOperation, args, exec.signal);
-      if (operation !== 'inspect_scene' && (operation !== 'read_sensor' || args.sensor !== 'head_rgb')) return result;
-      const encoded = operation === 'inspect_scene' ? result.rgb_png_base64 : result.measurements.rgb_png_base64;
+      if (!['inspect_scene', 'observe'].includes(operation) && (operation !== 'read_sensor' || args.sensor !== 'head_rgb')) return result;
+      const encoded = operation === 'read_sensor' ? result.measurements.rgb_png_base64 : result.rgb_png_base64;
       const data = Buffer.from(encoded, 'base64');
       if (!data.length || data.toString('base64') !== encoded)
         throw new Error('MicroDuck RGB transport is invalid');
@@ -242,8 +244,9 @@ function tool(operation, properties, required, services) {
       const imageDirectory = resolve(dataDirectory, 'tool-images');
       await mkdir(imageDirectory, { recursive: true });
       await writeFile(resolve(imageDirectory, `${imageRef.attachmentId.slice(7)}.png`), data);
-      if (operation === 'inspect_scene') delete result.rgb_png_base64;
+      if (operation !== 'read_sensor') delete result.rgb_png_base64;
       else delete result.measurements.rgb_png_base64;
+      if (result.perception) result.perception.image_ref = imageRef;
       return { ...result, image_ref: imageRef };
     },
   });
@@ -308,6 +311,11 @@ const server = await startServer({
         sensor: { type: 'string', enum: ['head_rgb', 'tof', 'imu', 'joint_state', 'odometry'] },
       }, ['sensor'], { images }),
       'microduck.task_progress': tool('task_progress', {}, [], { images }),
+      'microduck.wait_for_motion': tool('wait_for_motion', {}, [], { images }),
+      'microduck.observe': tool('observe', {
+        prompt: { type: 'string', minLength: 1, maxLength: 120 },
+        source: { type: 'string', enum: ['models', 'simulator_ground_truth'] },
+      }, [], { images }),
       'microduck.inspect_scene': tool('inspect_scene', {
         prompt: { type: 'string', minLength: 1, maxLength: 120 },
         source: { type: 'string', enum: ['models', 'simulator_ground_truth'] },

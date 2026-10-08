@@ -70,7 +70,7 @@ def export_run(origin: str, run_id: str, output: Path, data_directory: Path | No
     known = set()
     for event in events:
         if (event["type"] == "tool.completed" and event["detail"].get("tool") in
-                ("microduck.inspect_scene", "microduck.read_sensor") and
+                ("microduck.inspect_scene", "microduck.read_sensor", "microduck.observe") and
                 event["detail"].get("result", {}).get("image_ref")):
             if data_directory is None:
                 raise ValueError("Tool image export requires the native data directory")
@@ -89,7 +89,7 @@ def export_run(origin: str, run_id: str, output: Path, data_directory: Path | No
             rows.append({"kind": "agent.observation", "eventSequence": event["sequence"],
                 "eventAt": event["at"], "evidenceId": None, "observedAt": result.get("observed_at"),
                 "sampleSequence": result.get("sequence"), "image": image,
-                "cameraName": "head_rgb.png", "perceptionSource": result.get("detection_source"),
+                "cameraName": "head_rgb.png", "perceptionSource": (result.get("perception") or result).get("detection_source"),
                 "executionId": None, "policyRequestId": None, "segmentId": None,
                 "nativeStepIndex": None, "simulationTimeS": None,
                 "file": path.as_posix(), "availability": "available"})

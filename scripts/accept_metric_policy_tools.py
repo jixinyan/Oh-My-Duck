@@ -12,6 +12,7 @@ import sys
 from uuid import uuid4
 
 from accept_harness_motion_guard import available_port, control, wait_boundary
+from metric_plan import case_motions
 from oh_my_duck.integrations.edh_native import MicroDuckWorkerSession
 from oh_my_duck.robotics.microduck.official_policies import OFFICIAL_REVISION
 
@@ -32,7 +33,7 @@ def provenance(root, args, configuration):
             "onnxruntime_telemetry_disabled": os.environ.get("ORT_DISABLE_TELEMETRY") == "1",
             "configuration": {key: value for key, value in configuration.items()
                               if key != "control_secret"},
-            "commands": {"operations": args.operations, "distance_m": args.distance,
+            "commands": {"motions": args.motions, "operations": args.operations, "distance_m": args.distance,
                          "angle_deg": args.angle, "speed_m_s": args.speed,
                          "angular_speed_deg_s": args.angular_speed}}
 
@@ -82,8 +83,8 @@ async def run(args):
     async def call(operation, arguments):
         result = await control(port, secret, task_id, operation, arguments)
         tools.append({"operation": operation, "arguments": arguments, "result": result, "phase": phase})
-        report = result if operation != "read_sensor" else {
-            "sensor": arguments["sensor"], "sequence": result["sequence"]}
+        report = result if operation not in {"read_sensor", "observe"} else {
+            "sensor": arguments.get("sensor", "combined"), "sequence": result["sequence"]}
         print(json.dumps({"operation": operation, "arguments": arguments,
                           "result": report, "phase": phase}), flush=True)
         return result
@@ -92,7 +93,29 @@ async def run(args):
         prior = session._status
         await session.resume({"owner_id": "planner", "execution_id": prior["execution_id"],
                               "boundary_id": prior["boundary_event_id"], "state_version": prior["state_version"]})
-        await wait_boundary(session)
+        first = await call("wait_for_motion", {})
+        second = await call("wait_for_motion", {})
+        if first["sequence"] != second["sequence"] or first["execution"]["boundary_id"] != second["execution"]["boundary_id"]:
+            raise AssertionError("Waiting on an existing boundary changed the native execution")
+
+    async def observe_boundary():
+        first = await call("observe", {})
+        second = await call("observe", {})
+        for key in ("episode_id", "sequence", "body_position_m", "stopped_samples"):
+            if first[key] != second[key]:
+                raise AssertionError("Repeated boundary observation changed physical state or stopped samples")
+        for key in ("joint_names", "joint_position_rad", "joint_velocity_rad_s", "odometry"):
+            if first["measurements"][key] != second["measurements"][key]:
+                raise AssertionError("Repeated boundary observation changed measured joint or odometry state")
+        measurements = second["measurements"]
+        if (len(set(measurements["joint_names"])) != 14 or len(measurements["joint_position_rad"]) != 14 or
+                len(measurements["joint_velocity_rad_s"]) != 14 or len(measurements["tof_distance_mm"]) != 64):
+            raise AssertionError("Combined observation lacks actual joint or ToF measurements")
+        if second["execution"]["remaining_wall_time_s"] > first["execution"]["remaining_wall_time_s"]:
+            raise AssertionError("Remaining native wall budget increased without a new execution")
+        if not base64.b64decode(second["rgb_png_base64"], validate=True):
+            raise AssertionError("Combined observation has no original head camera")
+        return second
 
     try:
         edh = root / ".cache/edh/8a5e685b22d032207f53db20454f0992a4ad60fd"
@@ -111,7 +134,7 @@ async def run(args):
                    "owner_assignment_id": "metric-acceptance", "idempotency_key": uuid4().hex}
         await session.start({"request": request, "native_task_id": "metric-tools",
                              "observation_ttl_s": 30, "device_timeout_s": 120, "policy_timeout_s": 30})
-        await wait_boundary(session)
+        await call("wait_for_motion", {})
         for _ in range(3):
             progress = await call("progress", {})
             if progress["fallen"]:
@@ -122,13 +145,12 @@ async def run(args):
             await resume()
         progress = await call("progress", {})
         require_upright_stop(progress)
-        operations = {"walk": {"distance_m": args.distance, "speed_m_s": args.speed},
-                      "rotate": {"angle_deg": args.angle, "angular_speed_deg_s": args.angular_speed}}
+        await observe_boundary()
         measurements = []
         record["measurements"] = measurements
-        for operation in args.operations:
-            parameters = operations[operation]
-            phase = operation
+        for index, motion in enumerate(args.motions):
+            operation, parameters = motion["operation"], motion["arguments"]
+            phase = f"{index}-{operation}"
             await call(operation, parameters)
             await resume()
             progress = await call("progress", {})
@@ -136,6 +158,7 @@ async def run(args):
             if evidence is None or not evidence["completed"] or evidence["error"] > evidence["tolerance"]:
                 raise AssertionError(f"Metric target failed: {evidence}; guard={progress['motion_guard']}")
             require_upright_stop(progress)
+            await observe_boundary()
             measurements.append({"operation": operation, "arguments": parameters,
                                  "evidence": evidence, "progress": progress})
         final = await call("progress", {})
@@ -184,7 +207,14 @@ def main():
     parser.add_argument("--angular-speed", type=float, default=45)
     parser.add_argument("--seed", type=int, default=20260930)
     parser.add_argument("--operations", nargs="+", choices=("walk", "rotate"), default=["walk", "rotate"])
-    asyncio.run(run(parser.parse_args()))
+    parser.add_argument("--sequence", type=Path)
+    args = parser.parse_args()
+    declared = ({"motions": json.loads(args.sequence.read_text())} if args.sequence is not None else {
+        "operations": args.operations, "distance_m": args.distance, "angle_deg": args.angle,
+        "speed_m_s": args.speed, "angular_speed_deg_s": args.angular_speed})
+    args.motions = case_motions(declared)
+    args.operations = [motion["operation"] for motion in args.motions]
+    asyncio.run(run(args))
 
 
 if __name__ == "__main__":

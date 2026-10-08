@@ -28,6 +28,7 @@ from oh_my_duck.robotics.microduck.official_policies import OfficialPolicyCatalo
 from oh_my_duck.robotics.microduck.sim_sensors import camera_optical_pose, tof_directions
 from oh_my_duck.perception.rgbd import measure_target
 from oh_my_duck.core.paths import project_root
+from oh_my_duck.robotics.runtime_startup import RuntimeStartup
 
 
 @wp.kernel
@@ -42,7 +43,8 @@ class IsaacNewtonBamBackend(CpuMujocoBamBackend):
                  device: str, floor_height_m: float = 0.0,
                  scene_id: str = "isaac_external", robot_model: str = "allcollisions",
                  provenance_path: Path | None = None, public_map_path: Path | None = None,
-                 observer_renderer: str = "newton_warp"):
+                 observer_renderer: str = "newton_warp", startup: RuntimeStartup | None = None):
+        self._startup = RuntimeStartup(scene_id, robot_model) if startup is None else startup
         from isaaclab.assets import AssetBaseCfg
         from isaaclab.envs import ManagerBasedEnv, ManagerBasedEnvCfg
         from isaaclab.sensors import CameraCfg
@@ -62,6 +64,7 @@ class IsaacNewtonBamBackend(CpuMujocoBamBackend):
         from oh_my_duck.rl.backends.isaac_newton.task_binding.simulation import NewtonSimulation
         from oh_my_duck.rl.backends.isaac_newton.asset_names import get_isaac_allcollisions_cfg, get_isaac_rollers_cfg
 
+        self._startup.mark("runtime_validation")
         if not device.startswith("cuda:") or not torch.cuda.is_available():
             raise ValueError("Isaac/Newton requires an explicitly selected CUDA device")
         factories = {"allcollisions": get_isaac_allcollisions_cfg,
@@ -123,14 +126,18 @@ class IsaacNewtonBamBackend(CpuMujocoBamBackend):
                                   robot_model=robot_model, iterations=iterations, ls_iterations=ls_iterations,
                                   njmax=5000, nconmax=5000), num_substeps=1,
                                   use_cuda_graph=robot_model != "allcollisions")))
+        self._startup.mark("simulation_launch")
         self._launch = launch_simulation(native_cfg, {"headless": True, "device": device})
         self._launch.__enter__()
+        self._startup.mark("environment_construction")
         self.native = ManagerBasedEnv(native_cfg)
+        self._startup.mark("bam_binding")
         self.sim = NewtonSimulation(self.native, task_sim_cfg)
         self.robot = NewtonEntity(factories[robot_model](),
                                   self.native.scene["robot"], self.sim)
         self._servo_joint_ids = [self.robot.joint_names.index(name) for name in JOINT_NAMES]
         self.model = copy(self.sim.mj_model)
+        self._startup.mark("scene_and_sensor_binding")
         self._geometry_normalizations = NewtonManager._builder.omd_scene_transform_audit
         audit_bytes = (json.dumps(self._geometry_normalizations, indent=2, allow_nan=False) + "\n").encode()
         audit_hash = hashlib.sha256(audit_bytes).hexdigest()
@@ -196,6 +203,7 @@ class IsaacNewtonBamBackend(CpuMujocoBamBackend):
                                    "body": (0.0,) * 6, "posture": "stand"}
         self._reset_contact_evidence()
         self._sensor_rng = np.random.default_rng(0)
+        self._startup.mark("runtime_ready", ready=True)
 
     def _require_owner(self) -> None:
         if threading.get_ident() != self._owner_thread:
@@ -566,7 +574,8 @@ class IsaacNewtonBamBackend(CpuMujocoBamBackend):
                 "solver_ls_iterations": int(self.sim.mj_model.opt.ls_iterations),
                 "physics_cuda_graph": self.robot_model != "allcollisions",
                 "control_hz": 50, "robot_model": self.robot_model,
-                "observer_renderer": self.observer_renderer}
+                "observer_renderer": self.observer_renderer,
+                "runtime_startup": self._startup.reference()}
 
     def list_policies(self):
         result = super().list_policies()

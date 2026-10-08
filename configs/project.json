@@ -5,6 +5,14 @@
   "entry_point": "omd.py",
   "release_readiness": {
     "state": "acceptance_in_progress",
+    "runtime_observation_iteration": {
+      "state": "cpu_functional_checks_passed_gpu_pending",
+      "tools": ["microduck.observe", "microduck.wait_for_motion"],
+      "plan": "configs/experiments/runtime-release-acceptance.json",
+      "continuous_motion_plan": "configs/experiments/navigation-motion-sequences.json",
+      "report": "docs/runtime-release-acceptance.md",
+      "gpu_execution": "sequential_single_device_from_2_to_4"
+    },
     "report": "docs/reports/end-to-end-2026-10-03.md",
     "native_voice_task": "5dfb18d9-b31b-4226-bc94-9391ddd847ac",
     "native_voice_task_state": "succeeded",

@@ -8,6 +8,7 @@ import sys
 
 from jsonschema import Draft202012Validator
 from verify_metric_campaign import verify_case
+from metric_plan import MOTIONS_SCHEMA, case_motions
 
 
 PLAN_SCHEMA = {
@@ -19,8 +20,9 @@ PLAN_SCHEMA = {
             "properties": {
                 "scene_config": {"type": "string", "minLength": 1},
                 "cases": {"type": "array", "minItems": 1, "items": {
-                    "type": "object", "required": ["id", "seed", "operations", "distance_m", "angle_deg"],
+                    "type": "object", "required": ["id", "seed"],
                     "additionalProperties": False,
+                    "oneOf": [{"required": ["motions"]}, {"required": ["operations", "distance_m", "angle_deg"]}],
                     "properties": {
                         "id": {"type": "string", "pattern": "^[a-z][a-z0-9-]*$"},
                         "seed": {"type": "integer", "minimum": 0},
@@ -29,6 +31,7 @@ PLAN_SCHEMA = {
                         "distance_m": {"type": "number"}, "angle_deg": {"type": "number"},
                         "speed_m_s": {"type": "number", "minimum": 0.1, "maximum": 0.4},
                         "angular_speed_deg_s": {"type": "number", "minimum": 10, "maximum": 55},
+                        "motions": MOTIONS_SCHEMA,
                     },
                 }},
             },
@@ -53,13 +56,15 @@ def main():
     cases = suite["cases"]
     if len({case["id"] for case in cases}) != len(cases):
         raise ValueError("Metric campaign requires unique case identifiers")
+    for case in cases:
+        case_motions(case)
     scene = root / suite["scene_config"]
     configuration = json.loads(scene.read_text())
     backend = configuration["backend"]
     if backend not in {"cpu-mujoco-bam", "isaac-newton"}:
         raise ValueError("Metric campaign requires an actual supported simulation backend")
-    if backend == "isaac-newton" and (args.gpu is None or args.gpu < 0):
-        raise ValueError("Newton campaign requires an explicitly allocated physical GPU")
+    if backend == "isaac-newton" and args.gpu not in {2, 3, 4}:
+        raise ValueError("Newton campaign requires one allocated physical GPU from devices 2–4")
     if backend == "cpu-mujoco-bam" and args.gpu is not None:
         raise ValueError("CPU campaign does not allocate a GPU")
     environment = dict(os.environ)
@@ -85,13 +90,12 @@ def main():
                      "result": str(destination / "result.json")}
             record["cases"].append(entry)
             destination_record.write_text(json.dumps(record, indent=2) + "\n")
+            sequence_path = args.output / (case["id"] + "-motions.json")
+            sequence_path.write_text(json.dumps(case_motions(case), indent=2) + "\n")
             command = [sys.executable, str(root / "scripts/accept_metric_policy_tools.py"),
                        "--scene-config", str(scene), "--catalog", str(args.catalog.resolve(strict=True)),
                        "--output", str(destination), "--seed", str(case["seed"]),
-                       "--distance", str(case["distance_m"]), "--angle", str(case["angle_deg"]),
-                       "--speed", str(case.get("speed_m_s", 0.4)),
-                       "--angular-speed", str(case.get("angular_speed_deg_s", 45)),
-                       "--operations", *case["operations"]]
+                       "--sequence", str(sequence_path)]
             print(f"Starting actual {args.suite}/{case['id']}", flush=True)
             with (args.output / (case["id"] + ".log")).open("w") as log:
                 subprocess.run(command, cwd=root, env=environment, stdout=log, stderr=subprocess.STDOUT, check=True)

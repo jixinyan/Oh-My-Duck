@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "stages": [
+    {"id": "office-matrix", "kind": "metric", "plan": "configs/experiments/metric-policy-acceptance.json", "suite": "office-feet"},
+    {"id": "hospital-matrix", "kind": "metric", "plan": "configs/experiments/metric-policy-acceptance.json", "suite": "hospital-rollers"},
+    {"id": "office-sequence", "kind": "metric", "plan": "configs/experiments/navigation-motion-sequences.json", "suite": "office-sequence"},
+    {"id": "hospital-sequence", "kind": "metric", "plan": "configs/experiments/navigation-motion-sequences.json", "suite": "hospital-sequence"},
+    {"id": "office-navigation", "kind": "navigation", "scene": "configs/simulation-demo/office-vln.json", "instruction": "configs/simulation-demo/office-vln-instruction.md", "minimum_distance_m": 3},
+    {"id": "hospital-navigation", "kind": "navigation", "scene": "configs/simulation-demo/hospital-navigation.json", "instruction": "configs/simulation-demo/hospital-navigation-instruction.md", "minimum_distance_m": 3}
+  ]
+}

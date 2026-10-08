@@ -9,6 +9,7 @@ from pathlib import Path
 
 from PIL import Image
 
+PROGRESS_TOOLS = {"microduck.task_progress", "microduck.observe", "microduck.wait_for_motion"}
 
 def require_one(events: list[dict], event_type: str) -> dict:
     matches = [event for event in events if event["type"] == event_type]
@@ -28,7 +29,7 @@ def audit_motion_guard_pauses(events: list[dict], run_id: str, warmup_policy: st
     if len(commands) != len(completed_commands):
         raise AssertionError("Physical command request identities are duplicated")
     guarded = [event for event in events if event["type"] == "tool.completed" and
-               event["detail"].get("tool") == "microduck.task_progress" and
+               event["detail"].get("tool") in PROGRESS_TOOLS and
                event["detail"]["result"].get("motion_guard")]
     if not guarded:
         raise AssertionError("Native automatic pause lacks measured motion-guard progress")
@@ -126,11 +127,13 @@ def main() -> None:
     calls = [event["detail"]["data"]["name"] for event in events
              if event["type"] == "dsh.tool-call"]
     required_calls = {
-        "microduck__read_sensor", "microduck__set_command",
-        "microduck__task_progress",
+        "microduck__set_command",
         "execution__start",
         "verification__check", "verification__submit",
     }
+    if not set(calls) & {"microduck__read_sensor", "microduck__observe"} or not set(calls) & {
+            name.replace(".", "__") for name in PROGRESS_TOOLS}:
+        raise AssertionError("Original trace lacks actual sensor and measured-progress tool calls")
     if arguments.prior_export is None:
         required_calls.update(("microduck__policy_catalog", "execution__resume"))
         if not set(calls) & {"microduck__select_policy", "microduck__walk", "microduck__rotate"}:
@@ -146,7 +149,7 @@ def main() -> None:
     if arguments.require_metric_tools:
         prepared = {item["result"]["request_id"]: item["result"] for item in tool_results
                     if item["tool"] == "microduck.walk"}
-        completed_motion = [item["result"] for item in tool_results if item["tool"] == "microduck.task_progress"
+        completed_motion = [item["result"] for item in tool_results if item["tool"] in PROGRESS_TOOLS
                             and item["result"].get("metric_motion", {}) is not None
                             and item["result"].get("metric_motion", {}).get("completed") is True]
         walking = [progress for progress in completed_motion if progress["metric_motion"]["operation"] == "walk"]
@@ -172,7 +175,7 @@ def main() -> None:
         for detail in tool_results:
             if detail["tool"] in ("microduck.select_policy", "microduck.transition_policy"):
                 samples_by_sequence.clear()
-            if detail["tool"] == "microduck.task_progress":
+            if detail["tool"] in PROGRESS_TOOLS:
                 result = detail["result"]
                 samples = result["stopped_samples"]
                 if (type(samples) is not int or samples < 0 or
@@ -207,9 +210,9 @@ def main() -> None:
         selection_results = [event["detail"] for event in prior_events
                              if event["type"] == "tool.completed"]
         prior_progress = [item["result"] for item in selection_results
-                          if item.get("tool") == "microduck.task_progress"]
+                          if item.get("tool") in PROGRESS_TOOLS]
         current_progress = [item["result"] for item in tool_results
-                            if item.get("tool") == "microduck.task_progress"]
+                            if item.get("tool") in PROGRESS_TOOLS]
         if not prior_progress or not current_progress or (
             prior_progress[-1]["episode_id"], prior_progress[-1]["sequence"]
         ) != (
@@ -228,7 +231,7 @@ def main() -> None:
                for item in tool_results):
         raise AssertionError("A forward policy command was not confirmed")
     positions = [item["result"]["body_position_m"] for item in tool_results
-                 if item.get("tool") == "microduck.task_progress"]
+                 if item.get("tool") in PROGRESS_TOOLS]
     if len(positions) < 2 or not math.dist(positions[0][:2], positions[-1][:2]) > 0.01:
         raise AssertionError("Recorded physical position did not change")
 

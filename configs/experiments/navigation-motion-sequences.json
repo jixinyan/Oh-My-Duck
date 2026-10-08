@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "suites": {
+    "apartment-sequence": {
+      "scene_config": "configs/simulation-demo/apartment-metric.json",
+      "cases": [{"id": "walk-clockwise-return", "seed": 20261007, "motions": [
+        {"operation": "walk", "arguments": {"distance_m": 1.0}},
+        {"operation": "rotate", "arguments": {"angle_deg": -78}},
+        {"operation": "walk", "arguments": {"distance_m": -0.5}},
+        {"operation": "rotate", "arguments": {"angle_deg": 78}},
+        {"operation": "walk", "arguments": {"distance_m": -0.5}}
+      ]}]
+    },
+    "office-sequence": {
+      "scene_config": "configs/simulation-demo/office-vln.json",
+      "cases": [{"id": "left-walk-clockwise", "seed": 20261007, "motions": [
+        {"operation": "rotate", "arguments": {"angle_deg": 88}},
+        {"operation": "walk", "arguments": {"distance_m": 1.35}},
+        {"operation": "rotate", "arguments": {"angle_deg": -78}}
+      ]}]
+    },
+    "hospital-sequence": {
+      "scene_config": "configs/simulation-demo/hospital-navigation.json",
+      "cases": [{"id": "long-roll-turn", "seed": 20261007, "motions": [
+        {"operation": "walk", "arguments": {"distance_m": 1.7}},
+        {"operation": "rotate", "arguments": {"angle_deg": 85.5}},
+        {"operation": "walk", "arguments": {"distance_m": 2.1}}
+      ]}]
+    }
+  }
+}

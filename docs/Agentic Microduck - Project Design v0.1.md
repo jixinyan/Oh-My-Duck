@@ -12,6 +12,8 @@ tags:
   - project-design
 ---
 
+> 2026-10-07：统一暂停观测通过 `microduck.observe` 返回相机、ToF、IMU、servo、odometry、进度与原生剩余执行时间，可附带明确来源的当前帧感知。`microduck.wait_for_motion` 等待确认边界，全部动作仍由原生 ActionGate 接纳。连续运动检查保存每次参数和物理样本，初始化记录各阶段耗时。统一验收使用固定源码，串行执行单个 GPU 的矩阵、连续动作与原生导航，见[执行说明](runtime-release-acceptance.md)。
+
 > 2026-10-07：当前控制器的 Office 有序导航测得 3.052359 米行走段累计位移和 0.116789 米最终目标误差，三段行走满足原有精度，零外部接触。两次顺时针转弯停滞并执行实际恢复。2400 秒预算拒绝最终保持恢复调用，任务 failed，没有正式 Verifier；完整事件、图像和资源释放记录保留。长行走后的顺时针响应、预算内正式完成和原生初始化可靠性仍需验证。见[Office 测量](reports/navigation-acceptance-2026-10-07.md#office-有序导航测量)。
 
 > 2026-10-07：Hospital 官方轮滑 policy 完成东向、北向和西向的有序路线，行走段端点位移累计 5.438808 米，最终目标误差 0.095637 米，80 个连续停止样本与零外部接触。独立 Verifier、原始记录复核和 170 秒 agentic MP4 检查通过。感知来源明确为 simulator ground truth，两次未达到严格精度的动作保留实际状态。自动验收入口负责会话、任务、原始图像、独立复核和资源释放，见[导航证据](reports/navigation-acceptance-2026-10-07.md)。
