@@ -37,9 +37,10 @@ ASR text matched two of the three generated utterances; recognition accuracy
 requires separate evaluation. GPU acceptance and RL remain stopped.
 
 The [installed CPU voice-task check](docs/reports/cpu-voice-task-2026-10-08.md)
-verified actual ASR submission, fixed-voice feedback and resource release. The
-configured provider requires `gpt-6.1-sol` model access before current-source
-navigation can be accepted.
+verified actual Qwen ASR → OpenAI `gpt-6-luna` → native policy/sensor tools →
+interruption → fixed-voice feedback. The run preserved 1400 controls, 5600 physical
+substeps, 2427 events and 296 original images; all resources were released.
+Office navigation remains pending.
 
 Verified CPU paths cover actual policy motion, stopping, cancellation, native SDK
 transport, recorded sensors, voice profiles, assets and independent installation.

@@ -4,10 +4,10 @@ The release workflow uses recorded speech, the pinned native Harness, official p
 
 ## Runtime preparation
 
-The installed CPU voice task verified actual ASR submission, confirmed-voice
-failure feedback, two decoded WAV files, unchanged profile and full resource
-release. The configured provider denies access to `gpt-6.1-sol`; current-source
-model-driven navigation requires that access. See the
+The installed CPU voice task verified actual Qwen ASR, OpenAI `gpt-6-luna`, native
+policy/sensor tools, interruption, confirmed-voice feedback and full resource
+release. Independent checks cover 1400 controls, 5600 substeps, 2427 events,
+296 original images and two decoded WAV files. Office navigation remains pending. See the
 [actual task and provider record](reports/cpu-voice-task-2026-10-08.md).
 
 Qwen ASR, Base TTS and VoiceDesign passed actual CPU Float32 inference in their
