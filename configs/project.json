@@ -6,11 +6,15 @@
   "release_readiness": {
     "state": "acceptance_in_progress",
     "runtime_observation_iteration": {
-      "state": "cpu_functional_checks_passed_gpu_pending",
+      "state": "cpu_fixed_source_acceptance_passed_gpu_pending",
+      "source_revision": "32e35dd09ce7c278c6a264cf1fc9ab9926996efd",
+      "cpu_campaign": "outputs/acceptance/runtime-sequence-clean-20261007-01/campaign.json",
+      "independent_cpu_audit": "outputs/acceptance/runtime-sequence-clean-20261007-01/independent-audit.json",
+      "gpu_admission": "waiting_for_sustained_idle_capacity_no_worker_started",
       "tools": ["microduck.observe", "microduck.wait_for_motion"],
       "plan": "configs/experiments/runtime-release-acceptance.json",
       "continuous_motion_plan": "configs/experiments/navigation-motion-sequences.json",
-      "report": "docs/runtime-release-acceptance.md",
+      "report": "docs/reports/runtime-observation-acceptance-2026-10-07.md",
       "gpu_execution": "sequential_single_device_from_2_to_4"
     },
     "report": "docs/reports/end-to-end-2026-10-03.md",

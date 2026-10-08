@@ -6,7 +6,7 @@ The release campaign validates the combined observation and native motion-wait i
 
 ## Local validation
 
-The actual CPU apartment functional run at `outputs/acceptance/runtime-observation-cpu-20261007-01` completed a 0.5 m walk and −45° rotation. The five-motion run at `outputs/acceptance/cpu-navigation-sequence-20261007-02` completed +1.0 m, −78°, −0.5 m, +78°, −0.5 m. Distance errors were 0.021102, 0.035872 and 0.040380 m; angle errors were 4.496450° and 4.712026°. Actual stopping, repeated observations and resource release passed. These development runs used a working checkout; formal acceptance additionally requires clean fixed source provenance.
+The clean fixed-source campaign at commit `32e35dd09ce7c278c6a264cf1fc9ab9926996efd` completed +1.0 m, −78°, −0.5 m, +78°, −0.5 m. Distance errors were 0.021102, 0.035872 and 0.040380 m; angle errors were 4.496450° and 4.712026°. Actual stopping, repeated observations, source provenance, physical counts and resource release passed. The separate artifact verifier also passed. Artifacts are at `outputs/acceptance/runtime-sequence-clean-20261007-01`; see the [acceptance evidence](reports/runtime-observation-acceptance-2026-10-07.md).
 
 The sequence plan is `configs/experiments/navigation-motion-sequences.json`. Each `motions` entry preserves its own operation and parameters, allowing repeated `walk` and `rotate` operations. The independent verifier reconstructs each displacement and continuous yaw from native physical samples, validates original request tolerances, decoded camera bytes, sensor dimensions, stopping, control/physics counts, source hashes and resource release.
 
@@ -32,7 +32,7 @@ python scripts/run_release_campaign.py \
   --output outputs/acceptance/runtime-release-20261007-01
 ```
 
-The controller checks clean source before each stage, holds an exclusive local campaign lease, requires an idle selected GPU with at least 16 GiB available, records occupancy samples and preserves foreign process records. Metric artifacts are copied from the remote worker. Navigation exports actual events, camera bytes, formal verdicts and independent audit results. Each completed stage records its exit code and elapsed time; a failed stage prevents overall acceptance. Configuration and transport errors propagate and record an aborted stage. The controller closes its own navigation server and the navigation runner closes its own physics session. RL training remains stopped.
+The controller checks clean source before each stage, holds an exclusive local campaign lease, requires the selected GPU to remain idle for ten seconds with at least 16 GiB available, records occupancy samples and preserves foreign process records. Admission stops after thirty seconds without sufficient idle observations. Metric artifacts are copied from the remote worker. Navigation exports actual events, camera bytes, formal verdicts and independent audit results. Each completed stage records its exit code and elapsed time; a failed stage prevents overall acceptance. Configuration and transport errors propagate and record the aborted campaign and any active stage. The controller closes its own navigation server and the navigation runner closes its own physics session. RL training remains stopped.
 
 ## Initialization and media evidence
 

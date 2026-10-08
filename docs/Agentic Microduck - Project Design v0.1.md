@@ -12,6 +12,8 @@ tags:
   - project-design
 ---
 
+> 固定提交 `32e35dd` 的统一观测与原生等待接口通过 CPU 五动作连续序列及独立复核，安装包、既有导航和语音回放、实际 MP4 生成检查通过。统一 GPU 测试等待授权设备 2–4 的持续空闲容量，分配检查未启动物理 worker，见[验收证据](reports/runtime-observation-acceptance-2026-10-07.md)。
+
 > 2026-10-07：统一暂停观测通过 `microduck.observe` 返回相机、ToF、IMU、servo、odometry、进度与原生剩余执行时间，可附带明确来源的当前帧感知。`microduck.wait_for_motion` 等待确认边界，全部动作仍由原生 ActionGate 接纳。连续运动检查保存每次参数和物理样本，初始化记录各阶段耗时。统一验收使用固定源码，串行执行单个 GPU 的矩阵、连续动作与原生导航，见[执行说明](runtime-release-acceptance.md)。
 
 > 2026-10-07：当前控制器的 Office 有序导航测得 3.052359 米行走段累计位移和 0.116789 米最终目标误差，三段行走满足原有精度，零外部接触。两次顺时针转弯停滞并执行实际恢复。2400 秒预算拒绝最终保持恢复调用，任务 failed，没有正式 Verifier；完整事件、图像和资源释放记录保留。长行走后的顺时针响应、预算内正式完成和原生初始化可靠性仍需验证。见[Office 测量](reports/navigation-acceptance-2026-10-07.md#office-有序导航测量)。

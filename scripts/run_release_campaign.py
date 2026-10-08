@@ -53,6 +53,7 @@ def within(root, name):
 def gpu_snapshot(args, output, name):
     deadline = time.monotonic() + 30
     sample = 0
+    idle_since = None
     while True:
         raw = ssh(args, "nvidia-smi --query-gpu=index,uuid,utilization.gpu,memory.used,memory.total --format=csv,noheader,nounits",
                   check=True, capture_output=True, text=True).stdout
@@ -61,8 +62,14 @@ def gpu_snapshot(args, output, name):
         selected = [row for row in rows if int(row[0]) == args.gpu]
         if len(selected) != 1 or float(selected[0][4]) - float(selected[0][3]) < 16384:
             raise RuntimeError("Allocated GPU requires at least 16 GiB available")
+        now = time.monotonic()
         if float(selected[0][2]) == 0:
-            return
+            if idle_since is None:
+                idle_since = now
+            if now - idle_since >= 10:
+                return
+        else:
+            idle_since = None
         if time.monotonic() >= deadline:
             raise RuntimeError("Allocated GPU did not become idle; occupation samples are preserved")
         time.sleep(2)
@@ -137,7 +144,7 @@ def main():
     args.output.mkdir(parents=True, exist_ok=False)
     output = args.output.resolve()
     remote_output = args.worker_root + "/outputs/release-campaigns/" + output.name
-    record = {"schema_version": 1, "passed": False, "source_revision": revision,
+    record = {"schema_version": 1, "passed": False, "state": "running", "source_revision": revision,
               "plan_sha256": hashlib.sha256(args.plan.read_bytes()).hexdigest(), "physical_gpu": args.gpu,
               "worker_host": args.worker_host, "remote_output": remote_output, "stages": [],
               "scope": "Declared native runtime cases; broader generalization and hardware separate"}
@@ -145,7 +152,7 @@ def main():
     save_json(output / "campaign.json", record)
     lock_path = root / ".cache/acceptance-gpu.lock"
     lock_path.parent.mkdir(parents=True, exist_ok=True)
-    with lock_path.open("a") as lease:
+    with stage_record(output, record, record), lock_path.open("a") as lease:
         fcntl.flock(lease.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
         gpu_snapshot(args, output, "gpu-before")
         processes = ssh(args, "nvidia-smi --query-compute-apps=gpu_uuid,pid,process_name,used_memory --format=csv,noheader",
@@ -218,6 +225,7 @@ def main():
             save_json(output / "campaign.json", record)
             print(json.dumps(entry), flush=True)
         record["passed"] = all(entry["state"] == "passed" for entry in record["stages"])
+        record["state"] = "passed" if record["passed"] else "failed"
         processes = ssh(args, "nvidia-smi --query-compute-apps=gpu_uuid,pid,process_name,used_memory --format=csv,noheader",
                         check=True, capture_output=True, text=True).stdout
         (output / "gpu-processes-after.csv").write_text(processes)
