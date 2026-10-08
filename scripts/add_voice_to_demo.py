@@ -46,19 +46,31 @@ def main():
         response_duration = audio.getnframes() / audio.getframerate()
     with wave.open(str(args.instruction_audio)) as audio:
         instruction_duration = audio.getnframes() / audio.getframerate()
-    duration = metadata["duration"]
-    if (not math.isfinite(duration) or duration <= 0 or instruction_duration <= 0 or
-            response_duration <= 0 or instruction_duration + response_duration + 0.5 > duration):
-        raise ValueError("视频时长无法完整容纳指令音频和反馈音频")
-    offset_ms = round((duration - response_duration - 0.5) * 1000)
+    source_duration = metadata["duration"]
+    fps = metadata["fps"]
+    if (not math.isfinite(source_duration) or source_duration <= 0 or
+            not math.isfinite(fps) or fps <= 0 or instruction_duration <= 0 or
+            response_duration <= 0 or instruction_duration + 0.5 > source_duration):
+        raise ValueError("视频时长无法完整容纳指令音频")
+    final_hold = response_duration + 0.5
+    duration = source_duration + final_hold
+    offset_ms = round(source_duration * 1000)
     command = [imageio_ffmpeg.get_ffmpeg_exe(), "-v", "error", "-n", "-i", str(args.video),
         "-i", str(args.instruction_audio), "-i", str(response), "-filter_complex",
+        f"[0:v]tpad=stop_mode=clone:stop_duration={final_hold}[video];"
         f"[2:a]adelay={offset_ms}:all=1[feedback];[1:a][feedback]amix=inputs=2:duration=longest:normalize=0,apad[audio]",
-        "-map", "0:v:0", "-map", "[audio]", "-c:v", "copy", "-c:a", "aac", "-b:a", "192k",
+        "-map", "[video]", "-map", "[audio]", "-c:v", "libx264", "-preset", "veryfast",
+        "-crf", "18", "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "192k",
         "-t", str(duration), "-movflags", "+faststart", str(args.output)]
     subprocess.run(command, check=True)
     subprocess.run([imageio_ffmpeg.get_ffmpeg_exe(), "-v", "error", "-i", str(args.output),
         "-f", "null", "-"], check=True, capture_output=True)
+    encoded_frames = imageio_ffmpeg.read_frames(str(args.output), pix_fmt="rgb24")
+    encoded = next(encoded_frames)
+    encoded_frames.close()
+    if (encoded["size"] != metadata["size"] or not math.isfinite(encoded["duration"]) or
+            encoded["duration"] <= 0 or abs(encoded["duration"] - duration) > 1 / fps):
+        raise ValueError("完成视频的画面尺寸或音频时长不符合要求")
     manifest = {"scope": result["scope"], "run_id": result["native_run"]["id"],
         "transcription": result["transcription"], "speech": result["speech"],
         "instruction_audio_sha256": digest(args.instruction_audio), "response_offset_ms": offset_ms,
@@ -66,7 +78,9 @@ def main():
         "video_source_sha256": digest(args.video), "video_sha256": digest(args.output),
         "video_report_sha256": digest(video_report_path), "voice_result_sha256": digest(args.voice_result),
         "instruction_duration_s": instruction_duration, "response_duration_s": response_duration,
-        "duration_s": duration, "complete_decode": "passed",
+        "source_duration_s": source_duration, "final_frame_hold_s": final_hold,
+        "feedback_starts_after_source_video": True,
+        "duration_s": encoded["duration"], "complete_decode": "passed",
         "live_microphone": result["live_microphone"], "speaker_playback": result["speaker_playback"]}
     args.output.with_suffix(".voice.json").write_text(json.dumps(manifest, ensure_ascii=False,
         indent=2, allow_nan=False) + "\n", encoding="utf-8")
