@@ -24,6 +24,9 @@ PHASES = (
 
 
 async def run(args):
+    from OpenGL import GL
+    import torch
+
     from oh_my_duck.integrations.edh_native import MicroDuckWorkerSession
     from oh_my_duck.robotics.microduck.official_policies import OFFICIAL_REVISION
     from oh_my_duck.validation.harness.control import available_port, control, wait_boundary
@@ -95,6 +98,9 @@ async def run(args):
                                   "execution_mode": "policy",
                                   "schema_path": str(args.edh_source / "harness/contracts/schema/physical.schema.json"),
                                   "monitor_every_actions": 1, "policy_max_actions_per_inference": 1})
+        record["renderer"] = await session._device.on_owner(lambda: GL.glGetString(GL.GL_RENDERER).decode("utf-8"))
+        if not any(name in record["renderer"].lower() for name in ("llvmpipe", "softpipe")):
+            raise RuntimeError("CPU pose validation requires a Mesa software renderer")
         await session.open_task({"native_task_id": "pose-tools", "run_task_id": task_id, "catalog_task_id": "pose-tools"})
         request = {"schema_version": "physical.subgoal.v1", "task_id": task_id, "team_run_id": task_id,
                    "goal_id": "pose-tools", "attempt_id": "attempt-1",
@@ -140,7 +146,6 @@ async def run(args):
                     and (session._control_server is None or not session._control_server.is_serving())
                     and (session._policy_server is None or not session._policy_server.is_serving()))
         record.update(closed=closed, resources_released=released)
-        import torch
         record["cuda_initialized"] = torch.cuda.is_initialized()
         save()
         if not released:

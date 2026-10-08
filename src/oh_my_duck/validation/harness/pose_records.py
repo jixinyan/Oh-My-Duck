@@ -34,6 +34,8 @@ def verify(directory: Path, catalog: Path) -> dict:
         raise AssertionError("Pose runner differs from its recorded source revision")
     if record["cuda_initialized"]:
         raise AssertionError("Pose campaign initialized CUDA")
+    if not any(name in record["renderer"].lower() for name in ("llvmpipe", "softpipe")):
+        raise AssertionError("Pose camera evidence requires actual Mesa software rendering")
     if record["provenance"]["configuration"]["backend"] != "cpu-mujoco-bam":
         raise AssertionError("Pose evidence requires actual CPU MuJoCo/BAM")
     if record["provenance"]["cuda_visible_devices"] != "":
