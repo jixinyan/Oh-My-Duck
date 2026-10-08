@@ -12,6 +12,8 @@ tags:
   - project-design
 ---
 
+> CPU 公寓与 Newton 使用相同原生感知工具和 frame 格式。CPU 接口使用当前 RGB、depth、segmentation 与真实相机 geometry，五种状态、1253 个原生几何比较、距离、bearing 和读取期间的物理状态保持通过；431 个独立安装文件及 24 个调用通过。GPU 与 RL 保持停止，见[CPU 感知验证](reports/cpu-scene-perception-2026-10-08.md)。
+
 > 训练计划在创建输出和启动 worker 前检查整数计数与有限比例，原生 framework、任务和全部已提交计划保持原有内容。Linux 110 项测试、三项子测试、430 个独立安装文件及 24 个调用通过；GPU 与 RL 保持停止，见[训练输入验证](reports/campaign-input-admission-2026-10-08.md)。
 
 > CPU 语音任务已经验证 ASR 原样提交、固定音色反馈、完整 WAV 和资源释放。当前模型服务的 token 没有 `gpt-6.1-sol` 访问权限，正式导航验收需要恢复该权限；本次动作、相机帧和 verdict 均为零。GPU 与 RL 保持停止，见[任务记录](reports/cpu-voice-task-2026-10-08.md)。

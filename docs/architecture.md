@@ -51,7 +51,7 @@ Application, robot, training, shared acceptance and replay modules live in `src/
 | Native PPO | `rl/learners/` | `rsl_rl/`, `sb3/` |
 | Training registration and dispatch | `rl/training/`, `rl/experiments/` | `tasks.py`, `frameworks.py`, `campaign.py` |
 | Export and deployment rehearsal | `rl/artifacts/`, `rl/evaluation/` | Export, schema-2 packaging and metrics |
-| Active perception | `perception/` | `client.py`, `service.py`, `rgbd.py`, `validation.py` |
+| Active perception | `perception/` | `client.py`, `service.py`, `rgbd.py`, `validation.py`; `mujoco.py` owns actual CPU render geometry and apartment target labels |
 | Voice interaction | `voice/` | `qwen.py` for model inference and device admission; `profiles.py` for confirmed voices; `service.py`, `remote.py`, `session.py`, `device.py` for HTTP, sessions and audio devices |
 | Experience and replay export | `experience/` | `harness_replay.py` |
 | Measured policy acceptance | `validation/metric/` | `plans.py`, `case.py`, `campaign.py`, `verify.py`, `policy.py` |

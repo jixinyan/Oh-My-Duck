@@ -16,6 +16,11 @@ installed files and 24 CLI calls passed
 [interface validation](docs/reports/native-application-interfaces-2026-10-08.md).
 The [application source map](src/oh_my_duck/agentic/README.md) locates each interface.
 
+CPU apartment perception uses the shared native tools to return actual head RGB,
+visible geometry, calibrated distance and bearing. Five software-rendered states
+and 1253 native pixel intersections passed
+[independent CPU checks](docs/reports/cpu-scene-perception-2026-10-08.md).
+
 Training campaigns validate integer counts and finite search fractions before
 creating outputs or launching workers. All committed plans preserve their
 configuration; 110 Linux CPU tests and independent installation passed

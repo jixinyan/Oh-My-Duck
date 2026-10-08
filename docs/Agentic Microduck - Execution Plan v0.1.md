@@ -10,6 +10,8 @@ tags:
   - sim-to-real
 ---
 
+> 2026-10-08：CPU 原生感知接口完成真实 RGBD、可见场景目标、距离及 bearing 的验证。五种状态、1253 个原生几何比较、物理状态保持、15 份资料复核、431 个安装文件和 24 个调用通过；GPU 与 RL 保持停止，见[CPU 感知验证](reports/cpu-scene-perception-2026-10-08.md)。
+
 > 2026-10-08：训练计划的计数、比例与 allocation 参数完成启动前检查，已有任务、原生 PPO 和全部已提交计划保持原有内容。Linux 110 项测试、三项子测试与独立安装的 430 个文件和 24 个调用通过。GPU 与 RL 保持停止，见[训练输入验证](reports/campaign-input-admission-2026-10-08.md)。
 
 > 2026-10-08：CPU 语音任务的转写提交、固定音色反馈、两段 WAV、音色资料和五个进程退出通过独立检查。当前 provider 返回 token 无权访问 `gpt-6.1-sol`，机器人动作、相机帧与正式 verdict 均为零；完整导航验收需要该模型权限。GPU 与 RL 保持停止，见[任务记录](reports/cpu-voice-task-2026-10-08.md)。

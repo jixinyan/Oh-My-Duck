@@ -4,11 +4,15 @@
 
 `source="simulator_ground_truth"` 使用 Newton 当前相机的实例编号、实际形状名称和射线距离。目标来自当前可见像素；支持 `desk`、`chair`、`plant`、`bin`、`door`、`reception` 和 `objects`。每项结果明确记录 detection、mask 与 distance 的来源。
 
+CPU MuJoCo/BAM 公寓使用相同工具，`perception/mujoco.py` 提供当前 RGB、depth、segmentation 和 world points。`objects` 返回当前可见的具名家具及互动目标；也可查询 `desk`、`chair`、`plant`、`table`、`cabinet`、`block`、`ball`、`dock` 等类别，或直接使用 `off_desk`、`obj_3` 等真实场景名称。未表示或不可见的目标返回空列表。五种实际状态、1253 个像素的原生几何求交、距离与角度、读取期间的物理状态保持及独立安装检查通过，见[CPU 感知验证](reports/cpu-scene-perception-2026-10-08.md)。
+
 `source="models"` 调用独立 YOLO26/SAM 3.1 服务。YOLO26 提供 COCO 类别与目标框；启用 SAM 3.1 时，SAM 使用文本提示产生分割，服务通过框的 IoU 关联 YOLO 结果。SAM 的开放词汇结果可以没有 YOLO 类别匹配。服务的两种运行方式由启动参数明确选择，模型错误直接传播给调用者。
 
 ## 距离计算
 
 距离需要与 RGB 对应的 calibrated depth geometry。Newton 接口从原生 ray buffer 获取每个像素的起点、方向和实际 ray-hit distance，再使用当前光心与相机旋转得到世界坐标。负值和非有限深度视为无效数据。
+
+CPU 接口读取 MuJoCo 的 optical-axis depth，并使用实际单目 render frustum、光心和朝向计算世界坐标。背景与 clipping plane 之外的像素使用无效 depth。RGB、depth 与 segmentation 使用相同视图和从上到下的像素中心。感知读取保持 episode、物理 sequence、仿真时间和动作计数；后续相机读取继续返回 RGB。
 
 目标表面距离取有效像素到光心距离的中位数，同时报告 10%–90% 区间。目标表面世界位置取各坐标的中位数；水平距离与 bearing 使用当前身体位置和 yaw。有效像素不足八个时返回 `insufficient_valid_depth`。正 bearing 表示向左。
 
