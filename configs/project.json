@@ -5,6 +5,16 @@
   "entry_point": "omd.py",
   "release_readiness": {
     "state": "acceptance_in_progress",
+    "native_task_wait_admission": {
+      "state": "actual_api_cli_and_installed_package_verified",
+      "source_revision": "6099b17",
+      "focused_tests_passed": 19,
+      "source_and_resource_files_verified": 431,
+      "installed_cli_checks_passed": 24,
+      "gpu_acceptance_performed": false,
+      "installed_package": "outputs/acceptance/native-wait-admission-20261008-01-install/result.json",
+      "report": "docs/reports/native-wait-admission-2026-10-08.md"
+    },
     "perception_source_admission": {
       "state": "configured_sources_actual_native_cpu_and_installed_package_verified",
       "source_revision": "c824a89129cbaf5b8b4c87c363c42c9ca9e0170c",

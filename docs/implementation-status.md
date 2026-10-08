@@ -1,5 +1,7 @@
 # Implementation status
 
+> 原生任务等待和 voice-task 入口在请求任务状态、创建输出或连接服务之前检查有限的正数时间。19 项实际 API/CLI 检查、431 个独立安装文件及 24 个调用通过。GPU 与 RL 保持停止，见[等待参数验证](reports/native-wait-admission-2026-10-08.md)。
+
 > RL 使用说明根据当前原生 framework 注册和训练配置维护：四种组合支持 train、resume 与 normalized export；SB3 新训练使用独立 official critic 和 KL-adaptive learning rate，恢复时保留原有设置。W&B 配置为 online，GPU 与 RL 保持停止，后续允许同时使用一张空闲 GPU 2–4。参见[framework](rl-frameworks.md)、[代表任务](rl-reproduction.md)与[完整训练流程](rl-campaigns.md)。
 
 > 2026-10-08：原生感知工具根据场景配置公布可用 source，环境 metadata 与 scene_info 返回相同结果。48 项测试、Python/Node 的 42 组参数、两个真实 CPU 会话、150 个控制步、600 个物理子步和独立安装检查通过。模型服务连接错误完整传递，原生资源全部关闭。GPU 与 RL 保持停止，见[感知来源验证](reports/perception-source-capabilities-2026-10-08.md)。
