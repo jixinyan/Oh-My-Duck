@@ -5,6 +5,36 @@
   "entry_point": "omd.py",
   "release_readiness": {
     "state": "acceptance_in_progress",
+    "native_application_interfaces": {
+      "state": "actual_native_session_tool_schemas_and_installed_interfaces_verified",
+      "source_revision": "d54040d7d1da0e41ca4e877891dbc57c9c73bd23",
+      "application_module": "oh_my_duck.agentic.application",
+      "interface_module": "oh_my_duck.agentic.harness",
+      "client_module": "oh_my_duck.integrations.native_client",
+      "tool_module": "oh_my_duck.agentic.tools",
+      "schema_standard": "JSON Schema Draft 2020-12",
+      "interface_operations": ["open", "submit", "status", "wait", "stop", "close"],
+      "registered_tool_schemas_verified": 7,
+      "configuration_and_import_tests_passed": 77,
+      "subtests_passed": 33,
+      "source_and_resource_files_verified": 430,
+      "installed_cli_checks_passed": 24,
+      "native_robot_rl_execution_files_unchanged": 345,
+      "session_audit": "outputs/acceptance/native-application-session-20261008-01/result.json",
+      "independent_session_audit": "outputs/acceptance/native-application-session-20261008-01/independent-audit.json",
+      "installed_package": "outputs/acceptance/native-application-install-20261008-01/result.json",
+      "installed_interfaces": "outputs/acceptance/native-application-install-20261008-01/interface.json",
+      "source_audit": "outputs/acceptance/native-application-source-20261008-01.json",
+      "remote_preflight": "outputs/acceptance/native-application-preflight-20261008-01/preflight/result.json",
+      "remote_stages_verified": 6,
+      "remote_scene_configurations_verified": 4,
+      "pinned_harness_files_verified": 29,
+      "session_resources_released": true,
+      "gpu_acceptance_performed": false,
+      "model_task_acceptance_performed": false,
+      "physical_task_acceptance_performed": false,
+      "report": "docs/reports/native-application-interfaces-2026-10-08.md"
+    },
     "native_scene_configuration": {
       "state": "shared_schema_cpu_startup_and_installed_resource_verified",
       "source_revision": "daf5594d9d7bd5294ee9937fa776ced4942cd2e2",
@@ -492,11 +522,13 @@
     },
     "tools": {
       "module": "oh_my_duck.agentic.tools",
-      "state": "registry_implemented",
-      "role": "Expose only registered tool handlers"
+      "state": "draft202012_registration_arguments_and_actual_handlers_verified",
+      "role": "Registered handlers use complete JSON Schema Draft 2020-12, finite JSON values and explicit simulation parameters; actual capability calls and rejected movement inputs verified"
     },
     "harness": {
       "module": "oh_my_duck.integrations.edh_native",
+      "interface_module": "oh_my_duck.agentic.harness",
+      "client_module": "oh_my_duck.integrations.native_client",
       "state": "native_edh_office_multiskill_and_hospital_multi_policy_tasks_verified",
       "role": "Pinned native sessions, actual model perception, four-policy Office skills and navigation, Hospital roller/crouch actions, measured stopping and independent Verifier passed in fixed scenarios; image-only VLN and generalization pending"
     },
@@ -528,8 +560,8 @@
     },
     "application": {
       "module": "oh_my_duck.agentic.application",
-      "state": "composition_interface",
-      "role": "Explicit injection of services without starting models or an agent loop"
+      "state": "native_task_service_composition_and_installed_interfaces_verified",
+      "role": "Explicit service injection uses NativeTaskClient for native session, submission, status, wait, stop and close; actual CPU session lifecycle and independent installed tool interfaces verified"
     }
   },
   "training_backends": {

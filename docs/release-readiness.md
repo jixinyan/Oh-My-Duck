@@ -4,6 +4,13 @@ The release workflow uses recorded speech, the pinned native Harness, official p
 
 ## Runtime preparation
 
+Application and voice share the native task service interface for opening,
+submitting, querying, waiting, stopping and closing. Tool registration and
+invocation use complete JSON Schema Draft 2020-12 and finite JSON values.
+Actual CPU native session lifecycle and resource release, 77 tests, 33 subtests,
+430 independent installed files and 24 CLI calls passed
+[interface validation](reports/native-application-interfaces-2026-10-08.md).
+
 CPU apartment and Newton scenes use one packaged JSON Schema through the Python
 CLI and native Node server. Seven actual configurations and 23 invalid variants
 produce identical admission results. Actual public startup, graceful exit, 64

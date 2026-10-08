@@ -9,6 +9,13 @@ Use `omd validate` for native acceptance and recorded-evidence audits, and
 [source map](docs/architecture.md#source-organization) lists the responsible module
 for each capability. The same commands are available through `python -m oh_my_duck`.
 
+Application services and voice use the same native task client for sessions,
+submission, status, stopping and closing. Tool arguments use complete JSON Schema
+Draft 2020-12. Actual CPU service lifecycle, 77 tests, 33 subtests, 430 independently
+installed files and 24 CLI calls passed
+[interface validation](docs/reports/native-application-interfaces-2026-10-08.md).
+The [application source map](src/oh_my_duck/agentic/README.md) locates each interface.
+
 Verified CPU paths cover actual policy motion, stopping, cancellation, native SDK
 transport, recorded sensors, voice profiles, assets and independent installation.
 `omd validate pose` exercises head/body commands through the native Harness and
@@ -160,7 +167,8 @@ Python modules live in `src/oh_my_duck/`. The native Node deployment lives in
 | Training, simulators, PPO, export and evaluation | [rl/](src/oh_my_duck/rl/) |
 | Native physical session, devices, tools and transport | [integrations/edh/](src/oh_my_duck/integrations/edh/) |
 | Native Node deployment and Planner role | [integrations/edh/](integrations/edh/) |
-| Tool and skill interfaces | [agentic/](src/oh_my_duck/agentic/) |
+| Application, tool and skill interfaces | [agentic source map](src/oh_my_duck/agentic/README.md) |
+| Native task HTTP client | [native_client.py](src/oh_my_duck/integrations/native_client.py) |
 | Robot models, motors and execution backends | [robotics/](src/oh_my_duck/robotics/) |
 | Verified joint graphs and training packages | [robotics/policies/](src/oh_my_duck/robotics/policies/) |
 | Physical records, policy and release audits | [validation/](src/oh_my_duck/validation/) |
