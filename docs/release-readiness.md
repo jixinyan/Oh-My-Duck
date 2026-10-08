@@ -4,6 +4,11 @@ The release workflow uses recorded speech, the pinned native Harness, official p
 
 ## Runtime preparation
 
+Native metric tool schemas advertise default speeds, units and measured completion
+requirements. Actual Luna calls passed four bounded CPU motions, Node startup,
+17 import tests and independent installation. Complete office navigation remains
+pending. See [tool parameters](reports/metric-tool-guidance-2026-10-08.md).
+
 Native metric tools preserve pending requests and explicitly replace commands.
 Actual CPU admission, four caller deadlines, measured motion, stopping and
 resource release passed 641 controls and 2564 substeps. Independent action

@@ -5,6 +5,23 @@
   "entry_point": "omd.py",
   "release_readiness": {
     "state": "acceptance_in_progress",
+    "metric_tool_guidance": {
+      "state": "actual_native_model_motion_and_installed_tools_verified_navigation_pending",
+      "source_revision": "4200252329d1b8ab4f573163db3e31c18aaa578a",
+      "model": "gpt-6-luna",
+      "completed_metric_requests": 4,
+      "maximum_distance_error_m": 0.0204836092855923,
+      "maximum_angle_error_deg": 3.8345499352661183,
+      "focused_tests_passed": 17,
+      "source_and_resource_files_verified": 432,
+      "installed_cli_checks_passed": 25,
+      "formal_navigation_acceptance_passed": false,
+      "session_resources_released": true,
+      "gpu_acceptance_performed": false,
+      "runtime_result": "outputs/acceptance/cpu-luna-navigation-20261008-04/result.json",
+      "installed_package": "outputs/acceptance/metric-tool-guidance-20261008-01-install/result.json",
+      "report": "docs/reports/metric-tool-guidance-2026-10-08.md"
+    },
     "metric_request_admission": {
       "state": "actual_native_cpu_motion_deadlines_replacements_and_installed_package_verified",
       "source_revision": "d113f3b9eb2d4ff6ff43662a040b9ca978327535",

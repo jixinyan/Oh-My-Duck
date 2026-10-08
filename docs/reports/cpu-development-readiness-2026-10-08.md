@@ -8,6 +8,7 @@ stopped.
 
 | Capability | Verified scope | Evidence |
 | --- | --- | --- |
+| Metric tool parameters | Native units, speeds and turn translation; actual Luna four-motion execution, 17 import tests, 432 installed files and 25 CLI calls; complete navigation remains pending | [Tool guidance](metric-tool-guidance-2026-10-08.md) |
 | Native metric request lifecycle | Eight rejected calls preserve the prepared request and physical state; four caller deadlines retain execution; two motions and two explicit replacements pass 641 controls, 2564 substeps, independent ONNX checks and resource release; 432 installed files and 25 CLI calls | [Metric admission](metric-request-admission-2026-10-08.md) |
 | Native task wait deadlines | Finite positive API and voice CLI admission, 19 actual checks, HTTP resource closure and independent installation | [Wait admission](native-wait-admission-2026-10-08.md) |
 | Configured perception sources | Native tool schema, environment metadata and scene tool agree; 42 Python/Node cases, 48 tests, two actual CPU sessions, 150 controls and 600 substeps; installed package verified | [Source selection](perception-source-capabilities-2026-10-08.md) |

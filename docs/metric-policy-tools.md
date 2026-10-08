@@ -13,9 +13,11 @@
 | `microduck.observe` | 可选 `prompt` 与 `source`，同时提供 | 在确认暂停边界返回 head RGB、ToF、IMU、servo、odometry、进度和剩余执行时间；感知来源为 `simulator_ground_truth` 或 `models` |
 | `microduck.wait_for_motion` | 无参数 | 等待当前原生运动确认暂停或结束，返回实际进度与剩余执行时间 |
 
-`observe` 的传感器使用同一个 episode 和 sequence。附带感知时检查图像来源与该物理边界一致；ToF 读取可供 MotionGuard 的当前暂停边界检查使用。CPU 公寓支持基础观测，感知需要后端提供当前帧感知接口。`wait_for_motion` 最多等待 90 秒，调用超时向调用者报告，运动状态仍由原生 execution 管理。已经确认的边界可以再次读取，读取不会推进物理时间。进度中的 `execution.remaining_wall_time_s` 来自原生预算；Planner 应保留终点停止、`finish_policy`、独立 Verifier 与 `tasks.finish` 所需时间。
+`observe` 的传感器使用同一个 episode 和 sequence。附带感知时检查图像来源与该物理边界一致；ToF 读取可供 MotionGuard 的当前暂停边界检查使用。CPU 公寓提供当前帧的原生实例几何与射线距离；`scene_info.perception_sources` 公布当前配置可以调用的感知来源。`wait_for_motion` 最多等待 90 秒，调用超时向调用者报告，运动状态仍由原生 execution 管理。已经确认的边界可以再次读取，读取不会推进物理时间。进度中的 `execution.remaining_wall_time_s` 来自原生预算；Planner 应保留终点停止、`finish_policy`、独立 Verifier 与 `tasks.finish` 所需时间。
 
 `distance_m` 的绝对值为 0.1–10 米，正数前进、负数后退。`speed_m_s` 为 0.1–0.4 米/秒，默认 0.4。`angle_deg` 的绝对值为 10–360 度，正数绕世界 +Z 逆时针、负数顺时针。`angular_speed_deg_s` 为 10–55 度/秒，默认 45。速度参数表示传入 policy 的命令，实际动作按 odometry 测量。
+
+原生工具的参数 schema 提供速度默认值、单位、最小动作幅度和完成条件。导航使用默认速度，通过请求距离、角度与当前观测控制每段运动范围；其他速度需要在当前场景测量 policy 响应。标准脚模型转向同时使用 0.2 米/秒前向和 0.25 米/秒侧向命令，因此需要根据障碍位置预留运动空间，并在转向结束后重新测量位置。转向速度较低时，完成请求角度可能需要更多时间与平移距离。轮滑模型的转向命令为零前向、零侧向及请求 yaw 速度，完成后仍检查实际平移与停止状态。
 
 调用示例：`microduck.walk({"distance_m": 1.0})`、`microduck.rotate({"angle_deg": -45})`。动作准备要求当前原生 execution 已确认暂停，并具有至少五个实际停止样本。调用 `execution.resume` 后，控制器在每个实际控制步检查目标；内部命令每段最多 100 个控制步。到达目标后执行零 twist，取得五个停止样本后暂停。停止后的目标距离误差需要不超过 0.05 米，角度误差需要不超过 5 度。
 

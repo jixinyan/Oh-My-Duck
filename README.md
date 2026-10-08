@@ -14,6 +14,11 @@ execution. Actual CPU motion, request admission, caller deadlines and cleanup
 passed [metric request checks](docs/reports/metric-request-admission-2026-10-08.md).
 Use `omd validate metric-admission` to exercise that lifecycle.
 
+Native motion tools advertise default speeds, units and completion requirements.
+The Planner observes actual translation after turning. See the
+[parameter guide](docs/metric-policy-tools.md) and
+[CPU tool checks](docs/reports/metric-tool-guidance-2026-10-08.md).
+
 Application services and voice use the same native task client for sessions,
 submission, status, stopping and closing. Tool arguments use complete JSON Schema
 Draft 2020-12. Actual CPU service lifecycle, 77 tests, 33 subtests, 430 independently
