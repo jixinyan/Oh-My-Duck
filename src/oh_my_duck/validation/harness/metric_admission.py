@@ -1,5 +1,6 @@
 import argparse
 import asyncio
+from copy import deepcopy
 import hashlib
 import json
 import os
@@ -52,6 +53,8 @@ async def run(arguments):
     async def call(operation, parameters):
         result = await control(port, secret, task_id, operation, parameters)
         calls.append({"operation": operation, "arguments": parameters, "result": result})
+        print(json.dumps({"operation": operation, "sequence": result.get("sequence"),
+                          "request_id": result.get("request_id"), "metric_motion": result.get("metric_motion")}), flush=True)
         return result
 
     async def resume():
@@ -76,9 +79,11 @@ async def run(arguments):
         def snapshot():
             state = backend._native_state()
             return {"sequence": backend._sequence, "stopped_samples": backend._stopped_samples,
+                    "qpos": backend.data.qpos.tolist(), "qvel": backend.data.qvel.tolist(),
+                    "ctrl": backend.data.ctrl.tolist(), "physics_time_s": float(backend.data.time),
                     "physical": {key: state[key] for key in ("body_position_m", "body_twist",
                         "joint_position_rad", "joint_velocity_rad_s", "odometry")},
-                    "command": backend._requested_command,
+                    "command": deepcopy(backend._requested_command),
                     "segment_request_id": session._motion_segment["request_id"],
                     "gate": {key: session._gate.snapshot()[key] for key in
                              ("state", "generation", "boundary_id", "device_confirmed")}}
