@@ -40,3 +40,9 @@ python scripts/accept_perception_records.py \
 Policy 调试记录保存实际 61 维输入、13 维命令、14 维输出、官方 model SHA256、执行编号、generation、输入与结果 sequence，以及执行之后的 world velocity。记录在原生 update 序列化前加入；ActionGate、BAM、50 Hz 和物理子步设置保持原有内容。每个 metric campaign case 自动执行独立 ONNX 重算，并保存 `policy-verification.json` 及其 SHA256。
 
 固定源码 `d0ae8f6` 的 CPU 五动作矩阵通过运动复核与 policy 复核，共 1348 个控制步，使用 `velstand` 与 `alpha_walking`；所有重算输出与实际动作误差为零。固定源码 `94db369` 的五动作连续序列通过自动 policy 复核和独立运动复核，共 1208 个控制步，重算误差同样为零。输出为 `outputs/acceptance/offline-policy-input-matrix-20261007-01` 与 `outputs/acceptance/offline-policy-input-sequence-20261007-01`。同一源码的控制连接关闭和 SIGTERM 检查分别执行 84 与 81 个实际控制步，全部会话释放资源，结果为 `outputs/acceptance/offline-policy-cancel-eof-20261007-01` 与 `outputs/acceptance/offline-policy-cancel-sigterm-20261007-01`。
+
+同一源码通过实际 `ground_pick` 终止和 `alpha_stand` 接续检查：技能执行 140 个控制步，接续执行 100 个控制步，确认停止时具有 95 个连续停止样本。转换保留原有 episode、sequence、simulation time 和物理位置，结果为 `outputs/acceptance/offline-policy-transition-20261007-01.json`。该检查覆盖策略转换与站立恢复。
+
+固定源码 `6e3e0afcf3f3fec319c05e3ce53974ec503c108d` 构建 wheel 与源码包，并安装到独立环境；安装包、源码包和实际安装的 390 个源码及资源文件逐个核验一致，三份许可证核验通过。十个 CLI 入口在项目目录之外检查，包括帮助、任务列表、framework 列表、状态、voice-client doctor、语音帮助、voice-task、voice-session、harness 和 sim；实际 voice-client 依赖来自锁定文件，doctor 没有初始化 CUDA。结果为 `outputs/acceptance/offline-installed-package-20261007-01.json`，安装包位于 `outputs/packages/offline-release-20261007-02`。模型命令在调用时直接加载各自依赖。
+
+发布计划检查在项目自己的 `outputs/tests/release-plan` 创建输入资料，支持使用共享 cache 的固定源码目录。当前 16 项检查通过；Python 编译、Node 入口语法和 Git 空白检查通过。远程进程检查没有发现 Oh-My-Duck、Microduck 原生 worker 或相关语音服务运行；已有 GPU 进程的用户身份已核查，当前项目没有分配设备。

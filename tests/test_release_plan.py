@@ -15,7 +15,7 @@ PLAN = ROOT / "configs/experiments/runtime-release-acceptance.json"
 
 @pytest.fixture
 def inputs():
-    directory = ROOT / ".cache/release-plan-tests" / uuid4().hex
+    directory = ROOT / "outputs/tests/release-plan" / uuid4().hex
     directory.mkdir(parents=True)
     yield directory, json.loads(PLAN.read_text())
     shutil.rmtree(directory)

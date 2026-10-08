@@ -10,7 +10,7 @@ Metric campaigns preserve exact policy inputs and admitted actions, then indepen
 
 [![Status: active development](https://img.shields.io/badge/status-active_development-blue)](docs/implementation-status.md)
 [![RL behavior: pending](https://img.shields.io/badge/RL_behavior-pending-orange)](docs/reports/rl-walking-low-speed-launch-2026-09-29.md)
-[![Recorded CPU checks: 55 passed on 2026-09-23](https://img.shields.io/badge/recorded_CPU_checks-55_passed-2ea44f)](docs/reports/project-status-2026-09-23.md)
+[![CPU motion: verified](https://img.shields.io/badge/CPU_motion-verified-2ea44f)](docs/reports/offline-release-validation-2026-10-07.md)
 [![Voice: native task verified](https://img.shields.io/badge/voice-native_task_verified-green)](docs/reports/end-to-end-2026-10-03.md)
 [![Release: acceptance in progress](https://img.shields.io/badge/release-acceptance_in_progress-blue)](docs/release-readiness.md)
 [![Isaac Office: agentic navigation verified](https://img.shields.io/badge/Isaac_Office-agentic_navigation_verified-green)](docs/reports/metric-camera-tools-2026-09-30.md)

@@ -16,6 +16,8 @@ environments/voice-client/.venv/bin/python omd.py doctor --runtime voice-client 
 
 The doctor checks installed dependency versions and the actual service identities. On the simulation host, `--runtime isaac-newton --scene-config configs/simulation-demo/office.json --catalog POLICY_DIRECTORY` also checks CUDA, the pinned Isaac Lab revision, the converted robot asset and the complete official ONNX catalogue. Add `--metadata-only` to inspect environment versions and assets without initializing CUDA. Scene checks verify every downloaded file against its recorded size and SHA256, the source USD identity and its public map. The [release campaign preflight](runtime-release-acceptance.md) performs these checks for all declared stages and saves a separate readiness result.
 
+The [offline validation report](reports/offline-release-validation-2026-10-07.md) records actual CPU motion and cancellation, 2556 independently recomputed policy controls, recorded RGBD validation, voice profile checks, a six-stage remote preflight and an independent wheel installation. GPU acceptance and RL remain stopped. Each metric campaign case now requires exact recorded 61→14 ONNX parity and saves `policy-verification.json` alongside its physical audit.
+
 ## End-to-end acceptance
 
 ```bash
