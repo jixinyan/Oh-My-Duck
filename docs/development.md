@@ -45,6 +45,9 @@ USD instance expansion, source MJCF geometry mapping and physics material
 preparation live in `task_binding/collision_assets.py`. This module imports only
 the standard library until an actual asset is prepared. `task_binding/collisions.py`
 owns simulator spawning and the Newton model-initialization callback.
+`task_binding/collision_model.py` applies source contact masks, explicit ground
+pairs and scene geometry corrections to the actual Newton builder. Its module
+imports no simulator or learning library until called.
 `omd validate model-assets --output DIRECTORY` runs actual USD preparation and
 Newton imports with `CUDA_VISIBLE_DEVICES=''`. The output directory must be new;
 the command retains partial results and per-model progress if validation fails.
