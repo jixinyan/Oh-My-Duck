@@ -6,6 +6,7 @@ import { fileURLToPath } from 'node:url';
 import { createInterface } from 'node:readline';
 import { identifyModelClient } from './model-transport.mjs';
 import { createRequire } from 'node:module';
+import { validateSceneConfiguration } from './scene-configuration.mjs';
 
 const omdRoot = fileURLToPath(new URL('../../', import.meta.url));
 const edhRoot = resolve(process.env.OMD_EDH_SOURCE ?? '');
@@ -27,6 +28,9 @@ if (!python || !catalogDir || !dataDirectory || !baseURL || !model)
   throw new Error('Simulation worker, policy catalog, data directory, and model endpoint are required');
 if (!['chat-completions', 'responses'].includes(modelAPI))
   throw new Error('Model API is invalid');
+const sceneConfiguration = process.env.OMD_SCENE_CONFIGURATION
+  ? JSON.parse(process.env.OMD_SCENE_CONFIGURATION) : null;
+if (sceneConfiguration !== null) await validateSceneConfiguration(sceneConfiguration, edhRoot);
 const [{ ContractValidator }, { OpenAICompatibleAdapter, OpenAIResponsesAdapter }, serverModule] = await Promise.all([
   import(resolve(edhRoot, 'harness/contracts/src/index.ts')),
   import(resolve(edhRoot, 'harness/agent-runtime/models/src/index.ts')),
@@ -66,34 +70,10 @@ const tempDirectory = resolve(omdRoot, '.cache/tmp');
 await mkdir(tempDirectory, { recursive: true });
 await mkdir(dataDirectory, { recursive: true });
 const runSockets = new Map();
-const sceneConfiguration = process.env.OMD_SCENE_CONFIGURATION
-  ? JSON.parse(process.env.OMD_SCENE_CONFIGURATION) : null;
-if (sceneConfiguration !== null) {
-  if (sceneConfiguration.backend !== 'isaac-newton' ||
-      typeof sceneConfiguration.scene_id !== 'string' ||
-      !/^[a-z0-9][a-z0-9._-]*$/.test(sceneConfiguration.scene_id) ||
-      typeof sceneConfiguration.usd_path !== 'string' ||
-      typeof sceneConfiguration.provenance_path !== 'string' ||
-      typeof sceneConfiguration.task_instruction !== 'string' ||
-      !sceneConfiguration.task_instruction.trim() ||
-      sceneConfiguration.goal?.kind !== 'point' ||
-      !Array.isArray(sceneConfiguration.goal.target_xy_m) ||
-      sceneConfiguration.goal.target_xy_m.length !== 2 ||
-      !sceneConfiguration.goal.target_xy_m.every(Number.isFinite) ||
-      !Number.isFinite(sceneConfiguration.goal.distance_m) ||
-      sceneConfiguration.goal.distance_m <= 0 ||
-      !Number.isSafeInteger(sceneConfiguration.goal.hold_ticks) ||
-      sceneConfiguration.goal.hold_ticks < 1 ||
-      !Number.isSafeInteger(sceneConfiguration.budget?.max_control_steps) ||
-      sceneConfiguration.budget.max_control_steps < 1 ||
-      !Number.isFinite(sceneConfiguration.budget?.max_wall_time_s) ||
-      sceneConfiguration.budget.max_wall_time_s <= 0)
-    throw new Error('Isaac scene configuration is incomplete or invalid');
-}
 const nativeTaskId = sceneConfiguration?.scene_id ?? 'official-apartment-office';
 const goal = sceneConfiguration?.goal ?? { kind: 'room', room: 'office', hold_ticks: 5 };
 const taskInstruction = sceneConfiguration?.task_instruction ?? 'Navigate the official MicroDuck apartment from the corridor to the office and remain upright in the office for five admitted control steps.';
-const environmentLabel = sceneConfiguration
+const environmentLabel = sceneConfiguration?.backend === 'isaac-newton'
   ? `Isaac Lab Newton/BAM: ${nativeTaskId}` : 'CPU MuJoCo/BAM official 8 × 6 m apartment';
 const check = { check_id: 'goal_reached', check: 'native_goal_reached', args: [] };
 const catalog = {

@@ -59,6 +59,14 @@ def main() -> int:
         registry_path = PurePosixPath(args.worker_policy_registry)
         if args.worker_host is None or not registry_path.is_absolute() or ".." in registry_path.parts:
             raise ValueError("Remote registry requires --worker-host and an absolute path without parent components")
+    scene_configuration = None
+    if args.scene_config is not None:
+        from oh_my_duck.integrations.edh.scene_configuration import validate_scene_configuration
+
+        scene_configuration = json.loads(args.scene_config.resolve(strict=True).read_text(encoding="utf-8"))
+        validate_scene_configuration(scene_configuration)
+        if scene_configuration["backend"] == "cpu-mujoco-bam" and args.worker_cuda_device is not None:
+            raise ValueError("CPU apartment scenes require no CUDA device assignment")
     edh_source = args.edh_source.resolve(strict=True)
     revision = subprocess.run(
         ["git", "-C", str(edh_source), "rev-parse", "HEAD"],
@@ -147,14 +155,7 @@ def main() -> int:
     simulation_python = (args.simulation_python or args.cpu_python).absolute()
     if remote_worker is None and not simulation_python.is_file():
         raise FileNotFoundError(simulation_python)
-    scene_configuration = None
-    if args.scene_config is not None:
-        scene_path = args.scene_config.resolve(strict=True)
-        scene_configuration = json.loads(scene_path.read_text(encoding="utf-8"))
-        if not isinstance(scene_configuration, dict):
-            raise ValueError("Scene configuration must be a JSON object")
-        if scene_configuration.get("backend") != "isaac-newton":
-            raise ValueError("External scenes require the Isaac Newton backend")
+    if scene_configuration is not None:
         for field in ("usd_path", "provenance_path", "public_map_path"):
             if field in scene_configuration:
                 value = Path(scene_configuration[field])
@@ -165,7 +166,8 @@ def main() -> int:
                     if ".." in path.parts:
                         raise ValueError("Scene paths must not contain parent components")
                     scene_configuration[field] = str(PurePosixPath(args.worker_root) / path)
-        if remote_worker is not None and args.worker_cuda_device is None:
+        if (scene_configuration["backend"] == "isaac-newton" and
+                remote_worker is not None and args.worker_cuda_device is None):
             raise ValueError("Remote Isaac Newton scenes require an explicit CUDA device")
     catalog = (args.policy_dir.resolve(strict=True) if remote_worker is None
                else PurePosixPath(args.worker_policy_dir))

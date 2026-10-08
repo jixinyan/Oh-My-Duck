@@ -1,0 +1,99 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "required": ["backend", "scene_id", "spawn_pose", "goal", "task_instruction", "budget"],
+  "properties": {
+    "backend": {"enum": ["cpu-mujoco-bam", "isaac-newton"]},
+    "scene_id": {"type": "string", "pattern": "^[a-z0-9][a-z0-9._-]*$"},
+    "robot_model": {"enum": ["allcollisions", "groundcontact_rollers"]},
+    "device": {"enum": ["cpu", "cuda:0"]},
+    "observer_renderer": {"enum": ["newton_warp", "isaac_rtx"]},
+    "usd_path": {"type": "string", "minLength": 1},
+    "provenance_path": {"type": "string", "minLength": 1},
+    "public_map_path": {"type": "string", "minLength": 1},
+    "task_instruction": {"type": "string", "pattern": "\\S"},
+    "spawn_pose": {"type": "object"},
+    "goal": {"type": "object"},
+    "budget": {
+      "type": "object", "additionalProperties": false,
+      "required": ["max_control_steps", "max_wall_time_s"],
+      "properties": {
+        "max_control_steps": {"type": "integer", "minimum": 5, "maximum": 9007199254740991},
+        "max_wall_time_s": {"type": "number", "exclusiveMinimum": 0}
+      }
+    }
+  },
+  "if": {"properties": {"backend": {"const": "cpu-mujoco-bam"}}},
+  "then": {
+    "properties": {
+      "robot_model": {"const": "allcollisions"}, "device": {"const": "cpu"},
+      "usd_path": false, "provenance_path": false, "public_map_path": false, "observer_renderer": false,
+      "spawn_pose": {"$ref": "#/$defs/cpuSpawn"},
+      "goal": {"oneOf": [
+        {"$ref": "#/$defs/roomGoal"}, {"$ref": "#/$defs/dockGoal"}, {"$ref": "#/$defs/objectGoal"}
+      ]}
+    }
+  },
+  "else": {
+    "required": ["usd_path", "provenance_path"],
+    "properties": {
+      "usd_path": {"type": "string", "minLength": 1},
+      "provenance_path": {"type": "string", "minLength": 1},
+      "device": {"const": "cuda:0"},
+      "spawn_pose": {"$ref": "#/$defs/isaacSpawn"}, "goal": {"$ref": "#/$defs/pointGoal"}
+    }
+  },
+  "$defs": {
+    "hold": {"type": "integer", "minimum": 1, "maximum": 500},
+    "xy": {"type": "array", "minItems": 2, "maxItems": 2, "items": {"type": "number"}},
+    "cpuSpawn": {
+      "type": "object", "additionalProperties": false, "required": ["x_m", "y_m", "yaw_rad"],
+      "properties": {
+        "x_m": {"type": "number"}, "y_m": {"type": "number"}, "yaw_rad": {"type": "number"}
+      }
+    },
+    "isaacSpawn": {
+      "type": "object", "additionalProperties": false, "required": ["x_m", "y_m", "z_m", "yaw_rad"],
+      "properties": {
+        "x_m": {"type": "number"}, "y_m": {"type": "number"}, "yaw_rad": {"type": "number"},
+        "z_m": {"type": "number", "exclusiveMinimum": 0}
+      }
+    },
+    "roomGoal": {
+      "type": "object", "additionalProperties": false, "required": ["kind", "room", "hold_ticks"],
+      "properties": {
+        "kind": {"const": "room"}, "hold_ticks": {"$ref": "#/$defs/hold"},
+        "room": {"enum": ["kitchen", "living_room", "corridor", "bedroom", "office", "bathroom"]}
+      }
+    },
+    "dockGoal": {
+      "type": "object", "additionalProperties": false, "required": ["kind", "hold_ticks"],
+      "properties": {"kind": {"const": "dock"}, "hold_ticks": {"$ref": "#/$defs/hold"}}
+    },
+    "objectGoal": {
+      "type": "object", "additionalProperties": false,
+      "required": ["kind", "object", "distance_m", "hold_ticks"],
+      "properties": {
+        "kind": {"const": "object"}, "hold_ticks": {"$ref": "#/$defs/hold"},
+        "object": {"enum": ["obj_0", "obj_1", "obj_2", "obj_3", "ball_0", "ball_1", "ball_2"]},
+        "distance_m": {"type": "number", "exclusiveMinimum": 0}
+      }
+    },
+    "pointGoal": {
+      "type": "object", "additionalProperties": false,
+      "required": ["kind", "target_xy_m", "distance_m", "hold_ticks"],
+      "properties": {
+        "kind": {"const": "point"}, "hold_ticks": {"$ref": "#/$defs/hold"},
+        "target_xy_m": {"$ref": "#/$defs/xy"},
+        "distance_m": {"type": "number", "exclusiveMinimum": 0},
+        "waypoints": {"type": "array", "items": {
+          "type": "object", "additionalProperties": false, "required": ["target_xy_m", "distance_m"],
+          "properties": {
+            "target_xy_m": {"$ref": "#/$defs/xy"},
+            "distance_m": {"type": "number", "exclusiveMinimum": 0}
+          }
+        }}
+      }
+    }
+  }
+}

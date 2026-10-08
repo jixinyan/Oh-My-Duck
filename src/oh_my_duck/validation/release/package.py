@@ -49,7 +49,8 @@ def main():
                 or "/robotics/microduck/microduck/" in name
                 or "/robotics/microduck/xl330_test_bench/" in name
                 or "/rl/backends/isaac_newton/resources/" in name
-                or name.endswith("odom_anchor_sets.json")]
+                or name.endswith("odom_anchor_sets.json")
+                or name == "src/oh_my_duck/integrations/edh/scene.schema.json"]
     licenses = ["THIRD_PARTY_NOTICES.md", "third_party/microduck_rl/LICENSE",
                 "docs/third_party/isaaclab-microduck-LICENSE.txt"]
     with zipfile.ZipFile(wheel) as archive, tarfile.open(source, "r:gz") as source_archive:
