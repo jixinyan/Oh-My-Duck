@@ -45,4 +45,8 @@ Policy 调试记录保存实际 61 维输入、13 维命令、14 维输出、官
 
 固定源码 `6e3e0afcf3f3fec319c05e3ce53974ec503c108d` 构建 wheel 与源码包，并安装到独立环境；安装包、源码包和实际安装的 390 个源码及资源文件逐个核验一致，三份许可证核验通过。十个 CLI 入口在项目目录之外检查，包括帮助、任务列表、framework 列表、状态、voice-client doctor、语音帮助、voice-task、voice-session、harness 和 sim；实际 voice-client 依赖来自锁定文件，doctor 没有初始化 CUDA。结果为 `outputs/acceptance/offline-installed-package-20261007-01.json`，安装包位于 `outputs/packages/offline-release-20261007-02`。模型命令在调用时直接加载各自依赖。
 
+最终固定源码 `8f6349be174c12c11428590a01fa9379dc5373e7` 的 16 项发布参数检查在固定源码目录中通过。该源码重新构建的 wheel 与源码包位于 `outputs/packages/offline-release-20261007-03`，390 个源码及资源文件、三份许可证和十个独立安装入口全部通过，结果为 `outputs/acceptance/offline-installed-package-20261007-02.json`。同一源码在远程 Linux Newton 环境中完成 Python 编译及真实 Harness、感知客户端依赖导入，`CUDA_VISIBLE_DEVICES` 设置为空。
+
+同一最终源码的远程准备结果为 `preflight_passed`，通过六阶段计划、四份场景配置、完整 Office/Hospital 资源、机器人资源、十个官方 policy 和固定 Harness 来源检查。结果保存为 `outputs/acceptance/offline-preflight-20261007-03`，`cuda_runtime_checked=false`、`gpu_acceptance_performed=false`。当前无需 GPU 的发布检查已经完成；Newton 后退修正、连续长导航、渲染和实际模型感知使用原有严格要求进行 GPU 验收，当前均保持停止。
+
 发布计划检查在项目自己的 `outputs/tests/release-plan` 创建输入资料，支持使用共享 cache 的固定源码目录。当前 16 项检查通过；Python 编译、Node 入口语法和 Git 空白检查通过。远程进程检查没有发现 Oh-My-Duck、Microduck 原生 worker 或相关语音服务运行；已有 GPU 进程的用户身份已核查，当前项目没有分配设备。
