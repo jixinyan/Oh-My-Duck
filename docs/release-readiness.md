@@ -4,6 +4,11 @@ The release workflow uses recorded speech, the pinned native Harness, official p
 
 ## Runtime preparation
 
+The public `omd validate model-assets` command passed four actual CPU imports,
+both robot variants, source passive joints and output protection. It records
+source/dependency provenance and per-model progress. See [public asset validation](reports/model-assets-cli-2026-10-08.md).
+Independent installation checked 421 files and 20 CLI calls.
+
 The [OpenUSD readiness report](reports/openusd-readiness-2026-10-08.md) records
 the unique OpenUSD 26.08 provider, 244 verified installation files, actual RSL-RL/SB3
 setup selections, both robot collision preparations and Newton CPU imports, and the complete six-stage

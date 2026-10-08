@@ -5,6 +5,25 @@
   "entry_point": "omd.py",
   "release_readiness": {
     "state": "acceptance_in_progress",
+    "cpu_model_asset_audit": {
+      "state": "actual_public_cli_geometry_joints_progress_and_output_protection_verified",
+      "source_revision": "1abea13d4bcd084b08c0065d1673f9630d2a9a41",
+      "command": "omd validate model-assets",
+      "module": "oh_my_duck.validation.release.assets",
+      "models_verified": ["allcollisions", "groundcontact_rollers"],
+      "actual_newton_imports": 4,
+      "progress_records_verified": 8,
+      "source_passive_wheel_joints_verified": 4,
+      "actual_failure_output_preserved": true,
+      "installed_failure_audit": "outputs/acceptance/model-assets-cli-installed-boundaries-20261008-01/independent-audit.json",
+      "runtime_audit": "outputs/acceptance/model-assets-cli-20261008-01/result.json",
+      "boundary_audit": "outputs/acceptance/model-assets-cli-boundaries-20261008-01/independent-audit.json",
+      "installed_package": "outputs/acceptance/model-assets-cli-package-20261008-01/result.json",
+      "source_and_resource_files_verified": 421,
+      "installed_cli_checks_passed": 20,
+      "gpu_acceptance_performed": false,
+      "report": "docs/reports/model-assets-cli-2026-10-08.md"
+    },
     "openusd_readiness": {
       "state": "actual_setup_metadata_collision_preparation_cpu_import_and_installed_checks_verified_gpu_pending",
       "source_revision": "d39d5df1ed04b474d9866e90e6f421e422ab8901",

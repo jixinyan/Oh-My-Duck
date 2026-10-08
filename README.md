@@ -4,6 +4,11 @@
 
 # Oh My Duck 🦆
 
+`omd validate model-assets` checks actual robot collision assets and Newton imports
+using only CPU. Both robot variants, passive wheel joints, progress records and
+output protection passed [public asset validation](docs/reports/model-assets-cli-2026-10-08.md).
+Independent installation verified 421 files and 20 CLI calls.
+
 Use `omd validate` for native acceptance and recorded-evidence audits, and
 `omd replay` for session management and terminal run export. The
 [source map](docs/architecture.md#source-organization) lists the responsible module
