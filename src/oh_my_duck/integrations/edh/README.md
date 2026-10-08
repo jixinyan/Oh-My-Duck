@@ -12,6 +12,13 @@ The server launches `python -m oh_my_duck.integrations.edh_native` locally or
 through SSH. CPU MuJoCo/BAM and Isaac Newton/BAM use the same native session,
 tool operations and physical evidence. Importing these modules requires the
 pinned `physical_harness` package; selecting Isaac initializes its runtime during
-environment reset. Official policy inference and physical stepping remain on
+environment reset. Verified policy inference and physical stepping remain on
 the native device owner thread. Every admitted action retains its observation,
 execution, generation and physical step identity.
+
+`robotics/policies/catalogue.py` admits optional SHA256-verified training packages
+alongside the pinned official policies. `joint_onnx.py` owns the common API-1 graph
+and metadata checks. Scene configuration passes `policy_registry` to either
+backend. A configured locomotion alias uses the same distance/angle controller;
+registered policy selection preserves native boundary, action-scale and model
+checks. See [package registration](../../../../docs/policy-registry.md).

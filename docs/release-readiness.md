@@ -4,6 +4,15 @@ The release workflow uses recorded speech, the pinned native Harness, official p
 
 ## Runtime preparation
 
+Registered training packages passed native CPU control, complete episodic
+duration, transition, stopping and independent action/image verification: 725
+controls, 2900 substeps, 145 frames and 87 stopped samples. Final source passed
+37 tests, 429 installed files, 24 CLI calls and six-stage preparation. Four actual
+Newton constructor calls rejected invalid packages before CUDA allocation.
+See [integration evidence](reports/policy-packages-2026-10-08.md) and the
+[registry guide](policy-registry.md). Learned behavior and Newton execution
+retain their separate acceptance requirements.
+
 Native CPU pose tools passed actual head pitch/body height response and return,
 575 controls, 2300 physics substeps, 115 original camera frames and installed
 independent verification. Software renderer identity and resource release were

@@ -9,6 +9,7 @@ stopped.
 | Capability | Verified scope | Evidence |
 | --- | --- | --- |
 | Native robot worker | Actual CPU MuJoCo/BAM motion, pinned SDK/process transport, ActionGate, policy transitions, cancellation and resource release | [Worker validation](native-worker-modules-2026-10-08.md) |
+| Training-package tools | Actual retained Walking/StandUp packages, configured locomotion selection, complete episodic duration and transition; 725 controls, 145 frames, 87 stopped samples; 429 installed files and 24 CLI calls | [Package integration](policy-packages-2026-10-08.md) |
 | Native head/body commands | Actual software-rendered CPU execution; 575 controls, positive/negative head pitch and body height response, zero-command return, 115 camera frames, 95 stopped samples and installed independent audit | [Pose validation](native-pose-2026-10-08.md) |
 | Motion and policy evidence | Continuous five-motion sequence; 1208 independently recomputed ONNX actions with zero error; physical states and stopping checked | [Validation modules](validation-modules-2026-10-08.md) |
 | Sensor and voice records | Actual saved RGBD validation, frame identity, distance reconstruction and confirmed voice profiles | [Offline validation](offline-release-validation-2026-10-07.md) |
@@ -28,6 +29,7 @@ Source responsibilities are listed in the [architecture source map](../architect
 `task_binding/collision_assets.py` owns USD preparation;
 `task_binding/collision_model.py` owns Newton contact configuration;
 `task_binding/contact_model.py` owns official solver material and contact masks;
+`robotics/policies/` owns common joint ONNX admission and the training-package catalogue;
 `infrastructure/usd_runtime.py` owns installed OpenUSD verification.
 Public execution and audit commands remain available from installed packages.
 All verification processes exited. Source, configuration, wheel, source

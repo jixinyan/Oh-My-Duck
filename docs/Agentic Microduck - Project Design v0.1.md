@@ -12,6 +12,8 @@ tags:
   - project-design
 ---
 
+> 训练 policy 包可通过 `--policy-registry` 登记，在原生 Harness 中调用，并明确选择距离/角度工具使用的 policy。真实 Walking 与 StandUp 包的 CPU 执行、限定时长结束、站立策略接续和停止通过：725 次控制、2900 个物理步、145 个相机帧及 87 个停止样本。37 项测试、429 个安装文件、24 个调用及当前源码发布准备通过，四条 Newton 构造路径在申请 CUDA 资源之前拒绝无效包。学习行为与 GPU 执行继续保持独立验收要求，见[训练包接入验证](reports/policy-packages-2026-10-08.md)。
+
 > 原生 CPU 姿态命令经 Harness 和 ActionGate 完成实际验证，头部 pitch 与身体高度的正反向响应、归零响应、575 次控制、115 个相机帧和停止状态通过核验。执行与独立资料检查分别位于 `validation/harness/pose.py` 与 `pose_records.py`，公开入口为 `omd validate pose` 和 `pose-audit`。30 项测试、425 个安装文件及 22 个独立调用通过，当前源码发布准备检查通过。GPU 和 RL 保持停止，见[姿态验证](reports/native-pose-2026-10-08.md)。
 
 > 官方 solver 材质与接触掩码位于 `task_binding/contact_model.py`，原生 manager 编译 MuJoCo Warp 接触数据。两种机器人、Office 和 Hospital 的四个实际 CPU solver model 通过十项参数、独立 body 掩码及 21 项非接触数据检查，计算内容的 AST 保持一致；28 项配置及导入测试、423 个安装文件与 20 个独立调用通过。GPU 和 RL 保持停止，见[接触模型验证](reports/contact-model-2026-10-08.md)。

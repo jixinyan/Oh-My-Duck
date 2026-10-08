@@ -23,6 +23,14 @@ checks for all 5682 geometric colliders and 164 signed-scale transformations.
 Official solver contact data passed four actual Newton CPU model constructions
 and native MuJoCo Warp compilations across both robot variants and scenes.
 
+Training packages can be registered with `omd harness --policy-registry` and
+selected through native tools. The registry declares each package's model,
+command channels and SHA256. Registered locomotion also uses distance/angle tools.
+Actual CPU execution of retained Walking and StandUp packages, episodic
+completion, transition and stopping passed
+[integration checks](docs/reports/policy-packages-2026-10-08.md). The
+[registry guide](docs/policy-registry.md) describes package admission and commands.
+
 Newton uses OpenUSD 26.08 and verifies its unique provider and installed files
 before GPU allocation. Training, evaluation, diagnostic and direct runtime entry
 points passed [actual preflight validation](docs/reports/newton-execution-preflight-2026-10-08.md).
