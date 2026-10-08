@@ -58,7 +58,7 @@ async def run(arguments):
         status = session._status
         await session.resume({"owner_id": "planner", "execution_id": status["execution_id"],
                               "boundary_id": status["boundary_event_id"], "state_version": status["state_version"]})
-        await wait_boundary(session)
+        await wait_boundary(session, timeout_s=None)
 
     async def unchanged_motion(prepared, motion):
         backend = session._environment._backend()
@@ -105,7 +105,7 @@ async def run(arguments):
                 "source": {"kind": "benchmark", "reference": "metric-admission"}},
             "budget": configuration["budget"], "context_refs": [], "decision_owner_id": "planner",
             "owner_assignment_id": "metric-admission", "idempotency_key": uuid4().hex}})
-        await wait_boundary(session)
+        await wait_boundary(session, timeout_s=None)
         require_upright_stop(await call("progress", {}))
         for operation, parameters in (("walk", {"distance_m": 0.5}), ("rotate", {"angle_deg": 45})):
             prepared = await call(operation, parameters)

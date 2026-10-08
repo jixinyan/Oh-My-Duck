@@ -46,12 +46,12 @@ async def expect_control_error(port: int, secret: str, run_task_id: str,
         raise AssertionError(f"Native control accepted a request requiring {message}")
 
 
-async def wait_boundary(session: MicroDuckWorkerSession) -> dict:
+async def wait_boundary(session: MicroDuckWorkerSession, *, timeout_s: float | None = 180) -> dict:
     pump = session._pump
     if pump is None:
         raise RuntimeError("Native policy pump was not started")
-    async with asyncio.timeout(180):
-        await pump
+    async with asyncio.timeout(timeout_s):
+        await asyncio.shield(pump)
         await session._await_motion_cleanup()
     status = session._status
     if status["state"] != "paused" or not status["device_confirmed"]:
