@@ -24,12 +24,15 @@ def model_snapshot(model_id: str, revision: str | None = None) -> tuple[str, str
 
 
 def _model_options(device: str) -> dict:
-    if device.startswith("cuda"):
+    if not isinstance(device, str) or not device:
+        raise ValueError("device 必须是 cpu 或 cuda 设备")
+    if device == "cpu":
+        return {"device_map": "cpu", "dtype": torch.float32}
+    selected = torch.device(device)
+    if selected.type == "cuda":
         if not torch.cuda.is_available():
             raise RuntimeError("CUDA 不可用")
         return {"device_map": device, "dtype": torch.bfloat16}
-    if device == "cpu":
-        return {"device_map": "cpu", "dtype": torch.float32}
     raise ValueError("device 必须是 cpu 或 cuda 设备")
 
 
@@ -50,11 +53,12 @@ def _write_audio(path: Path, waveform: np.ndarray, sample_rate: int) -> PayloadR
 
 class QwenSpeechRecognition:
     def __init__(self, *, device: str = "cuda:0", revision: str | None = None):
+        options = _model_options(device)
         from qwen_asr import Qwen3ASRModel
 
         snapshot, self.model_revision = model_snapshot(ASR_MODEL, revision)
         self.model = Qwen3ASRModel.from_pretrained(
-            snapshot, max_inference_batch_size=1, max_new_tokens=512, **_model_options(device)
+            snapshot, max_inference_batch_size=1, max_new_tokens=512, **options
         )
         self._model_lock = Lock()
 
@@ -78,10 +82,11 @@ class QwenVoiceDesign:
         self, output_dir: str | Path, *, device: str = "cuda:0", revision: str | None = None,
         language: str = "Auto",
     ):
+        options = _model_options(device)
         from qwen_tts import Qwen3TTSModel
 
         snapshot, self.model_revision = model_snapshot(DESIGN_MODEL, revision)
-        self.model = Qwen3TTSModel.from_pretrained(snapshot, **_model_options(device))
+        self.model = Qwen3TTSModel.from_pretrained(snapshot, **options)
         self.output_dir = Path(output_dir).expanduser().resolve()
         self.language = language
         self._model_lock = Lock()
@@ -108,10 +113,11 @@ class QwenSpeechSynthesis:
         self, output_dir: str | Path, *, device: str = "cuda:0", revision: str | None = None,
         language: str = "Auto",
     ):
+        options = _model_options(device)
         from qwen_tts import Qwen3TTSModel
 
         snapshot, self.model_revision = model_snapshot(BASE_MODEL, revision)
-        self.model = Qwen3TTSModel.from_pretrained(snapshot, **_model_options(device))
+        self.model = Qwen3TTSModel.from_pretrained(snapshot, **options)
         self.output_dir = Path(output_dir).expanduser().resolve()
         self.language = language
         self._model_lock = Lock()

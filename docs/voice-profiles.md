@@ -37,4 +37,8 @@ TMPDIR="$PWD/.cache/tmp" CUDA_VISIBLE_DEVICES="$GPU_ID" environments/voice/.venv
 
 交互式录音与播放由[语音交互说明](voice-interaction.md)中的独立 client 环境和两个常驻模型服务提供。文件命令行保留音色设计、确认及文件检查功能。交互会话向调用者输出转写文本，并接收调用者明确提供的回复文本；外部 Harness 负责其自身的推理和工具调用。
 模型推理在工作线程中运行，同一个模型实例的调用由互斥锁串行执行。调用者取消等待后，已经启动的 GPU 推理仍会继续；交互会话用请求代次阻止过期合成结果自动播放。
+三个 Qwen 适配器均在导入模型 SDK 和请求模型快照之前检查 `device`。CPU 使用
+`torch.float32`；CUDA 使用 `torch.bfloat16`。设备格式由 `torch.device` 解析，未支持的
+设备立即报错。明确指定 `--device cpu` 可以执行 CPU 推理，运行时设置
+`CUDA_VISIBLE_DEVICES=''`。
 独立语音 CLI 进程默认设置 `--cpu-threads 1`，也可明确指定正整数。直接使用模型适配器的服务进程应自行设置 PyTorch CPU 线程数量；适配器构造器不会修改进程级线程设置。
