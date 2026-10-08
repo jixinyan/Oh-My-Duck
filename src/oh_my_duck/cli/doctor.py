@@ -84,6 +84,9 @@ def main():
             raise RuntimeError(f"{package}: 需要 {expected}，当前版本为 {installed}")
         checks[package] = installed
     if args.runtime == "isaac-newton":
+        from oh_my_duck.infrastructure.usd_runtime import verify_usd_runtime
+
+        checks["openusd"] = verify_usd_runtime()
         if not args.metadata_only:
             import torch
 

@@ -29,6 +29,7 @@ from oh_my_duck.robotics.microduck.sim_sensors import camera_optical_pose, tof_d
 from oh_my_duck.perception.rgbd import measure_target
 from oh_my_duck.core.paths import project_root
 from oh_my_duck.robotics.runtime_startup import RuntimeStartup
+from oh_my_duck.infrastructure.usd_runtime import verify_usd_runtime
 
 
 @wp.kernel
@@ -45,6 +46,7 @@ class IsaacNewtonBamBackend(CpuMujocoBamBackend):
                  provenance_path: Path | None = None, public_map_path: Path | None = None,
                  observer_renderer: str = "newton_warp", startup: RuntimeStartup | None = None):
         self._startup = RuntimeStartup(scene_id, robot_model) if startup is None else startup
+        verify_usd_runtime()
         from isaaclab.assets import AssetBaseCfg
         from isaaclab.envs import ManagerBasedEnv, ManagerBasedEnvCfg
         from isaaclab.sensors import CameraCfg

@@ -27,7 +27,11 @@ package = false
 # Preserve Isaac's Pillow pin; MoviePy declares <12. Our render path uses
 # imageio, and installed video-writing checks cover the retained Pillow version.
 # native Harness 的 policy transport 固定 websockets 17；运行验证覆盖 Viser 服务。
-override-dependencies = ["typing-extensions==4.15.0", "pillow==12.2.0", "websockets==17.0.1"]
+# OpenUSD 的 pxr 原生文件由一个包提供：x86_64 使用 usd-core，ARM 使用 usd-exchange。
+override-dependencies = [
+  "typing-extensions==4.15.0", "pillow==12.2.0", "websockets==17.0.1",
+  "usd-exchange>=2.2; platform_machine == 'aarch64' or platform_machine == 'arm64'",
+]
 index-strategy = "unsafe-best-match"
 prerelease = "allow"
 environments = ["sys_platform == 'linux' and platform_machine == 'x86_64'"]
