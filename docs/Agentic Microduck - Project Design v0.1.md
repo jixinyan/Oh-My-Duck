@@ -14,7 +14,7 @@ tags:
 
 > 原生 worker 按环境、动作设备、会话工具和进程通信组织在 `integrations/edh/`，公开入口保持 `oh_my_duck.integrations.edh_native`。实际 CPU 连续动作、任务权限、policy 转换、原生 SDK 通信、执行取消与独立安装通过，远程 Newton adapter 导入通过。两种 robot conversion asset 支持经过完整来源检查的明确复用，当前源码的六阶段发布准备检查通过。独立安装核验 418 个文件与 19 个命令，GPU 和 RL 保持停止。见[资产验证](reports/source-verified-assets-2026-10-08.md)、[原生 worker 验证](reports/native-worker-modules-2026-10-08.md)与[架构及源码职责](architecture.md)。
 
-> 验收实现按运动指标、原生 Harness 和发布流程分别组织在 `validation/`，原生 session 管理与记录导出属于 `experience/`。公开入口为 `omd validate`、`omd replay` 和 `python -m oh_my_duck`；来源检查覆盖实际实现文件与固定 Git 内容。实际 CPU 连续动作、取消执行、ONNX 重算、独立安装和远程准备检查通过，见[当前验收](reports/validation-modules-2026-10-08.md)与[架构及源码职责](architecture.md)。
+> 验收实现按运动指标、原生 Harness 和发布流程分别组织在 `validation/`，原生 session 管理与记录导出属于 `experience/`。公开入口为 `omd validate`、`omd replay` 和 `python -m oh_my_duck`；来源检查覆盖实际实现文件与固定 Git 内容。独立安装检查支持明确的命令时限和逐项过程记录，实际完整检查与中断验证通过。实际 CPU 连续动作、取消执行、ONNX 重算、独立安装和远程准备检查通过，见[命令过程验证](reports/installed-audit-lifecycle-2026-10-08.md)、[当前验收](reports/validation-modules-2026-10-08.md)与[架构及源码职责](architecture.md)。
 
 > 无 GPU 检查覆盖实际 CPU metric motion、连续动作、原生 backend、官方 ONNX graph、固定音色资料及所属进程清理。远程发布准备检查根据固定 Git 内容核验部署的 Harness 源文件，并检查全部场景资源、机器人转换资源和官方 policy；元数据模式不初始化 CUDA。GPU 验收及 RL 训练保持停止，见[检查记录](reports/offline-release-validation-2026-10-07.md)。
 

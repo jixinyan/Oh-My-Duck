@@ -45,6 +45,8 @@ and physical-record verifiers outside the checkout and preserve their reports.
 command; the default permits the complete saved-evidence computation. A companion
 `.commands.jsonl` file records command starts, process exits, elapsed time and
 output hashes, including interrupted checks. Every output path must be new.
+The [installed lifecycle report](reports/installed-audit-lifecycle-2026-10-08.md)
+records actual complete audits, explicit deadlines and subprocess interruption.
 
 The [module validation report](reports/validation-modules-2026-10-08.md) records
 actual CPU motion, cancellation, installed ONNX and physical-record audits,

@@ -5,6 +5,20 @@
   "entry_point": "omd.py",
   "release_readiness": {
     "state": "acceptance_in_progress",
+    "installed_audit_lifecycle": {
+      "state": "actual_installed_commands_deadlines_and_partial_evidence_verified",
+      "source_revision": "984d6ff554b7259d73a4ea99d6db3e24aedfd744",
+      "module": "oh_my_duck.validation.release.package",
+      "audit": "outputs/acceptance/installed-deadline-20261008-01/independent-audit.json",
+      "installed_package": "outputs/acceptance/installed-deadline-20261008-01/complete.json",
+      "source_and_resource_files_verified": 418,
+      "installed_cli_checks_passed": 19,
+      "explicit_deadline_cli_checks_passed": 17,
+      "actual_interruption_verified": true,
+      "partial_evidence_retained": true,
+      "cuda_runtime_checked": false,
+      "report": "docs/reports/installed-audit-lifecycle-2026-10-08.md"
+    },
     "native_worker_modules": {
       "state": "cpu_native_sdk_and_installed_checks_passed_metadata_prepared_gpu_pending",
       "module": "oh_my_duck.integrations.edh",
