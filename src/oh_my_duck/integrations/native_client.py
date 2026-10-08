@@ -1,5 +1,6 @@
 import asyncio
 import json
+import math
 from pathlib import Path
 from urllib.parse import quote
 from uuid import uuid4
@@ -87,6 +88,8 @@ class NativeTaskClient:
             return result
 
     async def wait(self, *, timeout_s=2400):
+        if type(timeout_s) not in (int, float) or not math.isfinite(timeout_s) or timeout_s <= 0:
+            raise ValueError("timeout_s 必须是有限的正数")
         async with asyncio.timeout(timeout_s):
             while True:
                 run = await self.status()

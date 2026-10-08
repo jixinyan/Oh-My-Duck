@@ -2,6 +2,7 @@ import argparse
 import asyncio
 from dataclasses import asdict
 import json
+import math
 from pathlib import Path
 
 from oh_my_duck.core.contracts.sensors import PayloadRef
@@ -55,6 +56,6 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--timeout", type=float, default=2400)
     args = parser.parse_args()
-    if args.timeout <= 0:
-        parser.error("timeout 必须大于零")
+    if not math.isfinite(args.timeout) or args.timeout <= 0:
+        parser.error("timeout 必须是有限的正数")
     return asyncio.run(run(args))
