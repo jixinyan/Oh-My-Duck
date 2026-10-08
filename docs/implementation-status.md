@@ -1,8 +1,10 @@
 # Implementation status
 
-> 原生重试保留完整物理状态，并为新执行准备所属的有界命令；进度工具返回同一 sequence 的原生目标信息。三次执行、200 个控制步、800 个子步、六次启动拒绝、三次读取检查与独立 ONNX 复核通过；18 项导入测试、433 个安装文件和 26 个调用通过，见[原生重试验证](reports/native-execution-retry-2026-10-08.md)。完整 Luna 办公室导航继续验收，GPU 与 RL 保持停止。
+> OpenAI Luna 通过原生 Harness 完成 CPU 公寓办公室导航，正式 Verifier 为 passed。569 个控制步、2276 个子步、1040 个事件、113 个观察相机帧与 12 次停止进度检查通过；1920×1080 MP4 完成编码和完整解码，会话资源已关闭，见[导航验证](reports/cpu-luna-navigation-2026-10-08.md)。GPU 与 RL 保持停止。
 
-> 原生工具公布速度默认值、单位、最小动作幅度和测量完成条件，Planner 根据转向平移安排路线。实际 OpenAI Luna 的四个距离/角度请求满足原有精度和停止条件；17 项导入测试、432 个独立安装文件与 25 个调用通过。完整办公室导航仍需验收，GPU 与 RL 保持停止，见[工具参数验证](reports/metric-tool-guidance-2026-10-08.md)。
+> 原生重试保留完整物理状态，并为新执行准备所属的有界命令；进度工具返回同一 sequence 的原生目标信息。三次执行、200 个控制步、800 个子步、六次启动拒绝、三次读取检查与独立 ONNX 复核通过；18 项导入测试、433 个安装文件和 26 个调用通过，见[原生重试验证](reports/native-execution-retry-2026-10-08.md)。GPU 与 RL 保持停止。
+
+> 原生工具公布速度默认值、单位、最小动作幅度和测量完成条件，Planner 根据转向平移安排路线。实际 OpenAI Luna 的四个距离/角度请求满足原有精度和停止条件；17 项导入测试、432 个独立安装文件与 25 个调用通过。GPU 与 RL 保持停止，见[工具参数验证](reports/metric-tool-guidance-2026-10-08.md)。
 
 > 准备中的距离与角度请求保留原有身份，调用者等待超时保留原生执行。真实 CPU 检查通过 8 次重复请求拒绝、4 次调用者超时、2 次明确修改命令、641 个控制步和 2564 个物理子步；两个动作满足原有误差与停止条件。17 项测试、432 个安装文件、25 个调用和独立 ONNX 复核通过，资源全部关闭。GPU 与 RL 保持停止，见[动作请求验证](reports/metric-request-admission-2026-10-08.md)。
 
@@ -246,7 +248,7 @@ is prepared but not launched. Default task recipes and native PPO algorithms rem
 | Component | Current state |
 |---|---|
 | Source organization | First-party code consolidated under `src/oh_my_duck`; obsolete `training/` packages removed |
-| CLI/application | Native task service interface, public validation/replay, scene schema, registered packages and voice workflow; 433 installed files, 26 CLI calls, actual CPU metric request lifecycle and state-preserving retries verified |
+| CLI/application | Native services, validation/replay, scene schemas, registered packages and voice; 433 installed files, 26 CLI calls, state-preserving retries, formal CPU Luna navigation and trace MP4 verified |
 | Core contracts/tool catalog/recording | 七项仿真工具的完整 Draft 2020-12 Schema、实际 handler 与无效参数拒绝已经验证；JSONL、原生事件和 PNG 导出、SHA256 检查及 1080p agentic MP4 保留实际验证资料 |
 | Agentic Harness, skills, robot execution | 固定 EDH 原生会话、SSH GPU worker、真实模型、官方 ONNX、ActionGate 与独立 Verifier 已运行；CPU 公寓与 Newton Office 的固定场景导航、Office 四个 policy 的完整多动作任务和 Hospital 轮滑有序路线通过。三个场景各通过三个距离/角度会话；全部长距离请求精度、图像输入独立 VLN、多场景泛化与真机待验收 |
 | Perception and policy adapters | 官方十项 policy 与登记的训练包共享 61-to-14 推断及原生工具；实际 CPU Walking/StandUp 包执行、episodic 时长/接续与停止通过。Newton Office 的 velstand/alpha_walking、head RGB、observer 场景、ToF、IMU 与 odometry 已验证；学习行为、物体识别及物体效果待验收 |

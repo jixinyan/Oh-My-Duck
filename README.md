@@ -25,6 +25,11 @@ Actual CPU lifecycle, independent ONNX checks and installation passed
 [retry validation](docs/reports/native-execution-retry-2026-10-08.md).
 Use `omd validate execution-retry` to exercise that lifecycle.
 
+OpenAI `gpt-6-luna` completed the native CPU apartment office task with official
+policies, actual sensors and a passed independent Verifier result. The
+[navigation record](docs/reports/cpu-luna-navigation-2026-10-08.md) includes the
+1920×1080 MP4 with simulation frames, head RGB and agentic trace.
+
 Application services and voice use the same native task client for sessions,
 submission, status, stopping and closing. Tool arguments use complete JSON Schema
 Draft 2020-12. Actual CPU service lifecycle, 77 tests, 33 subtests, 430 independently
@@ -56,7 +61,7 @@ The [installed CPU voice-task check](docs/reports/cpu-voice-task-2026-10-08.md)
 verified actual Qwen ASR → OpenAI `gpt-6-luna` → native policy/sensor tools →
 interruption → fixed-voice feedback. The run preserved 1400 controls, 5600 physical
 substeps, 2427 events and 296 original images; all resources were released.
-Office navigation remains pending.
+This CPU voice record covers confirmed interruption and fixed-voice feedback.
 
 Verified CPU paths cover actual policy motion, stopping, cancellation, native SDK
 transport, recorded sensors, voice profiles, assets and independent installation.
@@ -90,6 +95,7 @@ authorized execution and resource requirements.
 [![Status: active development](https://img.shields.io/badge/status-active_development-blue)](docs/implementation-status.md)
 [![RL behavior: pending](https://img.shields.io/badge/RL_behavior-pending-orange)](docs/reports/rl-walking-low-speed-launch-2026-09-29.md)
 [![CPU motion: verified](https://img.shields.io/badge/CPU_motion-verified-2ea44f)](docs/reports/offline-release-validation-2026-10-07.md)
+[![CPU Luna navigation: verified](https://img.shields.io/badge/CPU_Luna_navigation-verified-2ea44f)](docs/reports/cpu-luna-navigation-2026-10-08.md)
 [![Voice: native task verified](https://img.shields.io/badge/voice-native_task_verified-green)](docs/reports/end-to-end-2026-10-03.md)
 [![Release: acceptance in progress](https://img.shields.io/badge/release-acceptance_in_progress-blue)](docs/release-readiness.md)
 [![Isaac Office: agentic navigation verified](https://img.shields.io/badge/Isaac_Office-agentic_navigation_verified-green)](docs/reports/metric-camera-tools-2026-09-30.md)
