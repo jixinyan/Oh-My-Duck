@@ -19,6 +19,7 @@ def main():
     parser.add_argument("--video", type=Path, required=True)
     parser.add_argument("--voice-result", type=Path, required=True)
     parser.add_argument("--instruction-audio", type=Path, required=True)
+    parser.add_argument("--response-audio", type=Path)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     if args.output.exists() or args.output.with_suffix(".voice.json").exists():
@@ -33,7 +34,8 @@ def main():
             video_report["runState"] != "succeeded" or video_report["formalVerdict"] != "passed" or
             video_report["videoSha256"] != digest(args.video)):
         raise ValueError("视频来源与语音任务记录不一致")
-    response = Path(unquote(urlsplit(result["speech"]["audio"]["uri"]).path)).resolve(strict=True)
+    response = (args.response_audio if args.response_audio is not None else
+                Path(unquote(urlsplit(result["speech"]["audio"]["uri"]).path))).resolve(strict=True)
     if (digest(args.instruction_audio) != result["transcription"]["audio_sha256"] or
             digest(response) != result["speech"]["audio"]["sha256"]):
         raise ValueError("音频与任务记录 SHA256 不一致")
@@ -60,6 +62,7 @@ def main():
     manifest = {"scope": result["scope"], "run_id": result["native_run"]["id"],
         "transcription": result["transcription"], "speech": result["speech"],
         "instruction_audio_sha256": digest(args.instruction_audio), "response_offset_ms": offset_ms,
+        "response_audio_source": str(response),
         "video_source_sha256": digest(args.video), "video_sha256": digest(args.output),
         "video_report_sha256": digest(video_report_path), "voice_result_sha256": digest(args.voice_result),
         "instruction_duration_s": instruction_duration, "response_duration_s": response_duration,
