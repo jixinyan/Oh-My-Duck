@@ -16,21 +16,29 @@ from oh_my_duck.perception.mujoco import APARTMENT_OBJECTS
 from oh_my_duck.robotics.backends.simulation import CpuMujocoBamBackend
 
 
-def validate_case(backend, output, name, pose):
+def validate_case(backend, output, name, pose, control_steps=0):
     backend.reset_episode(42, {"kind": "room", "room": "corridor", "hold_ticks": 5}, pose)
+    for index in range(control_steps):
+        inference = backend.infer_policy()
+        backend.apply_policy_action(inference['action'], request_id=f'{name}:{index}',
+                                    expected_sequence=inference['sequence'])
+    if control_steps:
+        assert backend._stopped_samples >= 5
     before = [backend.data.qpos.copy(), backend.data.qvel.copy(), backend.data.ctrl.copy()]
     counters = (backend._sequence, float(backend.data.time), backend._stopped_samples, backend._goal_held_ticks)
     frame, segmentation = backend._perception_capture()
     points = np.load(BytesIO(base64.b64decode(frame['points_world_npy_base64'])), allow_pickle=False)
     rgb = np.asarray(Image.open(BytesIO(base64.b64decode(frame['rgb_png_base64']))))
     assert points.shape == (240, 320, 3) and rgb.shape == (240, 320, 3)
-    assert rgb.std() > 0 and frame['sequence'] == 0
+    assert rgb.std() > 0 and frame['sequence'] == control_steps
     assert np.allclose(frame['camera_position_m'], backend.data.cam_xpos[backend._camera_site_id], atol=1e-7)
     checked = []
     for row in range(5, 235, 13):
         for column in range(5, 315, 17):
             geom, kind = segmentation[row, column]
             if kind != mujoco.mjtObj.mjOBJ_GEOM or not np.isfinite(points[row, column]).all():
+                continue
+            if backend.model.body_rootid[backend.model.geom_bodyid[geom]] == backend._robot_root_id:
                 continue
             if not all(np.array_equal(segmentation[row, column], segmentation[r, c])
                        for r, c in ((row - 2, column), (row + 2, column),
@@ -45,10 +53,10 @@ def validate_case(backend, output, name, pose):
             near = float(backend.model.vis.map.znear * backend.model.stat.extent)
             origin = backend.data.cam_xpos[camera_id] + ray * near
             ray /= np.linalg.norm(ray)
-            geom_id = np.full(1, -1, dtype=np.int32)
-            distance = mujoco.mj_ray(backend.model, backend.data, origin, ray,
-                                      mujoco.MjvOption().geomgroup, 1, -1, geom_id)
-            assert distance >= 0 and geom_id[0] == geom, (name, row, column, geom, geom_id)
+            distance = mujoco.mju_rayGeom(backend.data.geom_xpos[geom], backend.data.geom_xmat[geom],
+                                          backend.model.geom_size[geom], origin, ray,
+                                          int(backend.model.geom_type[geom]))
+            assert distance >= 0, (name, row, column, geom)
             point = origin + ray * distance
             error = float(np.linalg.norm(points[row, column] - point))
             assert error < 0.002, (name, row, column, error)
@@ -90,7 +98,7 @@ def validate_case(backend, output, name, pose):
     (output / f'{name}-frame.json').write_text(json.dumps(frame) + '\n')
     (output / f'{name}-inspection.json').write_text(json.dumps(inspection) + '\n')
     np.savez_compressed(output / f'{name}-geometry.npz', points_world_m=points, segmentation=segmentation)
-    return {'case': name, 'pose': pose, 'native_ray_pixels': len(checked),
+    return {'case': name, 'pose': pose, 'control_steps': control_steps, 'native_ray_pixels': len(checked),
             'maximum_world_point_error_m': max(item['error_m'] for item in checked),
             'targets': inspection['targets'], 'pixels': checked, 'physical_state_unchanged': True}
 
@@ -105,10 +113,11 @@ def main():
     try:
         from OpenGL import GL
 
-        cases = [('corridor', 0.0, 0.0, 0.0), ('office', 2.0, -0.4, 0.0),
-                 ('kitchen', -2.8, 0.8, 1.2), ('living_room', -1.6, -0.5, math.pi)]
-        results = [validate_case(backend, args.output, name, {'x_m': x, 'y_m': y, 'yaw_rad': yaw})
-                   for name, x, y, yaw in cases]
+        cases = [('corridor', 0.0, 0.0, 0.0, 0), ('office', 2.0, -0.4, 0.0, 0),
+                 ('kitchen', -2.8, 0.8, 1.2, 0), ('living_room', -1.6, -0.5, math.pi, 0),
+                 ('corridor_after_policy', 0.0, 0.0, 0.0, 75)]
+        results = [validate_case(backend, args.output, name, {'x_m': x, 'y_m': y, 'yaw_rad': yaw}, steps)
+                   for name, x, y, yaw, steps in cases]
         renderer = GL.glGetString(GL.GL_RENDERER).decode()
         assert 'llvmpipe' in renderer.lower(), renderer
         assert not torch.cuda.is_initialized()
