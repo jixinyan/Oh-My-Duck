@@ -33,25 +33,44 @@ def audit_motion_guard_pauses(events: list[dict], run_id: str, warmup_policy: st
                event["detail"]["result"].get("motion_guard")]
     if not guarded:
         raise AssertionError("Native automatic pause lacks measured motion-guard progress")
-    paused = [event for event in events if event["type"] == "execution.updated" and
-              event["detail"]["execution"]["state"] == "paused" and
-              event["detail"]["execution"]["device_confirmed"]]
+    boundaries = [event for event in events if event["type"] == "execution.updated" and
+                  event["detail"]["execution"]["state"] in ("paused", "ended") and
+                  event["detail"]["execution"]["device_confirmed"]]
     for progress_event in guarded:
         progress = progress_event["detail"]["result"]
         guard = progress["motion_guard"]
         execution = progress["execution"]
         if (guard["run_task_id"] != run_id or
                 guard["execution_id"] != execution["execution_id"] or
+                guard["episode_id"] != progress["episode_id"] or
                 guard["sequence"] != progress["sequence"] or
-                execution["state"] != "paused" or not execution["device_confirmed"]):
-            raise AssertionError("Motion guard differs from its measured paused execution")
-        if not any(datetime.fromisoformat(event["detail"]["execution"]["boundary_at"].replace("Z", "+00:00")) <=
+                execution["state"] not in ("paused", "ended") or not execution["device_confirmed"]):
+            raise AssertionError("Motion guard differs from its confirmed physical boundary")
+        matching = [event for event in boundaries if
+                   datetime.fromisoformat(event["detail"]["execution"]["boundary_at"].replace("Z", "+00:00")) <=
                    datetime.fromisoformat(progress_event["at"].replace("Z", "+00:00")) and
                    event["detail"]["execution"]["execution_id"] == execution["execution_id"] and
+                   event["detail"]["execution"]["state"] == execution["state"] and
                    event["detail"]["execution"]["boundary_event_id"] == execution["boundary_id"] and
-                   event["detail"]["execution"]["task_scope"]["task_id"] == run_id
-                   for event in paused):
-            raise AssertionError("Motion guard lacks the matching native confirmed pause")
+                   event["detail"]["execution"]["task_scope"]["task_id"] == run_id]
+        if not matching:
+            raise AssertionError("Motion guard lacks its matching native confirmed boundary")
+        generation_delta = 1
+        if execution["state"] == "ended":
+            generation_delta = 2
+            if execution["stop_reason"] != "policy_stop":
+                raise AssertionError("Retained motion guard requires a confirmed policy stop")
+            terminal = matching[-1]["detail"]["execution"]
+            if not any(event["sequence"] < matching[-1]["sequence"] and
+                       event["detail"]["execution"]["state"] == "paused" and
+                       event["detail"]["execution"]["execution_id"] == execution["execution_id"] and
+                       event["detail"]["execution"]["task_scope"]["task_id"] == run_id and
+                       all(event["detail"]["execution"][key] == terminal[key]
+                           for key in ("control_steps", "raw_sim_steps", "policy_calls"))
+                       for event in boundaries):
+                raise AssertionError("Terminal guard lacks its preceding confirmed physical pause")
+        if execution["generation"] != guard["generation"] + generation_delta:
+            raise AssertionError("Motion guard differs from the native stop generation")
         command_event = commands.get(guard["command_request_id"])
         if command_event is None and guard.get("metric_request_id") is None:
             segment = progress.get("command_segment", {})
