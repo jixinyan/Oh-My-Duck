@@ -1,4 +1,3 @@
-"""Prepare the isolated, pinned Isaac Lab / Newton environment."""
 from __future__ import annotations
 import argparse
 from datetime import datetime, timezone
@@ -16,7 +15,7 @@ def sync_environment(name, project, environment, rl_framework):
     extras = ["--extra", "native-harness"] if name == "isaac-newton" else []
     if name == "isaac-newton" and rl_framework == "sb3":
         extras.extend(["--extra", "sb3"])
-    reinstall = ["--reinstall-package", "usd-core"] if name == "isaac-newton" else []
+    reinstall = ["--reinstall-package", "usd-exchange"] if name == "isaac-newton" else []
     subprocess.run(["uv", "sync", "--project", str(project), "--locked", "--python", "3.12",
                     *extras, *reinstall], env=environment, check=True)
     if name != "isaac-newton":
@@ -29,7 +28,7 @@ def sync_environment(name, project, environment, rl_framework):
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description="Prepare the isolated, pinned Isaac Lab / Newton environment.")
     parser.add_argument("--skip-env", action="store_true")
     parser.add_argument("--rl-framework", choices=["rsl-rl", "sb3"], default="rsl-rl")
     args = parser.parse_args()

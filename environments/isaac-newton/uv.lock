@@ -15,7 +15,7 @@ prerelease-mode = "allow"
 overrides = [
     { name = "pillow", specifier = "==12.2.0" },
     { name = "typing-extensions", specifier = "==4.15.0" },
-    { name = "usd-exchange", marker = "platform_machine == 'aarch64' or platform_machine == 'arm64'", specifier = ">=2.2" },
+    { name = "usd-core", marker = "sys_platform != 'linux'", specifier = ">=25.11,<26.0" },
     { name = "websockets", specifier = "==17.0.1" },
 ]
 
@@ -849,7 +849,7 @@ dependencies = [
     { name = "transformers", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
     { name = "trimesh", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
     { name = "typing-extensions", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
-    { name = "usd-core", marker = "platform_machine == 'x86_64' and platform_machine in 'x86_64,AMD64' and sys_platform == 'linux'" },
+    { name = "usd-exchange", marker = "platform_machine == 'x86_64' and platform_machine in 'x86_64,AMD64,aarch64,arm64' and sys_platform == 'linux'" },
     { name = "warp-lang", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
 ]
 
@@ -1695,6 +1695,7 @@ dependencies = [
     { name = "torch", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
     { name = "torchvision", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
     { name = "tyro", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
+    { name = "usd-exchange", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
     { name = "wandb", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
     { name = "warp-lang", marker = "platform_machine == 'x86_64' and sys_platform == 'linux'" },
 ]
@@ -1736,6 +1737,7 @@ requires-dist = [
     { name = "torch", specifier = "==2.10.0", index = "https://download.pytorch.org/whl/cu130" },
     { name = "torchvision", specifier = "==0.25.0", index = "https://download.pytorch.org/whl/cu130" },
     { name = "tyro", specifier = "==1.0.5" },
+    { name = "usd-exchange", specifier = "==3.0.0" },
     { name = "wandb", specifier = "==0.24.0" },
     { name = "warp-lang", specifier = "==1.13.0" },
     { name = "websockets", marker = "extra == 'native-harness'", specifier = "==17.0.1" },
@@ -2744,11 +2746,11 @@ wheels = [
 ]
 
 [[package]]
-name = "usd-core"
-version = "25.11"
-source = { registry = "https://pypi.org/simple" }
+name = "usd-exchange"
+version = "3.0.0"
+source = { registry = "https://pypi.nvidia.com/" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/ed/f1/dbf18bee5b569a06119f0cde798daeef4837887594a0caf415eb1d75112a/usd_core-25.11-cp312-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:c05c05150f6c4598e0738677f0b7c8f82ff9fc492d040ed78147eb1ad5ce8545", size = 27393145, upload-time = "2025-10-24T19:01:27.841Z" },
+    { url = "https://pypi.nvidia.com/usd-exchange/usd_exchange-3.0.0-cp312-cp312-manylinux_2_35_x86_64.whl", hash = "sha256:3d5a3ca9f6153abaf2bb4f8fda6c4026e174b6b050eb904a6e4a5bdf89a52926" },
 ]
 
 [[package]]

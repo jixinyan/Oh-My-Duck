@@ -11,8 +11,8 @@ def verify_usd_runtime():
         if any(path.parts[:1] == ("pxr",) for path in files):
             owners.append(installed)
     identities = {installed.metadata["Name"]: installed.version for installed in owners}
-    if len(owners) != 1 or identities != {"usd-core": "25.11"}:
-        raise RuntimeError(f"Isaac/Newton 的 OpenUSD 需要唯一的 usd-core 25.11 提供 pxr: {identities}")
+    if len(owners) != 1 or identities != {"usd-exchange": "3.0.0"}:
+        raise RuntimeError(f"Isaac/Newton 的 OpenUSD 需要唯一的 usd-exchange 3.0.0 提供 pxr: {identities}")
     installed = owners[0]
     verified = []
     for path in installed.files:
@@ -28,4 +28,4 @@ def verify_usd_runtime():
         verified.append(str(path))
     if not verified:
         raise RuntimeError("OpenUSD 安装记录没有可验证的文件")
-    return {"provider": "usd-core", "version": installed.version, "files_verified": len(verified)}
+    return {"provider": "usd-exchange", "version": installed.version, "files_verified": len(verified)}

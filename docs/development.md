@@ -35,11 +35,16 @@ upstream cache. `environments/{mujoco,isaac-newton,isaac-assets}` holds dependen
 manifests and locks; run their setup through `omd setup`.
 
 Newton setup includes the native Harness extra and the selected PPO framework.
-The x86_64 runtime uses `usd-core==25.11` as its unique `pxr` provider. Setup
+The Linux x86_64 runtime uses `usd-exchange==3.0.0` (OpenUSD 26.08) as its unique `pxr` provider. Setup
 reinstalls and verifies its files through `infrastructure/usd_runtime.py`, using
 `.cache/tmp` for installer temporary files. `doctor --metadata-only` and online
 backend construction perform the same file checks before CUDA initialization.
 See [OpenUSD readiness](reports/openusd-readiness-2026-10-08.md).
+
+USD instance expansion, source MJCF geometry mapping and physics material
+preparation live in `task_binding/collision_assets.py`. This module imports only
+the standard library until an actual asset is prepared. `task_binding/collisions.py`
+owns simulator spawning and the Newton model-initialization callback.
 
 The Isaac backend requires Newton. Unsupported task bindings fail explicitly.
 Keep training dependencies out of agentic, voice, recording and CLI imports.
