@@ -8,6 +8,8 @@
 | Audit saved physical measurements | `omd validate metric-audit` | `metric/verify.py` |
 | Recompute saved official policy actions | `omd validate policy-audit` | `metric/policy.py` |
 | Exercise physical motion boundaries | `omd validate motion-guard` | `harness/motion_guard.py`, `harness/control.py` |
+| Measure official CPU head/body pose commands | `omd validate pose` | `harness/pose.py` |
+| Audit pose commands and native physical responses | `omd validate pose-audit` | `harness/pose_records.py` |
 | Audit native agent/task evidence | `omd validate replay` | `harness/replay.py` |
 | Run model-driven navigation | `omd validate navigation` | `harness/navigation.py` |
 | Audit saved navigation | `omd validate navigation-audit` | `harness/navigation_replay.py` |

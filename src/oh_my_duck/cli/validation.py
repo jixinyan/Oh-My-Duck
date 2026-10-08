@@ -9,6 +9,8 @@ COMMANDS = {
     "metric-audit": ("metric.verify", "复核运动样本、停止状态、相机与源码来源"),
     "policy-audit": ("metric.policy", "使用官方 ONNX 重新计算记录中的 policy action"),
     "motion-guard": ("harness.motion_guard", "检查真实运动暂停、恢复与终止"),
+    "pose": ("harness.pose", "执行官方 CPU 头部与身体姿态命令验证"),
+    "pose-audit": ("harness.pose_records", "复核姿态命令、物理响应、相机与原生动作记录"),
     "replay": ("harness.replay", "检查原生 agent、tool、sensor 与 Verifier 记录"),
     "navigation": ("harness.navigation", "执行声明场景的完整原生导航验收"),
     "navigation-audit": ("harness.navigation_replay", "复核导航轨迹、waypoint 与正式判定"),
