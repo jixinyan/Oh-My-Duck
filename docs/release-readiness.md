@@ -4,6 +4,12 @@ The release workflow uses recorded speech, the pinned native Harness, official p
 
 ## Runtime preparation
 
+Official solver contact configuration passed four actual CPU solver
+constructions and MuJoCo Warp model compilations, covering both robot variants
+and Office/Hospital. Ten source contact fields, twelve native arrays and 21
+protected fields per model were checked. The source AST, 28 tests and 423
+independent installed files passed [contact model validation](reports/contact-model-2026-10-08.md).
+
 Actual Office and Hospital imports passed all 5682 geometric colliders, 164
 signed-scale transformations, source contact filtering and two finalized CPU
 models. Original geometry, generated files and scene hashes were checked in

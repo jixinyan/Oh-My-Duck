@@ -44,6 +44,7 @@ Application, robot, training, shared acceptance and replay modules live in `src/
 | Newton asset preparation | `rl/backends/isaac_newton/` | `assets.py`, `asset_reuse.py`, `paths.py` |
 | USD collision geometry and materials | `rl/backends/isaac_newton/task_binding/` | `collision_assets.py` |
 | Newton collision masks and explicit contact pairs | `rl/backends/isaac_newton/task_binding/` | `collision_model.py` |
+| Official solver materials and contact tables | `rl/backends/isaac_newton/task_binding/` | `contact_model.py`, `manager.py` |
 | Native PPO | `rl/learners/` | `rsl_rl/`, `sb3/` |
 | Training registration and dispatch | `rl/training/`, `rl/experiments/` | `tasks.py`, `frameworks.py`, `campaign.py` |
 | Export and deployment rehearsal | `rl/artifacts/`, `rl/evaluation/` | Export, schema-2 packaging and metrics |
@@ -105,6 +106,10 @@ two-world configuration and finalized CPU data passed
 Actual Office and Hospital geometry, signed-scale normalization and finalized
 CPU models passed [external scene validation](reports/external-scene-cpu-2026-10-08.md).
 `task_binding/collisions.py` owns scene spawning and registers the native callback.
+`task_binding/contact_model.py` configures official materials and contact masks
+on the actual solver model. `task_binding/manager.py` compiles its native MuJoCo
+Warp tables before graph capture. Four actual CPU solver models and compiled
+arrays passed [contact model validation](reports/contact-model-2026-10-08.md).
 
 RL and agentic share robot/policy contracts rather than importing each other's
 implementation. `robotics/backends` implements online robot execution;

@@ -1,5 +1,7 @@
 # Implementation status
 
+> 2026-10-08：官方 solver 接触参数配置位于 `task_binding/contact_model.py`，原生 manager 编译 MuJoCo Warp 数据。标准脚、轮滑及 Office/Hospital 共四个实际 CPU solver model 和原生编译数据通过核验；十项接触参数、独立重算的 body 掩码及 21 项非接触数据检查通过，计算内容的 AST 保持一致。28 项配置及导入测试、423 个独立安装文件与 20 个调用通过，GPU 和 RL 保持停止，见[接触模型验证](reports/contact-model-2026-10-08.md)。
+
 > 2026-10-08：Office 与 Hospital 的实际 CPU 导入、5682 个几何 collider、164 处镜像缩放、接触过滤与两个 finalized model 检查通过；基于 2101169 个原始 points 重算 5680 个导入 mesh 的 world bounds，检查通过，全部来源及生成文件保持检查通过。Hospital 的 125 个 Xform 包含的碰撞几何均已核验。GPU 和 RL 保持停止，见[外部场景 CPU 验证](reports/external-scene-cpu-2026-10-08.md)。
 
 > 2026-10-08：碰撞参数处理位于 `task_binding/collision_model.py`，计算内容的 AST 保持一致。两种模型各两个实际 Newton world 的全部接触过滤、ground pair、摩擦与接触参数通过检查，两个 finalized CPU model 的数组复核通过。27 项配置及导入测试、422 个独立安装文件和 20 个调用通过，GPU 和 RL 保持停止。见[碰撞模型验证](reports/collision-model-2026-10-08.md)。
@@ -216,7 +218,7 @@ is prepared but not launched. Default task recipes and native PPO algorithms rem
 | Component | Current state |
 |---|---|
 | Source organization | First-party code consolidated under `src/oh_my_duck`; obsolete `training/` packages removed |
-| CLI/application | Public `validate` / `replay` / CPU `model-assets`, nine actual Newton execution preflight paths, native voice workflow, 422 installed files and 20 CLI calls verified |
+| CLI/application | Public `validate` / `replay` / CPU `model-assets`, nine actual Newton execution preflight paths, native voice workflow, 423 installed files and 20 CLI calls verified |
 | Core contracts/tool catalog/recording | 已验证 schema、工具登记与 JSONL；原生 Harness 完整事件和 PNG 导出、SHA256 检查及 1080p agentic MP4 已完成实际验证 |
 | Agentic Harness, skills, robot execution | 固定 EDH 原生会话、SSH GPU worker、真实模型、官方 ONNX、ActionGate 与独立 Verifier 已运行；CPU 公寓与 Newton Office 的固定场景导航、Office 四个 policy 的完整多动作任务和 Hospital 轮滑有序路线通过。三个场景各通过三个距离/角度会话；全部长距离请求精度、图像输入独立 VLN、多场景泛化与真机待验收 |
 | Perception and policy adapters | 官方十项 policy 目录及 61-to-14 推断，CPU episodic 时长/接续、Newton Office 的 velstand/alpha_walking、head RGB optical pose/近裁剪、observer 场景取景、ToF、IMU 与 odometry 已验证；实际 RGB 与 segmentation 证据保留，物体识别与各 policy 物体效果待验证 |
@@ -245,7 +247,7 @@ as expected for short smoke checkpoints. Explicit MuJoCo OSMesa video and native
 Newton video produced 60 verified 720p clips. SB3 curriculum restoration was then
 validated at `b65e8f9` on both tasks/backends, including a second saved-state resume.
 
-Latest tests passed 27 lightweight and 72 task/SB3 cases. Earlier installed-runtime
+Current configuration/import tests passed 28; earlier task/SB3 checks passed 72 cases. Earlier installed-runtime
 checks passed seven Isaac and two Newton binding tests. Wheel resources/licenses,
 bytecode exclusion, three environment locks and local Markdown links were checked.
 See [complete acceptance evidence](reports/rl-pipeline-acceptance.md).

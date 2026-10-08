@@ -17,6 +17,8 @@ materials and actual Newton imports using only CPU. The
 links source pins, measurements and reproduction instructions.
 Actual Office and Hospital imports passed geometry and contact-configuration
 checks for all 5682 geometric colliders and 164 signed-scale transformations.
+Official solver contact data passed four actual Newton CPU model constructions
+and native MuJoCo Warp compilations across both robot variants and scenes.
 
 Newton uses OpenUSD 26.08 and verifies its unique provider and installed files
 before GPU allocation. Training, evaluation, diagnostic and direct runtime entry

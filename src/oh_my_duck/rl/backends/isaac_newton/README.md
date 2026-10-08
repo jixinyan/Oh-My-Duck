@@ -16,6 +16,8 @@ libraries belong to the isolated `isaac-newton` environment; conversion uses
 | Conversion reference and robot naming | `asset_reference.py`, `asset_names.py` |
 | Source MJCF collision mapping and USD physics materials | `task_binding/collision_assets.py` |
 | Newton collision masks, explicit ground pairs and scene geometry corrections | `task_binding/collision_model.py` |
+| Official solver geometry materials and contact masks | `task_binding/contact_model.py` |
+| Native MuJoCo Warp contact compilation and graph preparation | `task_binding/manager.py` |
 | Simulator spawning and model-initialization callback | `task_binding/collisions.py` |
 
 `collision_assets.py` compiles the official source model, expands USD instances,
@@ -25,6 +27,10 @@ the model-initialization callback and passes the active builder to
 `collision_model.py`. Contact configuration can be applied directly to a real
 CPU builder; two-world official model preparation and finalized arrays passed
 the [CPU collision audit](../../../../../docs/reports/collision-model-2026-10-08.md).
+`contact_model.py` configures the actual solver model; `manager.py` compiles its
+native MuJoCo Warp contact tables before graph capture. Four CPU solver models
+and their compiled data passed the
+[contact model audit](../../../../../docs/reports/contact-model-2026-10-08.md).
 The Linux kitless environment uses `usd-exchange==3.0.0`, which supplies OpenUSD
 26.08. Setup and startup verify the unique provider and its installed files.
 

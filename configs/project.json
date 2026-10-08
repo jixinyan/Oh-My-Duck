@@ -5,6 +5,31 @@
   "entry_point": "omd.py",
   "release_readiness": {
     "state": "acceptance_in_progress",
+    "cpu_contact_model": {
+      "state": "actual_native_solver_contact_configuration_and_mujoco_warp_cpu_compilation_verified",
+      "source_revision": "425bb89696768f6c560970298a9dd9c40c8ac3a8",
+      "module": "oh_my_duck.rl.backends.isaac_newton.task_binding.contact_model",
+      "models_verified": ["allcollisions", "groundcontact_rollers"],
+      "actual_newton_cpu_solver_constructions": 4,
+      "actual_mujoco_warp_cpu_compilations": 4,
+      "geometry_contact_fields_verified": 10,
+      "native_geometry_and_body_arrays_verified": 12,
+      "protected_model_fields_unchanged": 21,
+      "calculation_body_ast_unchanged": true,
+      "configuration_and_import_tests_passed": 28,
+      "source_and_resource_files_verified": 423,
+      "installed_cli_checks_passed": 20,
+      "runtime_audits": [
+        "outputs/acceptance/contact-model-20261008-01/independent-audit.json",
+        "outputs/acceptance/contact-model-office-20261008-01/independent-audit.json",
+        "outputs/acceptance/contact-model-hospital-20261008-01/independent-audit.json"
+      ],
+      "installed_package": "outputs/acceptance/contact-model-package-20261008-01/result.json",
+      "remote_preflight": "outputs/acceptance/contact-model-release-preflight-20261008-01/preflight/result.json",
+      "gpu_acceptance_performed": false,
+      "solver_execution_performed": false,
+      "report": "docs/reports/contact-model-2026-10-08.md"
+    },
     "cpu_external_scene": {
       "state": "actual_scene_import_geometry_contact_configuration_and_finalized_cpu_models_verified",
       "source_revision": "cbf0c19a53da48c77dd7ca2b7f4baaf8b6433aa6",

@@ -12,6 +12,8 @@ tags:
   - project-design
 ---
 
+> 官方 solver 材质与接触掩码位于 `task_binding/contact_model.py`，原生 manager 编译 MuJoCo Warp 接触数据。两种机器人、Office 和 Hospital 的四个实际 CPU solver model 通过十项参数、独立 body 掩码及 21 项非接触数据检查，计算内容的 AST 保持一致；28 项配置及导入测试、423 个安装文件与 20 个独立调用通过。GPU 和 RL 保持停止，见[接触模型验证](reports/contact-model-2026-10-08.md)。
+
 > Office 与 Hospital 的实际 CPU 导入、全部 5682 个几何 collider、164 处镜像缩放、source filters 和两个 finalized model 检查通过。导入 mesh 的 world bounds、场景文件和生成文件保持检查通过，Hospital 的 Xform 碰撞几何完整导入。GPU 和 RL 保持停止，见[外部场景 CPU 验证](reports/external-scene-cpu-2026-10-08.md)。
 
 > Newton 接触配置位于 `task_binding/collision_model.py`，原生 callback 传入实际 builder。两种机器人模型的双 world 配置及 finalized CPU 数组通过全部接触过滤、ground pair 和摩擦参数检查，计算内容的 AST 保持一致；27 项配置及导入测试、422 个独立安装文件和 20 个调用通过。GPU 和 RL 保持停止，见[碰撞模型验证](reports/collision-model-2026-10-08.md)。
