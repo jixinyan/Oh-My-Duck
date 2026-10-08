@@ -29,27 +29,37 @@ Only concrete adapters import MuJoCo, Isaac, model SDKs or transport libraries. 
 
 All first-party implementation lives in `src/oh_my_duck/`:
 
-```text
-cli/                         unified public commands
-integrations/                native EDH worker and CPU simulation session adapter
-core/                        shared contracts and project configuration
-agentic/                     harness, tools, skills and application assembly
-robotics/                    execution backends, policies and Microduck models/motors
-rl/tasks/<family>/           environment.py + ppo.py per task family
-rl/tasks/shared/             symmetry, terrain and task variants
-rl/mdp/                      observations, rewards, resets, commands and curricula
-rl/models/                   configurable actor/critic definitions
-rl/backends/{mujoco,isaac_newton}/
-rl/learners/{rsl_rl,sb3}/      native PPO integrations
-rl/training/                 task/framework registry and process dispatch
-rl/artifacts/                normalized export and schema-2 packaging
-rl/evaluation/               audits, metrics and deployment rehearsal
-rl/experiments/              independent per-GPU training campaigns
-perception/                  active perception interfaces
-voice/                       Qwen WAV inference and persistent voice profiles
-experience/                  episode recording and replay contracts
-infrastructure/              scheduler, environment setup and offline tracking
-```
+| Capability | Source directory | Starting point |
+| --- | --- | --- |
+| Public commands | `cli/` | `cli/__init__.py`, `cli/validation.py` |
+| Native EDH physical session | `integrations/` | `integrations/edh_native.py` |
+| Tools and skills | `agentic/` | `agentic/tools/`, `agentic/skills/` |
+| Shared types and configuration | `core/` | `core/paths.py` |
+| Online robot execution | `robotics/backends/` | `simulation.py`, `isaac_official.py` |
+| Official robot assets and policies | `robotics/microduck/` | `official_policies.py` |
+| Task families | `rl/tasks/<family>/` | `environment.py`, `ppo.py` |
+| Shared task variants | `rl/tasks/shared/` | Symmetry and terrain definitions |
+| MDP and actor/critic | `rl/mdp/`, `rl/models/` | Observations, rewards, commands and curricula |
+| Batched training simulators | `rl/backends/` | `mujoco/`, `isaac_newton/` |
+| Native PPO | `rl/learners/` | `rsl_rl/`, `sb3/` |
+| Training registration and dispatch | `rl/training/`, `rl/experiments/` | `tasks.py`, `frameworks.py`, `campaign.py` |
+| Export and deployment rehearsal | `rl/artifacts/`, `rl/evaluation/` | Export, schema-2 packaging and metrics |
+| Active perception | `perception/` | `client.py`, `service.py`, `rgbd.py`, `validation.py` |
+| Voice interaction | `voice/` | Qwen services, WAV processing and confirmed profiles |
+| Experience and replay export | `experience/` | `harness_replay.py` |
+| Measured policy acceptance | `validation/metric/` | `plans.py`, `case.py`, `campaign.py`, `verify.py`, `policy.py` |
+| Native task and navigation acceptance | `validation/harness/` | `control.py`, `motion_guard.py`, `replay.py`, `navigation.py` |
+| Release preparation and package checks | `validation/release/` | `plans.py`, `worker.py`, `campaign.py`, `package.py` |
+| Setup and process ownership | `infrastructure/` | `owned_process.py`, `acceptance_supervisor.py` |
+
+`omd validate` selects an acceptance implementation through a lazy dispatcher.
+`omd replay` manages native sessions and exports terminal run evidence. Metric and
+release configuration schemas depend only on the validation plan modules; they
+can be checked without loading a policy, simulator or native Harness. Existing
+acceptance script paths are compatibility entry points for recorded invocations.
+Metric provenance schema 2 records both the implementation source hash and the
+entry-point hash; independent verification compares both with the recorded Git
+revision. Schema 1 records retain their original source verification.
 
 `environments/` contains dependency manifests and locks only. MuJoCo, Isaac/Newton,
 and asset conversion keep separate environments because their native libraries have

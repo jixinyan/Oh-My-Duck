@@ -19,6 +19,35 @@ MOTIONS_SCHEMA = {
 }
 
 
+PLAN_SCHEMA = {
+    "type": "object", "required": ["schema_version", "suites"], "additionalProperties": False,
+    "properties": {
+        "schema_version": {"const": 1},
+        "suites": {"type": "object", "minProperties": 1, "additionalProperties": {
+            "type": "object", "required": ["scene_config", "cases"], "additionalProperties": False,
+            "properties": {
+                "scene_config": {"type": "string", "minLength": 1},
+                "cases": {"type": "array", "minItems": 1, "items": {
+                    "type": "object", "required": ["id", "seed"],
+                    "additionalProperties": False,
+                    "oneOf": [{"required": ["motions"]}, {"required": ["operations", "distance_m", "angle_deg"]}],
+                    "properties": {
+                        "id": {"type": "string", "pattern": "^[a-z][a-z0-9-]*$"},
+                        "seed": {"type": "integer", "minimum": 0},
+                        "operations": {"type": "array", "minItems": 1, "uniqueItems": True,
+                                       "items": {"enum": ["walk", "rotate"]}},
+                        "distance_m": {"type": "number"}, "angle_deg": {"type": "number"},
+                        "speed_m_s": {"type": "number", "minimum": 0.1, "maximum": 0.4},
+                        "angular_speed_deg_s": {"type": "number", "minimum": 10, "maximum": 55},
+                        "motions": MOTIONS_SCHEMA,
+                    },
+                }},
+            },
+        }},
+    },
+}
+
+
 def case_motions(case):
     if "motions" in case:
         motions = case["motions"]

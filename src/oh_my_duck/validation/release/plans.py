@@ -1,11 +1,12 @@
+import argparse
 import hashlib
 import json
 from pathlib import Path
 
 from jsonschema import Draft202012Validator
 
-from accept_metric_campaign import PLAN_SCHEMA
-from metric_plan import case_motions
+from oh_my_duck.validation.metric.plans import PLAN_SCHEMA, case_motions
+from oh_my_duck.core.paths import project_root
 
 
 STAGE_SCHEMA = {
@@ -107,3 +108,24 @@ def validate_plan(root, path):
         inputs[scene_name] = hashlib.sha256(scene_path.read_bytes()).hexdigest()
         scenes[scene_name] = configuration
     return plan, scenes, inputs
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Validate declared release inputs without initializing a simulator")
+    parser.add_argument("--plan", type=Path, default=Path("configs/experiments/runtime-release-acceptance.json"))
+    parser.add_argument("--output", type=Path)
+    args = parser.parse_args()
+    root = project_root()
+    path = args.plan if args.plan.is_absolute() else root / args.plan
+    plan, scenes, inputs = validate_plan(root, path)
+    result = {"passed": True, "stages": len(plan["stages"]), "scenes": len(scenes),
+              "input_sha256": inputs, "cuda_runtime_checked": False}
+    if args.output is not None:
+        args.output.parent.mkdir(parents=True, exist_ok=True)
+        with args.output.open("x") as output:
+            output.write(json.dumps(result, indent=2, allow_nan=False) + "\n")
+    print(json.dumps(result))
+
+
+if __name__ == "__main__":
+    main()

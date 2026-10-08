@@ -7,7 +7,7 @@ from pathlib import Path
 import secrets
 from uuid import uuid4
 
-from accept_harness_motion_guard import available_port, control, wait_boundary
+from oh_my_duck.validation.harness.control import available_port, control, wait_boundary
 from oh_my_duck.integrations.edh_native import MicroDuckWorkerSession
 from oh_my_duck.robotics.microduck.official_policies import OFFICIAL_REVISION
 

@@ -4,6 +4,11 @@
 
 # Oh My Duck 🦆
 
+Use `omd validate` for native acceptance and recorded-evidence audits, and
+`omd replay` for session management and terminal run export. The
+[source map](docs/architecture.md#source-organization) lists the responsible module
+for each capability. The same commands are available through `python -m oh_my_duck`.
+
 Actual CPU policy checks cover metric motion, continuous navigation commands, native backend behavior and cancellation cleanup. Remote preflight verifies all release scenes, official policy hashes and the pinned Harness sources without initializing CUDA. Results and reproduction are in the [offline validation report](docs/reports/offline-release-validation-2026-10-07.md) and [runtime acceptance guide](docs/runtime-release-acceptance.md). GPU acceptance and RL remain stopped.
 
 Metric campaigns preserve exact policy inputs and admitted actions, then independently replay those inputs through the official ONNX models. The CPU matrix and continuous sequence verified 2556 control steps with zero action parity error.

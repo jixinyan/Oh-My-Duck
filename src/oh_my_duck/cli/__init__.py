@@ -32,6 +32,8 @@ COMMANDS = {
     "voice-service": (None, "Run an isolated ASR or TTS model service"),
     "sim": ("simulation.py", "Run interactive measured simulation tools through JSONL"),
     "harness": ("harness.py", "Run MicroDuck simulation scenes through native EDH"),
+    "validate": (None, "Run native acceptance or independently audit recorded evidence"),
+    "replay": (None, "Manage native Harness sessions and export terminal runs"),
 }
 
 
@@ -49,13 +51,15 @@ def main():
     if command not in COMMANDS:
         print(f"Unknown command {command!r}. Use --help.", file=sys.stderr)
         return 2
-    if command in {"voice", "voice-session", "voice-task", "voice-service", "doctor"}:
+    if command in {"voice", "voice-session", "voice-task", "voice-service", "doctor", "validate", "replay"}:
         module_name = {
             "voice": "oh_my_duck.cli.voice",
             "voice-session": "oh_my_duck.cli.voice_session",
             "voice-task": "oh_my_duck.cli.voice_task",
             "voice-service": "oh_my_duck.voice.service",
             "doctor": "oh_my_duck.cli.doctor",
+            "validate": "oh_my_duck.cli.validation",
+            "replay": "oh_my_duck.experience.harness_replay",
         }[command]
         module = importlib.import_module(module_name)
         sys.argv = [sys.argv[0], *sys.argv[2:]]

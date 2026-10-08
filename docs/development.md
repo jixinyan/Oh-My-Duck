@@ -8,6 +8,14 @@ under `src/oh_my_duck/`, grouped by project capability; see [architecture.md](ar
 no simulator at startup. `rl/` owns task recipes, MDP, learners, export and evaluation;
 `robotics/microduck/` owns models, assets, motor behavior and robot conventions.
 
+Native acceptance belongs in `validation/{metric,harness,release}/`; terminal
+Harness export belongs in `experience/harness_replay.py`. Use `omd validate --help`
+and `omd replay --help` to find public entry points. Install the `validation` extra
+for JSON Schema, saved image and ONNX audits. Actual physics checks additionally
+require the locked simulator environment and the pinned native Harness dependency.
+Reusable implementation imports package modules directly. Compatibility scripts
+contain entry-point dispatch only; pytest does not add `scripts/` to its import path.
+
 Task factories and policy configuration are editable project source. Native RSL-RL
 and SB3 PPO remain dependencies. Microduck task code is never loaded from the
 upstream cache. `environments/{mujoco,isaac-newton,isaac-assets}` holds dependency

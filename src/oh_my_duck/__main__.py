@@ -1,4 +1,4 @@
-from oh_my_duck.validation.release.campaign import main
+from oh_my_duck.cli import main
 
 
 if __name__ == "__main__":

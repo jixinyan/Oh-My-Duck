@@ -6,7 +6,7 @@ from uuid import uuid4
 from jsonschema import ValidationError
 import pytest
 
-from release_plan import validate_plan
+from oh_my_duck.validation.release.plans import validate_plan
 
 
 ROOT = Path(__file__).resolve().parents[1]

@@ -156,6 +156,11 @@
     "rl_training": "stopped"
   },
   "components": {
+    "validation": {
+      "module": "oh_my_duck.validation",
+      "state": "packaged_entrypoints_implemented_cpu_and_installed_revalidation_pending",
+      "role": "Metric, native Harness and release acceptance; independent saved evidence audits through omd validate"
+    },
     "contracts": {
       "module": "oh_my_duck.core.contracts",
       "state": "implemented",
@@ -189,7 +194,7 @@
     "recording": {
       "module": "oh_my_duck.experience",
       "state": "jsonl_implemented_native_harness_replay_and_mp4_verified",
-      "role": "Persist episode evidence without memory/planning; native Harness replay and MP4 scripts preserve actual events, camera files and source hashes"
+      "role": "Persist episode evidence; omd replay manages native sessions and exports actual events, camera files and source hashes"
     },
     "training": {
       "module": "oh_my_duck.rl.training",

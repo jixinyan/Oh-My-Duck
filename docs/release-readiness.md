@@ -4,6 +4,12 @@ The release workflow uses recorded speech, the pinned native Harness, official p
 
 ## Runtime preparation
 
+The public acceptance entry point is `omd validate`; session and replay export use
+`omd replay`. Install `oh-my-duck[validation]` for configuration and saved-evidence
+audits. Use the locked CPU or Newton environment for physical execution. An installed
+command finds configuration through the checkout or an explicit `OMD_PROJECT_ROOT`.
+`omd validate release-plan` checks all declared inputs without initializing CUDA.
+
 Use Python 3.12, Node.js and the locked environments in `environments/`. Install the voice client on the operator computer and the ASR, TTS and Isaac/Newton environments on the NVIDIA host. Keep the model services bound to localhost and use SSH forwarding between hosts. Voice setup requires an explicitly confirmed profile before task feedback can be synthesized.
 
 ```bash

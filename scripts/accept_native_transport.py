@@ -7,7 +7,7 @@ from pathlib import Path
 import viser
 from websockets.asyncio.client import connect
 
-from accept_harness_motion_guard import available_port
+from oh_my_duck.validation.harness.control import available_port
 
 
 async def run(output):

@@ -3,12 +3,14 @@ title: Agentic Microduck — 分步执行计划
 version: 0.2
 status: In progress
 created: 2026-09-06
-updated: 2026-10-07
+updated: 2026-10-08
 tags:
   - microduck
   - implementation-plan
   - sim-to-real
 ---
+
+> 2026-10-08：公开验收入口与源码职责整理已经实现；配置与传输模块支持独立导入，pytest 使用项目 package。完整 CPU 动作、取消执行、历史资料复核与独立安装检查作为本次结构验收依据，GPU 和 RL 保持停止。具体模块见[架构说明](architecture.md)。
 
 > 无 GPU 检查已通过 CPU 动作矩阵、连续序列、独立复核、backend 行为、官方 ONNX graph、语音资料、感知资料、policy 转换及所属进程取消。Policy 调试记录与自动 ONNX 重算已接入，2556 个控制步复核一致。独立安装核验 390 个源码及资源文件和十个 CLI 入口，无需 CUDA 的远程准备检查通过六阶段计划、四份场景配置及固定 Harness 源文件，完整结果已保存。GPU 验收及 RL 保持停止，见[检查记录](reports/offline-release-validation-2026-10-07.md)。
 
