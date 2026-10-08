@@ -14,7 +14,7 @@ import torch
 from ultralytics import YOLO
 import uvicorn
 
-from oh_my_duck.perception.rgbd import measure_target
+from oh_my_duck.perception.rgbd import measure_target, validate_pose
 
 
 class InspectRequest(BaseModel):
@@ -46,6 +46,7 @@ class PerceptionModels:
         points = np.load(BytesIO(base64.b64decode(frame["points_world_npy_base64"], validate=True)), allow_pickle=False)
         if points.shape != (image.height, image.width, 3):
             raise ValueError("RGB and depth geometry differ")
+        validate_pose(frame["camera_position_m"], frame["body_position_m"], frame["yaw_rad"])
         predictions = self.yolo.predict(image, device=0, conf=0.15, verbose=False)[0]
         boxes = predictions.boxes.xyxy.cpu().numpy()
         scores = predictions.boxes.conf.cpu().numpy()

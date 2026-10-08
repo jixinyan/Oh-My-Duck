@@ -18,6 +18,7 @@
       "remote_preflight_source": "793883738699ff5733ecf9f42f6df663ad6827d1",
       "voice_profile_tests_passed": 10,
       "release_plan_tests_passed": 16,
+      "recorded_perception_validation": "outputs/acceptance/offline-perception-records-20261007-01.json",
       "cuda_runtime_checked": false,
       "gpu_execution": "stopped",
       "report": "docs/reports/offline-release-validation-2026-10-07.md"

@@ -24,3 +24,15 @@ Hospital 后退记录的修正运动从约 sequence 237 持续到 332。sequence
 固定源码 `793883738699ff5733ecf9f42f6df663ad6827d1` 的远程准备检查通过，完整记录为 `outputs/acceptance/offline-preflight-20261007-02`。六个阶段使用四份场景配置、九个来源文件；Office 的 2291 个资源文件及 Hospital 的 1639 个资源文件全部通过大小和 SHA256 检查，场景 USD、公用地图、标准脚和轮滑机器人资源身份通过核验。每份配置的十个官方 policy 均通过检查。远程部署的 29 个原生 Harness Python/schema 文件与固定 Git 内容一致；本地 Node 入口和固定来源同时核验。Provider 配置使用 `gpt-6-astra` 与 Responses API，记录仅保存模型和 API 类型。
 
 准备结果为 `preflight_passed`，`cuda_runtime_checked=false`、`gpu_acceptance_performed=false`。GPU 动作矩阵、Newton 连续导航、识别准确率、物体效果、训练 policy 行为与真机验收仍需相应环境的实际运行证据。
+
+感知客户端核验当前帧的 episode、sequence、时间、查询、图像 SHA256、距离来源、模型身份、目标几何及标注图像尺寸。服务在模型调用前检查 camera/body 位置及 yaw 的有效性。已有实际 Newton RGBD 记录的两张图像、四个 YOLO26 目标通过检查；有效深度数量与目标位置根据原始 world points 独立复算一致，48 项无效资料检查全部拒绝。结果为 `outputs/acceptance/offline-perception-records-20261007-01.json`。该检查使用已有采集记录，没有执行新的模型推理。
+
+复现已有资料检查：
+
+```bash
+python scripts/accept_perception_records.py \
+  --capture outputs/recorded-rgbd-20260930 \
+  --output outputs/acceptance/perception-records-NEW.json
+```
+
+输入目录必须包含原始 `result.json`、`head-INDEX.png`、`models-INDEX.png` 和 `points-INDEX.npy`；所有输入 SHA256 保存到结果中。资料缺失或检查失败会立即返回错误。
