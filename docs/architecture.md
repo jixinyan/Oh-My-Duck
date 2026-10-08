@@ -33,6 +33,7 @@ Application, robot, training, shared acceptance and replay modules live in `src/
 | --- | --- | --- |
 | Public commands | `cli/` | `cli/__init__.py`, `cli/validation.py` |
 | Native EDH physical session | `integrations/edh/` | `environment.py`, `device.py`, `session.py`, `worker.py` |
+| Shared native CPU/Newton scene configuration | `integrations/edh/` | `scene.schema.json`, `scene_configuration.py`; Node admission in `integrations/edh/scene-configuration.mjs` at the repository root |
 | Tools and skills | `agentic/` | `agentic/tools/`, `agentic/skills/` |
 | Shared types and configuration | `core/` | `core/paths.py` |
 | Online robot execution | `robotics/backends/` | `simulation.py`, `isaac_official.py` |

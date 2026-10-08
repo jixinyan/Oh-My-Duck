@@ -4,6 +4,14 @@ The release workflow uses recorded speech, the pinned native Harness, official p
 
 ## Runtime preparation
 
+CPU apartment and Newton scenes use one packaged JSON Schema through the Python
+CLI and native Node server. Seven actual configurations and 23 invalid variants
+produce identical admission results. Actual public startup, graceful exit, 64
+tests, 431 independently installed files and 24 CLI calls passed
+[configuration validation](reports/native-scene-configuration-2026-10-08.md).
+Robot, RL and native physical execution files preserve the preceding verified
+source. Model tasks and GPU execution require their own acceptance.
+
 Registered training packages passed native CPU control, complete episodic
 duration, transition, stopping and independent action/image verification: 725
 controls, 2900 substeps, 145 frames and 87 stopped samples. Final source passed

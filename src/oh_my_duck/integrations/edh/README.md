@@ -2,6 +2,7 @@
 
 | Responsibility | Implementation |
 | --- | --- |
+| Shared CPU/Newton scene schema and Python admission | [scene_configuration.py](scene_configuration.py), [scene.schema.json](scene.schema.json) |
 | Simulation initialization, observations, action stepping and native checks | [environment.py](environment.py) |
 | Owner-thread action execution and stop acknowledgement | [device.py](device.py) |
 | Native session lifecycle, control tools, metric motion and ActionGate boundaries | [session.py](session.py) |
@@ -22,3 +23,8 @@ and metadata checks. Scene configuration passes `policy_registry` to either
 backend. A configured locomotion alias uses the same distance/angle controller;
 registered policy selection preserves native boundary, action-scale and model
 checks. See [package registration](../../../../docs/policy-registry.md).
+
+The Python CLI and native Node deployment validate the same scene schema. CPU
+apartment configurations select a spawn and native room/dock/object goal. Newton
+configurations declare USD provenance and a point/route goal. The schema is an
+installed resource. See [configuration](../../../../docs/harness-native-integration.md#场景配置).

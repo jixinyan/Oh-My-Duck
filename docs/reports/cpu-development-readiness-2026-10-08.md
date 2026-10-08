@@ -8,6 +8,7 @@ stopped.
 
 | Capability | Verified scope | Evidence |
 | --- | --- | --- |
+| Configurable native scenes | Shared CPU/Newton schema; actual Python CLI and pinned Node startup/exit, seven declared configurations, 23 rejected variants, 64 tests and 431 installed files | [Scene configuration](native-scene-configuration-2026-10-08.md) |
 | Native robot worker | Actual CPU MuJoCo/BAM motion, pinned SDK/process transport, ActionGate, policy transitions, cancellation and resource release | [Worker validation](native-worker-modules-2026-10-08.md) |
 | Training-package tools | Actual retained Walking/StandUp packages, configured locomotion selection, complete episodic duration and transition; 725 controls, 145 frames, 87 stopped samples; 429 installed files and 24 CLI calls | [Package integration](policy-packages-2026-10-08.md) |
 | Native head/body commands | Actual software-rendered CPU execution; 575 controls, positive/negative head pitch and body height response, zero-command return, 115 camera frames, 95 stopped samples and installed independent audit | [Pose validation](native-pose-2026-10-08.md) |

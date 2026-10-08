@@ -35,6 +35,37 @@ EDH_MODEL_BASE_URL=http://127.0.0.1:8000/v1 EDH_MODEL=your-vision-tool-model PYT
 
 正常结束时，Planner 在已确认暂停边界设置有界零 `twist` 命令，经原生 `execution.resume` 实际执行至少五个控制步，再读取 `task_progress` 的身体速度与停止状态；公寓导航验收使用 100 个零命令控制步。随后从当前确认边界读取 `execution_id`、`generation`、`boundary_id`，调用 `finish_policy`。该工具由物理 owner 确认当前零命令、已执行零命令控制步、连续停止样本和身体速度，原生 ActionGate 再以 `policy_stop` 结束执行。EDH 主机分配独立 Verifier 读取新鲜物理观测与目标状态。真实成功需要该正式结果支持。取消通过 EDH 原生任务接口执行，并以确认边界及后续动作计数检查。原生工具支持 perpetual、scripted 和 episodic policy；CPU 验证覆盖 `kick_left` 的时长边界与显式接续 `alpha_stand`，动作效果需要对应的物理证据。
 
+## 场景配置
+
+`--scene-config` 使用共用 JSON Schema，Python CLI 与 Node
+部署通过相同 JSON Schema 检查参数。Schema 随安装包发布；源码文件为
+`src/oh_my_duck/integrations/edh/scene.schema.json`，Python 校验位于
+`scene_configuration.py`，Node 校验位于 `integrations/edh/scene-configuration.mjs`。
+
+| 后端 | 机器人与资源 | 出生位置 | 目标 |
+| --- | --- | --- | --- |
+| `cpu-mujoco-bam` | 官方公寓，`allcollisions` | `x_m`、`y_m`、`yaw_rad` | `room`、`dock`、`object` |
+| `isaac-newton` | USD 与来源资料，标准脚或轮滑模型 | `x_m`、`y_m`、`z_m`、`yaw_rad` | `point`，可附加有序 `waypoints` |
+
+配置声明 `scene_id`、`task_instruction` 和 `budget`。数值必须有限，控制预算至少为
+5 次且必须为整数，`hold_ticks` 为 1–500 的整数。CPU 公寓使用原生房间与物体名称，配置中
+选择 `device` 时必须为 `cpu`。Newton 内部设备使用 `cuda:0`；远程分配通过
+`--worker-cuda-device` 明确选择物理 GPU。当前 GPU 与 RL 保持停止。
+
+使用已准备的固定 EDH、官方 policy 和私有 provider 配置启动 CPU 场景：
+
+```sh
+CUDA_VISIBLE_DEVICES='' PYTHONPATH=src .cache/cpu-apartment-locked-venv/bin/python omd.py harness \
+  --provider-config "$PRIVATE_PROVIDER_CONFIG" \
+  --scene-config configs/simulation-demo/apartment-metric.json
+```
+
+此配置的 profile 为 `official-microduck-apartment`，scenario 为
+`navigate-official-microduck-apartment`。`--policy-registry` 可以同时指定训练包。
+各 policy 的学习行为、每项导航任务和 GPU 执行分别进行验收。
+7 份现有配置、23 组无效配置、完整 CLI/Node 启动及安装资源检查见
+[配置验证](reports/native-scene-configuration-2026-10-08.md)。
+
 ## 模型连接检查
 
 CLI 从 provider TOML 的 `wire_api` 选择固定 EDH 的 Responses 或 Chat Completions adapter。`--model-api` 可以明确选择接口；`--model` 可以明确选择模型。`--reasoning-effort` 使用 adapter 声明的能力和原生调用参数，服务拒绝请求时立即终止。模型 HTTP 请求使用项目客户端名称 `Oh-My-Duck/0.1`，凭证保留在进程内存。

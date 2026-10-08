@@ -137,6 +137,12 @@ The first scope is one robot, one external host and one active task. Complex who
 
 ## Explore the project
 
+`omd harness --scene-config` accepts the official CPU apartment and Isaac/Newton
+scenes. Python and Node validate the same packaged schema before native execution.
+CPU configurations select a spawn and a room, dock or object goal; Newton
+configurations provide USD provenance and a point or ordered route goal.
+See [native configuration](docs/harness-native-integration.md#场景配置).
+
 | Start with | What it explains |
 |---|---|
 | [Project Design](docs/Agentic%20Microduck%20-%20Project%20Design%20v0.1.md) | Full product scope, decisions, module boundaries and interfaces |
@@ -146,20 +152,24 @@ The first scope is one robot, one external host and one active task. Complex who
 | [Development guide](docs/development.md) | Module layout, source pins, environments, Git and file management |
 | [Implementation status](docs/implementation-status.md) | Current progress, measured evidence and remaining work |
 
-All first-party code lives in `src/oh_my_duck`, grouped by project capability: `rl`, `agentic`, `robotics`, `perception`, `voice`, and `experience`, with shared `core` and `infrastructure` modules. Dependency locks live in `environments/`.
+Python modules live in `src/oh_my_duck/`. The native Node deployment lives in
+`integrations/edh/`, and dependency locks live in `environments/`.
 
-```text
-src/oh_my_duck/
-├── rl/              tasks, rewards, simulators, PPO, export and evaluation
-├── agentic/         external Harness, tools, skills and application assembly
-├── robotics/        robot models, motors, execution and policy interfaces
-├── perception/      perception interfaces
-├── voice/           Qwen file inference and persistent voice profiles
-├── experience/      episode records
-├── core/            shared contracts
-├── infrastructure/  environments, jobs and tracking
-└── cli/             public commands
-```
+| Capability | Source |
+| --- | --- |
+| Training, simulators, PPO, export and evaluation | [rl/](src/oh_my_duck/rl/) |
+| Native physical session, devices, tools and transport | [integrations/edh/](src/oh_my_duck/integrations/edh/) |
+| Native Node deployment and Planner role | [integrations/edh/](integrations/edh/) |
+| Tool and skill interfaces | [agentic/](src/oh_my_duck/agentic/) |
+| Robot models, motors and execution backends | [robotics/](src/oh_my_duck/robotics/) |
+| Verified joint graphs and training packages | [robotics/policies/](src/oh_my_duck/robotics/policies/) |
+| Physical records, policy and release audits | [validation/](src/oh_my_duck/validation/) |
+| Perception services and frame validation | [perception/](src/oh_my_duck/perception/) |
+| Qwen audio and confirmed voice profiles | [voice/](src/oh_my_duck/voice/) |
+| Episode records and replay export | [experience/](src/oh_my_duck/experience/) |
+| Shared types and configuration | [core/](src/oh_my_duck/core/) |
+| Environments, processes and tracking | [infrastructure/](src/oh_my_duck/infrastructure/) |
+| Public commands | [cli/](src/oh_my_duck/cli/) |
 
 
 The public development entry point is `python omd.py --help`. Voice file inference runs through `python -m oh_my_duck.cli.voice` in the isolated ASR and TTS environments. Backend dependencies remain isolated.

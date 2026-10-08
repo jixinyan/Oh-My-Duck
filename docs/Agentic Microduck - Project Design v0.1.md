@@ -12,6 +12,8 @@ tags:
   - project-design
 ---
 
+> CPU 公寓与 Newton 场景使用相同的已打包 JSON Schema，公开入口支持出生位置与原生目标配置。7 份配置及 23 组无效配置的 Python/Node 检查、实际启动与退出、64 项测试、431 个独立安装文件和 24 个调用通过。机器人、RL 和原生执行的 345 个文件保持一致，GPU 与 RL 保持停止，见[场景配置验证](reports/native-scene-configuration-2026-10-08.md)。
+
 > 训练 policy 包可通过 `--policy-registry` 登记，在原生 Harness 中调用，并明确选择距离/角度工具使用的 policy。真实 Walking 与 StandUp 包的 CPU 执行、限定时长结束、站立策略接续和停止通过：725 次控制、2900 个物理步、145 个相机帧及 87 个停止样本。37 项测试、429 个安装文件、24 个调用及当前源码发布准备通过，四条 Newton 构造路径在申请 CUDA 资源之前拒绝无效包。学习行为与 GPU 执行继续保持独立验收要求，见[训练包接入验证](reports/policy-packages-2026-10-08.md)。
 
 > 原生 CPU 姿态命令经 Harness 和 ActionGate 完成实际验证，头部 pitch 与身体高度的正反向响应、归零响应、575 次控制、115 个相机帧和停止状态通过核验。执行与独立资料检查分别位于 `validation/harness/pose.py` 与 `pose_records.py`，公开入口为 `omd validate pose` 和 `pose-audit`。30 项测试、425 个安装文件及 22 个独立调用通过，当前源码发布准备检查通过。GPU 和 RL 保持停止，见[姿态验证](reports/native-pose-2026-10-08.md)。
