@@ -4,6 +4,12 @@ The release workflow uses recorded speech, the pinned native Harness, official p
 
 ## Runtime preparation
 
+The [native worker validation](reports/native-worker-modules-2026-10-08.md) records
+current CPU execution, real SDK/process transport, policy transition,
+cancellation and installed package checks. Remote compilation and actual imports
+passed. Current-source robot conversion assets must pass the source-fingerprint
+check before the complete release metadata stage can pass.
+
 The public acceptance entry point is `omd validate`; session and replay export use
 `omd replay`. Install `oh-my-duck[validation]` for configuration and saved-evidence
 audits. Use the locked CPU or Newton environment for physical execution. An installed

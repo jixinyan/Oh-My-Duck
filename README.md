@@ -11,6 +11,11 @@ for each capability. The same commands are available through `python -m oh_my_du
 Actual CPU motion, cancellation and independent installed audits passed the
 [module validation](docs/reports/validation-modules-2026-10-08.md).
 
+The [native worker source map](src/oh_my_duck/integrations/edh/README.md) locates
+environment, device, session and transport code. Actual CPU motion, native SDK
+process communication, policy transition, cancellation and independent installed
+audits passed [worker validation](docs/reports/native-worker-modules-2026-10-08.md).
+
 Actual CPU policy checks cover metric motion, continuous navigation commands, native backend behavior and cancellation cleanup. Remote preflight verifies all release scenes, official policy hashes and the pinned Harness sources without initializing CUDA. Results and reproduction are in the [offline validation report](docs/reports/offline-release-validation-2026-10-07.md) and [runtime acceptance guide](docs/runtime-release-acceptance.md). GPU acceptance and RL remain stopped.
 
 Metric campaigns preserve exact policy inputs and admitted actions, then independently replay those inputs through the official ONNX models. The CPU matrix and continuous sequence verified 2556 control steps with zero action parity error.
