@@ -12,6 +12,22 @@ from oh_my_duck.core.paths import project_root
 ROOT = project_root()
 
 
+def sync_environment(name, project, environment, rl_framework):
+    extras = ["--extra", "native-harness"] if name == "isaac-newton" else []
+    if name == "isaac-newton" and rl_framework == "sb3":
+        extras.extend(["--extra", "sb3"])
+    reinstall = ["--reinstall-package", "usd-core"] if name == "isaac-newton" else []
+    subprocess.run(["uv", "sync", "--project", str(project), "--locked", "--python", "3.12",
+                    *extras, *reinstall], env=environment, check=True)
+    if name != "isaac-newton":
+        return None
+    python = Path(environment["UV_PROJECT_ENVIRONMENT"]) / "bin/python"
+    return json.loads(subprocess.check_output([
+        str(python), "-c",
+        "import json; from oh_my_duck.infrastructure.usd_runtime import verify_usd_runtime; print(json.dumps(verify_usd_runtime()))",
+    ], cwd=ROOT, env=environment, text=True))
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--skip-env", action="store_true")
@@ -37,15 +53,7 @@ def main():
     for name, project in (("isaac-newton", ROOT / "environments/isaac-newton"),
                           ("isaac-assets", ROOT / "environments/isaac-assets")):
         env = {**shared, "UV_PROJECT_ENVIRONMENT": str(ROOT / ".envs" / name)}
-        extras = ["--extra", "sb3"] if name == "isaac-newton" and args.rl_framework == "sb3" else []
-        reinstall = ["--reinstall-package", "usd-core"] if name == "isaac-newton" else []
-        subprocess.run(["uv", "sync", "--project", str(project), "--locked", "--python", "3.12", *extras, *reinstall], env=env, check=True)
-        openusd = None
-        if name == "isaac-newton":
-            openusd = json.loads(subprocess.check_output([
-                str(ROOT / ".envs" / name / "bin/python"), "-c",
-                "import json; from oh_my_duck.infrastructure.usd_runtime import verify_usd_runtime; print(json.dumps(verify_usd_runtime()))",
-            ], cwd=ROOT, env=env, text=True))
+        openusd = sync_environment(name, project, env, args.rl_framework)
         result = subprocess.check_output(["uv", "pip", "freeze", "--python", str(ROOT / ".envs" / name / "bin/python")], env=env, text=True)
         out = ROOT / "artifacts/environments" / name
         out.mkdir(parents=True, exist_ok=True)
