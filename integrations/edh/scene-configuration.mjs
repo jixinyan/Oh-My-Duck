@@ -6,7 +6,8 @@ import { resolve } from 'node:path';
 export function perceptionSources(configuration) {
   if (!Object.hasOwn(configuration ?? {}, 'perception_endpoint')) return ['simulator_ground_truth'];
   const endpoint = configuration.perception_endpoint;
-  if (typeof endpoint !== 'string' || !/^http:\/\/127\.0\.0\.1:[0-9]{1,5}\/?$/.test(endpoint))
+  if (typeof endpoint !== 'string' || endpoint.trim() !== endpoint ||
+      !/^http:\/\/127\.0\.0\.1:[0-9]{1,5}\/?$/.test(endpoint))
     throw new Error('Perception endpoint must be an explicit local service or SSH tunnel');
   const address = new URL(endpoint);
   const port = Number(address.port || 80);

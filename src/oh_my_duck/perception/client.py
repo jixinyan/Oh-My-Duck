@@ -7,7 +7,7 @@ from oh_my_duck.perception.validation import validate_response
 
 class PerceptionClient:
     def __init__(self, endpoint: str):
-        if not isinstance(endpoint, str) or not endpoint:
+        if not isinstance(endpoint, str) or not endpoint or any(character.isspace() for character in endpoint):
             raise ValueError("Perception endpoint must be a nonempty URL string")
         address = urlsplit(endpoint)
         if (address.scheme != "http" or address.hostname != "127.0.0.1" or address.port is None

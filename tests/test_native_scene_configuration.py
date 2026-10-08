@@ -62,7 +62,8 @@ def test_cpu_scene_rejects_cuda_assignment_before_sdk_loading():
 @pytest.mark.parametrize("backend", ["apartment-metric", "office"])
 @pytest.mark.parametrize("endpoint", [None, "", "http://example.com:9000", "http://127.0.0.1:0",
                                     "http://127.0.0.1:65536", "http://127.0.0.1:9000/inspect",
-                                    "http://127.0.0.1:9000?key=value", "http://user@127.0.0.1:9000"])
+                                    "http://127.0.0.1:9000?key=value", "http://user@127.0.0.1:9000",
+                                    "http://127.0.0.1:9000\n"])
 def test_unavailable_perception_endpoint_fails_at_configuration(backend, endpoint):
     configuration = json.loads((SCENES / f"{backend}.json").read_text())
     configuration["perception_endpoint"] = endpoint
