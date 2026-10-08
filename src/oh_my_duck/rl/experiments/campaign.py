@@ -24,12 +24,26 @@ SB3_OPTIONS = {
 }
 
 
+def require_integer(value, name, minimum=None):
+    if type(value) is not int or (minimum is not None and value < minimum):
+        suffix = f' >= {minimum}' if minimum is not None else ''
+        raise ValueError(f'{name} must be an integer{suffix}')
+
+
+def require_fraction(value, name, *, include_one=False):
+    if (isinstance(value, bool) or not isinstance(value, (int, float))
+            or not math.isfinite(value) or value <= 0
+            or value > 1 or (value == 1 and not include_one)):
+        upper = '<= 1' if include_one else '< 1'
+        raise ValueError(f'{name} must be finite with 0 < value {upper}')
+
+
 def load_plan(path):
     plan = json.loads(Path(path).read_text())
-    if plan.get('schema_version') != 1 or not plan.get('runs'):
+    if type(plan.get('schema_version')) is not int or plan['schema_version'] != 1 or not plan.get('runs'):
         raise ValueError('Expected a nonempty schema-1 campaign')
-    if plan.get('smoke_iterations', 0) < 5 or plan.get('checkpoint_interval', 0) < 1:
-        raise ValueError('Campaign requires at least five smoke iterations and periodic checkpoints')
+    require_integer(plan.get('smoke_iterations'), 'smoke_iterations', 5)
+    require_integer(plan.get('checkpoint_interval'), 'checkpoint_interval', 1)
     from oh_my_duck.rl.training.tasks import project_tasks
     tasks = project_tasks()
     seen = set()
@@ -46,8 +60,9 @@ def load_plan(path):
         task.binding(row['backend'])
         if task.evaluation is None or task.policy_package is None:
             raise ValueError('Full campaigns require task evaluation and policy-package profiles')
-        if row['num_envs'] < 1 or row['iterations'] < 1:
-            raise ValueError('Resource and iteration counts must be positive')
+        require_integer(row.get('num_envs'), 'num_envs', 1)
+        require_integer(row.get('iterations'), 'iterations', 1)
+        require_integer(row.get('seed'), 'seed')
         if row['backend'] not in ('mujoco', 'isaac-newton') or row['framework'] not in ('rsl-rl', 'sb3'):
             raise ValueError('Unsupported native training combination')
         for key, choices in SB3_OPTIONS.items():
@@ -62,13 +77,18 @@ def load_plan(path):
     for option in ('record_previews', 'unforced_evaluation'):
         if option in plan and type(plan[option]) is not bool:
             raise ValueError(f'{option} must be a boolean')
-    if search := plan.get('environment_search'):
+    if 'environment_search' in plan:
+        search = plan['environment_search']
+        if not isinstance(search, dict):
+            raise ValueError('environment_search must be an object')
         candidates = search.get('candidates', [])
         if not candidates or any(type(n) is not int or n < 64 for n in candidates) or candidates != sorted(set(candidates)):
             raise ValueError('Environment search needs increasing unique integer candidates >= 64')
-        if not 0 < search.get('memory_fraction', 0) < 1 or not 0 < search.get('stop_below_best_fraction', 0) <= 1:
-            raise ValueError('Environment search fractions must leave VRAM headroom')
-        if not 1 <= search.get('warmup_updates', 0) < search.get('updates', 0):
+        require_fraction(search.get('memory_fraction'), 'memory_fraction')
+        require_fraction(search.get('stop_below_best_fraction'), 'stop_below_best_fraction', include_one=True)
+        require_integer(search.get('warmup_updates'), 'warmup_updates', 1)
+        require_integer(search.get('updates'), 'updates', 2)
+        if search['warmup_updates'] >= search['updates']:
             raise ValueError('Environment search requires warmup and measured updates')
         if any(row.get('resume') for row in plan['runs']):
             raise ValueError('Environment search requires fresh runs; resume cannot change vector size')
@@ -77,8 +97,8 @@ def load_plan(path):
 
 def assigned_devices(visible, count, runs_per_gpu=1):
     devices = [s.strip() for s in visible.split(',') if s.strip()]
-    if runs_per_gpu < 1:
-        raise ValueError('runs-per-gpu must be positive')
+    require_integer(count, 'run count', 1)
+    require_integer(runs_per_gpu, 'runs-per-gpu', 1)
     if len(devices) * runs_per_gpu < count or len(devices) != len(set(devices)):
         raise ValueError('Campaign needs a distinct allocated GPU for every run')
     # Pinned mjlab select_gpus consumes ordinal CUDA_VISIBLE_DEVICES entries.
