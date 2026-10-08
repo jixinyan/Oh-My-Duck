@@ -57,9 +57,10 @@ and JavaScript syntax checks passed.
 The remote Newton environment compiled the source and imported the actual native
 worker, Newton backend and perception client with `CUDA_VISIBLE_DEVICES` empty.
 Current-source release metadata requires robot conversion assets matching the
-current conversion-source fingerprint. That preparation item remains pending;
-its source and result are preserved in
-`outputs/acceptance/native-worker-preflight-20261008-01/`.
+current conversion-source fingerprint. The
+[source-verified asset preparation](source-verified-assets-2026-10-08.md) supplies
+both required robot variants and records the complete metadata preflight at
+`bf8abf881f57880a352fcb765f1182f80b710bb7`.
 GPU simulation, fresh Newton kernel execution and hardware acceptance remain
 pending. GPU acceptance and RL stay stopped.
 

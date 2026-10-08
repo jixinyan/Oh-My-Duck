@@ -10,7 +10,7 @@ tags:
   - sim-to-real
 ---
 
-> 2026-10-08：原生 worker 的环境、动作设备、会话工具和通信模块完成组织及实际验证。连续五动作、1208 个 ONNX 重算、任务权限检查、两种运动取消、policy 转换、原生 SDK 与独立进程通信通过；独立安装检查 417 个文件与 19 个命令。远程编译和实际导入通过，当前源码对应的 robot conversion asset 准备尚待完成。GPU 和 RL 保持停止，见[完整记录](reports/native-worker-modules-2026-10-08.md)。
+> 2026-10-08：原生 worker 的环境、动作设备、会话工具和通信模块完成组织及实际验证。连续五动作、1208 个 ONNX 重算、任务权限检查、两种运动取消、policy 转换、原生 SDK 与独立进程通信通过。两种 robot conversion asset 支持经过 129 项转换输入、实际依赖和全部生成文件检查的明确复用；当前源码的六阶段、四份场景配置及 29 个固定 Harness 文件通过准备检查。独立安装核验 418 个文件与 19 个命令。GPU 和 RL 保持停止，见[资产验证](reports/source-verified-assets-2026-10-08.md)与[原生 worker 验证](reports/native-worker-modules-2026-10-08.md)。
 
 > 2026-10-08：公开验收入口与源码职责整理已经通过实际 CPU 连续五动作、1208 个 ONNX action 重算、两种运动期间取消、历史记录复核、21 项参数及导入检查、412 个安装文件和 19 个独立安装调用。远程六阶段准备检查通过，没有初始化 CUDA。GPU 和 RL 保持停止；结果见[完整记录](reports/validation-modules-2026-10-08.md)，具体模块见[架构说明](architecture.md)。
 

@@ -8,7 +8,29 @@ The [native worker validation](reports/native-worker-modules-2026-10-08.md) reco
 current CPU execution, real SDK/process transport, policy transition,
 cancellation and installed package checks. Remote compilation and actual imports
 passed. Current-source robot conversion assets must pass the source-fingerprint
-check before the complete release metadata stage can pass.
+check before the complete release metadata stage can pass. The
+[source-verified asset report](reports/source-verified-assets-2026-10-08.md) records
+both current-source robot variants and the complete six-stage metadata preflight.
+All four scene configurations, ten policies and 29 pinned Harness files passed
+with CUDA disabled. Independent installation checked 418 source/resource files,
+three licenses and 19 CLI calls, including actual saved ONNX and physical evidence.
+
+An ancestor checkout with identical conversion inputs and resolved dependencies
+can supply already-converted assets through the explicit reuse command:
+
+```bash
+CUDA_VISIBLE_DEVICES='' omd assets --backend isaac-newton -- \
+  --model allcollisions --reuse-from-source /absolute/path/to/ancestor-checkout
+CUDA_VISIBLE_DEVICES='' omd assets --backend isaac-newton -- \
+  --model groundcontact_rollers --reuse-from-source /absolute/path/to/ancestor-checkout
+```
+
+Both sources must be clean committed complete checkouts. Reuse requires new
+destination directories and checks every generated file. The manifest retains
+the original conversion/physics status and records both revisions, fingerprints
+and conversion-input hashes. See the
+[backend source map](../src/oh_my_duck/rl/backends/isaac_newton/README.md).
+Fresh Newton physics and hardware acceptance remain pending; GPU and RL stay stopped.
 
 The public acceptance entry point is `omd validate`; session and replay export use
 `omd replay`. Install `oh-my-duck[validation]` for configuration and saved-evidence

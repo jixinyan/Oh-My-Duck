@@ -41,6 +41,7 @@ Application, robot, training, shared acceptance and replay modules live in `src/
 | Shared task variants | `rl/tasks/shared/` | Symmetry and terrain definitions |
 | MDP and actor/critic | `rl/mdp/`, `rl/models/` | Observations, rewards, commands and curricula |
 | Batched training simulators | `rl/backends/` | `mujoco/`, `isaac_newton/` |
+| Newton asset preparation | `rl/backends/isaac_newton/` | `assets.py`, `asset_reuse.py`, `paths.py` |
 | Native PPO | `rl/learners/` | `rsl_rl/`, `sb3/` |
 | Training registration and dispatch | `rl/training/`, `rl/experiments/` | `tasks.py`, `frameworks.py`, `campaign.py` |
 | Export and deployment rehearsal | `rl/artifacts/`, `rl/evaluation/` | Export, schema-2 packaging and metrics |
@@ -65,6 +66,13 @@ The [native worker source map](../src/oh_my_duck/integrations/edh/README.md)
 separates simulation and sensors, device ownership, session and tool control,
 and process transport. `integrations/edh_native.py` exports the public classes and
 remains the executable module used by the native server and SSH workers.
+
+The [Newton backend source map](../src/oh_my_duck/rl/backends/isaac_newton/README.md)
+locates task binding, simulator physics, BAM and asset preparation. Explicit asset
+reuse checks clean ancestor source, complete conversion inputs and resolved
+dependencies before copying SHA256-verified generated files into a new directory.
+Conversion provenance and physical-validation status are preserved. Standard
+source-fingerprint verification remains required at runtime.
 
 `environments/` contains dependency manifests and locks only. MuJoCo, Isaac/Newton,
 and asset conversion keep separate environments because their native libraries have

@@ -18,6 +18,12 @@ refer to those modules. An immutable worker checkout needs explicit access to th
 canonical `.cache/`, `data/` and `artifacts/` directories. Keep its output directory
 available separately. These generated resources are checked before any GPU admission.
 
+Current-source converted assets can be prepared without starting Kit or CUDA
+through explicit `--reuse-from-source` after identical conversion inputs,
+resolved dependencies and generated files have been verified. See the
+[asset preparation instructions](release-readiness.md#runtime-preparation) and
+[actual six-stage metadata results](reports/source-verified-assets-2026-10-08.md).
+
 `--preflight-only` checks matching clean source, both pinned Harness revisions, the actual remote environment versions, every declared stage and motion parameter, all downloaded scene file sizes and SHA256 values, public map references, converted robot assets, the ten official policy models and the selected provider metadata. CUDA visibility is cleared and no simulation worker starts. The output records `preflight_passed`, `gpu_acceptance_performed: false` and the actual per-scene checks. Full GPU execution performs the same preflight before admission.
 
 ```bash

@@ -6,7 +6,7 @@
   "release_readiness": {
     "state": "acceptance_in_progress",
     "native_worker_modules": {
-      "state": "cpu_native_sdk_and_installed_checks_passed_asset_preparation_pending",
+      "state": "cpu_native_sdk_and_installed_checks_passed_metadata_prepared_gpu_pending",
       "module": "oh_my_duck.integrations.edh",
       "entry_point": "oh_my_duck.integrations.edh_native",
       "source_revision": "edffd76594a2347996af82e59f3389ad0f480eb5",
@@ -25,11 +25,30 @@
       "source_and_resource_files_verified": 417,
       "installed_cli_checks_passed": 19,
       "linux_runtime_imports": "outputs/acceptance/native-worker-linux-imports-20261008-01.txt",
-      "remote_metadata": "outputs/acceptance/native-worker-preflight-20261008-01/preflight/result.json",
-      "robot_conversion_assets": "current_source_fingerprint_pending",
+      "remote_metadata": "outputs/acceptance/asset-reuse-preflight-20261008-01/preflight/result.json",
+      "remote_metadata_source_revision": "bf8abf881f57880a352fcb765f1182f80b710bb7",
+      "robot_conversion_assets": "current_source_fingerprint_verified",
       "gpu_execution": "stopped",
       "cuda_runtime_checked": false,
       "report": "docs/reports/native-worker-modules-2026-10-08.md"
+    },
+    "source_verified_assets": {
+      "state": "conversion_inputs_generated_files_metadata_and_installed_checks_passed",
+      "source_revision": "bf8abf881f57880a352fcb765f1182f80b710bb7",
+      "baseline_revision": "a3cbcc160ca9bb25a12e350d0125e877e53b0934",
+      "module": "oh_my_duck.rl.backends.isaac_newton.asset_reuse",
+      "conversion_inputs_verified": 129,
+      "models": ["allcollisions", "groundcontact_rollers"],
+      "generated_files_verified_per_model": 11,
+      "conversion_status": "converted_not_physics_validated",
+      "independent_asset_audit": "outputs/acceptance/asset-reuse-20261008-01/independent-audit.json",
+      "remote_preflight": "outputs/acceptance/asset-reuse-preflight-20261008-01/preflight/result.json",
+      "installed_package": "outputs/acceptance/asset-reuse-installed-package-20261008-02.json",
+      "source_and_resource_files_verified": 418,
+      "installed_cli_checks_passed": 19,
+      "cuda_runtime_checked": false,
+      "gpu_execution": "stopped",
+      "report": "docs/reports/source-verified-assets-2026-10-08.md"
     },
     "validation_modules": {
       "state": "cpu_installed_and_saved_evidence_checks_passed_gpu_runtime_pending",
@@ -279,7 +298,7 @@
       "asset_environment": ".envs/isaac-assets",
       "locomotion": "physics_audited_behavior_unvalidated",
       "environment_state": "locked_installed_runtime_exercised",
-      "asset_environment_state": "conversion_worker_verified",
+      "asset_environment_state": "conversion_worker_and_source_verified_reuse_passed",
       "environment_framework": "Isaac Lab"
     }
   },

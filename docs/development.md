@@ -22,6 +22,13 @@ owns observations and simulator stepping, `device.py` owns action execution,
 transport. `integrations/edh_native.py` remains the executable and public import
 entry point; see the [source map](../src/oh_my_duck/integrations/edh/README.md).
 
+Asset preparation belongs in `rl/backends/isaac_newton/`; see its
+[source map](../src/oh_my_duck/rl/backends/isaac_newton/README.md).
+`assets.py --reuse-from-source` requires a clean complete ancestor checkout and
+identical conversion inputs and resolved dependencies. It creates a new verified
+artifact directory with original conversion status and explicit source provenance.
+The existing source fingerprint and generated-file checks apply to every use.
+
 Task factories and policy configuration are editable project source. Native RSL-RL
 and SB3 PPO remain dependencies. Microduck task code is never loaded from the
 upstream cache. `environments/{mujoco,isaac-newton,isaac-assets}` holds dependency

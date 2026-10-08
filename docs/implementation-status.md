@@ -1,6 +1,6 @@
 # Implementation status
 
-> 2026-10-08：原生 worker 位于 `integrations/edh/`，分别管理环境、动作设备、会话工具与进程通信；公开 executable 保持 `oh_my_duck.integrations.edh_native`。实际 CPU 连续动作、1208 个 ONNX 重算、任务权限检查、原生 SDK 与独立进程通信、policy 转换及两种运动期间取消全部通过。独立安装检查 417 个文件、三份许可证和 19 个命令调用。远程编译与实际导入通过；当前源码对应的 robot conversion asset 准备尚待完成，GPU 和 RL 保持停止。见[验证记录](reports/native-worker-modules-2026-10-08.md)。
+> 2026-10-08：原生 worker 位于 `integrations/edh/`，分别管理环境、动作设备、会话工具与进程通信；公开 executable 保持 `oh_my_duck.integrations.edh_native`。实际 CPU 连续动作、1208 个 ONNX 重算、任务权限检查、原生 SDK 与独立进程通信、policy 转换及两种运动期间取消全部通过。两种 robot conversion asset 支持经过完整来源检查的明确复用；当前源码六阶段准备检查通过，核验四份场景配置、十个官方 policy 和 29 个 Harness 文件。独立安装检查 418 个文件、三份许可证和 19 个命令调用，远程编译与实际导入通过，GPU 和 RL 保持停止。见[资产验证](reports/source-verified-assets-2026-10-08.md)与[原生 worker 验证](reports/native-worker-modules-2026-10-08.md)。
 
 > 2026-10-08：验收实现按职责位于 `validation/{metric,harness,release}`，原生记录导出位于 `experience/harness_replay.py`。公开入口及 21 项配置与导入检查通过；实际 CPU 连续五动作、1208 个 ONNX action 重算、两种运动期间取消和独立复核通过。独立安装核验 412 个文件、三份许可证和 19 个实际调用；已有 Hospital 导航记录通过完整复核。远程六阶段准备检查通过且没有初始化 CUDA，见[完整记录](reports/validation-modules-2026-10-08.md)。GPU 和 RL 保持停止。
 
