@@ -12,6 +12,8 @@ tags:
   - project-design
 ---
 
+> CPU 语音任务已经验证 ASR 原样提交、固定音色反馈、完整 WAV 和资源释放。当前模型服务的 token 没有 `gpt-6.1-sol` 访问权限，正式导航验收需要恢复该权限；本次动作、相机帧和 verdict 均为零。GPU 与 RL 保持停止，见[任务记录](reports/cpu-voice-task-2026-10-08.md)。
+
 > 三个固定 Qwen 模型完成 CPU Float32 推理，已确认音色、数据库内容、三段 WAV 和安装后的入口通过核验。26 项设备检查、72 次无效参数调用及六次 CUDA 不可用调用通过；三段回读文字中两段一致，一段保留「你好／您好」差异。GPU 与 RL 保持停止，见[CPU 语音验证](reports/qwen-cpu-validation-2026-10-08.md)。
 
 > 应用和语音使用原生任务客户端，工具参数使用完整 JSON Schema Draft 2020-12。实际 CPU 会话、任务目录检查、关闭及资源释放通过，77 项测试、33 项子测试、430 个独立安装文件和 24 个调用通过。具体职责位于[应用源码说明](../src/oh_my_duck/agentic/README.md)，结果见[接口验证](reports/native-application-interfaces-2026-10-08.md)。GPU 与 RL 保持停止。

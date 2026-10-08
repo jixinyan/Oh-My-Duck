@@ -4,6 +4,12 @@ The release workflow uses recorded speech, the pinned native Harness, official p
 
 ## Runtime preparation
 
+The installed CPU voice task verified actual ASR submission, confirmed-voice
+failure feedback, two decoded WAV files, unchanged profile and full resource
+release. The configured provider denies access to `gpt-6.1-sol`; current-source
+model-driven navigation requires that access. See the
+[actual task and provider record](reports/cpu-voice-task-2026-10-08.md).
+
 Qwen ASR, Base TTS and VoiceDesign passed actual CPU Float32 inference in their
 separate frozen environments. The existing confirmed profile and database bytes
 remained unchanged. Three decoded WAV files, installed model admission, the active

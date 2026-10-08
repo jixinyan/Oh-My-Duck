@@ -23,6 +23,11 @@ model admission, profile preservation and process release passed
 ASR text matched two of the three generated utterances; recognition accuracy
 requires separate evaluation. GPU acceptance and RL remain stopped.
 
+The [installed CPU voice-task check](docs/reports/cpu-voice-task-2026-10-08.md)
+verified actual ASR submission, fixed-voice feedback and resource release. The
+configured provider requires `gpt-6.1-sol` model access before current-source
+navigation can be accepted.
+
 Verified CPU paths cover actual policy motion, stopping, cancellation, native SDK
 transport, recorded sensors, voice profiles, assets and independent installation.
 `omd validate pose` exercises head/body commands through the native Harness and
