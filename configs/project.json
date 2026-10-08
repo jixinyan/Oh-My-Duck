@@ -5,6 +5,28 @@
   "entry_point": "omd.py",
   "release_readiness": {
     "state": "acceptance_in_progress",
+    "cpu_collision_model": {
+      "state": "actual_two_world_contact_masks_ground_pairs_and_finalized_cpu_arrays_verified",
+      "source_revision": "8858d9da5486d34f7d77f3793d7dbcb4adcfa50f",
+      "module": "oh_my_duck.rl.backends.isaac_newton.task_binding.collision_model",
+      "models_verified": ["allcollisions", "groundcontact_rollers"],
+      "worlds_per_model": 2,
+      "actual_newton_imports": 4,
+      "finalized_cpu_models": 2,
+      "calculation_body_ast_unchanged": true,
+      "configuration_and_import_tests_passed": 27,
+      "source_and_resource_files_verified": 422,
+      "installed_cli_checks_passed": 20,
+      "runtime_audit": "outputs/acceptance/collision-model-20261008-01/independent-audit.json",
+      "installed_package": "outputs/acceptance/collision-model-package-20261008-01/result.json",
+      "remote_preflight": "outputs/acceptance/collision-model-release-preflight-20261008-01/preflight/result.json",
+      "release_stages_verified": 6,
+      "scene_configurations_verified": 4,
+      "harness_source_files_verified": 29,
+      "gpu_acceptance_performed": false,
+      "solver_execution_performed": false,
+      "report": "docs/reports/collision-model-2026-10-08.md"
+    },
     "newton_execution_preflight": {
       "state": "actual_entry_points_dependency_failure_setup_repair_and_installed_boundaries_verified",
       "source_revision": "82451e7c41c711854aacd62c52e670776a4f451e",

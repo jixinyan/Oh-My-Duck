@@ -43,6 +43,7 @@ Application, robot, training, shared acceptance and replay modules live in `src/
 | Batched training simulators | `rl/backends/` | `mujoco/`, `isaac_newton/` |
 | Newton asset preparation | `rl/backends/isaac_newton/` | `assets.py`, `asset_reuse.py`, `paths.py` |
 | USD collision geometry and materials | `rl/backends/isaac_newton/task_binding/` | `collision_assets.py` |
+| Newton collision masks and explicit contact pairs | `rl/backends/isaac_newton/task_binding/` | `collision_model.py` |
 | Native PPO | `rl/learners/` | `rsl_rl/`, `sb3/` |
 | Training registration and dispatch | `rl/training/`, `rl/experiments/` | `tasks.py`, `frameworks.py`, `campaign.py` |
 | Export and deployment rehearsal | `rl/artifacts/`, `rl/evaluation/` | Export, schema-2 packaging and metrics |
@@ -97,8 +98,11 @@ See [actual dependency and import validation](reports/openusd-readiness-2026-10-
 `task_binding/collision_assets.py` owns official MJCF compilation, USD instance
 expansion, source geometry mapping and physics material preparation. It can be
 called directly on an actual USD stage without starting the simulator.
-`task_binding/collisions.py` owns scene spawning and the Newton model callback
-for filters, contact parameters, geometry orientation and ground collision pairs.
+`task_binding/collision_model.py` applies source masks, contact parameters,
+geometry orientation and ground pairs to the actual Newton builder. Actual
+two-world configuration and finalized CPU data passed
+[collision model validation](reports/collision-model-2026-10-08.md).
+`task_binding/collisions.py` owns scene spawning and registers the native callback.
 
 RL and agentic share robot/policy contracts rather than importing each other's
 implementation. `robotics/backends` implements online robot execution;

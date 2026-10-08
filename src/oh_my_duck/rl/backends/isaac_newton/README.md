@@ -15,12 +15,16 @@ libraries belong to the isolated `isaac-newton` environment; conversion uses
 | Explicit reuse of identical converted assets | `asset_reuse.py` |
 | Conversion reference and robot naming | `asset_reference.py`, `asset_names.py` |
 | Source MJCF collision mapping and USD physics materials | `task_binding/collision_assets.py` |
-| Simulator spawning and Newton collision parameters | `task_binding/collisions.py` |
+| Newton collision masks, explicit ground pairs and scene geometry corrections | `task_binding/collision_model.py` |
+| Simulator spawning and model-initialization callback | `task_binding/collisions.py` |
 
 `collision_assets.py` compiles the official source model, expands USD instances,
 maps each enabled collider to its source geometry and authors its physics material.
 It imports no native simulator or USD module until called. `collisions.py` registers
-the model-initialization callback that configures the actual Newton collision model.
+the model-initialization callback and passes the active builder to
+`collision_model.py`. Contact configuration can be applied directly to a real
+CPU builder; two-world official model preparation and finalized arrays passed
+the [CPU collision audit](../../../../../docs/reports/collision-model-2026-10-08.md).
 The Linux kitless environment uses `usd-exchange==3.0.0`, which supplies OpenUSD
 26.08. Setup and startup verify the unique provider and its installed files.
 

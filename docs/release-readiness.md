@@ -4,6 +4,11 @@ The release workflow uses recorded speech, the pinned native Harness, official p
 
 ## Runtime preparation
 
+The actual collision configuration helper passed two-world checks for both robot
+variants and finalized CPU arrays. All source masks and explicit contact fields
+were checked; 27 tests and an independent installation of 422 files and 20 CLI
+calls passed [collision model validation](reports/collision-model-2026-10-08.md).
+
 Newton training, evaluation, diagnostic and direct runtime entry points verify
 the installed OpenUSD provider before GPU allocation. Nine actual entry-point
 checks, locked setup repair, 26 configuration/import tests and independent

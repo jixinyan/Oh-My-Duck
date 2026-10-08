@@ -13,6 +13,7 @@ stopped.
 | Sensor and voice records | Actual saved RGBD validation, frame identity, distance reconstruction and confirmed voice profiles | [Offline validation](offline-release-validation-2026-10-07.md) |
 | Converted assets | Both variants, complete conversion inputs and dependencies, source fingerprints and every generated file | [Source-verified assets](source-verified-assets-2026-10-08.md) |
 | OpenUSD and native imports | Unique patched OpenUSD 26.08 provider; six imports across three processes; source geometry, materials and joints preserved | [OpenUSD validation](openusd-readiness-2026-10-08.md) |
+| Newton contact configuration | Actual two-world source masks, explicit ground pairs and finalized CPU arrays for both robot variants; 27 tests and 422 installed files | [Collision model validation](collision-model-2026-10-08.md) |
 | Public CPU asset command | Four actual Newton imports, passive wheel joints, ordered progress, failed-result retention and output protection | [Public asset validation](model-assets-cli-2026-10-08.md) |
 | Newton execution entry points | Nine actual dependency failures before CUDA/Isaac initialization; actual locked setup repair; 26 tests and 421 independent installed files | [Execution preflight](newton-execution-preflight-2026-10-08.md) |
 | Current-source release preparation | Six stages, four scenes, ten policies, 29 pinned Harness files and actual model-provider metadata; CUDA uninitialized | [Execution preflight](newton-execution-preflight-2026-10-08.md) |
@@ -22,6 +23,7 @@ Source responsibilities are listed in the [architecture source map](../architect
 `integrations/edh/` owns native environment, device, session and transport;
 `validation/` owns acceptance; `experience/` owns replay export;
 `task_binding/collision_assets.py` owns USD preparation;
+`task_binding/collision_model.py` owns Newton contact configuration;
 `infrastructure/usd_runtime.py` owns installed OpenUSD verification.
 Public execution and audit commands remain available from installed packages.
 All verification processes exited. Source, configuration, wheel, source

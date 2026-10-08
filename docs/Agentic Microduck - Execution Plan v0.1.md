@@ -10,6 +10,8 @@ tags:
   - sim-to-real
 ---
 
+> 2026-10-08：Newton 接触配置独立到 `task_binding/collision_model.py`，两种模型各两个实际 world 的接触过滤、ground pair、摩擦参数和 finalized CPU 数组通过核验，计算内容的 AST 保持一致。27 项配置及导入测试、422 个独立安装文件与 20 个调用通过。GPU 和 RL 保持停止，见[碰撞模型验证](reports/collision-model-2026-10-08.md)。
+
 > 2026-10-08：训练和评估入口、诊断入口、直接环境创建与原生 RSL worker 已接入 OpenUSD 启动前检查。九条实际调用路径、锁定安装修复、244 个文件核验、26 项配置及导入测试，以及 421 个独立安装文件与 20 个调用通过。GPU 和 RL 保持停止，见[入口验证](reports/newton-execution-preflight-2026-10-08.md)与[CPU 开发验证记录](reports/cpu-development-readiness-2026-10-08.md)。
 
 > 2026-10-08：OpenUSD 26.08 的实际安装、244 个文件检查、两种模型碰撞准备和 Newton CPU 导入通过，全部 14 个 servo 保留。公开 `omd validate model-assets` 完成同一进程的四次实际导入、全部 passive wheel joint 核验、八条过程记录复核及输出保护。24 项配置和导入测试通过，独立安装核验 421 个文件、三份许可证与 20 个调用。远程环境和完整资料见[CPU Newton 资产验证](reports/openusd-readiness-2026-10-08.md)与[公开资产验收](reports/model-assets-cli-2026-10-08.md)。GPU 和 RL 保持停止。
