@@ -15,7 +15,6 @@ from oh_my_duck.core.paths import project_root
 
 async def run(args):
     import torch
-    from OpenGL import GL
 
     from oh_my_duck.integrations.edh_native import MicroDuckWorkerSession
     from oh_my_duck.validation.harness.control import available_port, control, expect_control_error
@@ -106,6 +105,8 @@ async def run(args):
             "native_task_id": "policy-packages", "policy_id": "registered-schema2-onnx",
             "execution_mode": "policy", "schema_path": str(args.edh_source / "harness/contracts/schema/physical.schema.json"),
             "monitor_every_actions": 1, "policy_max_actions_per_inference": 1})
+        from OpenGL import GL
+
         record["renderer"] = await session._device.on_owner(lambda: GL.glGetString(GL.GL_RENDERER).decode())
         if not any(name in record["renderer"].lower() for name in ("llvmpipe", "softpipe")):
             raise RuntimeError("CPU package execution requires Mesa software rendering")
