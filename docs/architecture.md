@@ -34,7 +34,8 @@ Application, robot, training, shared acceptance and replay modules live in `src/
 | Public commands | `cli/` | `cli/__init__.py`, `cli/validation.py` |
 | Native EDH physical session | `integrations/edh/` | `environment.py`, `device.py`, `session.py`, `worker.py` |
 | Shared native CPU/Newton scene configuration | `integrations/edh/` | `scene.schema.json`, `scene_configuration.py`; Node admission in `integrations/edh/scene-configuration.mjs` at the repository root |
-| Tools and skills | `agentic/` | `agentic/tools/`, `agentic/skills/` |
+| Application dependencies, tools and skills | `agentic/` | [Source map](../src/oh_my_duck/agentic/README.md), `application.py`, `harness/base.py`, `tools/`, `skills/` |
+| Native task HTTP client | `integrations/` | `native_client.py`; implements `HarnessBridge` for voice and application services |
 | Shared types and configuration | `core/` | `core/paths.py` |
 | Online robot execution | `robotics/backends/` | `simulation.py`, `isaac_official.py` |
 | Official robot assets and policies | `robotics/microduck/` | `official_policies.py` |
@@ -130,6 +131,13 @@ trainable on another backend; no diagnostic fallback is allowed.
 6. Tools and voice emit events with episode identity, simulation/real domain, timestamps and evidence references.
 7. The recorder persists evidence. The harness decides what to remember and what to say.
 8. TTS consumes the confirmed active voice profile and the harness's response text.
+
+`ApplicationServices.harness` uses the native task interface: `open`, `submit`,
+`status`, `wait`, `stop` and `close`. `integrations/native_client.py` implements
+these operations through the pinned native HTTP API. The server owns tool
+registration and experience records. Tool schemas use JSON Schema Draft 2020-12
+through the `validation` extra; registration validates the schema and invocation
+validates finite JSON arguments before the handler runs.
 
 `integrations/edh/server.mjs` 使用固定 EDH 源码的 `startServer` 与 `createNativeWorkerEnvironment`。`integrations/edh/team.yaml` 和角色文件定义原生 Planner、Verifier 以及 MicroDuck 工具。`integrations/edh/environment.py` 提供真实 CPU MuJoCo/BAM、Newton/BAM、官方 ONNX 策略和传感器数据，`device.py` 管理原生动作设备，`session.py` 管理工具与 ActionGate，`worker.py` 管理进程通信；每次 14 关节动作经过 ActionGate 后执行四个 0.005 秒物理步。普通暂停时设备先排空已接纳动作，再发布真实 `pausing` 观测，随后确认停止。`finish_policy` 在已确认暂停边界调用原生 ActionGate 的 `policy_stop`，发布新鲜 `ended` 状态；独立 Verifier 随后读取原生目标检查。模型凭证只通过私有配置或环境变量传递。
 

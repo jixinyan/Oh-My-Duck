@@ -16,6 +16,13 @@ require the locked simulator environment and the pinned native Harness dependenc
 Reusable implementation imports package modules directly. Compatibility scripts
 contain entry-point dispatch only; pytest does not add `scripts/` to its import path.
 
+Application dependencies, tool registration and skill execution are listed in
+the [agentic source map](../src/oh_my_duck/agentic/README.md).
+`HarnessBridge` declares the operations implemented by `NativeTaskClient`:
+`open`, `submit`, `status`, `wait`, `stop` and `close`. Use the pinned native server
+for actual task validation. Tool schemas require the `validation` extra or a
+locked execution environment and use JSON Schema Draft 2020-12.
+
 The native worker implementation lives in `integrations/edh/`: `environment.py`
 owns observations and simulator stepping, `device.py` owns action execution,
 `session.py` owns native session and tool boundaries, and `worker.py` owns process
@@ -97,7 +104,7 @@ Before committing, inspect the staged diff and ensure no ignored artifacts or cr
 
 ## Progress
 
-Update the original design and execution documents when scope, module responsibilities or milestone status changes. Distinguish implemented, executed and validated. Record failed experiments, including job IDs and failure causes. A generated source inventory is not a complete semantic code audit, a mock is not an autonomous Harness, and a smoke checkpoint is not a walking-policy benchmark.
+Update the original design and execution documents when scope, module responsibilities or milestone status changes. Record executed behavior, measured results and remaining acceptance requirements. Preserve experiment identities and source revisions. Require semantic review for source audits, actual native model tasks for Harness acceptance and behavioral evaluation for learned policies.
 
 Resource allocation is explicit and based on the experiment. The user permits single-node multi-GPU jobs and does not impose an artificial runtime or task-count cap. Never infer that reserving more GPUs automatically parallelizes a single-GPU trainer.
 

@@ -669,58 +669,39 @@ policy-package/
 
 ## 11. 开发结构与配置建议
 
-当前实际采用一个轻量 Python 核心包加独立训练工作区。先建立可扩展接口，不提前安装或启动每个模块的重型依赖；未来服务可独立进程部署，必要时再拆为独立分发包。
+项目源码统一位于 `src/oh_my_duck/`，依赖环境位于 `environments/`。
 
-```text
-oh-my-duck/
-  omd.py                         # 统一入口；安装后也可使用 omd
-  src/oh_my_duck/
-    application.py               # 明确注入服务，不隐式启动 agent loop
-    cli.py                       # CLI 路由
-    contracts/                   # 身份、任务、传感器帧、事件
-    backends/                    # 在线 RobotBackend：sim / real
-    skills/                      # 技能元数据与执行生命周期
-    tools/                       # 实际注册工具与调用结果
-    perception/                  # 主动观察、目标证据与有效性
-    policies/                    # joint / velocity / action-sequence 适配
-    harness/                     # 外部 bridge，后续 mock / 真正接口
-    voice/                       # ASR、音色设计/存储、TTS、音频设备
-    recording/                   # episode 记录；当前 JSONL
-    training/                    # 离线 TrainingBackend 协议与注册
-  training/
-    common/                      # 跨模拟器关节契约、命令时序和评测
-    mujoco/                      # 当前官方后端的进程内实现
-    # isaac_newton/               # 后续实际迁移时添加
-  scripts/                       # 环境获取、job 提交、进程入口
-  configs/                       # 组件成熟度、上游版本、实验协议
-  tests/                         # 契约/模块边界/实际行为
-  docs/                          # 总体设计、步骤、架构和证据
-```
+| 职责 | 当前目录与入口 |
+| --- | --- |
+| 公开命令 | `cli/`、`omd.py` |
+| 应用服务、工具与技能 | `agentic/application.py`、`agentic/tools/`、`agentic/skills/` |
+| 原生任务接口与 HTTP 客户端 | `agentic/harness/base.py`、`integrations/native_client.py` |
+| EDH 物理环境、设备、会话与通信 | `integrations/edh/`；Node 部署位于根目录 `integrations/edh/` |
+| 身份、传感器、任务与事件 | `core/contracts/` |
+| 在线机器人与 policy 执行 | `robotics/backends/`、`robotics/policies/`、`robotics/microduck/` |
+| 主动感知 | `perception/` |
+| ASR、固定音色与音频设备 | `voice/` |
+| 经验记录与原生回放导出 | `experience/` |
+| 任务、MDP、Newton/MuJoCo、PPO、导出与评估 | `rl/` |
+| 运动、原生任务与发布验收 | `validation/` |
+| 依赖安装与进程管理 | `infrastructure/` |
+| 版本、场景、训练、语音与发布配置 | `configs/` |
+| 模块与实际运行检查 | `tests/`、`scripts/` |
 
-模块接口是明确的后续实现位置，不表示能力已经可运行。`omd status` 展示软件成熟度；它不能替代连接设备后得到的真实能力发现。核心包不导入模拟器、Torch 或语音模型；实际训练位于分开的环境中。在线机器人执行后端与离线训练后端分别建模。详见[架构与扩展指南](architecture.md)。
+`ApplicationServices.harness` 使用 `HarnessBridge` 声明的 `open`、`submit`、
+`status`、`wait`、`stop`、`close`，具体实现为 `NativeTaskClient`。语音入口使用同一
+客户端。原生服务管理工具注册、规划与经验资料，任务记录保留会话身份、执行领域和正式结果。
+`ToolCatalog` 使用 `jsonschema` 检查 Draft 2020-12 Schema，注册时检查声明，调用时
+检查有限数值与完整参数，随后执行 handler。运行工具需要 `validation` extra 或锁定环境。
 
-示意配置：
+`omd status` 展示软件成熟度，连接设备后的能力由实际后端返回。应用接口导入时不启动
+模拟器、Torch 或语音模型。在线执行与批量训练分别位于 `robotics/backends/` 和
+`rl/backends/`。具体入口见[应用源码说明](../src/oh_my_duck/agentic/README.md)、
+[架构说明](architecture.md)和[原生部署](harness-native-integration.md)。
 
-```yaml
-schema_version: 1
-persona_id: duck-001
-robot_id: sim-duck-001
-backend:
-  kind: isaac                  # 或 microduck；端点由连接配置提供
-harness:
-  adapter: external            # 协议待接入项目确定
-voice:
-  input_mode: explicit_recording
-  asr: Qwen/Qwen3-ASR-0.6B
-  active_profile: voice-001/v1
-  tts: Qwen/Qwen3-TTS-12Hz-0.6B-Base
-recording:
-  events: true
-  sensor_mode: keyframes
-  experience_domain: simulation
-```
-
-上述配置不代表已存在的命令或可运行示例。实际发布前补充模型修订、后端连接与存储路径，并进行 schema 校验。
+实际配置包括 `configs/upstream.json`、`configs/training.json`、
+`configs/simulation-demo/` 和 `configs/experiments/runtime-release-acceptance.json`。场景参数使用
+共用 JSON Schema；模型、场景、policy 和声音版本分别保存来源资料。
 
 ## 12. 分阶段交付与验收
 
@@ -787,7 +768,7 @@ recording:
 | 版本 | 日期 | 变更 |
 |---|---|---|
 | 0.1 | 2026-09-06 | 首次整合项目定位、Isaac 迁移、通用工具、轻量语音、持久音色与经验记录设计 |
-| 0.2 | 2026-09-06 | 用户确认完整 scope 下双训练后端、sim2sim、Newton、job/headless/视频、仿真优先与后续 mock；优先整体框架、README 项目总览、本地 Git 和文档同步 |
+| 0.2 | 2026-09-06 | 双训练后端、sim2sim、Newton、headless 视频、原生 Harness、项目入口与文档同步 |
 
 ## 15. 来源与证据边界
 

@@ -10,7 +10,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 
 from oh_my_duck.core.contracts import EpisodeEvent, ExecutionDomain, Identity
 from oh_my_duck.experience import JsonlEpisodeRecorder
-from oh_my_duck.agentic.tools import ToolCatalog, ToolDefinition, ToolResult
+from oh_my_duck.agentic.tools import ToolCatalog
 
 
 class FrameworkTests(unittest.TestCase):
@@ -32,18 +32,24 @@ class FrameworkTests(unittest.TestCase):
         self.assertEqual(catalog.definitions(), ())
 
     def test_tool_correlation_and_duplicate_registration(self):
-        catalog = ToolCatalog()
-        definition = ToolDefinition("state", "Read actual state", {"type": "object"})
-        async def mismatched(request_id, arguments):
-            return ToolResult("a-different-request", "ok", {})
-        catalog.register(definition, mismatched)
+        from oh_my_duck.agentic.skills.simulation import SimulationSkillRunner
+        from oh_my_duck.agentic.tools.simulation import simulation_tools
+        from oh_my_duck.robotics.backends.simulation import SimulationBackend
+
+        backend = SimulationBackend(robot_id="capability-check", backend="cpu-mujoco-bam",
+                                    policy_path=None, task_id="capability-check")
+        catalog = simulation_tools(backend, SimulationSkillRunner(backend))
+        definition, handler = catalog._tools["get_capabilities"]
         with self.assertRaises(ValueError):
-            catalog.register(definition, mismatched)
-        with self.assertRaises(ValueError):
-            asyncio.run(catalog.invoke("state", "request-1", {}))
+            catalog.register(definition, handler)
+        result = asyncio.run(catalog.invoke("get_capabilities", "request-1", {}))
+        self.assertEqual(result.request_id, "request-1")
+        self.assertEqual(result.payload["identity"]["robot_id"], backend.robot_id)
 
     def test_episode_domain_and_evidence_survive_recording(self):
-        with tempfile.TemporaryDirectory() as directory:
+        temporary = Path.cwd() / ".cache/tmp"
+        temporary.mkdir(parents=True, exist_ok=True)
+        with tempfile.TemporaryDirectory(dir=temporary) as directory:
             path = Path(directory) / "episode.jsonl"
             recorder = JsonlEpisodeRecorder(path)
             for i, domain in enumerate((ExecutionDomain.SIMULATION, ExecutionDomain.REAL)):

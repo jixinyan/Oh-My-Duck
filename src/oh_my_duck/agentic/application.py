@@ -1,4 +1,3 @@
-"""Explicit dependency injection for future UI/services; no implicit agent loop."""
 from dataclasses import dataclass
 
 from oh_my_duck.robotics.backends import RobotBackend
