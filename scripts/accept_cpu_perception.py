@@ -36,12 +36,20 @@ def validate_case(backend, output, name, pose):
                        for r, c in ((row - 2, column), (row + 2, column),
                                     (row, column - 2), (row, column + 2))):
                 continue
-            point = np.zeros(3)
-            geom_id, flex_id, skin_id = [np.full(1, -1, dtype=np.int32) for _ in range(3)]
-            body_id = mujoco.mjv_select(backend.model, backend.data, mujoco.MjvOption(), 320 / 240,
-                                        (column + 0.5) / 320, 1 - (row + 0.5) / 240,
-                                        backend._renderer.scene, point, geom_id, flex_id, skin_id)
-            assert body_id >= 0 and geom_id[0] == geom, (name, row, column, geom, geom_id)
+            camera_id = backend._camera_site_id
+            assert backend.model.cam_sensorsize[camera_id, 0] == 0
+            focal = 240 / (2 * math.tan(math.radians(float(backend.model.cam_fovy[camera_id])) / 2))
+            rotation = backend.data.cam_xmat[camera_id].reshape(3, 3)
+            ray = rotation @ np.array([(column + 0.5 - 160) / focal, (120 - row - 0.5) / focal, -1])
+            # 射线从实际 near plane 开始，使用模型 fovy 独立计算像素方向。
+            near = float(backend.model.vis.map.znear * backend.model.stat.extent)
+            origin = backend.data.cam_xpos[camera_id] + ray * near
+            ray /= np.linalg.norm(ray)
+            geom_id = np.full(1, -1, dtype=np.int32)
+            distance = mujoco.mj_ray(backend.model, backend.data, origin, ray,
+                                      mujoco.MjvOption().geomgroup, 1, -1, geom_id)
+            assert distance >= 0 and geom_id[0] == geom, (name, row, column, geom, geom_id)
+            point = origin + ray * distance
             error = float(np.linalg.norm(points[row, column] - point))
             assert error < 0.002, (name, row, column, error)
             checked.append({'row': row, 'column': column, 'geom_id': int(geom),
@@ -82,7 +90,7 @@ def validate_case(backend, output, name, pose):
     (output / f'{name}-frame.json').write_text(json.dumps(frame) + '\n')
     (output / f'{name}-inspection.json').write_text(json.dumps(inspection) + '\n')
     np.savez_compressed(output / f'{name}-geometry.npz', points_world_m=points, segmentation=segmentation)
-    return {'case': name, 'pose': pose, 'native_selected_pixels': len(checked),
+    return {'case': name, 'pose': pose, 'native_ray_pixels': len(checked),
             'maximum_world_point_error_m': max(item['error_m'] for item in checked),
             'targets': inspection['targets'], 'pixels': checked, 'physical_state_unchanged': True}
 
@@ -114,7 +122,7 @@ def main():
                             for path in args.output.iterdir() if path.is_file()}}
     (args.output / 'result.json').write_text(json.dumps(result, indent=2) + '\n')
     print(json.dumps({'passed': True, 'cases': len(results),
-                      'native_selected_pixels': sum(item['native_selected_pixels'] for item in results),
+                      'native_ray_pixels': sum(item['native_ray_pixels'] for item in results),
                       'maximum_world_point_error_m': max(item['maximum_world_point_error_m'] for item in results),
                       'renderer': renderer, 'cuda_initialized': False}))
 

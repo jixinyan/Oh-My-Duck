@@ -797,9 +797,9 @@ class CpuMujocoBamBackend(SimulationBackend):
         return self.observe_control()
 
     def _perception_capture(self) -> tuple[dict, object]:
+        self._require_owner()
         from oh_my_duck.perception.mujoco import capture_world_points
 
-        self._require_owner()
         observed = self.observe_control()
         points, segmentation, eye = capture_world_points(self._renderer)
         output = BytesIO()
@@ -819,6 +819,9 @@ class CpuMujocoBamBackend(SimulationBackend):
         return frame
 
     def inspect_scene(self, prompt: str) -> dict:
+        self._require_owner()
+        if not isinstance(prompt, str) or not prompt.strip() or len(prompt) > 120:
+            raise ValueError("Perception prompt must contain 1–120 characters")
         from oh_my_duck.perception.mujoco import inspect_apartment_frame
 
         frame, segmentation = self._perception_capture()
