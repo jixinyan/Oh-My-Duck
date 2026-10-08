@@ -12,6 +12,8 @@ tags:
   - project-design
 ---
 
+> 三个固定 Qwen 模型完成 CPU Float32 推理，已确认音色、数据库内容、三段 WAV 和安装后的入口通过核验。26 项设备检查、72 次无效参数调用及六次 CUDA 不可用调用通过；三段回读文字中两段一致，一段保留「你好／您好」差异。GPU 与 RL 保持停止，见[CPU 语音验证](reports/qwen-cpu-validation-2026-10-08.md)。
+
 > 应用和语音使用原生任务客户端，工具参数使用完整 JSON Schema Draft 2020-12。实际 CPU 会话、任务目录检查、关闭及资源释放通过，77 项测试、33 项子测试、430 个独立安装文件和 24 个调用通过。具体职责位于[应用源码说明](../src/oh_my_duck/agentic/README.md)，结果见[接口验证](reports/native-application-interfaces-2026-10-08.md)。GPU 与 RL 保持停止。
 
 > CPU 公寓与 Newton 场景使用相同的已打包 JSON Schema，公开入口支持出生位置与原生目标配置。7 份配置及 23 组无效配置的 Python/Node 检查、实际启动与退出、64 项测试、431 个独立安装文件和 24 个调用通过。机器人、RL 和原生执行的 345 个文件保持一致，GPU 与 RL 保持停止，见[场景配置验证](reports/native-scene-configuration-2026-10-08.md)。

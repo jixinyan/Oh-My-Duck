@@ -42,3 +42,5 @@ TMPDIR="$PWD/.cache/tmp" CUDA_VISIBLE_DEVICES="$GPU_ID" environments/voice/.venv
 设备立即报错。明确指定 `--device cpu` 可以执行 CPU 推理，运行时设置
 `CUDA_VISIBLE_DEVICES=''`。
 独立语音 CLI 进程默认设置 `--cpu-threads 1`，也可明确指定正整数。直接使用模型适配器的服务进程应自行设置 PyTorch CPU 线程数量；适配器构造器不会修改进程级线程设置。
+
+三个固定模型已完成四个 CPU 线程下的真实推理、三段 WAV 检查、安装后入口检查和已确认音色保持验证。三段音频回读有两段文字一致，一段保留「你好／您好」差异；识别准确率和音色听感需要独立评估。见[CPU 验证记录](reports/qwen-cpu-validation-2026-10-08.md)。

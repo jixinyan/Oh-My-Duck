@@ -4,6 +4,13 @@ The release workflow uses recorded speech, the pinned native Harness, official p
 
 ## Runtime preparation
 
+Qwen ASR, Base TTS and VoiceDesign passed actual CPU Float32 inference in their
+separate frozen environments. The existing confirmed profile and database bytes
+remained unchanged. Three decoded WAV files, installed model admission, the active
+profile CLI and process release passed [CPU voice validation](reports/qwen-cpu-validation-2026-10-08.md).
+ASR text matches two of three generated utterances; recognition accuracy requires
+separate evaluation. Use `--device cpu` with `CUDA_VISIBLE_DEVICES=''` for CPU inference.
+
 Application and voice share the native task service interface for opening,
 submitting, querying, waiting, stopping and closing. Tool registration and
 invocation use complete JSON Schema Draft 2020-12 and finite JSON values.

@@ -16,6 +16,13 @@ installed files and 24 CLI calls passed
 [interface validation](docs/reports/native-application-interfaces-2026-10-08.md).
 The [application source map](src/oh_my_duck/agentic/README.md) locates each interface.
 
+Qwen ASR, Base TTS and VoiceDesign passed actual CPU inference with fixed model
+commits and the same confirmed voice profile. Three generated WAV files, installed
+model admission, profile preservation and process release passed
+[CPU voice validation](docs/reports/qwen-cpu-validation-2026-10-08.md).
+ASR text matched two of the three generated utterances; recognition accuracy
+requires separate evaluation. GPU acceptance and RL remain stopped.
+
 Verified CPU paths cover actual policy motion, stopping, cancellation, native SDK
 transport, recorded sensors, voice profiles, assets and independent installation.
 `omd validate pose` exercises head/body commands through the native Harness and

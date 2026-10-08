@@ -1,5 +1,7 @@
 # Implementation status
 
+> 2026-10-08：Qwen ASR、Base TTS 和 VoiceDesign 完成真实 CPU 推理，模型参数均为 CPU Float32，CUDA 未初始化。两个锁定环境通过 26 项设备检查和 72 次无效参数调用，安装后的包完成六次 CUDA 不可用检查。三段 WAV、固定音色、独立 CLI 查询及进程退出检查通过，430 个安装文件和 24 个调用通过；三段音频回读有两段文字一致，一段保留「你好／您好」差异。GPU 与 RL 保持停止，见[CPU 语音验证](reports/qwen-cpu-validation-2026-10-08.md)。
+
 > 2026-10-08：应用与语音使用同一原生任务接口，覆盖会话创建、任务提交、状态查询、等待、停止与关闭。工具参数由完整 JSON Schema Draft 2020-12 检查，七项仿真工具声明参数与数值范围。真实 CPU 原生会话、任务目录检查、正常关闭和资源释放通过；77 项测试、33 项子测试、430 个独立安装文件和 24 个调用通过。345 个机器人、RL 和原生执行文件保持一致，GPU 与 RL 保持停止，见[应用接口验证](reports/native-application-interfaces-2026-10-08.md)。
 
 > 2026-10-08：CPU 公寓和 Newton 场景通过同一份 JSON Schema 进入原生 Harness。7 份现有配置接受、23 组无效配置拒绝，Python 与 Node 的结果一致；实际公开启动入口、CPU profile 和正常退出检查通过。64 项测试、431 个独立安装文件、24 个调用和安装后的 schema 检查通过。345 个机器人、RL 和原生执行文件保持与已验证源码一致。GPU 与 RL 保持停止，见[场景配置验证](reports/native-scene-configuration-2026-10-08.md)。
@@ -230,7 +232,7 @@ is prepared but not launched. Default task recipes and native PPO algorithms rem
 | Core contracts/tool catalog/recording | 七项仿真工具的完整 Draft 2020-12 Schema、实际 handler 与无效参数拒绝已经验证；JSONL、原生事件和 PNG 导出、SHA256 检查及 1080p agentic MP4 保留实际验证资料 |
 | Agentic Harness, skills, robot execution | 固定 EDH 原生会话、SSH GPU worker、真实模型、官方 ONNX、ActionGate 与独立 Verifier 已运行；CPU 公寓与 Newton Office 的固定场景导航、Office 四个 policy 的完整多动作任务和 Hospital 轮滑有序路线通过。三个场景各通过三个距离/角度会话；全部长距离请求精度、图像输入独立 VLN、多场景泛化与真机待验收 |
 | Perception and policy adapters | 官方十项 policy 与登记的训练包共享 61-to-14 推断及原生工具；实际 CPU Walking/StandUp 包执行、episodic 时长/接续与停止通过。Newton Office 的 velstand/alpha_walking、head RGB、observer 场景、ToF、IMU 与 odometry 已验证；学习行为、物体识别及物体效果待验收 |
-| Voice interaction | Qwen ASR、已确认音色 TTS、原生 Harness、Newton/BAM 与独立 Verifier 的录音任务闭环已经通过；Mac 音频设备、合成中断与 CPU MuJoCo/BAM、Newton 任务执行中断通过，会话释放资源。Microduck 音频设备待验收。见[闭环记录](reports/end-to-end-2026-10-03.md)与[设备检查](reports/voice-interaction-validation-2026-09-29.md) |
+| Voice interaction | 三个固定 Qwen 模型的 CPU 推理、安装入口和固定音色检查通过，音频回读文字为 2/3 一致，见[CPU 验证](reports/qwen-cpu-validation-2026-10-08.md)。Qwen ASR、已确认音色 TTS、原生 Harness、Newton/BAM 与独立 Verifier 的录音任务闭环已经通过；Mac 音频设备、合成中断与 CPU MuJoCo/BAM、Newton 任务执行中断通过，会话释放资源。Microduck 音频设备待验收。见[闭环记录](reports/end-to-end-2026-10-03.md)与[设备检查](reports/voice-interaction-validation-2026-09-29.md) |
 | MuJoCo RL | Both representative tasks × both native PPO frameworks passed the single-GPU lifecycle and completed replay |
 | Isaac/Newton RL | Both representative tasks × both native PPO frameworks passed the single-GPU lifecycle and completed replay |
 | Newton physics | Actual solver, canonical state/sensors, BAM cadence, DR and penalties audited; current CPU import/contact checks cover both robot variants and all Office/Hospital geometric colliders; current GPU runtime acceptance pending |
