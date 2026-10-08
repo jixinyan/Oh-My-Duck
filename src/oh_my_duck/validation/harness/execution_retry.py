@@ -124,6 +124,8 @@ async def run(arguments):
             publication = await session.start(request)
             observed_id = session._latest_observation.observation_id
             assert publications[observed_id] == before
+            admitted = session._gate.snapshot()
+            assert admitted["state"] == "running" and admitted["generation"] == 0
             await wait_boundary(session, timeout_s=None)
             progress = await call("progress", {})
             require_upright_stop(progress)
@@ -132,7 +134,8 @@ async def run(arguments):
             execution_id = snapshot["execution_id"]
             assert execution_id not in execution_ids
             execution_ids.add(execution_id)
-            assert segment["execution_id"] == execution_id and segment["generation"] == snapshot["generation"]
+            assert segment["execution_id"] == execution_id == admitted["execution_id"]
+            assert segment["generation"] == admitted["generation"]
             assert segment["effective_after_sequence"] == before["sequence"]
             assert segment["max_control_steps"] == count
             assert progress["sequence"] - before["sequence"] == count
@@ -168,6 +171,7 @@ async def run(arguments):
                 "command_request_id": segment["request_id"], "initial_physical_state": before,
                 "physical_state_preserved_at_start": True, "control_steps": count,
                 "raw_sim_steps": session._device.raw_sim_steps, "explicit_command_preserved": explicit is not None,
+                "admitted_generation": admitted["generation"],
                 "final_progress": progress, "finish": finished, "terminal_boundary": terminal})
             print(json.dumps({"attempt": attempt, "sequence": progress["sequence"],
                               "controls": count, "terminal": terminal["stop_reason"]}), flush=True)
