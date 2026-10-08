@@ -9,6 +9,7 @@ import sys
 
 from jsonschema import Draft202012Validator
 from verify_metric_campaign import verify_case
+from verify_policy_inference import verify as verify_policy_inputs
 from metric_plan import MOTIONS_SCHEMA, case_motions
 from oh_my_duck.infrastructure.owned_process import owned_process
 
@@ -116,8 +117,12 @@ def main():
             verification = verify_case(destination, case)
             verification_path = destination / "verification.json"
             verification_path.write_text(json.dumps(verification, indent=2) + "\n")
+            policy_verification = verify_policy_inputs(destination, args.catalog)
+            policy_verification_path = destination / "policy-verification.json"
+            policy_verification_path.write_text(json.dumps(policy_verification, indent=2) + "\n")
             entry.update(passed=True, state="passed", result_sha256=hashlib.sha256(result_path.read_bytes()).hexdigest(),
                          verification_sha256=hashlib.sha256(verification_path.read_bytes()).hexdigest(),
+                         policy_verification_sha256=hashlib.sha256(policy_verification_path.read_bytes()).hexdigest(),
                          measurements=result["measurements"])
             destination_record.write_text(json.dumps(record, indent=2) + "\n")
             print(json.dumps({"case": case["id"], "passed": True,
