@@ -40,6 +40,8 @@ class MicroDuckEnvironment:
         self._last_control_started_at: float | None = None
         self._observations: dict[str, tuple[str, int]] = {}
         self._navigation_samples: dict[str, dict[str, Any]] = {}
+        self._pending_policy_evidence: dict[str, Any] | None = None
+        self._last_action_inference: dict[str, Any] | None = None
 
     def _backend(self) -> CpuMujocoBamBackend:
         if self.backend is None:
@@ -79,7 +81,11 @@ class MicroDuckEnvironment:
             "tof_distance_mm": tuple(measured["tof_distance_mm"]),
             "tof_status": tuple(measured["tof_status"]),
             "contact_evidence": measured["contact_evidence"],
+            "body_twist_world": tuple(measured["body_twist_world"]),
         }
+        inference = self._last_action_inference
+        if inference is not None and (inference["episode_id"], inference["result_sequence"]) == (state["episode_id"], sequence):
+            self._navigation_samples[observation_id]["policy_inference"] = inference
         if len(self._observations) > 128:
             oldest = next(iter(self._observations))
             self._observations.pop(oldest)
@@ -190,12 +196,21 @@ class MicroDuckEnvironment:
         if should_stop():
             return NativeStep(self.observe(), 0, False, 0, False)
         self._last_control_started_at = time.monotonic()
+        inference = self._pending_policy_evidence
+        if (inference is None or (inference["episode_id"], inference["sequence"]) != (backend.episode_id, backend._sequence)
+                or list(action) != inference["action"]):
+            raise RuntimeError("Admitted action lacks its matching policy inference evidence")
         result = backend.apply_policy_action(list(action), request_id=uuid4().hex,
                                              expected_sequence=backend._sequence,
                                              should_stop=should_stop)
         raw_steps = result["raw_sim_steps"]
         if type(raw_steps) is not int or not 0 <= raw_steps <= 4:
             raise RuntimeError("MicroDuck returned an invalid physical step count")
+        if raw_steps:
+            self._last_action_inference = {**inference, "result_sequence": result["sequence"],
+                                           "raw_sim_steps": raw_steps,
+                                           "action_request_id": result["request_id"]}
+        self._pending_policy_evidence = None
         observation = self._observation(result)
         frames: tuple[NativeFrame, ...] = ()
         if raw_steps == 4 and result["sequence"] % 5 == 0:
@@ -457,7 +472,11 @@ class MicroDuckWorkerSession(NativeWorkerSession):
             def infer_on_owner() -> dict:
                 if inference_state() == "cancelled":
                     return {"cancelled": True}
-                return environment._backend().infer_policy()
+                result = environment._backend().infer_policy()
+                if not result["complete"]:
+                    environment._pending_policy_evidence = {**result,
+                        "execution_id": request["execution_id"], "generation": request["generation"]}
+                return result
 
             result = await self._device.on_owner(infer_on_owner)
             if inference_state() == "cancelled":
@@ -916,6 +935,18 @@ class MicroDuckWorkerSession(NativeWorkerSession):
             await gate.pause("planner_pause")
         finally:
             ready.set()
+
+    async def _publish(self, observation: NativeObservation, control: dict[str, Any] | None = None,
+                       *, require_running: bool = False) -> dict[str, Any] | None:
+        if control is not None and control["executed_actions"]:
+            sample = self._environment._navigation_samples[observation.observation_id]
+            inference = sample.get("policy_inference")
+            if (inference is None or inference["action"] != control["action"]
+                    or inference["raw_sim_steps"] != control["raw_sim_steps"]):
+                raise RuntimeError("Control publication lacks its matching policy inference evidence")
+            control["policy_inference"] = inference
+            control["body_twist_world_after_action"] = sample["body_twist_world"]
+        return await super()._publish(observation, control, require_running=require_running)
 
     async def _publish_pausing(self, observation: NativeObservation) -> None:
         if self._require_gate().snapshot()["stop_reason"] in ("budget_exhausted", "policy_stop"):
