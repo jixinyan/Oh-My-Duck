@@ -12,6 +12,8 @@ tags:
   - project-design
 ---
 
+> 原生感知工具、环境 metadata 和 scene_info 根据当前配置公布可用 source。模型服务使用明确的本地 endpoint；无效来源与连接错误通过工具传递。两个真实 CPU 会话、150 个控制步、600 个物理子步、48 项测试、42 组 Python/Node 参数及独立安装检查通过，见[感知来源验证](reports/perception-source-capabilities-2026-10-08.md)。GPU 与 RL 保持停止。
+
 > CPU 公寓与 Newton 使用相同原生感知工具和 frame 格式。CPU 接口使用当前 RGB、depth、segmentation 与真实相机 geometry，五种状态、1253 个原生几何比较、距离、bearing 和读取期间的物理状态保持通过；431 个独立安装文件及 24 个调用通过。GPU 与 RL 保持停止，见[CPU 感知验证](reports/cpu-scene-perception-2026-10-08.md)。
 
 > 训练计划在创建输出和启动 worker 前检查整数计数与有限比例，原生 framework、任务和全部已提交计划保持原有内容。Linux 110 项测试、三项子测试、430 个独立安装文件及 24 个调用通过；GPU 与 RL 保持停止，见[训练输入验证](reports/campaign-input-admission-2026-10-08.md)。

@@ -8,6 +8,8 @@ CPU MuJoCo/BAM 公寓使用相同工具，`perception/mujoco.py` 提供当前 RG
 
 `source="models"` 调用独立 YOLO26/SAM 3.1 服务。YOLO26 提供 COCO 类别与目标框；启用 SAM 3.1 时，SAM 使用文本提示产生分割，服务通过框的 IoU 关联 YOLO 结果。SAM 的开放词汇结果可以没有 YOLO 类别匹配。服务的两种运行方式由启动参数明确选择，模型错误直接传播给调用者。
 
+工具参数与 `scene_info.perception_sources` 公布当前可用来源。配置模型服务时，在 scene config 中设置 `"perception_endpoint": "http://127.0.0.1:8784"`；Python 和 Node 启动入口检查地址与端口，原生 worker 在读取相机之前检查 source。两个真实 CPU 会话、来源拒绝、实际连接错误与后续感知读取通过，见[感知来源验证](reports/perception-source-capabilities-2026-10-08.md)。
+
 ## 距离计算
 
 距离需要与 RGB 对应的 calibrated depth geometry。Newton 接口从原生 ray buffer 获取每个像素的起点、方向和实际 ray-hit distance，再使用当前光心与相机旋转得到世界坐标。负值和非有限深度视为无效数据。

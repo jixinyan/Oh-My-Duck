@@ -20,6 +20,9 @@ CPU apartment perception uses the shared native tools to return actual head RGB,
 visible geometry, calibrated distance and bearing. Five software-rendered states
 and 1253 native pixel intersections passed
 [independent CPU checks](docs/reports/cpu-scene-perception-2026-10-08.md).
+Tool parameters advertise the scene's configured perception sources. Actual
+native sessions, endpoint validation and installed entry points passed
+[source-selection checks](docs/reports/perception-source-capabilities-2026-10-08.md).
 
 Training campaigns validate integer counts and finite search fractions before
 creating outputs or launching workers. All committed plans preserve their

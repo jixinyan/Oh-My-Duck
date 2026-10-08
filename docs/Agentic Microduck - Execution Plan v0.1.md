@@ -10,6 +10,8 @@ tags:
   - sim-to-real
 ---
 
+> 2026-10-08：原生感知来源声明与启动参数检查完成。两个真实 CPU 会话、150 个控制步、600 个物理子步、48 项测试、42 组 Python/Node 参数和独立安装检查通过，原生资源全部关闭。GPU 与 RL 保持停止，见[感知来源验证](reports/perception-source-capabilities-2026-10-08.md)。
+
 > 2026-10-08：CPU 原生感知接口完成真实 RGBD、可见场景目标、距离及 bearing 的验证。五种状态、1253 个原生几何比较、物理状态保持、15 份资料复核、431 个安装文件和 24 个调用通过；GPU 与 RL 保持停止，见[CPU 感知验证](reports/cpu-scene-perception-2026-10-08.md)。
 
 > 2026-10-08：训练计划的计数、比例与 allocation 参数完成启动前检查，已有任务、原生 PPO 和全部已提交计划保持原有内容。Linux 110 项测试、三项子测试与独立安装的 430 个文件和 24 个调用通过。GPU 与 RL 保持停止，见[训练输入验证](reports/campaign-input-admission-2026-10-08.md)。

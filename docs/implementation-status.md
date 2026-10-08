@@ -1,5 +1,7 @@
 # Implementation status
 
+> 2026-10-08：原生感知工具根据场景配置公布可用 source，环境 metadata 与 scene_info 返回相同结果。48 项测试、Python/Node 的 42 组参数、两个真实 CPU 会话、150 个控制步、600 个物理子步和独立安装检查通过。模型服务连接错误完整传递，原生资源全部关闭。GPU 与 RL 保持停止，见[感知来源验证](reports/perception-source-capabilities-2026-10-08.md)。
+
 > 2026-10-08：CPU 公寓感知接入原生 `inspect_scene` 与 `observe`，返回当前 RGB、可见目标、实际 depth、距离与 bearing。五种真实状态包含官方 policy 执行之后的状态，1253 个像素通过原生几何求交复核，最大世界坐标误差为 1.89 毫米；感知读取保持物理状态、仿真时间与全部计数。15 份原始资料、431 个独立安装文件与 24 个调用通过核验，全部 renderer 资源关闭，CUDA 未初始化。GPU 与 RL 保持停止，见[CPU 感知验证](reports/cpu-scene-perception-2026-10-08.md)。
 
 > 2026-10-08：训练计划在启动 worker 与创建输出目录之前检查整数计数、有限比例及 search 配置。全部已提交训练计划保持原有内容；本地 108 项测试与三项子测试通过，两项检查因可选环境路径缺失跳过，Linux 的 110 项测试与三项子测试全部通过。独立安装核验 430 个文件、三份许可证和 24 个公开调用。GPU 与 RL 保持停止，见[训练输入验证](reports/campaign-input-admission-2026-10-08.md)。

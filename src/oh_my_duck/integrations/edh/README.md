@@ -28,3 +28,8 @@ The Python CLI and native Node deployment validate the same scene schema. CPU
 apartment configurations select a spawn and native room/dock/object goal. Newton
 configurations declare USD provenance and a point/route goal. The schema is an
 installed resource. See [configuration](../../../../docs/harness-native-integration.md#场景配置).
+
+`scene_configuration.perception_sources` validates the optional model endpoint.
+Native tool schemas and scene metadata expose the available sources; the worker
+checks source availability before acquiring a perception frame. Model endpoints
+use an explicit loopback HTTP port, including SSH-forwarded services.

@@ -5,6 +5,24 @@
   "entry_point": "omd.py",
   "release_readiness": {
     "state": "acceptance_in_progress",
+    "perception_source_admission": {
+      "state": "configured_sources_actual_native_cpu_and_installed_package_verified",
+      "source_revision": "c824a89129cbaf5b8b4c87c363c42c9ca9e0170c",
+      "configuration_cases_verified": 42,
+      "focused_tests_passed": 48,
+      "actual_native_sessions_verified": 2,
+      "policy_control_steps": 150,
+      "raw_sim_steps": 600,
+      "unavailable_source_requests_rejected": 6,
+      "actual_model_connection_errors_verified": 2,
+      "source_and_resource_files_verified": 431,
+      "installed_cli_checks_passed": 24,
+      "cuda_initialized": false,
+      "formal_navigation_acceptance_performed": false,
+      "runtime_result": "outputs/acceptance/perception-source-capabilities-20261008-02.json",
+      "installed_package": "outputs/acceptance/perception-source-capabilities-20261008-02-install/result.json",
+      "report": "docs/reports/perception-source-capabilities-2026-10-08.md"
+    },
     "cpu_scene_perception": {
       "state": "actual_software_rendered_rgbd_native_geometry_and_installed_package_verified",
       "runtime_source_revision": "25111e55157f0f01efc9bdd4cb11c6cffb7d980d",

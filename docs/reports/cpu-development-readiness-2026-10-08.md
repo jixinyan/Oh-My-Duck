@@ -8,6 +8,7 @@ stopped.
 
 | Capability | Verified scope | Evidence |
 | --- | --- | --- |
+| Configured perception sources | Native tool schema, environment metadata and scene tool agree; 42 Python/Node cases, 48 tests, two actual CPU sessions, 150 controls and 600 substeps; installed package verified | [Source selection](perception-source-capabilities-2026-10-08.md) |
 | Current CPU scene perception | Five actual software-rendered states, 1253 native geometry intersections, target distances/bearing, unchanged physical state during reads; 431 installed files and 24 CLI calls | [CPU perception](cpu-scene-perception-2026-10-08.md) |
 | Native training inputs | Integer counts, finite search fractions, actual CLI admission and unchanged committed campaigns; 110 Linux tests, three subtests, 430 installed files and 24 CLI calls | [Campaign admission](campaign-input-admission-2026-10-08.md) |
 | CPU voice-task failure lifecycle | Actual installed Qwen ASR → native Harness request → confirmed-voice response; provider denies `gpt-6.1-sol`; two decoded WAV files, unchanged profile, closed session and five exited processes verified; navigation remains pending | [CPU voice task](cpu-voice-task-2026-10-08.md) |
