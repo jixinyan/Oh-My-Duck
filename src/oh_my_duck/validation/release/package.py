@@ -3,11 +3,13 @@ import hashlib
 from importlib.metadata import distribution
 from importlib.resources import files
 import json
+import math
 import os
 from pathlib import Path
 import subprocess
 import sys
 import tarfile
+import time
 import zipfile
 
 import oh_my_duck
@@ -22,7 +24,11 @@ def main():
     parser.add_argument("--catalog", type=Path)
     parser.add_argument("--metric-campaign", type=Path)
     parser.add_argument("--metric-plan", type=Path)
+    parser.add_argument("--command-timeout", type=float,
+                        help="Optional positive per-command deadline in seconds")
     args = parser.parse_args()
+    if args.command_timeout is not None and (not math.isfinite(args.command_timeout) or args.command_timeout <= 0):
+        parser.error("Command timeout must be positive and finite")
     if (args.policy_record is None) != (args.catalog is None):
         raise ValueError("An actual policy record and catalogue must be provided together")
     if (args.metric_campaign is None) != (args.metric_plan is None):
@@ -31,6 +37,9 @@ def main():
     packages = args.packages.resolve(strict=True)
     if args.output.exists():
         raise FileExistsError(args.output)
+    command_log = args.output.with_suffix(".commands.jsonl")
+    if command_log.exists():
+        raise FileExistsError(command_log)
     installed = Path(oh_my_duck.__file__).resolve(strict=True)
     if not installed.is_relative_to(Path(sys.prefix).resolve()):
         raise AssertionError("Package validation requires an independent installed environment")
@@ -81,22 +90,41 @@ def main():
                          "--plan", str(args.metric_plan.resolve(strict=True)), "--source-root", str(root),
                          "--output", str(args.output.resolve().with_name(args.output.stem + "-metric.json"))])
     checks = []
-    for arguments in commands:
-        completed = subprocess.run([str(cli), *arguments], cwd=Path.home(), env=environment,
-                                   check=True, capture_output=True, text=True, timeout=30)
-        if not completed.stdout.strip():
-            raise AssertionError(f"Installed CLI returned no result: {arguments}")
-        if arguments[0] == "doctor" and json.loads(completed.stdout)["cuda_runtime_checked"]:
-            raise AssertionError("Installed voice client initialized CUDA")
-        checks.append({"arguments": arguments, "passed": True,
-                       "stdout_sha256": hashlib.sha256(completed.stdout.encode()).hexdigest()})
+    args.output.parent.mkdir(parents=True, exist_ok=True)
+    with command_log.open("x") as progress:
+        for arguments in commands:
+            started = time.monotonic()
+            completed = None
+            progress.write(json.dumps({"state": "started", "arguments": arguments,
+                                       "command_timeout_s": args.command_timeout}, allow_nan=False) + "\n")
+            progress.flush()
+            try:
+                completed = subprocess.run([str(cli), *arguments], cwd=Path.home(), env=environment,
+                                           capture_output=True, text=True, timeout=args.command_timeout)
+            finally:
+                elapsed = time.monotonic() - started
+                record = {"state": "exited" if completed is not None else "interrupted",
+                          "arguments": arguments, "elapsed_s": elapsed,
+                          "exit_code": completed.returncode if completed is not None else None}
+                if completed is not None:
+                    record.update(stdout_sha256=hashlib.sha256(completed.stdout.encode()).hexdigest(),
+                                  stderr_sha256=hashlib.sha256(completed.stderr.encode()).hexdigest())
+                progress.write(json.dumps(record, allow_nan=False) + "\n")
+                progress.flush()
+            completed.check_returncode()
+            if not completed.stdout.strip():
+                raise AssertionError(f"Installed CLI returned no result: {arguments}")
+            if arguments[0] == "doctor" and json.loads(completed.stdout)["cuda_runtime_checked"]:
+                raise AssertionError("Installed voice client initialized CUDA")
+            checks.append({"arguments": arguments, "passed": True, "elapsed_s": elapsed,
+                           "stdout_sha256": record["stdout_sha256"]})
     result = {"passed": True, "scope": "Built distributions and independent installed CLI outside checkout",
               "source_revision": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root, text=True).strip(),
               "installed_package": str(installed), "tracked_files_verified": len(required),
               "licenses_verified": len(licenses), "cli_checks": checks,
+              "command_timeout_s": args.command_timeout, "command_log": str(command_log.resolve()),
               "cuda_runtime_checked": False,
               "package_sha256": {path.name: hashlib.sha256(path.read_bytes()).hexdigest() for path in (wheel, source)}}
-    args.output.parent.mkdir(parents=True, exist_ok=True)
     with args.output.open("x") as output:
         output.write(json.dumps(result, indent=2) + "\n")
     print(json.dumps({"passed": True, "tracked_files_verified": len(required), "cli_checks": len(checks)}))

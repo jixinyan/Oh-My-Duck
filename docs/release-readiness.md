@@ -41,6 +41,10 @@ command finds configuration through the checkout or an explicit `OMD_PROJECT_ROO
 The installed package audit accepts `--policy-record` with `--catalog` and
 `--metric-campaign` with `--metric-plan`. These inputs execute the installed ONNX
 and physical-record verifiers outside the checkout and preserve their reports.
+`--command-timeout SECONDS` sets an optional positive deadline for each installed
+command; the default permits the complete saved-evidence computation. A companion
+`.commands.jsonl` file records command starts, process exits, elapsed time and
+output hashes, including interrupted checks. Every output path must be new.
 
 The [module validation report](reports/validation-modules-2026-10-08.md) records
 actual CPU motion, cancellation, installed ONNX and physical-record audits,
