@@ -11,6 +11,9 @@ for each capability. The same commands are available through `python -m oh_my_du
 
 Verified CPU paths cover actual policy motion, stopping, cancellation, native SDK
 transport, recorded sensors, voice profiles, assets and independent installation.
+`omd validate pose` exercises head/body commands through the native Harness and
+ActionGate; [measured response, return and independent audits](docs/reports/native-pose-2026-10-08.md)
+passed with software rendering. `omd validate pose-audit` checks the saved evidence.
 `omd validate model-assets` audits both robot variants, passive joints, geometry,
 materials and actual Newton imports using only CPU. The
 [CPU readiness record](docs/reports/cpu-development-readiness-2026-10-08.md)

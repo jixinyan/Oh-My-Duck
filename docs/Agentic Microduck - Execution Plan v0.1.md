@@ -10,6 +10,8 @@ tags:
   - sim-to-real
 ---
 
+> 2026-10-08：原生 CPU 姿态工具的执行、相机记录、独立检查和安装验证完成。固定源码执行 575 次控制和 2300 个物理步，头部 pitch 与身体高度的正反向响应及归零响应通过检查，全部资源已经释放。30 项测试、425 个安装文件及 22 个独立调用通过，六阶段发布准备检查通过。GPU 和 RL 保持停止，见[姿态验证](reports/native-pose-2026-10-08.md)。
+
 > 2026-10-08：官方 solver 接触参数配置与原生 manager 的编译职责已经明确，四个实际 CPU solver model 与 MuJoCo Warp 编译数据通过十项参数、独立 body 掩码和 21 项非接触数据核验，计算内容的 AST 保持一致。28 项配置及导入测试、423 个独立安装文件与 20 个调用通过。GPU 和 RL 保持停止，见[接触模型验证](reports/contact-model-2026-10-08.md)。
 
 > 2026-10-08：Office 与 Hospital 的实际 CPU 导入、5682 个几何 collider、164 处镜像缩放及 finalized model 接触数据通过核验；5680 个导入 mesh 的 world bounds、source filters、场景文件和生成文件保持检查通过。GPU 和 RL 保持停止，见[外部场景 CPU 验证](reports/external-scene-cpu-2026-10-08.md)。

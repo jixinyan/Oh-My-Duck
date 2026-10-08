@@ -52,7 +52,7 @@ Application, robot, training, shared acceptance and replay modules live in `src/
 | Voice interaction | `voice/` | Qwen services, WAV processing and confirmed profiles |
 | Experience and replay export | `experience/` | `harness_replay.py` |
 | Measured policy acceptance | `validation/metric/` | `plans.py`, `case.py`, `campaign.py`, `verify.py`, `policy.py` |
-| Native task and navigation acceptance | `validation/harness/` | `control.py`, `motion_guard.py`, `replay.py`, `navigation.py` |
+| Native task, pose and navigation acceptance | `validation/harness/` | `control.py`, `motion_guard.py`, `pose.py`, `pose_records.py`, `replay.py`, `navigation.py` |
 | Release preparation and package checks | `validation/release/` | `plans.py`, `worker.py`, `campaign.py`, `package.py` |
 | CPU Newton asset audit | `validation/release/` | `assets.py` / `omd validate model-assets` |
 | Setup and process ownership | `infrastructure/` | `bootstrap_isaac.py`, `usd_runtime.py`, `owned_process.py`, `acceptance_supervisor.py` |

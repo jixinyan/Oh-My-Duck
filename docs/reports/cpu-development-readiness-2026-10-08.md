@@ -9,6 +9,7 @@ stopped.
 | Capability | Verified scope | Evidence |
 | --- | --- | --- |
 | Native robot worker | Actual CPU MuJoCo/BAM motion, pinned SDK/process transport, ActionGate, policy transitions, cancellation and resource release | [Worker validation](native-worker-modules-2026-10-08.md) |
+| Native head/body commands | Actual software-rendered CPU execution; 575 controls, positive/negative head pitch and body height response, zero-command return, 115 camera frames, 95 stopped samples and installed independent audit | [Pose validation](native-pose-2026-10-08.md) |
 | Motion and policy evidence | Continuous five-motion sequence; 1208 independently recomputed ONNX actions with zero error; physical states and stopping checked | [Validation modules](validation-modules-2026-10-08.md) |
 | Sensor and voice records | Actual saved RGBD validation, frame identity, distance reconstruction and confirmed voice profiles | [Offline validation](offline-release-validation-2026-10-07.md) |
 | Converted assets | Both variants, complete conversion inputs and dependencies, source fingerprints and every generated file | [Source-verified assets](source-verified-assets-2026-10-08.md) |

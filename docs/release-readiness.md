@@ -4,6 +4,12 @@ The release workflow uses recorded speech, the pinned native Harness, official p
 
 ## Runtime preparation
 
+Native CPU pose tools passed actual head pitch/body height response and return,
+575 controls, 2300 physics substeps, 115 original camera frames and installed
+independent verification. Software renderer identity and resource release were
+checked. The source passed 30 tests, 425 installed files and 22 CLI calls;
+[pose validation](reports/native-pose-2026-10-08.md) records its exact scope.
+
 Official solver contact configuration passed four actual CPU solver
 constructions and MuJoCo Warp model compilations, covering both robot variants
 and Office/Hospital. Ten source contact fields, twelve native arrays and 21
