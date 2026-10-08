@@ -363,6 +363,9 @@ def tool_summary(event: dict) -> str:
             text += f"\nremaining {execution['remaining_wall_time_s']:.1f} s / {execution['remaining_actions']} controls"
         if perception := result.get("perception"):
             text += f"\n{perception['prompt']} · {perception['distance_source']} · {len(perception['targets'])} targets"
+        if goal := result.get("goal_check"):
+            evidence = goal["checks"]["goal_reached"]["evidence"]
+            text += f"\ngoal={goal['complete']} · hold {evidence['held_ticks']}/{evidence['required_hold_ticks']}"
         return text
     elif tool == "microduck.select_policy":
         visible = selected(result, ("policy_name", "kind", "encoding", "duration_s"))
@@ -372,9 +375,10 @@ def tool_summary(event: dict) -> str:
         visible["stop_confirmation"] = selected(result["stop_confirmation"],
                                                 ("zero_control_steps", "stopped_samples"))
     elif tool.startswith("execution."):
-        visible = selected(result.get("execution", {}),
-                           ("state", "control_steps", "raw_sim_steps", "device_confirmed",
-                            "stop_reason", "generation"))
+        execution = result.get("execution")
+        visible = ({"execution": None} if execution is None else
+                   selected(execution, ("state", "control_steps", "raw_sim_steps", "device_confirmed",
+                                        "stop_reason", "generation")))
     elif tool == "planning.read":
         visible = selected(result, ("activeGoalId", "attemptId", "finalGoalId"))
         visible["plan_version"] = (result.get("plan") or {}).get("version")
