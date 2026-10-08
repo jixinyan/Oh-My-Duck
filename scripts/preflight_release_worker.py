@@ -16,6 +16,7 @@ def main():
     parser.add_argument("--plan", type=Path, required=True)
     parser.add_argument("--catalog", type=Path, required=True)
     parser.add_argument("--edh-source", type=Path, required=True)
+    parser.add_argument("--harness-manifest", type=Path, required=True)
     parser.add_argument("--provider-config", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
@@ -27,11 +28,19 @@ def main():
         plan, scenes, inputs = validate_plan(root, args.plan)
         result.update(stages=len(plan["stages"]), input_sha256=inputs,
             source_revision=subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root, text=True).strip())
-        revision = subprocess.check_output(["git", "-C", str(args.edh_source), "rev-parse", "HEAD"], text=True).strip()
-        if revision != "8a5e685b22d032207f53db20454f0992a4ad60fd":
-            raise ValueError("Native Harness source differs from the pinned revision")
+        manifest = json.loads(args.harness_manifest.read_text())
+        revision = manifest["revision"]
+        if revision != "8a5e685b22d032207f53db20454f0992a4ad60fd" or not manifest["files"]:
+            raise ValueError("Native Harness manifest differs from the pinned source")
+        for name, expected in manifest["files"].items():
+            source = Path(name)
+            if source.is_absolute() or ".." in source.parts:
+                raise ValueError("Native Harness source file must belong to its dependency directory")
+            if hashlib.sha256((args.edh_source / source).read_bytes()).hexdigest() != expected:
+                raise ValueError(f"Native Harness source differs: {source}")
         (args.edh_source / "harness/contracts/schema/physical.schema.json").resolve(strict=True)
         result["harness_revision"] = revision
+        result["harness_source_files_verified"] = len(manifest["files"])
         provider_data = tomllib.loads(args.provider_config.read_text())
         provider = provider_data["model_providers"][provider_data["model_provider"]]
         endpoint = urlsplit(provider["base_url"])

@@ -4,6 +4,7 @@ from contextlib import contextmanager
 from datetime import datetime, timezone
 import fcntl
 import hashlib
+from io import BytesIO
 import json
 from pathlib import Path
 import shlex
@@ -12,6 +13,7 @@ import signal
 import socket
 import subprocess
 import sys
+import tarfile
 import time
 
 from record_harness_demo import request, save_json
@@ -75,12 +77,32 @@ def preflight(args, root, output, remote_output, revision):
     if local_pin != "8a5e685b22d032207f53db20454f0992a4ad60fd":
         raise ValueError("Local native Harness differs from its pinned source")
     (args.edh_source / "node_modules/tsx/dist/loader.mjs").resolve(strict=True)
+    archive = subprocess.check_output(["git", "-C", str(args.edh_source), "archive", local_pin,
+        "harness", "apps/server", "package.json", "pnpm-lock.yaml", "pnpm-workspace.yaml", "tsconfig.json"])
+    expected = {}
+    with tarfile.open(fileobj=BytesIO(archive), mode="r:") as source:
+        for member in source.getmembers():
+            if member.isfile():
+                expected[member.name] = hashlib.sha256(source.extractfile(member).read()).hexdigest()
+    for name, digest in expected.items():
+        if hashlib.sha256((args.edh_source / name).read_bytes()).hexdigest() != digest:
+            raise ValueError("Local Harness runtime source differs from its pinned Git content")
+    worker_files = {name: digest for name, digest in expected.items()
+                    if (name.startswith("harness/physical-runtime/src/") and name.endswith(".py")) or
+                    name == "harness/contracts/schema/physical.schema.json"}
+    manifest = output / "harness-source.json"
+    save_json(manifest, {"revision": local_pin, "role": "remote_physical_worker", "files": worker_files,
+                        "local_runtime_files_verified": len(expected)})
+    ssh(args, "mkdir -p " + shlex.quote(args.worker_root + "/outputs/release-campaigns") +
+        " && mkdir " + shlex.quote(remote_output), check=True)
+    subprocess.run(["rsync", "-a", str(manifest), args.worker_host + ":" + remote_output + "/harness-source.json"], check=True)
     subprocess.run(["node", "--check", str(root / "integrations/edh/server.mjs")], check=True)
     command = ["env", "CUDA_VISIBLE_DEVICES=", "ORT_DISABLE_TELEMETRY=1",
                f"PYTHONPATH={args.worker_root}/src", f"TMPDIR={args.worker_root}/.cache/tmp",
                args.worker_python, "scripts/preflight_release_worker.py", "--plan",
                str(args.plan.resolve().relative_to(root)), "--catalog", args.worker_policy_dir,
-               "--edh-source", args.worker_edh_source, "--provider-config", args.remote_provider_config,
+               "--edh-source", args.worker_edh_source, "--harness-manifest", remote_output + "/harness-source.json",
+               "--provider-config", args.remote_provider_config,
                "--output", remote_output + "/preflight"]
     with (output / "preflight.log").open("x") as log:
         try:
