@@ -48,6 +48,7 @@ class IsaacNewtonBamBackend(CpuMujocoBamBackend):
                  policy_registry: Path | None = None):
         self._startup = RuntimeStartup(scene_id, robot_model) if startup is None else startup
         verify_usd_runtime()
+        self.catalog = PolicyCatalogue(catalog_dir, policy_registry)
         from isaaclab.assets import AssetBaseCfg
         from isaaclab.envs import ManagerBasedEnv, ManagerBasedEnvCfg
         from isaaclab.sensors import CameraCfg
@@ -81,7 +82,6 @@ class IsaacNewtonBamBackend(CpuMujocoBamBackend):
         SimulationBackend.__init__(self, robot_id=robot_id, backend="isaac-newton",
                                    policy_path=None, task_id=scene_id)
         self._np, self._mujoco = np, mujoco
-        self.catalog = PolicyCatalogue(catalog_dir, policy_registry)
         self.active_policy = self.catalog.get("roller" if robot_model == "groundcontact_rollers" else "velstand")
         self.policy_sha256 = self.active_policy.sha256
         self._scene_path = scene_path.resolve(strict=True)
