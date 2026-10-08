@@ -19,6 +19,12 @@
       "voice_profile_tests_passed": 10,
       "release_plan_tests_passed": 16,
       "recorded_perception_validation": "outputs/acceptance/offline-perception-records-20261007-01.json",
+      "policy_input_matrix": "outputs/acceptance/offline-policy-input-matrix-20261007-01/independent-audit.json",
+      "policy_input_sequence": "outputs/acceptance/offline-policy-input-sequence-20261007-01/independent-audit.json",
+      "policy_input_control_steps_verified": 2556,
+      "maximum_policy_action_parity_error": 0.0,
+      "policy_input_cancellation_eof": "outputs/acceptance/offline-policy-cancel-eof-20261007-01/acceptance.json",
+      "policy_input_cancellation_sigterm": "outputs/acceptance/offline-policy-cancel-sigterm-20261007-01/acceptance.json",
       "cuda_runtime_checked": false,
       "gpu_execution": "stopped",
       "report": "docs/reports/offline-release-validation-2026-10-07.md"

@@ -16,6 +16,8 @@ tags:
 
 > 感知入口检查当前帧的 episode、sequence、时间、查询、图像 SHA256、距离来源和模型身份，并验证目标几何及标注图像。Camera/body 位置与 yaw 在模型调用前检查有效性，已有实际 RGBD 资料复算和无效资料拒绝检查通过。
 
+> Policy 输入与 ActionGate 接纳的动作在序列化前绑定，包含来源 SHA256、61→14 维输入输出、13 维命令和物理 sequence。每个 metric case 自动重算实际官方 ONNX；CPU 矩阵与连续序列的 2556 个控制步输出完全一致。
+
 > 统一观测与原生等待接口通过固定源码的 CPU 连续动作及 Newton Office 五动作矩阵，安装包、既有导航和语音回放、实际 MP4 生成检查通过。GPU 验收已按用户要求停止，全部本次进程退出，Hospital 后退停滞与其他阶段仍需验证。后续设备要求没有任何 compute PID，不与 haomin 或其他用户共用 GPU，见[验收证据](reports/runtime-observation-acceptance-2026-10-07.md)。
 
 > 2026-10-07：统一暂停观测通过 `microduck.observe` 返回相机、ToF、IMU、servo、odometry、进度与原生剩余执行时间，可附带明确来源的当前帧感知。`microduck.wait_for_motion` 等待确认边界，全部动作仍由原生 ActionGate 接纳。连续运动检查保存每次参数和物理样本，初始化记录各阶段耗时。统一验收使用固定源码，串行执行单个 GPU 的矩阵、连续动作与原生导航，见[执行说明](runtime-release-acceptance.md)。

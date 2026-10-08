@@ -36,3 +36,7 @@ python scripts/accept_perception_records.py \
 ```
 
 输入目录必须包含原始 `result.json`、`head-INDEX.png`、`models-INDEX.png` 和 `points-INDEX.npy`；所有输入 SHA256 保存到结果中。资料缺失或检查失败会立即返回错误。
+
+Policy 调试记录保存实际 61 维输入、13 维命令、14 维输出、官方 model SHA256、执行编号、generation、输入与结果 sequence，以及执行之后的 world velocity。记录在原生 update 序列化前加入；ActionGate、BAM、50 Hz 和物理子步设置保持原有内容。每个 metric campaign case 自动执行独立 ONNX 重算，并保存 `policy-verification.json` 及其 SHA256。
+
+固定源码 `d0ae8f6` 的 CPU 五动作矩阵通过运动复核与 policy 复核，共 1348 个控制步，使用 `velstand` 与 `alpha_walking`；所有重算输出与实际动作误差为零。固定源码 `94db369` 的五动作连续序列通过自动 policy 复核和独立运动复核，共 1208 个控制步，重算误差同样为零。输出为 `outputs/acceptance/offline-policy-input-matrix-20261007-01` 与 `outputs/acceptance/offline-policy-input-sequence-20261007-01`。同一源码的控制连接关闭和 SIGTERM 检查分别执行 84 与 81 个实际控制步，全部会话释放资源，结果为 `outputs/acceptance/offline-policy-cancel-eof-20261007-01` 与 `outputs/acceptance/offline-policy-cancel-sigterm-20261007-01`。
