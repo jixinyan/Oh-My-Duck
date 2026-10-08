@@ -27,6 +27,11 @@ Independent installed checks preserve per-command execution evidence and accept
 an optional explicit deadline. Actual completion, subprocess interruption and
 partial-output protection passed [lifecycle validation](docs/reports/installed-audit-lifecycle-2026-10-08.md).
 
+Newton preparation verifies the unique OpenUSD provider and its installed files
+before CUDA initialization. Actual setup selections, both robot USD imports on
+CPU, the complete release preflight and 419 independently installed files passed
+[OpenUSD validation](docs/reports/openusd-readiness-2026-10-08.md).
+
 Actual CPU policy checks cover metric motion, continuous navigation commands, native backend behavior and cancellation cleanup. Remote preflight verifies all release scenes, official policy hashes and the pinned Harness sources without initializing CUDA. Results and reproduction are in the [offline validation report](docs/reports/offline-release-validation-2026-10-07.md) and [runtime acceptance guide](docs/runtime-release-acceptance.md). GPU acceptance and RL remain stopped.
 
 Metric campaigns preserve exact policy inputs and admitted actions, then independently replay those inputs through the official ONNX models. The CPU matrix and continuous sequence verified 2556 control steps with zero action parity error.

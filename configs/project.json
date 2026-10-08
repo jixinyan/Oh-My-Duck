@@ -5,6 +5,28 @@
   "entry_point": "omd.py",
   "release_readiness": {
     "state": "acceptance_in_progress",
+    "openusd_readiness": {
+      "state": "actual_setup_metadata_asset_import_and_installed_checks_verified_gpu_pending",
+      "source_revision": "4bb90aa79c9fdb00045e652862e8acb06f7d23ef",
+      "module": "oh_my_duck.infrastructure.usd_runtime",
+      "provider": "usd-core",
+      "provider_version": "25.11",
+      "installed_provider_files_verified": 123,
+      "actual_setup_frameworks": ["rsl-rl", "sb3"],
+      "actual_robot_imports": ["allcollisions", "groundcontact_rollers"],
+      "actual_robot_import_device": "cpu",
+      "worker_environment": ".envs/isaac-newton-usd-core-20261008-01",
+      "runtime_audit": "outputs/acceptance/usd-provider-runtime-20261008-04/independent-audit.json",
+      "setup_audit": "outputs/acceptance/usd-environment-update-20261008-03/independent-audit.json",
+      "newton_usd_import": "outputs/acceptance/newton-usd-import-20261008-04.json",
+      "remote_preflight": "outputs/acceptance/usd-provider-preflight-20261008-03/preflight/result.json",
+      "installed_package": "outputs/acceptance/usd-provider-package-20261008-03/result.json",
+      "source_and_resource_files_verified": 419,
+      "installed_cli_checks_passed": 19,
+      "cuda_runtime_checked": false,
+      "gpu_execution": "stopped",
+      "report": "docs/reports/openusd-readiness-2026-10-08.md"
+    },
     "installed_audit_lifecycle": {
       "state": "actual_installed_commands_deadlines_and_partial_evidence_verified",
       "source_revision": "984d6ff554b7259d73a4ea99d6db3e24aedfd744",
@@ -220,7 +242,7 @@
       "video_sha256": "5aa3b8e986bebe486b74888d0710a0aa538d7305cef89fdeee4fed29ba1aa4c5",
       "report": "docs/reports/navigation-acceptance-2026-10-07.md"
     },
-    "runtime_doctor": "passed_voice_client_and_newton",
+    "runtime_doctor": "voice_client_and_newton_metadata_verified_cuda_acceptance_pending",
     "package_build": "passed_wheel_and_sdist",
     "voice_profile_tests": "10_passed",
     "video": "outputs/demos/oh-my-duck-voice-native-20261003-verified.mp4",

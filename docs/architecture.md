@@ -51,7 +51,7 @@ Application, robot, training, shared acceptance and replay modules live in `src/
 | Measured policy acceptance | `validation/metric/` | `plans.py`, `case.py`, `campaign.py`, `verify.py`, `policy.py` |
 | Native task and navigation acceptance | `validation/harness/` | `control.py`, `motion_guard.py`, `replay.py`, `navigation.py` |
 | Release preparation and package checks | `validation/release/` | `plans.py`, `worker.py`, `campaign.py`, `package.py` |
-| Setup and process ownership | `infrastructure/` | `owned_process.py`, `acceptance_supervisor.py` |
+| Setup and process ownership | `infrastructure/` | `bootstrap_isaac.py`, `usd_runtime.py`, `owned_process.py`, `acceptance_supervisor.py` |
 
 `omd validate` selects an acceptance implementation through a lazy dispatcher.
 `omd replay` manages native sessions and exports terminal run evidence. Metric and
@@ -79,6 +79,13 @@ and asset conversion keep separate environments because their native libraries h
 incompatible pins. `tests/rl/` separates dependency-specific tests from the lightweight
 core suite. Robot source assets are package data; generated assets and experiment
 outputs are ignored. Upstream ancestry and licenses live in `third_party/`.
+
+The Linux x86_64 Newton environment selects one OpenUSD provider. Setup verifies
+installed file hashes and includes the native Harness dependencies. Metadata
+checks and online initialization require `infrastructure/usd_runtime.py` before
+CUDA. Perception model services use their separately locked environment; their
+client and frame-validation modules belong to the simulator execution path.
+See [actual dependency and import validation](reports/openusd-readiness-2026-10-08.md).
 
 RL and agentic share robot/policy contracts rather than importing each other's
 implementation. `robotics/backends` implements online robot execution;

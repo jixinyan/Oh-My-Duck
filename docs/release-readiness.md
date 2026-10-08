@@ -4,6 +4,14 @@ The release workflow uses recorded speech, the pinned native Harness, official p
 
 ## Runtime preparation
 
+The [OpenUSD readiness report](reports/openusd-readiness-2026-10-08.md) records
+the unique x86_64 provider, 123 verified installation files, actual RSL-RL/SB3
+setup selections, both robot USD imports on CPU and the complete six-stage
+preflight. The verified remote environment is
+`.envs/isaac-newton-usd-core-20261008-01`; use its Python path for any subsequent
+authorized acceptance. The shared canonical environment is preserved.
+Independent installation checked 419 source/resource files and 19 CLI calls.
+
 The [native worker validation](reports/native-worker-modules-2026-10-08.md) records
 current CPU execution, real SDK/process transport, policy transition,
 cancellation and installed package checks. Remote compilation and actual imports
@@ -62,7 +70,7 @@ environments/voice-client/.venv/bin/python omd.py doctor --runtime voice-client 
   --harness-url http://127.0.0.1:4318 --output outputs/acceptance/doctor-client-new.json
 ```
 
-The doctor checks installed dependency versions and the actual service identities. On the simulation host, `--runtime isaac-newton --scene-config configs/simulation-demo/office.json --catalog POLICY_DIRECTORY` also checks CUDA, the pinned Isaac Lab revision, the converted robot asset and the complete official ONNX catalogue. Add `--metadata-only` to inspect environment versions and assets without initializing CUDA. Scene checks verify every downloaded file against its recorded size and SHA256, the source USD identity and its public map. The [release campaign preflight](runtime-release-acceptance.md) performs these checks for all declared stages and saves a separate readiness result.
+The doctor checks installed dependency versions and the actual service identities. On the simulation host, `--runtime isaac-newton --scene-config configs/simulation-demo/office.json --catalog POLICY_DIRECTORY` also verifies the unique OpenUSD provider and installation files before checking CUDA, the pinned Isaac Lab revision, the converted robot asset and the complete official ONNX catalogue. Add `--metadata-only` to inspect environment versions and assets without initializing CUDA. Scene checks verify every downloaded file against its recorded size and SHA256, the source USD identity and its public map. The [release campaign preflight](runtime-release-acceptance.md) performs these checks for all declared stages and saves a separate readiness result.
 
 The [offline validation report](reports/offline-release-validation-2026-10-07.md) records actual CPU motion and cancellation, 2556 independently recomputed policy controls, recorded RGBD validation, voice profile checks, a six-stage remote preflight and an independent wheel installation. GPU acceptance and RL remain stopped. Each metric campaign case now requires exact recorded 61→14 ONNX parity and saves `policy-verification.json` alongside its physical audit.
 

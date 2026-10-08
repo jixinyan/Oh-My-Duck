@@ -34,6 +34,13 @@ and SB3 PPO remain dependencies. Microduck task code is never loaded from the
 upstream cache. `environments/{mujoco,isaac-newton,isaac-assets}` holds dependency
 manifests and locks; run their setup through `omd setup`.
 
+Newton setup includes the native Harness extra and the selected PPO framework.
+The x86_64 runtime uses `usd-core==25.11` as its unique `pxr` provider. Setup
+reinstalls and verifies its files through `infrastructure/usd_runtime.py`, using
+`.cache/tmp` for installer temporary files. `doctor --metadata-only` and online
+backend construction perform the same file checks before CUDA initialization.
+See [OpenUSD readiness](reports/openusd-readiness-2026-10-08.md).
+
 The Isaac backend requires Newton. Unsupported task bindings fail explicitly.
 Keep training dependencies out of agentic, voice, recording and CLI imports.
 

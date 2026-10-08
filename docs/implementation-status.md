@@ -1,5 +1,7 @@
 # Implementation status
 
+> 2026-10-08：Newton 环境使用唯一的 OpenUSD provider，123 个安装文件通过实际 hash 检查，USD 版本为 25.11。实际安装流程通过 RSL-RL、SB3 与原生 Harness 依赖检查；两种机器人 USD 通过 Newton CPU 导入，保留全部 14 个 servo。当前源码六阶段发布准备、资产组成、实际导入和 419 个独立安装文件及 19 个命令调用通过。GPU 和 RL 保持停止，见[OpenUSD 验证](reports/openusd-readiness-2026-10-08.md)。
+
 > 2026-10-08：独立安装检查支持明确的命令时限，每次启动、退出、耗时和输出 SHA256 保存为连续记录。默认完整检查通过 418 个文件、三份许可证、19 个调用及实际 ONNX/物理资料复核；明确时限检查通过 17 个调用。实际子进程中断、保留过程记录、重复输出拒绝和无效时限拒绝通过，见[验证记录](reports/installed-audit-lifecycle-2026-10-08.md)。GPU 和 RL 保持停止。
 
 > 2026-10-08：原生 worker 位于 `integrations/edh/`，分别管理环境、动作设备、会话工具与进程通信；公开 executable 保持 `oh_my_duck.integrations.edh_native`。实际 CPU 连续动作、1208 个 ONNX 重算、任务权限检查、原生 SDK 与独立进程通信、policy 转换及两种运动期间取消全部通过。两种 robot conversion asset 支持经过完整来源检查的明确复用；当前源码六阶段准备检查通过，核验四份场景配置、十个官方 policy 和 29 个 Harness 文件。独立安装检查 418 个文件、三份许可证和 19 个命令调用，远程编译与实际导入通过，GPU 和 RL 保持停止。见[资产验证](reports/source-verified-assets-2026-10-08.md)与[原生 worker 验证](reports/native-worker-modules-2026-10-08.md)。
