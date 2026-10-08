@@ -53,6 +53,7 @@ class MicroDuckWorkerSession(NativeWorkerSession):
                 "height_m", "tilt_rad", "command_block", "contact_evidence")},
             "stopped_samples": measured["stopped_samples"],
             "required_stopped_samples": STOP_SAMPLES,
+            "goal_check": observed["goal_check"],
             "metric_motion": None if self._metric_motion is None else self._metric_motion.result,
             "motion_guard": self._motion_guard,
             "command_segment": None if self._motion_segment is None else {
@@ -85,6 +86,10 @@ class MicroDuckWorkerSession(NativeWorkerSession):
         backend = self._environment._backend()
         observed = backend.observe_control()
         observed["measurements"]["stopped_samples"] = backend._stopped_samples
+        goal = backend.check_goal()
+        if any(goal[key] != observed[key] for key in ("episode_id", "sequence", "simulation_time_s")):
+            raise RuntimeError("Native goal check differs from the control observation")
+        observed["goal_check"] = goal
         return observed
 
     def _command_steps(self, arguments: dict[str, Any]) -> int:
@@ -186,7 +191,7 @@ class MicroDuckWorkerSession(NativeWorkerSession):
         self._validator = ContractValidator.from_path(arguments["schema_path"])
         environment = MicroDuckEnvironment(configuration)
         self._environment = environment
-        self._device = MicroDuckActionDevice(environment, self._publish_pausing)
+        self._device = MicroDuckActionDevice(environment, self._publish_pausing, self._prepare_execution)
         self._initial_observation = await self._device.on_owner(
             lambda: environment.reset(self._native_task_id, configuration))
         self._description = await self._device.on_owner(environment.describe)
@@ -619,6 +624,29 @@ class MicroDuckWorkerSession(NativeWorkerSession):
         if self._motion_segment is None or self._motion_segment["run_task_id"] != self._run_task_id:
             raise RuntimeError("Native start requires a bounded MicroDuck command")
         return await super().start(arguments)
+
+    async def _prepare_execution(self, execution_id: str) -> None:
+        segment = self._motion_segment
+        self._require_control_lease(self._run_task_id)
+        if segment is None or segment["run_task_id"] != self._run_task_id:
+            raise RuntimeError("Admitted execution requires the active bounded command")
+        if segment["execution_id"] is None:
+            return
+        snapshot = self._require_gate().snapshot()
+        if (snapshot["state"] != "ended" or not snapshot["device_confirmed"] or
+                segment["execution_id"] != snapshot["execution_id"] or
+                execution_id == snapshot["execution_id"]):
+            raise RuntimeError("New execution requires the previous confirmed terminal boundary")
+
+        def prepare_command() -> dict:
+            self._require_control_lease(self._run_task_id)
+            return self._environment._backend().set_command(
+                {"twist": [0.0, 0.0, 0.0]}, request_id=uuid4().hex)
+
+        command = await self._device.on_owner(prepare_command)
+        self._require_control_lease(self._run_task_id)
+        self._metric_motion = None
+        self._bind_motion_segment(command, self.DEFAULT_COMMAND_STEPS)
 
     async def resume(self, arguments: dict[str, Any]) -> dict[str, Any]:
         await self._await_motion_cleanup()

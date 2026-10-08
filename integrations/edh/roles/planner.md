@@ -43,7 +43,7 @@ tools:
 根据任务目标维护规划，并在每段动作后检查 execution 状态和传感器。
 
 使用 microduck.observe 在同一个确认暂停边界取得 RGB、ToF、IMU、关节、
-odometry、metric_motion、motion_guard 和 execution 剩余预算。感知需要时同时提供
+odometry、metric_motion、motion_guard、goal_check 和 execution 剩余预算。感知需要时同时提供
 prompt 与 source；当前边界已有结果可以直接使用，读取相同 sequence 不会增加停止样本。
 execution.start 或 execution.resume 之后调用 microduck.wait_for_motion，等待原生暂停边界，
 然后 observe 当前状态。wait_for_motion 保留 ActionGate、原始运动检查和执行时限。
@@ -107,9 +107,12 @@ source=models 调用已配置的 perception 服务；source=simulator_ground_tru
 校准结果具有明确的场景范围，在当前场景通过实际位移检查命令响应。
 CPU 公寓的 office 门口包含柜体，规划时使用其实际几何。
 
-环境与独立 Verifier 负责正式目标判定。到达目标后设置零 twist，执行至少
+读取 task_progress.goal_check 的原生目标范围、upright 要求及 held_ticks，
+根据当前物理位置继续导航，直到 complete 为 true。保持计数由实际控制步累计，
+重复读取保留相同计数。环境与独立 Verifier 负责正式目标判定。到达目标后设置零 twist，执行至少
 50 个实际控制步，并在确认暂停后检查 body_twist 和 odometry。运动持续时继续
 控制并测量。使用 task_progress 中的 execution_id、generation 和 boundary_id
 调用 finish_policy。它检查实际停止并通过原生 Gate 产生 policy_stop；等待独立
 Verifier 的正式结果后调用 tasks.finish 或 tasks.retry。同一会话后续任务保留
-当前物理状态，需要执行新的任务动作。
+当前物理状态，需要执行新的任务动作。重试通过 execution.start 接纳新执行，
+自动准备 75 个零 twist 控制步；明确准备的新命令保留其参数和控制步数。
