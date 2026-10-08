@@ -195,8 +195,8 @@ function tool(operation, properties, required, services) {
       task_progress: 'Read current physical position, velocity, contact evidence, bounded-command status, and native motion-pause reason.',
       observe: 'Read head RGB, ToF, IMU, all joints, odometry, metric progress, motion guard, current boundary and remaining native budget in one confirmed paused sample. Optional prompt and source must be provided together to include frame-bound perception. This reads fresh ToF for guarded recovery. Reuse this result for the current boundary.',
       wait_for_motion: 'Wait up to 90 seconds for the currently admitted native policy motion to reach a confirmed paused or ended boundary, then return measured progress and remaining budget. Call after execution.start or execution.resume; inspect the result before preparing another action. This does not issue actions or confirm physical rest.',
-      walk: 'Prepare the configured locomotion policy to move a signed distance in meters along the current heading. Defaults are alpha_walking for standard feet and roller for the roller model; a policy registry can explicitly select another perpetual twist policy. Positive moves forward; negative moves backward. Requires a confirmed paused execution and five measured stopped samples. Call execution.resume afterward. Native odometry controls completion and braking; read task_progress.metric_motion after the pause.' + metricRecovery,
-      rotate: 'Prepare the configured locomotion policy to turn by a signed angle in degrees. Defaults are alpha_walking for standard feet and roller for the roller model; a policy registry can explicitly select another perpetual twist policy. This maneuver includes translation; the measured translation_xy_m is reported. Positive is counterclockwise around world +Z; negative is clockwise. Requires a confirmed paused execution and five measured stopped samples. Call execution.resume afterward. Accumulated measured yaw controls completion and braking; read task_progress.metric_motion after the pause.' + metricRecovery,
+      walk: 'Prepare the configured locomotion policy to move a signed distance in meters along the current heading, using 0.4 m/s unless a speed is supplied. Defaults are alpha_walking for standard feet and roller for the roller model; a policy registry can explicitly select another perpetual twist policy. Positive moves forward; negative moves backward. The parameter range describes accepted commands; policy tracking depends on the current scene and measured response. Requires a confirmed paused execution and five measured stopped samples, with no pending metric request. Call execution.resume afterward. Native odometry controls completion and braking; read task_progress.metric_motion after the pause.' + metricRecovery,
+      rotate: 'Prepare the configured locomotion policy to turn by a signed angle in degrees, using 45 degrees/second unless an angular speed is supplied. Defaults are alpha_walking for standard feet and roller for the roller model; a policy registry can explicitly select another perpetual twist policy. Standard feet use coupled forward/lateral/yaw motion, so reserve room for translation and remeasure the position afterward. The measured translation_xy_m is reported. Positive is counterclockwise around world +Z; negative is clockwise. Requires a confirmed paused execution and five measured stopped samples, with no pending metric request. Call execution.resume afterward. Accumulated measured yaw controls completion and braking; read task_progress.metric_motion after the pause.' + metricRecovery,
     }[operation],
     parameters: { type: 'object', properties, required, additionalProperties: false },
     output: {
@@ -303,12 +303,16 @@ const server = await startServer({
         source: { type: 'string', enum: availablePerceptionSources },
       }, ['prompt', 'source'], { images }),
       'microduck.walk': tool('walk', {
-        distance_m: { type: 'number', minimum: -10, maximum: 10 },
-        speed_m_s: { type: 'number', minimum: 0.1, maximum: 0.4 },
+        distance_m: { type: 'number', minimum: -10, maximum: 10,
+          description: 'Signed displacement along the current body heading, in meters. Magnitude must be at least 0.1 m. Completion requires a measured position error of at most 0.05 m and five stopped samples.' },
+        speed_m_s: { type: 'number', minimum: 0.1, maximum: 0.4, default: 0.4,
+          description: 'Requested body-forward policy command in meters/second. Omit to use 0.4 m/s. Lower commands require current-scene response verification; reduce the requested distance to bound travel.' },
       }, ['distance_m'], { images }),
       'microduck.rotate': tool('rotate', {
-        angle_deg: { type: 'number', minimum: -360, maximum: 360 },
-        angular_speed_deg_s: { type: 'number', minimum: 10, maximum: 55 },
+        angle_deg: { type: 'number', minimum: -360, maximum: 360,
+          description: 'Signed relative yaw around world +Z, in degrees; positive is counterclockwise. Magnitude must be at least 10 degrees. Completion requires a measured accumulated yaw error of at most 5 degrees and five stopped samples.' },
+        angular_speed_deg_s: { type: 'number', minimum: 10, maximum: 55, default: 45,
+          description: 'Requested yaw policy command in degrees/second. Omit to use 45 degrees/second. Standard feet also command 0.2 m/s forward and 0.25 m/s lateral throughout the turn; slower yaw can require more travel space.' },
       }, ['angle_deg'], { images }),
     },
     launchProfiles: {

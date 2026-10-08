@@ -66,6 +66,12 @@ velstand，带轮模型初始使用 roller。每条命令执行 5–100 个实�
 主动修改动作时，通过 set_command 明确设置新命令，随后调用 execution.resume。
 角度为绕世界 +Z 的有符号度数，正数为逆时针。工具使用 policy registry 为当前模型
 配置的 locomotion policy，默认值为标准模型的 alpha_walking 和带轮模型的 roller。
+walk 默认使用 0.4 m/s，rotate 默认使用 45 degrees/second。导航时使用默认值，
+通过请求距离、角度以及实时观察控制每段运动范围。其他速度需要在当前场景测量
+policy 的响应；参数范围表示工具可以接受的命令。标准模型转向同时使用
+0.2 m/s 前向和 0.25 m/s 侧向命令，需要根据附近障碍预留运动空间。
+转向速度较低时，完成角度可能需要更长时间与更多平移。根据公共几何和当前目标
+bearing 选择必要的转向，保持同一个距离或角度请求直到它完成或被明确修改。
 policy_catalog 提供注册包的来源与验证状态。
 使用实际位置和连续累计 yaw 控制目标、制动与停止，在内部接续有界命令。
 到达暂停边界后读取 task_progress.metric_motion，检查 completed、error、tolerance
