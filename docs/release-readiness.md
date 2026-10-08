@@ -14,7 +14,7 @@ environments/voice-client/.venv/bin/python omd.py doctor --runtime voice-client 
   --harness-url http://127.0.0.1:4318 --output outputs/acceptance/doctor-client-new.json
 ```
 
-The doctor checks installed dependency versions and the actual service identities. On the simulation host, `--runtime isaac-newton --scene-config configs/simulation-demo/office.json --catalog POLICY_DIRECTORY` also checks CUDA, the pinned Isaac Lab revision, the converted robot asset and the complete official ONNX catalogue. Readiness checks and behavioral acceptance have separate evidence.
+The doctor checks installed dependency versions and the actual service identities. On the simulation host, `--runtime isaac-newton --scene-config configs/simulation-demo/office.json --catalog POLICY_DIRECTORY` also checks CUDA, the pinned Isaac Lab revision, the converted robot asset and the complete official ONNX catalogue. Add `--metadata-only` to inspect environment versions and assets without initializing CUDA. Scene checks verify every downloaded file against its recorded size and SHA256, the source USD identity and its public map. The [release campaign preflight](runtime-release-acceptance.md) performs these checks for all declared stages and saves a separate readiness result.
 
 ## End-to-end acceptance
 
@@ -53,7 +53,7 @@ environments/cpu-apartment/.venv/bin/python scripts/verify_metric_campaign.py \
 
 The verifier uses native tool admissions and continuous physical samples to reconstruct position and accumulated yaw. It checks unchanged 0.05 m / 5° thresholds, five consecutive measured stop samples, upright endpoints, zero obstacle contacts, 14-servo actions, four physics substeps per action and confirmed termination. It compares observer PNG bytes and timestamps with native events, decodes images, verifies result hashes and checks runner/scene hashes against the recorded Git revision. Saved cases must cover the complete declared plan and share one source revision. Existing verification output files are rejected. These checks measure policy-tool execution; independent model task verdicts have their own acceptance.
 
-Current resource authorization permits at most one physical GPU from devices 2–4. Run Newton suites sequentially on that device and confirm resource release before the next workload. RL remains stopped.
+GPU acceptance and RL remain stopped. Future authorized allocation permits at most one physical GPU from devices 2–4, requires zero compute PIDs and sustained zero utilization, and preserves unrelated workloads. Run Newton suites sequentially and confirm resource release before the next workload.
 
 ## Record the agentic video
 

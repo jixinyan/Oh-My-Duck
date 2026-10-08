@@ -14,40 +14,14 @@ import subprocess
 import sys
 import time
 
-from jsonschema import Draft202012Validator
-
-from accept_metric_campaign import PLAN_SCHEMA
-from metric_plan import case_motions
 from record_harness_demo import request, save_json
+from release_plan import validate_plan
 from oh_my_duck.infrastructure.owned_process import owned_process
-
-
-STAGE_SCHEMA = {
-    "type": "object", "required": ["schema_version", "stages"], "additionalProperties": False,
-    "properties": {"schema_version": {"const": 1}, "stages": {"type": "array", "minItems": 1,
-        "items": {"oneOf": [
-            {"type": "object", "required": ["id", "kind", "plan", "suite"], "additionalProperties": False,
-             "properties": {"id": {"type": "string", "pattern": "^[a-z][a-z0-9-]*$"},
-                 "kind": {"const": "metric"}, "plan": {"type": "string"}, "suite": {"type": "string"}}},
-            {"type": "object", "required": ["id", "kind", "scene", "instruction", "minimum_distance_m"],
-             "additionalProperties": False, "properties": {
-                 "id": {"type": "string", "pattern": "^[a-z][a-z0-9-]*$"}, "kind": {"const": "navigation"},
-                 "scene": {"type": "string"}, "instruction": {"type": "string"},
-                 "minimum_distance_m": {"type": "number", "exclusiveMinimum": 0}}},
-        ]}}},
-}
 
 
 def ssh(args, command, **kwargs):
     return subprocess.run(["ssh", "-T", "-o", "BatchMode=yes", "-o", "ServerAliveInterval=30",
                            args.worker_host, command], **kwargs)
-
-
-def within(root, name):
-    path = (root / name).resolve(strict=True)
-    if not path.is_relative_to(root):
-        raise ValueError("Acceptance input must belong to the source checkout")
-    return path
 
 
 def gpu_snapshot(args, output, name):
@@ -96,6 +70,33 @@ def verify_source(args, root, revision):
         raise RuntimeError("Unified acceptance requires matching clean fixed source checkouts")
 
 
+def preflight(args, root, output, remote_output, revision):
+    local_pin = subprocess.check_output(["git", "-C", str(args.edh_source), "rev-parse", "HEAD"], text=True).strip()
+    if local_pin != "8a5e685b22d032207f53db20454f0992a4ad60fd":
+        raise ValueError("Local native Harness differs from its pinned source")
+    (args.edh_source / "node_modules/tsx/dist/loader.mjs").resolve(strict=True)
+    subprocess.run(["node", "--check", str(root / "integrations/edh/server.mjs")], check=True)
+    command = ["env", "CUDA_VISIBLE_DEVICES=", "ORT_DISABLE_TELEMETRY=1",
+               f"PYTHONPATH={args.worker_root}/src", f"TMPDIR={args.worker_root}/.cache/tmp",
+               args.worker_python, "scripts/preflight_release_worker.py", "--plan",
+               str(args.plan.resolve().relative_to(root)), "--catalog", args.worker_policy_dir,
+               "--edh-source", args.worker_edh_source, "--provider-config", args.remote_provider_config,
+               "--output", remote_output + "/preflight"]
+    with (output / "preflight.log").open("x") as log:
+        try:
+            ssh(args, "cd " + shlex.quote(args.worker_root) + " && " + shlex.join(command),
+                check=True, stdout=log, stderr=subprocess.STDOUT)
+        finally:
+            subprocess.run(["rsync", "-a", args.worker_host + ":" + remote_output + "/preflight/",
+                            str(output / "preflight") + "/"], check=True)
+    actual = json.loads((output / "preflight/result.json").read_text())
+    if not actual["passed"] or actual["source_revision"] != revision or actual["cuda_runtime_checked"]:
+        raise RuntimeError("Remote metadata preflight failed its source and readiness checks")
+    return {"passed": True, "local_harness_revision": local_pin,
+            "remote_report_sha256": hashlib.sha256((output / "preflight/result.json").read_bytes()).hexdigest(),
+            "cuda_runtime_checked": False}
+
+
 @contextmanager
 def stage_record(output, record, entry):
     try:
@@ -122,35 +123,23 @@ def main():
     parser.add_argument("--worker-policy-dir", required=True)
     parser.add_argument("--edh-source", type=Path, required=True)
     parser.add_argument("--remote-provider-config", required=True)
-    parser.add_argument("--gpu", type=int, choices=(2, 3, 4), required=True)
+    parser.add_argument("--gpu", type=int, choices=(2, 3, 4))
+    parser.add_argument("--preflight-only", action="store_true")
     parser.add_argument("--port", type=int, default=4365)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
+    if not args.preflight_only and args.gpu is None:
+        raise ValueError("GPU acceptance requires one allocated physical device from 2–4")
     if re.fullmatch("[a-z][a-z0-9-]*", args.output.name) is None:
         raise ValueError("Campaign output directory name must use lowercase letters, digits and hyphens")
     root = Path(__file__).resolve().parents[1]
-    plan = json.loads(args.plan.read_text())
-    Draft202012Validator(STAGE_SCHEMA).validate(plan)
-    if len({stage["id"] for stage in plan["stages"]}) != len(plan["stages"]):
-        raise ValueError("Acceptance stage identities must be unique")
+    plan, _scenes, inputs = validate_plan(root, args.plan)
     if not 1 <= args.port <= 65535 or args.worker_host.startswith("-") or any(c.isspace() for c in args.worker_host):
         raise ValueError("Worker host or local port is invalid")
     for value in (args.worker_root, args.worker_python, args.worker_edh_source,
                   args.worker_policy_dir, args.remote_provider_config):
         if not value.startswith("/") or "\0" in value:
             raise ValueError("Remote paths must be absolute")
-    for stage in plan["stages"]:
-        if stage["kind"] == "metric":
-            metrics = json.loads(within(root, stage["plan"]).read_text())
-            Draft202012Validator(PLAN_SCHEMA).validate(metrics)
-            if stage["suite"] not in metrics["suites"]:
-                raise ValueError("Unknown metric suite")
-            for case in metrics["suites"][stage["suite"]]["cases"]:
-                case_motions(case)
-        else:
-            scene = json.loads(within(root, stage["scene"]).read_text())
-            if scene["backend"] != "isaac-newton" or not within(root, stage["instruction"]).read_text().strip():
-                raise ValueError("Navigation requires Newton and an actual instruction")
     revision = subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root, text=True).strip()
     verify_source(args, root, revision)
     args.output.mkdir(parents=True, exist_ok=False)
@@ -158,6 +147,7 @@ def main():
     remote_output = args.worker_root + "/outputs/release-campaigns/" + output.name
     record = {"schema_version": 1, "passed": False, "state": "running", "source_revision": revision,
               "plan_sha256": hashlib.sha256(args.plan.read_bytes()).hexdigest(), "physical_gpu": args.gpu,
+              "input_sha256": inputs, "gpu_acceptance_performed": False,
               "worker_host": args.worker_host, "remote_output": remote_output, "stages": [],
               "scope": "Declared native runtime cases; broader generalization and hardware separate"}
     save_json(output / "plan.json", plan)
@@ -166,6 +156,13 @@ def main():
     lock_path.parent.mkdir(parents=True, exist_ok=True)
     with stage_record(output, record, record), lock_path.open("a") as lease:
         fcntl.flock(lease.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        record["preflight"] = preflight(args, root, output, remote_output, revision)
+        if args.preflight_only:
+            record["state"] = "preflight_passed"
+            save_json(output / "campaign.json", record)
+            print(json.dumps({"state": "preflight_passed", "gpu_acceptance_performed": False}), flush=True)
+            return 0
+        save_json(output / "campaign.json", record)
         gpu_snapshot(args, output, "gpu-before")
         processes = ssh(args, "nvidia-smi --query-compute-apps=gpu_uuid,pid,process_name,used_memory --format=csv,noheader",
                         check=True, capture_output=True, text=True).stdout
@@ -176,6 +173,7 @@ def main():
             entry = {"id": stage["id"], "kind": stage["kind"], "state": "running",
                      "started_at": datetime.now(timezone.utc).isoformat()}
             record["stages"].append(entry)
+            record["gpu_acceptance_performed"] = True
             save_json(output / "campaign.json", record)
             started = time.monotonic()
             print(json.dumps(entry), flush=True)

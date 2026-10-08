@@ -12,6 +12,17 @@ The sequence plan is `configs/experiments/navigation-motion-sequences.json`. Eac
 
 ## Unified GPU validation
 
+`--preflight-only` checks matching clean source, both pinned Harness revisions, the actual remote environment versions, every declared stage and motion parameter, all downloaded scene file sizes and SHA256 values, public map references, converted robot assets, the ten official policy models and the selected provider metadata. CUDA visibility is cleared and no simulation worker starts. The output records `preflight_passed`, `gpu_acceptance_performed: false` and the actual per-scene checks. Full GPU execution performs the same preflight before admission.
+
+```bash
+python scripts/run_release_campaign.py --preflight-only \
+  --worker-host jd_B300 --worker-root "$OMD_WORKER_ROOT" \
+  --worker-python "$OMD_WORKER_PYTHON" --worker-edh-source "$OMD_WORKER_EDH" \
+  --worker-policy-dir "$OMD_WORKER_POLICIES" --edh-source "$OMD_LOCAL_EDH" \
+  --remote-provider-config "$OMD_PROVIDER_CONFIG" \
+  --output outputs/acceptance/runtime-preflight-new
+```
+
 `configs/experiments/runtime-release-acceptance.json` declares six sequential stages:
 
 1. Office feet metric matrix.
