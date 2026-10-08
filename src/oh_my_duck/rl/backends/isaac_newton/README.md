@@ -24,6 +24,20 @@ the model-initialization callback that configures the actual Newton collision mo
 The Linux kitless environment uses `usd-exchange==3.0.0`, which supplies OpenUSD
 26.08. Setup and startup verify the unique provider and its installed files.
 
+Run the public CPU asset audit from the locked Newton environment:
+
+```bash
+CUDA_VISIBLE_DEVICES='' omd validate model-assets --repeat 3 \
+  --output outputs/acceptance/model-assets-unique-run
+```
+
+The command checks both robot variants by default. `--models` selects explicit
+variants. It verifies actual geometry, physics materials, source joints, generated
+file preservation and native Newton imports in anonymous USD session layers.
+Results, dependency/source provenance and per-model progress are saved under the
+new output directory. Solver execution and behavioral acceptance use the release
+campaign.
+
 `omd assets --backend isaac-newton -- --model MODEL` converts an asset when its
 source fingerprint has no verified generated result. To reuse a converted asset
 from an ancestor checkout with identical conversion inputs, provide that clean,

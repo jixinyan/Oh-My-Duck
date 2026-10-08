@@ -80,7 +80,7 @@ def main():
                 ["harness", "--help"], ["sim", "--help"], ["validate", "--help"], ["replay", "--help"],
                 ["validate", "metric-audit", "--help"], ["validate", "policy-audit", "--help"],
                 ["validate", "release", "--help"], ["validate", "navigation-audit", "--help"],
-                ["validate", "release-plan"]]
+                ["validate", "release-plan"], ["validate", "model-assets", "--help"]]
     if args.policy_record is not None:
         commands.append(["validate", "policy-audit", "--directory", str(args.policy_record.resolve(strict=True)),
                          "--catalog", str(args.catalog.resolve(strict=True)), "--output",

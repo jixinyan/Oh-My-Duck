@@ -15,6 +15,7 @@ COMMANDS = {
     "release": ("release.campaign", "执行远程 metadata 检查或已分配 GPU 的验收"),
     "release-worker": ("release.worker", "检查 worker 的依赖、场景与来源"),
     "release-plan": ("release.plans", "检查声明的全部阶段、配置和指令"),
+    "model-assets": ("release.assets", "使用 CPU 核验 USD 碰撞、官方材质和 Newton 导入"),
     "package-audit": ("release.package", "检查 wheel、源码包和独立安装的 CLI"),
 }
 
