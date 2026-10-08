@@ -280,6 +280,11 @@ class MicroDuckWorkerSession(NativeWorkerSession):
                     snapshot = self._require_gate().snapshot()
                     if snapshot["state"] != "paused" or not snapshot["device_confirmed"]:
                         raise RuntimeError("Metric motion requires a confirmed paused native execution")
+                    if (self._metric_motion is not None and
+                            self._metric_motion.phase in ("moving", "braking")):
+                        raise RuntimeError(
+                            f"Metric motion request {self._metric_motion.request_id} is pending; "
+                            "resume it or replace it explicitly with set_command")
                     if self._motion_guard is not None and self._motion_guard["reason"] in (
                             "forward_proximity", "external_contact", "motion_stalled", "tof_invalid"):
                         raise RuntimeError("Resolve the measured motion hazard before metric navigation")

@@ -62,6 +62,8 @@ tasks.finish 要求所有计划项目为 done 或明确 abandoned；最终目标
 velstand，带轮模型初始使用 roller。每条命令执行 5–100 个实际控制步，默认 75 步。
 初始 execution 的零命令完成并取得五个停止样本后，导航调用 walk(distance_m)
 或 rotate(angle_deg)，随后调用 execution.resume。距离为当前身体朝向的有符号米数；
+每次准备的距离或角度动作保留其 request_id；该动作需要完成执行后才能准备下一个。
+主动修改动作时，通过 set_command 明确设置新命令，随后调用 execution.resume。
 角度为绕世界 +Z 的有符号度数，正数为逆时针。工具使用 policy registry 为当前模型
 配置的 locomotion policy，默认值为标准模型的 alpha_walking 和带轮模型的 roller。
 policy_catalog 提供注册包的来源与验证状态。
