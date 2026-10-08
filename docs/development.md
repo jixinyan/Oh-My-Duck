@@ -16,6 +16,12 @@ require the locked simulator environment and the pinned native Harness dependenc
 Reusable implementation imports package modules directly. Compatibility scripts
 contain entry-point dispatch only; pytest does not add `scripts/` to its import path.
 
+The native worker implementation lives in `integrations/edh/`: `environment.py`
+owns observations and simulator stepping, `device.py` owns action execution,
+`session.py` owns native session and tool boundaries, and `worker.py` owns process
+transport. `integrations/edh_native.py` remains the executable and public import
+entry point; see the [source map](../src/oh_my_duck/integrations/edh/README.md).
+
 Task factories and policy configuration are editable project source. Native RSL-RL
 and SB3 PPO remain dependencies. Microduck task code is never loaded from the
 upstream cache. `environments/{mujoco,isaac-newton,isaac-assets}` holds dependency
