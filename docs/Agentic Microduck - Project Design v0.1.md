@@ -12,7 +12,7 @@ tags:
   - project-design
 ---
 
-> Newton 安装与启动前检查包含唯一 OpenUSD provider 及全部安装文件的 hash 核验。实际 RSL-RL/SB3 安装选择、原生 Harness 依赖、两种机器人 USD 的 Newton CPU 导入、六阶段发布准备和 419 个独立安装文件及 19 个调用通过。GPU 和 RL 保持停止，见[OpenUSD 验证](reports/openusd-readiness-2026-10-08.md)。
+> Newton 使用 OpenUSD 26.08，安装及启动前检查覆盖唯一 provider 与 244 个安装文件。USD 碰撞准备与 Newton 模型 callback 分别位于 `task_binding/collision_assets.py` 和 `task_binding/collisions.py`；两种模型的实际 CPU 导入、摩擦、材质绑定和几何保持检查通过，保留全部 14 个 servo。实际 RSL-RL/SB3 安装、原生 Harness 依赖、六阶段发布准备、23 项配置及导入测试、420 个独立安装文件和 19 个调用通过。GPU 和 RL 保持停止，见[CPU Newton 资产验证](reports/openusd-readiness-2026-10-08.md)。
 
 > 原生 worker 按环境、动作设备、会话工具和进程通信组织在 `integrations/edh/`，公开入口保持 `oh_my_duck.integrations.edh_native`。实际 CPU 连续动作、任务权限、policy 转换、原生 SDK 通信、执行取消与独立安装通过，远程 Newton adapter 导入通过。两种 robot conversion asset 支持经过完整来源检查的明确复用，当前源码的六阶段发布准备检查通过。独立安装核验 418 个文件与 19 个命令，GPU 和 RL 保持停止。见[资产验证](reports/source-verified-assets-2026-10-08.md)、[原生 worker 验证](reports/native-worker-modules-2026-10-08.md)与[架构及源码职责](architecture.md)。
 

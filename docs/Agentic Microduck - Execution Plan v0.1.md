@@ -10,7 +10,7 @@ tags:
   - sim-to-real
 ---
 
-> 2026-10-08：Newton 环境准备、安装文件检查和 USD CPU 导入完成实际验证。123 个 OpenUSD 文件、全部 14 个 servo、两种模型组成、RSL-RL/SB3 安装选择、原生 Harness 依赖及六阶段发布准备通过；独立安装核验 419 个文件、三份许可证和 19 个调用。远程验证环境及完整资料见[OpenUSD 验证](reports/openusd-readiness-2026-10-08.md)。GPU 和 RL 保持停止。
+> 2026-10-08：OpenUSD 26.08 的实际安装、244 个文件检查、两种模型碰撞准备和 Newton CPU 导入通过，全部 14 个 servo 保留。源码几何映射、官方摩擦、材质绑定、mesh points、world transforms 和生成文件完整核验；RSL-RL/SB3 安装选择、原生 Harness 依赖、六阶段发布准备及 23 项配置和导入测试通过。独立安装核验 420 个文件、三份许可证和 19 个调用。远程环境与完整资料见[CPU Newton 资产验证](reports/openusd-readiness-2026-10-08.md)。GPU 和 RL 保持停止。
 
 > 2026-10-08：原生 worker 的环境、动作设备、会话工具和通信模块完成组织及实际验证。连续五动作、1208 个 ONNX 重算、任务权限检查、两种运动取消、policy 转换、原生 SDK 与独立进程通信通过。两种 robot conversion asset 支持经过 129 项转换输入、实际依赖和全部生成文件检查的明确复用；当前源码的六阶段、四份场景配置及 29 个固定 Harness 文件通过准备检查。独立安装核验 418 个文件与 19 个命令。GPU 和 RL 保持停止，见[资产验证](reports/source-verified-assets-2026-10-08.md)与[原生 worker 验证](reports/native-worker-modules-2026-10-08.md)。
 

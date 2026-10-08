@@ -1,6 +1,6 @@
 # Implementation status
 
-> 2026-10-08：Newton 环境使用唯一的 OpenUSD provider，123 个安装文件通过实际 hash 检查，USD 版本为 25.11。实际安装流程通过 RSL-RL、SB3 与原生 Harness 依赖检查；两种机器人 USD 通过 Newton CPU 导入，保留全部 14 个 servo。当前源码六阶段发布准备、资产组成、实际导入和 419 个独立安装文件及 19 个命令调用通过。GPU 和 RL 保持停止，见[OpenUSD 验证](reports/openusd-readiness-2026-10-08.md)。
+> 2026-10-08：Newton 环境使用 `usd-exchange 3.0.0` 提供 OpenUSD 26.08，244 个安装文件通过实际 hash 检查。两种机器人 USD 的碰撞准备、材质绑定与 Newton CPU 导入通过，全部 14 个 servo 保留；229 个 mesh、1285270 个 points、world transforms 和生成资产文件保持一致。碰撞准备位于 `task_binding/collision_assets.py`，Newton 模型 callback 位于 `task_binding/collisions.py`。实际 RSL-RL/SB3 安装、原生 Harness 依赖、六阶段发布准备、23 项配置及导入测试、420 个独立安装文件和 19 个调用通过。GPU 和 RL 保持停止，见[CPU Newton 资产验证](reports/openusd-readiness-2026-10-08.md)。
 
 > 2026-10-08：独立安装检查支持明确的命令时限，每次启动、退出、耗时和输出 SHA256 保存为连续记录。默认完整检查通过 418 个文件、三份许可证、19 个调用及实际 ONNX/物理资料复核；明确时限检查通过 17 个调用。实际子进程中断、保留过程记录、重复输出拒绝和无效时限拒绝通过，见[验证记录](reports/installed-audit-lifecycle-2026-10-08.md)。GPU 和 RL 保持停止。
 
@@ -208,7 +208,7 @@ is prepared but not launched. Default task recipes and native PPO algorithms rem
 | Component | Current state |
 |---|---|
 | Source organization | First-party code consolidated under `src/oh_my_duck`; obsolete `training/` packages removed |
-| CLI/application | Unified entry point, `doctor` runtime checks and `voice-task` recorded native workflow; wheel build and installed voice commands verified |
+| CLI/application | Public `validate` / `replay`, actual `doctor` provider checks, native voice workflow, 420 installed files and 19 CLI calls verified |
 | Core contracts/tool catalog/recording | 已验证 schema、工具登记与 JSONL；原生 Harness 完整事件和 PNG 导出、SHA256 检查及 1080p agentic MP4 已完成实际验证 |
 | Agentic Harness, skills, robot execution | 固定 EDH 原生会话、SSH GPU worker、真实模型、官方 ONNX、ActionGate 与独立 Verifier 已运行；CPU 公寓与 Newton Office 的固定场景导航、Office 四个 policy 的完整多动作任务和 Hospital 轮滑有序路线通过。三个场景各通过三个距离/角度会话；全部长距离请求精度、图像输入独立 VLN、多场景泛化与真机待验收 |
 | Perception and policy adapters | 官方十项 policy 目录及 61-to-14 推断，CPU episodic 时长/接续、Newton Office 的 velstand/alpha_walking、head RGB optical pose/近裁剪、observer 场景取景、ToF、IMU 与 odometry 已验证；实际 RGB 与 segmentation 证据保留，物体识别与各 policy 物体效果待验证 |

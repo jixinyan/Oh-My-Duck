@@ -5,12 +5,12 @@ The release workflow uses recorded speech, the pinned native Harness, official p
 ## Runtime preparation
 
 The [OpenUSD readiness report](reports/openusd-readiness-2026-10-08.md) records
-the unique x86_64 provider, 123 verified installation files, actual RSL-RL/SB3
-setup selections, both robot USD imports on CPU and the complete six-stage
+the unique OpenUSD 26.08 provider, 244 verified installation files, actual RSL-RL/SB3
+setup selections, both robot collision preparations and Newton CPU imports, and the complete six-stage
 preflight. The verified remote environment is
-`.envs/isaac-newton-usd-core-20261008-01`; use its Python path for any subsequent
+`.envs/isaac-newton-usd-exchange-20261008-01`; use its Python path for any subsequent
 authorized acceptance. The shared canonical environment is preserved.
-Independent installation checked 419 source/resource files and 19 CLI calls.
+Independent installation checked 420 source/resource files and 19 CLI calls.
 
 The [native worker validation](reports/native-worker-modules-2026-10-08.md) records
 current CPU execution, real SDK/process transport, policy transition,

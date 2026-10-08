@@ -1,6 +1,6 @@
 # Architecture and extension guide
 
-This is the implementation framework for the full Project Design, not just the current locomotion experiment. The user's latest priority is **establish the module boundaries first, implement capabilities incrementally**.
+The implementation covers the full Project Design. The source map lists module responsibilities, public entry points and extension boundaries.
 
 ## Dependency direction
 
@@ -42,6 +42,7 @@ Application, robot, training, shared acceptance and replay modules live in `src/
 | MDP and actor/critic | `rl/mdp/`, `rl/models/` | Observations, rewards, commands and curricula |
 | Batched training simulators | `rl/backends/` | `mujoco/`, `isaac_newton/` |
 | Newton asset preparation | `rl/backends/isaac_newton/` | `assets.py`, `asset_reuse.py`, `paths.py` |
+| USD collision geometry and materials | `rl/backends/isaac_newton/task_binding/` | `collision_assets.py` |
 | Native PPO | `rl/learners/` | `rsl_rl/`, `sb3/` |
 | Training registration and dispatch | `rl/training/`, `rl/experiments/` | `tasks.py`, `frameworks.py`, `campaign.py` |
 | Export and deployment rehearsal | `rl/artifacts/`, `rl/evaluation/` | Export, schema-2 packaging and metrics |
@@ -80,12 +81,19 @@ incompatible pins. `tests/rl/` separates dependency-specific tests from the ligh
 core suite. Robot source assets are package data; generated assets and experiment
 outputs are ignored. Upstream ancestry and licenses live in `third_party/`.
 
-The Linux x86_64 Newton environment selects one OpenUSD provider. Setup verifies
+The Linux x86_64 Newton environment selects `usd-exchange==3.0.0`, supplying
+OpenUSD 26.08 as the unique `pxr` provider. Setup verifies
 installed file hashes and includes the native Harness dependencies. Metadata
 checks and online initialization require `infrastructure/usd_runtime.py` before
 CUDA. Perception model services use their separately locked environment; their
 client and frame-validation modules belong to the simulator execution path.
 See [actual dependency and import validation](reports/openusd-readiness-2026-10-08.md).
+
+`task_binding/collision_assets.py` owns official MJCF compilation, USD instance
+expansion, source geometry mapping and physics material preparation. It can be
+called directly on an actual USD stage without starting the simulator.
+`task_binding/collisions.py` owns scene spawning and the Newton model callback
+for filters, contact parameters, geometry orientation and ground collision pairs.
 
 RL and agentic share robot/policy contracts rather than importing each other's
 implementation. `robotics/backends` implements online robot execution;
