@@ -29,19 +29,30 @@ def main():
     subprocess.run([sys.executable, "-m", "oh_my_duck.infrastructure.bootstrap", "--skip-env"], check=True)
     if args.skip_env:
         return 0
+    temporary = ROOT / ".cache/tmp"
+    temporary.mkdir(parents=True, exist_ok=True)
     shared = {**os.environ, "UV_CACHE_DIR": str(ROOT / ".cache/uv"),
-              "UV_PYTHON_INSTALL_DIR": str(ROOT / ".cache/python"), "UV_HTTP_TIMEOUT": "600"}
+              "UV_PYTHON_INSTALL_DIR": str(ROOT / ".cache/python"), "UV_HTTP_TIMEOUT": "600",
+              "TMPDIR": str(temporary)}
     for name, project in (("isaac-newton", ROOT / "environments/isaac-newton"),
                           ("isaac-assets", ROOT / "environments/isaac-assets")):
         env = {**shared, "UV_PROJECT_ENVIRONMENT": str(ROOT / ".envs" / name)}
         extras = ["--extra", "sb3"] if name == "isaac-newton" and args.rl_framework == "sb3" else []
-        subprocess.run(["uv", "sync", "--project", str(project), "--locked", "--python", "3.12", *extras], env=env, check=True)
+        reinstall = ["--reinstall-package", "usd-core"] if name == "isaac-newton" else []
+        subprocess.run(["uv", "sync", "--project", str(project), "--locked", "--python", "3.12", *extras, *reinstall], env=env, check=True)
+        openusd = None
+        if name == "isaac-newton":
+            openusd = json.loads(subprocess.check_output([
+                str(ROOT / ".envs" / name / "bin/python"), "-c",
+                "import json; from oh_my_duck.infrastructure.usd_runtime import verify_usd_runtime; print(json.dumps(verify_usd_runtime()))",
+            ], cwd=ROOT, env=env, text=True))
         result = subprocess.check_output(["uv", "pip", "freeze", "--python", str(ROOT / ".envs" / name / "bin/python")], env=env, text=True)
         out = ROOT / "artifacts/environments" / name
         out.mkdir(parents=True, exist_ok=True)
         (out / "installed.txt").write_text(result)
         (out / "setup.json").write_text(json.dumps({"completed_at": datetime.now(timezone.utc).isoformat(),
-            "isaaclab": spec, "rl_framework": args.rl_framework if name == "isaac-newton" else None, "status": "installed_not_worker_validated"}, indent=2) + "\n")
+            "isaaclab": spec, "rl_framework": args.rl_framework if name == "isaac-newton" else None,
+            "openusd": openusd, "status": "installed_not_worker_validated"}, indent=2) + "\n")
     print("Isaac/Newton installed. Run asset conversion and validation through server jobs.")
     return 0
 
