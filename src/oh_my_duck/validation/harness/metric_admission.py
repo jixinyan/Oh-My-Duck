@@ -38,7 +38,7 @@ async def run(arguments):
               "cuda_visible_devices": os.environ["CUDA_VISIBLE_DEVICES"],
               "scene_config_sha256": hashlib.sha256(arguments.scene_config.read_bytes()).hexdigest(),
               "catalog_manifest_sha256": hashlib.sha256((arguments.catalog / "manifest.json").read_bytes()).hexdigest(),
-              "motions": [], "rejections": [], "explicit_replacements": []}
+              "motions": [], "rejections": [], "explicit_replacements": [], "caller_deadlines": []}
 
     async def emit(message):
         events.append(message)
@@ -58,6 +58,16 @@ async def run(arguments):
         status = session._status
         await session.resume({"owner_id": "planner", "execution_id": status["execution_id"],
                               "boundary_id": status["boundary_event_id"], "state_version": status["state_version"]})
+        try:
+            await wait_boundary(session, timeout_s=0.001)
+        except TimeoutError:
+            snapshot = session._gate.snapshot()
+            assert snapshot["state"] == "running" and not session._pump.done()
+            assert snapshot["execution_id"] == status["execution_id"]
+            record["caller_deadlines"].append({"timeout_s": 0.001, "state": snapshot["state"],
+                "execution_id": snapshot["execution_id"], "pump_cancelled": session._pump.cancelled()})
+        else:
+            raise AssertionError("The actual CPU motion completed before the caller deadline")
         await wait_boundary(session, timeout_s=None)
 
     async def unchanged_motion(prepared, motion):
