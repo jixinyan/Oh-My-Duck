@@ -16,6 +16,11 @@ installed files and 24 CLI calls passed
 [interface validation](docs/reports/native-application-interfaces-2026-10-08.md).
 The [application source map](src/oh_my_duck/agentic/README.md) locates each interface.
 
+Training campaigns validate integer counts and finite search fractions before
+creating outputs or launching workers. All committed plans preserve their
+configuration; 110 Linux CPU tests and independent installation passed
+[campaign input validation](docs/reports/campaign-input-admission-2026-10-08.md).
+
 Qwen ASR, Base TTS and VoiceDesign passed actual CPU inference with fixed model
 commits and the same confirmed voice profile. Three generated WAV files, installed
 model admission, profile preservation and process release passed

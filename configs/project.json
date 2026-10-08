@@ -5,6 +5,22 @@
   "entry_point": "omd.py",
   "release_readiness": {
     "state": "acceptance_in_progress",
+    "campaign_input_admission": {
+      "state": "actual_cpu_api_cli_and_installed_package_verified",
+      "source_revision": "075569be5e8f8fb7024b02408bfe8ef59a12b3fe",
+      "module": "oh_my_duck.rl.experiments.campaign",
+      "local_tests_passed": 108,
+      "local_tests_skipped": 2,
+      "remote_tests_passed": 110,
+      "subtests_passed_per_host": 3,
+      "source_and_resource_files_verified": 430,
+      "installed_cli_checks_passed": 24,
+      "committed_campaigns_unchanged": true,
+      "gpu_acceptance_performed": false,
+      "training_launched": false,
+      "installed_package": "outputs/acceptance/campaign-input-install-20261008-01/result.json",
+      "report": "docs/reports/campaign-input-admission-2026-10-08.md"
+    },
     "cpu_voice_task": {
       "state": "provider_model_access_required",
       "source_revision": "370755b25b3097a4af2c74b15ed73ab6f4bf3d18",

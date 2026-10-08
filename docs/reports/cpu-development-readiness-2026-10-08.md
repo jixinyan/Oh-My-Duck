@@ -8,6 +8,7 @@ stopped.
 
 | Capability | Verified scope | Evidence |
 | --- | --- | --- |
+| Native training inputs | Integer counts, finite search fractions, actual CLI admission and unchanged committed campaigns; 110 Linux tests, three subtests, 430 installed files and 24 CLI calls | [Campaign admission](campaign-input-admission-2026-10-08.md) |
 | CPU voice-task failure lifecycle | Actual installed Qwen ASR → native Harness request → confirmed-voice response; provider denies `gpt-6.1-sol`; two decoded WAV files, unchanged profile, closed session and five exited processes verified; navigation remains pending | [CPU voice task](cpu-voice-task-2026-10-08.md) |
 | Qwen CPU inference | Three fixed models, 26 admission tests, 72 rejected constructor calls, six installed unavailable-CUDA calls, three decoded WAV files, confirmed-profile preservation and process exit; ASR text matches 2/3 generated utterances | [CPU voice validation](qwen-cpu-validation-2026-10-08.md) |
 | Application and tool interfaces | Actual native CPU session, task catalogue, resource release, seven complete JSON Schemas, 77 tests, 33 subtests and 430 installed files | [Native application interfaces](native-application-interfaces-2026-10-08.md) |
