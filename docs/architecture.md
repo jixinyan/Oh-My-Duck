@@ -27,7 +27,7 @@ Only concrete adapters import MuJoCo, Isaac, model SDKs or transport libraries. 
 
 ## Source organization
 
-All first-party implementation lives in `src/oh_my_duck/`:
+Application, robot, training, shared acceptance and replay modules live in `src/oh_my_duck/`:
 
 | Capability | Source directory | Starting point |
 | --- | --- | --- |

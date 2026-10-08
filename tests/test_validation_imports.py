@@ -22,7 +22,8 @@ def test_metadata_and_transport_imports_leave_execution_dependencies_unloaded(mo
     result = subprocess.run([sys.executable, "-c", code, module], cwd=Path.home(), env=environment,
                             check=True, capture_output=True, text=True, timeout=30)
     loaded = {name.partition(".")[0] for name in json.loads(result.stdout)}
-    assert not loaded.intersection({"torch", "mujoco", "numpy", "onnxruntime", "isaaclab", "warp", "physical_runtime"})
+    assert not loaded.intersection({"torch", "mujoco", "numpy", "onnxruntime", "isaaclab", "isaacsim",
+                                    "newton", "warp", "physical_harness"})
 
 
 def test_validation_help_is_available_outside_a_checkout():

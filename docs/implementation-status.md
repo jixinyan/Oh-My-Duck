@@ -1,6 +1,6 @@
 # Implementation status
 
-> 2026-10-08：运动、原生 Harness 与发布验收实现按职责位于 `src/oh_my_duck/validation/{metric,harness,release}`，原生记录导出位于 `experience/harness_replay.py`。`omd validate` 与 `omd replay` 提供公开入口，配置模块导入不再依赖执行模块。16 项发布配置检查及历史三组 CPU 独立复核通过；当前结构的完整 CPU、取消执行和独立安装检查正在执行。GPU 和 RL 保持停止。
+> 2026-10-08：验收实现按职责位于 `validation/{metric,harness,release}`，原生记录导出位于 `experience/harness_replay.py`。公开入口及 21 项配置与导入检查通过；实际 CPU 连续五动作、1208 个 ONNX action 重算、两种运动期间取消和独立复核通过。独立安装核验 412 个文件、三份许可证和 19 个实际调用；已有 Hospital 导航记录通过完整复核。远程六阶段准备检查通过且没有初始化 CUDA，见[完整记录](reports/validation-modules-2026-10-08.md)。GPU 和 RL 保持停止。
 
 > 2026-10-07：无 GPU 检查通过实际 CPU 五动作矩阵、五动作连续序列、独立复核、原生 backend 行为、十个官方 ONNX graph、十项固定音色资料检查和两种实际运动取消。远程发布准备检查通过六个阶段、四份场景配置、29 个固定 Harness 源文件和全部 Office/Hospital 资源文件的 SHA256 检查，没有初始化 CUDA。GPU 验收及 RL 训练保持停止，见[检查记录](reports/offline-release-validation-2026-10-07.md)。
 

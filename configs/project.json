@@ -5,6 +5,26 @@
   "entry_point": "omd.py",
   "release_readiness": {
     "state": "acceptance_in_progress",
+    "validation_modules": {
+      "state": "cpu_installed_and_saved_evidence_checks_passed_gpu_runtime_pending",
+      "cpu_source_revision": "a3cbcc160ca9bb25a12e350d0125e877e53b0934",
+      "installed_source_revision": "19e594b2dbd5170ed3dd0f1929354232aab5dbaf",
+      "cpu_sequence": "outputs/acceptance/refactor-cpu-sequence-20261008-01/independent-audit.json",
+      "control_steps_verified": 1208,
+      "maximum_policy_action_error": 0.0,
+      "control_eof": "outputs/acceptance/refactor-cancel-eof-20261008-01/acceptance.json",
+      "sigterm": "outputs/acceptance/refactor-cancel-sigterm-20261008-01/acceptance.json",
+      "installed_package": "outputs/acceptance/refactor-installed-package-20261008-02.json",
+      "source_and_resource_files_verified": 412,
+      "installed_cli_checks_passed": 19,
+      "linux_runtime_imports": "outputs/acceptance/refactor-linux-imports-20261008-01.txt",
+      "configuration_and_import_checks_passed": 21,
+      "remote_preflight": "outputs/acceptance/refactor-preflight-20261008-02/preflight/result.json",
+      "recorded_navigation_audit": "outputs/acceptance/refactor-historical-navigation-20261008-01.json",
+      "gpu_execution": "stopped",
+      "cuda_runtime_checked": false,
+      "report": "docs/reports/validation-modules-2026-10-08.md"
+    },
     "offline_release_validation": {
       "state": "offline_checks_passed_gpu_acceptance_pending",
       "control_eof": "outputs/acceptance/campaign-cancel-eof-20261007-01/acceptance.json",
@@ -158,7 +178,7 @@
   "components": {
     "validation": {
       "module": "oh_my_duck.validation",
-      "state": "packaged_entrypoints_implemented_cpu_and_installed_revalidation_pending",
+      "state": "packaged_cpu_and_installed_evidence_verified_gpu_runtime_pending",
       "role": "Metric, native Harness and release acceptance; independent saved evidence audits through omd validate"
     },
     "contracts": {

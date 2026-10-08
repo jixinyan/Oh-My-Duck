@@ -12,10 +12,16 @@ The sequence plan is `configs/experiments/navigation-motion-sequences.json`. Eac
 
 ## Unified GPU validation
 
+Use `omd validate release` for the campaign and `omd validate release-plan` for
+configuration checks. Implementations live in `validation/release/`; source hashes
+refer to those modules. An immutable worker checkout needs explicit access to the
+canonical `.cache/`, `data/` and `artifacts/` directories. Keep its output directory
+available separately. These generated resources are checked before any GPU admission.
+
 `--preflight-only` checks matching clean source, both pinned Harness revisions, the actual remote environment versions, every declared stage and motion parameter, all downloaded scene file sizes and SHA256 values, public map references, converted robot assets, the ten official policy models and the selected provider metadata. CUDA visibility is cleared and no simulation worker starts. The output records `preflight_passed`, `gpu_acceptance_performed: false` and the actual per-scene checks. Full GPU execution performs the same preflight before admission.
 
 ```bash
-python scripts/run_release_campaign.py --preflight-only \
+omd validate release --preflight-only \
   --worker-host jd_B300 --worker-root "$OMD_WORKER_ROOT" \
   --worker-python "$OMD_WORKER_PYTHON" --worker-edh-source "$OMD_WORKER_EDH" \
   --worker-policy-dir "$OMD_WORKER_POLICIES" --edh-source "$OMD_LOCAL_EDH" \
@@ -35,7 +41,7 @@ python scripts/run_release_campaign.py --preflight-only \
 Run the controller from a clean fixed checkout and use a remote clean checkout at the same commit. Set `OMD_WORKER_ROOT`, `OMD_WORKER_PYTHON`, `OMD_WORKER_EDH`, `OMD_WORKER_POLICIES`, `OMD_LOCAL_EDH`, and `OMD_PROVIDER_CONFIG` to the actual paths. The provider file stays on the remote host. Select an idle device from GPU 2–4 after checking current ownership.
 
 ```bash
-python scripts/run_release_campaign.py \
+omd validate release \
   --worker-host jd_B300 --worker-root "$OMD_WORKER_ROOT" \
   --worker-python "$OMD_WORKER_PYTHON" --worker-edh-source "$OMD_WORKER_EDH" \
   --worker-policy-dir "$OMD_WORKER_POLICIES" --edh-source "$OMD_LOCAL_EDH" \

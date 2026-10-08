@@ -14,6 +14,10 @@ The installed package audit accepts `--policy-record` with `--catalog` and
 `--metric-campaign` with `--metric-plan`. These inputs execute the installed ONNX
 and physical-record verifiers outside the checkout and preserve their reports.
 
+The [module validation report](reports/validation-modules-2026-10-08.md) records
+actual CPU motion, cancellation, installed ONNX and physical-record audits,
+complete saved navigation verification and remote preparation without CUDA.
+
 Use Python 3.12, Node.js and the locked environments in `environments/`. Install the voice client on the operator computer and the ASR, TTS and Isaac/Newton environments on the NVIDIA host. Keep the model services bound to localhost and use SSH forwarding between hosts. Voice setup requires an explicitly confirmed profile before task feedback can be synthesized.
 
 ```bash

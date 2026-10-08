@@ -2,7 +2,7 @@
 
 ## Boundaries and entry points
 
-`omd.py` / `oh_my_duck.cli` is the public CLI. All first-party implementation is
+`omd.py` / `oh_my_duck.cli` is the public CLI. Project modules are
 under `src/oh_my_duck/`, grouped by project capability; see [architecture.md](architecture.md).
 `infrastructure/` owns setup, process dispatch and scheduler submission and imports
 no simulator at startup. `rl/` owns task recipes, MDP, learners, export and evaluation;
