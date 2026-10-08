@@ -1,6 +1,6 @@
 # Implementation status
 
-> 2026-10-07：`microduck.observe` 提供同一暂停边界的相机、64 项 ToF、IMU、14 个 servo、odometry、运动进度和剩余执行时间；`microduck.wait_for_motion` 等待原生运动边界。固定提交 `32e35dd` 的 CPU 五动作连续序列、独立物理复核、既有回放、安装包及视频生成检查通过。统一 GPU 分配检查记录了其他项目的持续占用，物理 worker 尚未启动，见[证据记录](reports/runtime-observation-acceptance-2026-10-07.md)与[运行说明](runtime-release-acceptance.md)。
+> 2026-10-07：`microduck.observe` 提供同一暂停边界的相机、64 项 ToF、IMU、14 个 servo、odometry、运动进度和剩余执行时间；`microduck.wait_for_motion` 等待原生运动边界。固定提交 `32e35dd` 的 CPU 五动作连续序列、独立物理复核、既有回放、安装包及视频生成检查通过。统一六阶段 GPU 验收使用固定提交 `960a9db`，GPU 4 通过持续空闲检查并进入 Office 矩阵，最终结果尚待验证，见[证据记录](reports/runtime-observation-acceptance-2026-10-07.md)与[运行说明](runtime-release-acceptance.md)。
 
 > 2026-10-07：当前控制器的 Office 有序路线 run `a8dd0f45-4480-4e60-a89a-0b783f2627c0` 为 failed，最终保持恢复调用超出原有 2400 秒预算，没有正式 Verifier。三段行走全部满足 0.05 米精度，端点位移累计 3.052359 米，最终目标误差 0.116789 米；两次顺时针旋转停滞，模型根据新鲜 ToF 和有界命令继续绕行。2627 控制步 / 10508 物理子步，零外部接触，4266 个事件与 549 张原始图片完整保存，自动入口关闭会话并释放 worker。后续需要验证长行走后的顺时针响应、预算内正式结束和 180 秒初始化可靠性。见[导航测量](reports/navigation-acceptance-2026-10-07.md#office-有序导航测量)。
 
