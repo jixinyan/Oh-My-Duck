@@ -1,5 +1,12 @@
 # Release readiness
 
+Native retries preserve physical state and bind commands to admitted executions.
+Progress tools expose native goal targets and hold evidence. Three actual CPU
+executions, 200 controls, 800 substeps, independent ONNX parity, 18 import tests,
+433 installed files and 26 CLI calls passed
+[retry validation](reports/native-execution-retry-2026-10-08.md).
+Complete Luna office navigation remains pending.
+
 The release workflow uses recorded speech, the pinned native Harness, official policies, actual simulation sensors, independent task verification, and the confirmed voice profile. Each acceptance run has a unique directory and preserves source revisions, model identity, task events and measured physics. Native task waits and the voice-task CLI require a finite positive timeout before requests or output creation; [API, CLI and installation checks](reports/native-wait-admission-2026-10-08.md) passed.
 
 ## Runtime preparation

@@ -19,6 +19,12 @@ The Planner observes actual translation after turning. See the
 [parameter guide](docs/metric-policy-tools.md) and
 [CPU tool checks](docs/reports/metric-tool-guidance-2026-10-08.md).
 
+Native retries retain physical state and bind a bounded command to each new
+execution. Progress tools expose the native goal target and hold evidence.
+Actual CPU lifecycle, independent ONNX checks and installation passed
+[retry validation](docs/reports/native-execution-retry-2026-10-08.md).
+Use `omd validate execution-retry` to exercise that lifecycle.
+
 Application services and voice use the same native task client for sessions,
 submission, status, stopping and closing. Tool arguments use complete JSON Schema
 Draft 2020-12. Actual CPU service lifecycle, 77 tests, 33 subtests, 430 independently

@@ -8,6 +8,7 @@ stopped.
 
 | Capability | Verified scope | Evidence |
 | --- | --- | --- |
+| Native execution retries and goal evidence | Three executions preserve complete physical state; 200 controls, 800 substeps, six rejected starts and three read-only checks; independent ONNX parity, 18 import tests, 433 installed files and 26 CLI calls | [Retry validation](native-execution-retry-2026-10-08.md) |
 | Metric tool parameters | Native units, speeds and turn translation; actual Luna four-motion execution, 17 import tests, 432 installed files and 25 CLI calls; complete navigation remains pending | [Tool guidance](metric-tool-guidance-2026-10-08.md) |
 | Native metric request lifecycle | Eight rejected calls preserve the prepared request and physical state; four caller deadlines retain execution; two motions and two explicit replacements pass 641 controls, 2564 substeps, independent ONNX checks and resource release; 432 installed files and 25 CLI calls | [Metric admission](metric-request-admission-2026-10-08.md) |
 | Native task wait deadlines | Finite positive API and voice CLI admission, 19 actual checks, HTTP resource closure and independent installation | [Wait admission](native-wait-admission-2026-10-08.md) |
