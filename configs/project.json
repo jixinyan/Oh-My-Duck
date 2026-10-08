@@ -5,6 +5,27 @@
   "entry_point": "omd.py",
   "release_readiness": {
     "state": "acceptance_in_progress",
+    "newton_execution_preflight": {
+      "state": "actual_entry_points_dependency_failure_setup_repair_and_installed_boundaries_verified",
+      "source_revision": "82451e7c41c711854aacd62c52e670776a4f451e",
+      "module": "oh_my_duck.infrastructure.usd_runtime",
+      "actual_entry_points_verified": 9,
+      "provider_files_verified_after_repair": 244,
+      "configuration_and_import_tests_passed": 26,
+      "source_and_resource_files_verified": 421,
+      "installed_cli_checks_passed": 20,
+      "worker_environment": ".envs/isaac-newton-preflight-20261008-01",
+      "runtime_audit": "outputs/acceptance/newton-execution-preflight-20261008-02/independent-audit.json",
+      "installed_package": "outputs/acceptance/newton-execution-preflight-package-20261008-01/result.json",
+      "installed_boundary_audit": "outputs/acceptance/newton-execution-preflight-package-20261008-01/boundary-audit.json",
+      "remote_preflight": "outputs/acceptance/newton-execution-release-preflight-20261008-01/preflight/result.json",
+      "release_stages_verified": 6,
+      "scene_configurations_verified": 4,
+      "harness_source_files_verified": 29,
+      "cuda_runtime_checked": false,
+      "gpu_acceptance_performed": false,
+      "report": "docs/reports/newton-execution-preflight-2026-10-08.md"
+    },
     "cpu_model_asset_audit": {
       "state": "actual_public_cli_geometry_joints_progress_and_output_protection_verified",
       "source_revision": "1abea13d4bcd084b08c0065d1673f9630d2a9a41",

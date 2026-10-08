@@ -86,7 +86,11 @@ The Linux x86_64 Newton environment selects `usd-exchange==3.0.0`, supplying
 OpenUSD 26.08 as the unique `pxr` provider. Setup verifies
 installed file hashes and includes the native Harness dependencies. Metadata
 checks and online initialization require `infrastructure/usd_runtime.py` before
-CUDA. Perception model services use their separately locked environment; their
+CUDA. Registered learners, native RSL workers, evaluation, diagnostics and direct
+environment creation check their execution environment before GPU allocation or
+native simulation launch. Actual invocation and installed dependency boundaries
+are recorded in [execution preflight](reports/newton-execution-preflight-2026-10-08.md).
+Perception model services use their separately locked environment; their
 client and frame-validation modules belong to the simulator execution path.
 See [actual dependency and import validation](reports/openusd-readiness-2026-10-08.md).
 

@@ -1,0 +1,42 @@
+# CPU development readiness
+
+The CPU work covers native policy execution, measured motion, cancellation,
+transport, recorded perception, voice profiles, asset preparation, dependency
+integrity, release inputs and independent installation. Each report identifies
+the actual source revision and retained artifacts. GPU acceptance and RL remain
+stopped.
+
+| Capability | Verified scope | Evidence |
+| --- | --- | --- |
+| Native robot worker | Actual CPU MuJoCo/BAM motion, pinned SDK/process transport, ActionGate, policy transitions, cancellation and resource release | [Worker validation](native-worker-modules-2026-10-08.md) |
+| Motion and policy evidence | Continuous five-motion sequence; 1208 independently recomputed ONNX actions with zero error; physical states and stopping checked | [Validation modules](validation-modules-2026-10-08.md) |
+| Sensor and voice records | Actual saved RGBD validation, frame identity, distance reconstruction and confirmed voice profiles | [Offline validation](offline-release-validation-2026-10-07.md) |
+| Converted assets | Both variants, complete conversion inputs and dependencies, source fingerprints and every generated file | [Source-verified assets](source-verified-assets-2026-10-08.md) |
+| OpenUSD and native imports | Unique patched OpenUSD 26.08 provider; six imports across three processes; source geometry, materials and joints preserved | [OpenUSD validation](openusd-readiness-2026-10-08.md) |
+| Public CPU asset command | Four actual Newton imports, passive wheel joints, ordered progress, failed-result retention and output protection | [Public asset validation](model-assets-cli-2026-10-08.md) |
+| Newton execution entry points | Nine actual dependency failures before CUDA/Isaac initialization; actual locked setup repair; 26 tests and 421 independent installed files | [Execution preflight](newton-execution-preflight-2026-10-08.md) |
+| Current-source release preparation | Six stages, four scenes, ten policies, 29 pinned Harness files and actual model-provider metadata; CUDA uninitialized | [Execution preflight](newton-execution-preflight-2026-10-08.md) |
+| Installed execution lifecycle | Actual completion, explicit deadlines, subprocess interruption, retained command records and existing-output protection | [Installed lifecycle](installed-audit-lifecycle-2026-10-08.md) |
+
+Source responsibilities are listed in the [architecture source map](../architecture.md#source-organization).
+`integrations/edh/` owns native environment, device, session and transport;
+`validation/` owns acceptance; `experience/` owns replay export;
+`task_binding/collision_assets.py` owns USD preparation;
+`infrastructure/usd_runtime.py` owns installed OpenUSD verification.
+Public execution and audit commands remain available from installed packages.
+All verification processes exited. Source, configuration, wheel, source
+distribution and evidence hashes are recorded in the corresponding reports.
+
+## GPU acceptance scope
+
+Actual Newton solver execution, initialization with freshly compiled kernels,
+rendering, current-controller multi-scene motion, ordered navigation, model
+perception accuracy and learned-policy behavior require their own execution
+evidence. The [release campaign](../runtime-release-acceptance.md) declares the
+six sequential runtime stages and preserves source, models, physical state,
+formal task verdicts, media and resource release.
+
+Future authorized execution permits at most one physical GPU from devices 2–4.
+The selected device must have zero compute PIDs and sustained zero utilization.
+Existing workloads and other users' processes are preserved. Hardware acceptance
+requires an actual Microduck.

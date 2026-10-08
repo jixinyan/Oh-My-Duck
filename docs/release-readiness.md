@@ -4,6 +4,15 @@ The release workflow uses recorded speech, the pinned native Harness, official p
 
 ## Runtime preparation
 
+Newton training, evaluation, diagnostic and direct runtime entry points verify
+the installed OpenUSD provider before GPU allocation. Nine actual entry-point
+checks, locked setup repair, 26 configuration/import tests and independent
+installation passed [execution preflight](reports/newton-execution-preflight-2026-10-08.md).
+The verified RSL-RL/SB3 environment is
+`.envs/isaac-newton-preflight-20261008-01`. The
+[CPU readiness record](reports/cpu-development-readiness-2026-10-08.md) lists
+completed execution, transport, sensor, voice, asset and installation checks.
+
 The public `omd validate model-assets` command passed four actual CPU imports,
 both robot variants, source passive joints and output protection. It records
 source/dependency provenance and per-model progress. See [public asset validation](reports/model-assets-cli-2026-10-08.md).

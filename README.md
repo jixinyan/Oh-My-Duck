@@ -4,43 +4,24 @@
 
 # Oh My Duck 🦆
 
-`omd validate model-assets` checks actual robot collision assets and Newton imports
-using only CPU. Both robot variants, passive wheel joints, progress records and
-output protection passed [public asset validation](docs/reports/model-assets-cli-2026-10-08.md).
-Independent installation verified 421 files and 20 CLI calls.
-
 Use `omd validate` for native acceptance and recorded-evidence audits, and
 `omd replay` for session management and terminal run export. The
 [source map](docs/architecture.md#source-organization) lists the responsible module
 for each capability. The same commands are available through `python -m oh_my_duck`.
-Actual CPU motion, cancellation and independent installed audits passed the
-[module validation](docs/reports/validation-modules-2026-10-08.md).
 
-The [native worker source map](src/oh_my_duck/integrations/edh/README.md) locates
-environment, device, session and transport code. Actual CPU motion, native SDK
-process communication, policy transition, cancellation and independent installed
-audits passed [worker validation](docs/reports/native-worker-modules-2026-10-08.md).
+Verified CPU paths cover actual policy motion, stopping, cancellation, native SDK
+transport, recorded sensors, voice profiles, assets and independent installation.
+`omd validate model-assets` audits both robot variants, passive joints, geometry,
+materials and actual Newton imports using only CPU. The
+[CPU readiness record](docs/reports/cpu-development-readiness-2026-10-08.md)
+links source pins, measurements and reproduction instructions.
 
-Converted robot assets can be explicitly reused from a clean ancestor checkout
-after complete conversion-input, resolved-dependency and generated-file checks.
-The [Newton backend source map](src/oh_my_duck/rl/backends/isaac_newton/README.md)
-documents the command. Both robot variants, current-source release preparation
-and the independent installed package passed [asset validation](docs/reports/source-verified-assets-2026-10-08.md)
-with CUDA disabled.
-
-Independent installed checks preserve per-command execution evidence and accept
-an optional explicit deadline. Actual completion, subprocess interruption and
-partial-output protection passed [lifecycle validation](docs/reports/installed-audit-lifecycle-2026-10-08.md).
-
-Newton preparation verifies OpenUSD 26.08 and all 244 provider installation files
-before CUDA initialization. Both robot variants passed actual CPU collision
-preparation, material checks and Newton import. Actual setup selections, the
-complete release preflight and 420 independently installed files passed
-[OpenUSD validation](docs/reports/openusd-readiness-2026-10-08.md).
-
-Actual CPU policy checks cover metric motion, continuous navigation commands, native backend behavior and cancellation cleanup. Remote preflight verifies all release scenes, official policy hashes and the pinned Harness sources without initializing CUDA. Results and reproduction are in the [offline validation report](docs/reports/offline-release-validation-2026-10-07.md) and [runtime acceptance guide](docs/runtime-release-acceptance.md). GPU acceptance and RL remain stopped.
-
-Metric campaigns preserve exact policy inputs and admitted actions, then independently replay those inputs through the official ONNX models. The CPU matrix and continuous sequence verified 2556 control steps with zero action parity error.
+Newton uses OpenUSD 26.08 and verifies its unique provider and installed files
+before GPU allocation. Training, evaluation, diagnostic and direct runtime entry
+points passed [actual preflight validation](docs/reports/newton-execution-preflight-2026-10-08.md).
+GPU acceptance and RL remain stopped. The
+[runtime acceptance guide](docs/runtime-release-acceptance.md) defines subsequent
+authorized execution and resource requirements.
 
 [![Status: active development](https://img.shields.io/badge/status-active_development-blue)](docs/implementation-status.md)
 [![RL behavior: pending](https://img.shields.io/badge/RL_behavior-pending-orange)](docs/reports/rl-walking-low-speed-launch-2026-09-29.md)

@@ -12,6 +12,8 @@ tags:
   - project-design
 ---
 
+> Newton 的实际训练、评估、诊断、直接环境创建与原生 RSL worker 在分配 GPU 之前检查 OpenUSD provider 和安装内容。九条真实调用路径、锁定安装修复、26 项配置及导入测试、421 个安装文件与 20 个独立调用通过。GPU 和 RL 保持停止，见[入口验证](reports/newton-execution-preflight-2026-10-08.md)与[CPU 开发验证记录](reports/cpu-development-readiness-2026-10-08.md)。
+
 > Newton 使用 OpenUSD 26.08，安装及启动前检查覆盖唯一 provider 与 244 个安装文件。USD 碰撞准备与 Newton 模型 callback 分别位于 `task_binding/collision_assets.py` 和 `task_binding/collisions.py`；两种模型的实际 CPU 导入、摩擦、材质绑定和几何保持检查通过，保留全部 14 个 servo。公开 `omd validate model-assets` 核验四个 passive wheel joint、记录完整过程并保护输出目录，四次实际 CPU 导入通过。24 项配置及导入测试、421 个独立安装文件与 20 个调用通过。GPU 和 RL 保持停止，见[CPU Newton 资产验证](reports/openusd-readiness-2026-10-08.md)与[公开资产验收](reports/model-assets-cli-2026-10-08.md)。
 
 > 原生 worker 按环境、动作设备、会话工具和进程通信组织在 `integrations/edh/`，公开入口保持 `oh_my_duck.integrations.edh_native`。实际 CPU 连续动作、任务权限、policy 转换、原生 SDK 通信、执行取消与独立安装通过，远程 Newton adapter 导入通过。两种 robot conversion asset 支持经过完整来源检查的明确复用，当前源码的六阶段发布准备检查通过。独立安装核验 418 个文件与 19 个命令，GPU 和 RL 保持停止。见[资产验证](reports/source-verified-assets-2026-10-08.md)、[原生 worker 验证](reports/native-worker-modules-2026-10-08.md)与[架构及源码职责](architecture.md)。

@@ -10,6 +10,8 @@ tags:
   - sim-to-real
 ---
 
+> 2026-10-08：训练和评估入口、诊断入口、直接环境创建与原生 RSL worker 已接入 OpenUSD 启动前检查。九条实际调用路径、锁定安装修复、244 个文件核验、26 项配置及导入测试，以及 421 个独立安装文件与 20 个调用通过。GPU 和 RL 保持停止，见[入口验证](reports/newton-execution-preflight-2026-10-08.md)与[CPU 开发验证记录](reports/cpu-development-readiness-2026-10-08.md)。
+
 > 2026-10-08：OpenUSD 26.08 的实际安装、244 个文件检查、两种模型碰撞准备和 Newton CPU 导入通过，全部 14 个 servo 保留。公开 `omd validate model-assets` 完成同一进程的四次实际导入、全部 passive wheel joint 核验、八条过程记录复核及输出保护。24 项配置和导入测试通过，独立安装核验 421 个文件、三份许可证与 20 个调用。远程环境和完整资料见[CPU Newton 资产验证](reports/openusd-readiness-2026-10-08.md)与[公开资产验收](reports/model-assets-cli-2026-10-08.md)。GPU 和 RL 保持停止。
 
 > 2026-10-08：原生 worker 的环境、动作设备、会话工具和通信模块完成组织及实际验证。连续五动作、1208 个 ONNX 重算、任务权限检查、两种运动取消、policy 转换、原生 SDK 与独立进程通信通过。两种 robot conversion asset 支持经过 129 项转换输入、实际依赖和全部生成文件检查的明确复用；当前源码的六阶段、四份场景配置及 29 个固定 Harness 文件通过准备检查。独立安装核验 418 个文件与 19 个命令。GPU 和 RL 保持停止，见[资产验证](reports/source-verified-assets-2026-10-08.md)与[原生 worker 验证](reports/native-worker-modules-2026-10-08.md)。
