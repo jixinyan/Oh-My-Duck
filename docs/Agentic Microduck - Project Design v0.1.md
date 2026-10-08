@@ -12,7 +12,7 @@ tags:
   - project-design
 ---
 
-> 固定提交 `32e35dd` 的统一观测与原生等待接口通过 CPU 五动作连续序列及独立复核，安装包、既有导航和语音回放、实际 MP4 生成检查通过。统一 GPU 测试使用固定提交 `960a9db`，GPU 4 通过持续空闲检查并进入六阶段串行验收，最终结果尚待验证，见[验收证据](reports/runtime-observation-acceptance-2026-10-07.md)。
+> 统一观测与原生等待接口通过固定源码的 CPU 连续动作及 Newton Office 五动作矩阵，安装包、既有导航和语音回放、实际 MP4 生成检查通过。GPU 验收已按用户要求停止，全部本次进程退出，Hospital 后退停滞与其他阶段仍需验证。后续设备要求没有任何 compute PID，不与 haomin 或其他用户共用 GPU，见[验收证据](reports/runtime-observation-acceptance-2026-10-07.md)。
 
 > 2026-10-07：统一暂停观测通过 `microduck.observe` 返回相机、ToF、IMU、servo、odometry、进度与原生剩余执行时间，可附带明确来源的当前帧感知。`microduck.wait_for_motion` 等待确认边界，全部动作仍由原生 ActionGate 接纳。连续运动检查保存每次参数和物理样本，初始化记录各阶段耗时。统一验收使用固定源码，串行执行单个 GPU 的矩阵、连续动作与原生导航，见[执行说明](runtime-release-acceptance.md)。
 

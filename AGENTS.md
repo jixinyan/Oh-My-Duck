@@ -41,3 +41,5 @@ This project extends the pinned official `pollen-robotics/microduck_rl` and `pol
 - 用户于 2026-09-23 授权通过 SSH 使用 `jd_B300` 的空闲 GPU，启动时检查使用情况并明确指定设备。保留完整的 smoke、导出、回放、恢复、训练与最终评估流程、不可变源码副本，以及已核对账号的 W&B 在线记录和本地产物。当前服务器已有源码，历史 checkpoint 仍在旧文件系统。
 
 - 用户于 2026-09-30 授权继续制作包含 agentic trace 与 Microduck 实际运行画面的 MP4 Demo，同时推进相关项目改进。Demo 使用真实模型、原生 Harness、官方 policy、Newton/BAM 和独立 Verifier，保存完整事件、原始相机帧与来源检查。完成录制后关闭会话并核查 GPU worker 释放。RL 训练保持停止。
+
+- 用户于 2026-10-07 停止当前 GPU 验收进程。GPU 仅可使用设备 2–4，同时最多使用一张；分配前要求设备没有任何 compute PID，并且持续零 utilization。已有进程即使当前 utilization 为零也不能共用设备。不能与 haomin 或其他用户争用 GPU，不停止其他项目的进程。当前 GPU 验收与 RL 均保持停止，不自动恢复，保存完整的结果和退出证据。

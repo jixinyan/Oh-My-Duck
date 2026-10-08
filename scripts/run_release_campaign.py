@@ -62,6 +62,14 @@ def gpu_snapshot(args, output, name):
         selected = [row for row in rows if int(row[0]) == args.gpu]
         if len(selected) != 1 or float(selected[0][4]) - float(selected[0][3]) < 16384:
             raise RuntimeError("Allocated GPU requires at least 16 GiB available")
+        processes = ssh(args, "nvidia-smi --query-compute-apps=gpu_uuid,pid,process_name,used_memory --format=csv,noheader",
+                        check=True, capture_output=True, text=True).stdout
+        (output / f"{name}-{sample:02d}-processes.csv").write_text(processes)
+        occupied = [row for row in csv.reader(processes.splitlines(), skipinitialspace=True)
+                    if row[0] == selected[0][1]]
+        if occupied:
+            pids = sorted({int(row[1]) for row in occupied})
+            raise RuntimeError(f"Allocated GPU already has compute processes {pids}; exclusive use is required")
         now = time.monotonic()
         if float(selected[0][2]) == 0:
             if idle_since is None:
