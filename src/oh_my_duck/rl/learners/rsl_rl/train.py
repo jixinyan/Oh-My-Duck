@@ -1,4 +1,3 @@
-"""Framework-owned headless orchestration of native RSL-RL PPO and torchrunx."""
 from dataclasses import asdict, dataclass, field
 from datetime import datetime
 import json
@@ -11,6 +10,7 @@ from typing import Literal
 from oh_my_duck.core.paths import project_root
 ROOT = project_root()
 from oh_my_duck.infrastructure.tracking import settings
+from oh_my_duck.infrastructure.usd_runtime import verify_execution_runtime
 from mjlab.envs import ManagerBasedRlEnvCfg
 from mjlab.rl import RslRlBaseRunnerCfg
 
@@ -27,6 +27,7 @@ class TrainConfig:
 
 
 def run_train(task_id, cfg, log_dir):
+    verify_execution_runtime(cfg.backend)
     import torch
     import time
     from oh_my_duck.infrastructure.provenance import source_provenance, validate_resume
@@ -153,6 +154,7 @@ def main():
     cfg = tyro.cli(TrainConfig, args=remaining,
         default=TrainConfig(build_environment(binding), binding.rsl_config.build()), config=mjlab.TYRO_FLAGS)
     task.binding(cfg.backend)
+    verify_execution_runtime(cfg.backend)
     os.environ['WANDB_MODE'] = settings()['mode']
     selected, count = select_gpus(cfg.gpu_ids)
     if not count:

@@ -1,4 +1,3 @@
-"""Launch pinned Isaac Lab SB3 PPO on the shared Newton diagnostic environment."""
 import importlib.util
 import os
 import sys
@@ -14,6 +13,8 @@ def main():
         raise SystemExit(f"Only explicit --task {TASK_ID} is implemented; this is not BAM locomotion")
     if any(arg.split("=", 1)[0] in {"--checkpoint", "--external_callback"} for arg in args):
         raise SystemExit("SB3 resume is pending normalization-state validation; custom registration is unsupported")
+    from oh_my_duck.infrastructure.usd_runtime import verify_usd_runtime
+    verify_usd_runtime()
     if importlib.util.find_spec("stable_baselines3") is None:
         raise SystemExit("Install SB3 first: python omd.py setup --backend isaac-newton --rl-framework sb3")
     upstream = project_root() / ".cache/upstream/IsaacLab/scripts/reinforcement_learning"

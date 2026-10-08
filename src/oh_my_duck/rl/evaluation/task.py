@@ -1,5 +1,3 @@
-"""Replay a normalized ONNX policy in a registered task, with metrics and native video."""
-
 import argparse
 import hashlib
 import json
@@ -8,12 +6,7 @@ from collections import defaultdict
 
 
 def main():
-    from oh_my_duck.infrastructure.headless import configure_egl
-
-    configure_egl()
-    from oh_my_duck.rl.evaluation.mujoco_video import MujocoVideo
-
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description="Replay a normalized ONNX policy in a registered task, with metrics and native video.")
     parser.add_argument("--task", required=True)
     parser.add_argument("--backend", required=True)
     parser.add_argument("--policy", required=True, type=Path)
@@ -35,6 +28,11 @@ def main():
         parser.error("training-stage requires --curriculum-step; standard forbids it")
     if (args.curriculum_step is not None and args.curriculum_step < 0) or not math.isfinite(args.push_scale) or args.push_scale < 0:
         parser.error("Use nonnegative finite diagnostic parameters")
+    from oh_my_duck.infrastructure.usd_runtime import verify_execution_runtime
+    verify_execution_runtime(args.backend)
+    from oh_my_duck.infrastructure.headless import configure_egl
+    configure_egl()
+    from oh_my_duck.rl.evaluation.mujoco_video import MujocoVideo
     args.output.mkdir(parents=True, exist_ok=False)
     import numpy as np
     import torch

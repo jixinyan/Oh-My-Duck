@@ -1,4 +1,3 @@
-"""Delegate diagnostic PPO training to the pinned Isaac Lab RSL-RL entry point."""
 import os
 import runpy
 from pathlib import Path
@@ -15,6 +14,8 @@ def main():
         raise SystemExit(f"Only --task {TASK_ID} is implemented; this is not BAM locomotion training")
     if any(arg.startswith("--external_callback") for arg in args):
         raise SystemExit("External registration is owned by this backend")
+    from oh_my_duck.infrastructure.usd_runtime import verify_usd_runtime
+    verify_usd_runtime()
     upstream = project_root() / ".cache/upstream/IsaacLab"
     script = upstream / "scripts/reinforcement_learning/rsl_rl/train.py"
     if not script.is_file():

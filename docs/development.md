@@ -48,6 +48,10 @@ owns simulator spawning and the Newton model-initialization callback.
 `omd validate model-assets --output DIRECTORY` runs actual USD preparation and
 Newton imports with `CUDA_VISIBLE_DEVICES=''`. The output directory must be new;
 the command retains partial results and per-model progress if validation fails.
+Registered Newton training, evaluation and direct environment creation use
+`verify_execution_runtime`. Native learner workers verify their own environment
+before GPU selection or initialization; diagnostic entry points verify before
+launching Isaac. MuJoCo paths retain their separate dependency environment.
 
 The Isaac backend requires Newton. Unsupported task bindings fail explicitly.
 Keep training dependencies out of agentic, voice, recording and CLI imports.

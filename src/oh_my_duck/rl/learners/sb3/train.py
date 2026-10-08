@@ -1,4 +1,3 @@
-"""Train PPO with SB3 using the project-owned Microduck task registry."""
 import argparse
 from dataclasses import asdict
 import hashlib
@@ -30,6 +29,7 @@ from oh_my_duck.rl.learners.sb3.learning_rate import KLAdaptiveLearningRate, KLF
 from oh_my_duck.core.paths import project_root
 ROOT = project_root()
 from oh_my_duck.infrastructure.tracking import start_run
+from oh_my_duck.infrastructure.usd_runtime import verify_execution_runtime
 
 
 class RewardAudit(BaseCallback):
@@ -76,7 +76,7 @@ class RewardAudit(BaseCallback):
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description="Train PPO with SB3 using the project-owned Microduck task registry.")
     parser.add_argument("task", choices=[t.id for t in project_tasks().list("mujoco")])
     parser.add_argument("--backend", default="mujoco")
     parser.add_argument("--action-rate-delay-iterations", type=int, default=0, help="Explicit Flat Walking smoothing curriculum experiment; zero preserves the official recipe")
@@ -98,6 +98,7 @@ def main():
         parser.error("num-envs and iterations must be positive")
     if args.learning_rate is not None and (not math.isfinite(args.learning_rate) or args.learning_rate <= 0):
         parser.error("learning-rate must be finite and positive")
+    verify_execution_runtime(args.backend)
     configure_torch_backends()
     from oh_my_duck.infrastructure.provenance import source_provenance, validate_resume
     provenance = source_provenance()

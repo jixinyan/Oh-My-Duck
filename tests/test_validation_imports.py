@@ -17,6 +17,8 @@ ROOT = Path(__file__).resolve().parents[1]
     "oh_my_duck.experience.harness_replay",
     "oh_my_duck.infrastructure.usd_runtime",
     "oh_my_duck.validation.release.assets",
+    "oh_my_duck.rl.training.runtime",
+    "oh_my_duck.rl.evaluation.task",
     "oh_my_duck.rl.backends.isaac_newton.task_binding.collision_assets",
 ])
 def test_metadata_and_transport_imports_leave_execution_dependencies_unloaded(module):

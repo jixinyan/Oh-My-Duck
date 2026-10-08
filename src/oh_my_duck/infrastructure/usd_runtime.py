@@ -4,6 +4,12 @@ from importlib.metadata import distributions
 from pathlib import Path
 
 
+def verify_execution_runtime(backend):
+    if backend == "isaac-newton":
+        return verify_usd_runtime()
+    return None
+
+
 def verify_usd_runtime():
     owners = []
     for installed in distributions():

@@ -1,4 +1,3 @@
-"""Finite Newton diagnostic rollout with measured state and optional offscreen video."""
 import argparse
 import hashlib
 import importlib.metadata
@@ -10,7 +9,7 @@ from oh_my_duck.rl.backends.isaac_newton.contracts import JOINT_NAMES
 
 
 def main(mode="eval"):
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description="Finite Newton diagnostic rollout with measured state and optional offscreen video.")
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--steps", type=int, default=100)
     parser.add_argument("--num-envs", type=int, default=2)
@@ -25,6 +24,8 @@ def main(mode="eval"):
         parser.error("steps and num-envs must be positive")
     if min(args.video_width, args.video_height) < 2 or args.video_width % 2 or args.video_height % 2:
         parser.error("Video dimensions must be positive even integers of at least 2 pixels")
+    from oh_my_duck.infrastructure.usd_runtime import verify_usd_runtime
+    verify_usd_runtime()
     schedule = None
     if args.schedule:
         from oh_my_duck.rl.backends.isaac_newton.contracts import protocol
