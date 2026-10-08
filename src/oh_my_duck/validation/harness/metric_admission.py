@@ -2,11 +2,15 @@ import argparse
 import asyncio
 import hashlib
 import json
+import os
 from pathlib import Path
 import secrets
 import subprocess
 import sys
 from uuid import uuid4
+
+from OpenGL import GL
+import torch
 
 from oh_my_duck.core.paths import project_root
 from oh_my_duck.integrations.edh_native import MicroDuckWorkerSession
@@ -18,9 +22,8 @@ from oh_my_duck.validation.metric.case import require_upright_stop
 async def run(arguments):
     root = project_root()
     configuration = json.loads(arguments.scene_config.read_text())
-    for name in ("usd_path", "provenance_path", "public_map_path"):
-        if name in configuration:
-            configuration[name] = str((root / configuration[name]).resolve(strict=True))
+    if configuration["backend"] != "cpu-mujoco-bam" or os.environ.get("CUDA_VISIBLE_DEVICES") != "":
+        raise ValueError("Metric admission validation requires CPU MuJoCo/BAM and empty CUDA_VISIBLE_DEVICES")
     port, secret, task_id = available_port(), secrets.token_hex(32), uuid4().hex
     configuration.update(native_task_id="metric-admission", catalog_dir=str(arguments.catalog.resolve(strict=True)),
                          policy_revision=OFFICIAL_REVISION, control_port=port, control_secret=secret,
@@ -29,6 +32,9 @@ async def run(arguments):
     events, samples, calls = [], [], []
     record = {"passed": False, "formal_navigation_acceptance_performed": False,
               "source_revision": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root, text=True).strip(),
+              "runner_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+              "policy_revision": OFFICIAL_REVISION, "seed": arguments.seed,
+              "cuda_visible_devices": os.environ["CUDA_VISIBLE_DEVICES"],
               "scene_config_sha256": hashlib.sha256(arguments.scene_config.read_bytes()).hexdigest(),
               "catalog_manifest_sha256": hashlib.sha256((arguments.catalog / "manifest.json").read_bytes()).hexdigest(),
               "motions": [], "rejections": [], "explicit_replacements": []}
@@ -83,6 +89,9 @@ async def run(arguments):
             "native_task_id": "metric-admission", "policy_id": "official-microduck-onnx",
             "execution_mode": "policy", "monitor_every_actions": 1,
             "schema_path": str(arguments.edh_source.resolve(strict=True) / "harness/contracts/schema/physical.schema.json")})
+        record["renderer"] = await session._device.on_owner(lambda: GL.glGetString(GL.GL_RENDERER).decode("utf-8"))
+        if not any(name in record["renderer"].lower() for name in ("llvmpipe", "softpipe")):
+            raise RuntimeError("Metric admission validation requires a Mesa software renderer")
         await session.open_task({"native_task_id": "metric-admission", "run_task_id": task_id,
                                  "catalog_task_id": "metric-admission"})
         await session.start({"native_task_id": "metric-admission", "request": {
@@ -140,6 +149,8 @@ async def run(arguments):
                     and (session._control_server is None or not session._control_server.is_serving())
                     and (session._policy_server is None or not session._policy_server.is_serving()))
         record.update(closed=closed, resources_released=released, passed=error is None and released)
+        record["cuda_initialized"] = torch.cuda.is_initialized()
+        assert not record["cuda_initialized"]
         (arguments.output / "result.json").write_text(json.dumps(record, indent=2, allow_nan=False) + "\n")
         assert released
     print(json.dumps({"passed": True, "rejections": len(record["rejections"]),
