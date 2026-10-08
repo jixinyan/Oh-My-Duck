@@ -5,7 +5,6 @@ from datetime import datetime, timezone
 import fcntl
 import hashlib
 import json
-import os
 from pathlib import Path
 import shlex
 import re
@@ -20,6 +19,7 @@ from jsonschema import Draft202012Validator
 from accept_metric_campaign import PLAN_SCHEMA
 from metric_plan import case_motions
 from record_harness_demo import request, save_json
+from oh_my_duck.infrastructure.owned_process import owned_process
 
 
 STAGE_SCHEMA = {
@@ -109,6 +109,10 @@ def stage_record(output, record, entry):
 
 
 def main():
+    def interrupted(_signum, _frame):
+        raise KeyboardInterrupt("Release campaign cancellation requested")
+
+    signal.signal(signal.SIGTERM, interrupted)
     parser = argparse.ArgumentParser(description="串行执行单个 GPU 的原生验收，保留每个阶段的实际结果")
     parser.add_argument("--plan", type=Path, default=Path("configs/experiments/runtime-release-acceptance.json"))
     parser.add_argument("--worker-host", required=True)
@@ -183,10 +187,25 @@ def main():
                         "scripts/accept_metric_campaign.py", "--plan", stage["plan"], "--suite", stage["suite"],
                         "--catalog", args.worker_policy_dir, "--gpu", str(args.gpu),
                         "--output", remote_output + "/" + stage["id"]]
-                    finished = ssh(args, "cd " + shlex.quote(args.worker_root) + " && " + shlex.join(command),
-                                   stdout=log, stderr=subprocess.STDOUT)
-                    subprocess.run(["rsync", "-a", args.worker_host + ":" + remote_output + "/" + stage["id"] + "/",
-                                    str(output / stage["id"]) + "/"], check=True)
+                    environment = command[:5]
+                    lifecycle = remote_output + "/" + stage["id"] + "-process.json"
+                    supervised = environment + [args.worker_python, "scripts/run_owned_acceptance.py",
+                                                "--record", lifecycle, "--"] + command[5:]
+                    remote_command = "cd " + shlex.quote(args.worker_root) + " && " + shlex.join(supervised)
+                    try:
+                        with owned_process(["ssh", "-T", "-o", "BatchMode=yes", "-o", "ServerAliveInterval=30",
+                                            args.worker_host, remote_command],
+                                           record_path=output / (stage["id"] + "-transport.json"),
+                                           cancel_stdin=True, stdin=subprocess.PIPE,
+                                           stdout=log, stderr=subprocess.STDOUT) as transport:
+                            exit_code = transport.wait()
+                    finally:
+                        subprocess.run(["rsync", "-a", "--include=" + stage["id"] + "/***",
+                                        "--include=" + stage["id"] + "-process.json", "--exclude=*",
+                                        args.worker_host + ":" + remote_output + "/", str(output) + "/"], check=True)
+                    cleanup = json.loads((output / (stage["id"] + "-process.json")).read_text())
+                    if cleanup["state"] != "exited" or cleanup.get("grace_timeout"):
+                        raise RuntimeError("Remote metric supervisor lacks graceful exit evidence")
                 else:
                     data = root / ".cache/harness-release" / output.name / stage["id"]
                     data.parent.mkdir(parents=True, exist_ok=True)
@@ -201,9 +220,8 @@ def main():
                         "--worker-policy-dir", args.worker_policy_dir, "--worker-cuda-device", str(args.gpu),
                         "--scene-config", str(root / stage["scene"]), "--seed", "20261007",
                         "--port", str(args.port), "--data-dir", str(data)]
-                    server = subprocess.Popen(command, cwd=root, stdout=log, stderr=subprocess.STDOUT,
-                                              start_new_session=True)
-                    try:
+                    with owned_process(command, record_path=output / (stage["id"] + "-server.json"),
+                                       cwd=root, stdout=log, stderr=subprocess.STDOUT) as server:
                         deadline = time.monotonic() + 60
                         while True:
                             if server.poll() is not None:
@@ -216,16 +234,14 @@ def main():
                             time.sleep(0.5)
                         origin = f"http://127.0.0.1:{args.port}"
                         request(origin, "/api/config")
-                        finished = subprocess.run([sys.executable, str(root / "scripts/run_navigation_acceptance.py"),
+                        with owned_process([sys.executable, str(root / "scripts/run_navigation_acceptance.py"),
                             "--base-url", origin, "--scene-config", str(root / stage["scene"]),
                             "--instruction", str(root / stage["instruction"]), "--data-directory", str(data),
                             "--output", str(output / stage["id"]), "--minimum-distance-m", str(stage["minimum_distance_m"])],
-                            cwd=root, stdout=log, stderr=subprocess.STDOUT)
-                    finally:
-                        if server.poll() is None:
-                            os.killpg(server.pid, signal.SIGTERM)
-                        server.wait(timeout=30)
-            entry.update(state="passed" if finished.returncode == 0 else "failed", exit_code=finished.returncode,
+                            record_path=output / (stage["id"] + "-process.json"),
+                            cwd=root, stdout=log, stderr=subprocess.STDOUT) as navigation:
+                            exit_code = navigation.wait()
+            entry.update(state="passed" if exit_code == 0 else "failed", exit_code=exit_code,
                          elapsed_s=time.monotonic() - started, ended_at=datetime.now(timezone.utc).isoformat())
             processes = ssh(args, "nvidia-smi --query-compute-apps=gpu_uuid,pid,process_name,used_memory --format=csv,noheader",
                             check=True, capture_output=True, text=True).stdout

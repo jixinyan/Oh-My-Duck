@@ -32,7 +32,20 @@ python scripts/run_release_campaign.py \
   --output outputs/acceptance/runtime-release-20261007-01
 ```
 
-The controller checks clean source before each stage and holds an exclusive local campaign lease. The selected GPU must have zero compute processes and remain at zero utilization for ten seconds with at least 16 GiB available. Any existing compute PID rejects admission, including an idle process. Allocation remains within devices 2–4 and never shares a GPU with haomin or another user's workload. Occupancy and process samples are preserved. Admission stops after thirty seconds without sufficient idle observations. Metric artifacts are copied from the remote worker. Navigation exports actual events, camera bytes, formal verdicts and independent audit results. Each completed stage records its exit code and elapsed time; a failed stage prevents overall acceptance. Configuration and transport errors propagate and record the aborted campaign and any active stage. The controller closes its own navigation server and the navigation runner closes its own physics session. RL training remains stopped.
+The controller checks clean source before each stage and holds an exclusive local campaign lease. The selected GPU must have zero compute processes and remain at zero utilization for ten seconds with at least 16 GiB available. Any existing compute PID rejects admission, including an idle process. Allocation remains within devices 2–4 and never shares a GPU with haomin or another user's workload. Occupancy and process samples are preserved. Admission stops after thirty seconds without sufficient idle observations. Metric artifacts are copied from the remote worker. Navigation exports actual events, camera bytes, formal verdicts and independent audit results. Each completed stage records its exit code and elapsed time; a failed stage prevents overall acceptance. Configuration and transport errors propagate and record the aborted campaign and any active stage. RL training remains stopped.
+
+The controller owns each launched process and saves its PID, process group, cancellation signals, exit status and cleanup timing. Remote metric stages use `run_owned_acceptance.py`: closing the SSH input channel requests cancellation, including after a transport disconnect. The remote supervisor interrupts only its own campaign, and that campaign closes its own physical worker. Interrupted metric stages copy available artifacts and lifecycle records back to the controller. Navigation cancellation gives the runner time to close its native session before the controller closes its server. Graceful cleanup has a 120-second deadline; exceeded deadlines produce termination evidence and an explicit failure.
+
+Actual CPU cancellation checks cover both control-channel closure and SIGTERM during official policy motion. Each executed 85 control steps, preserved the cancelled result, closed the native session and released resources without a cleanup timeout. Reproduce with the locked CPU environment and pinned policies:
+
+```bash
+PYTHONPATH=src python scripts/accept_campaign_cancellation.py \
+  --catalog POLICY_DIRECTORY --mode control-eof \
+  --output outputs/acceptance/cancel-eof-new
+PYTHONPATH=src python scripts/accept_campaign_cancellation.py \
+  --catalog POLICY_DIRECTORY --mode sigterm \
+  --output outputs/acceptance/cancel-signal-new
+```
 
 ## Initialization and media evidence
 

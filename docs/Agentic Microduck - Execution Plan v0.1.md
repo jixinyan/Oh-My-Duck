@@ -10,6 +10,8 @@ tags:
   - sim-to-real
 ---
 
+> 无 GPU 检查已经覆盖控制连接关闭和 SIGTERM 期间的实际 CPU policy 运动、会话资源释放和所属进程退出。继续完成本地回归、语音资料、安装包及无需 CUDA 的环境检查，GPU 验收及 RL 保持停止，见[检查记录](reports/offline-release-validation-2026-10-07.md)。
+
 > CPU 连续动作与 Newton Office 五动作矩阵已经通过独立复核。GPU 验收已按用户要求停止，控制进程和远程 worker 全部退出，剩余阶段尚待验收。后续只允许使用没有 compute PID 且持续空闲的设备，不自动恢复当前验收，原始记录见[验收证据](reports/runtime-observation-acceptance-2026-10-07.md)。
 
 > 2026-10-07：集中完成统一观测、原生运动等待、重复动作参数、回放检查和初始化耗时记录，完成本地编译、真实 CPU 连续动作及安装包检查后，执行[统一 GPU 验收](runtime-release-acceptance.md)。验收固定本地与远程源码，按矩阵、连续动作、真实模型导航的顺序使用单个 GPU，保存每个阶段的通过或失败证据及进程释放记录。RL 保持停止。

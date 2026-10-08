@@ -1,5 +1,7 @@
 # Implementation status
 
+> 2026-10-07：验收进程清理通过两次实际 CPU policy 检查，覆盖控制连接关闭和 SIGTERM，每次执行 85 个控制步，原生会话关闭、资源释放，所属进程退出且取消结果完整保留。远程 supervisor、metric campaign 和导航入口使用明确的进程所有权管理。GPU 验收及 RL 训练保持停止，见[检查记录](reports/offline-release-validation-2026-10-07.md)。
+
 > 2026-10-07：统一观测与原生等待接口通过固定源码的 CPU 连续动作及 Newton Office 五动作矩阵，最大 Office 距离误差为 0.022404 米，最大角度误差为 3.239445°；原始记录通过独立复核。Hospital 第一组通过，后退动作停滞且误差 0.052917 米。GPU 验收已按用户要求停止，本地控制进程及远程 worker 全部退出，剩余阶段尚待验收。后续分配要求设备没有 compute PID，不能与 haomin 或其他用户共用 GPU。见[证据记录](reports/runtime-observation-acceptance-2026-10-07.md)。
 
 > 2026-10-07：当前控制器的 Office 有序路线 run `a8dd0f45-4480-4e60-a89a-0b783f2627c0` 为 failed，最终保持恢复调用超出原有 2400 秒预算，没有正式 Verifier。三段行走全部满足 0.05 米精度，端点位移累计 3.052359 米，最终目标误差 0.116789 米；两次顺时针旋转停滞，模型根据新鲜 ToF 和有界命令继续绕行。2627 控制步 / 10508 物理子步，零外部接触，4266 个事件与 549 张原始图片完整保存，自动入口关闭会话并释放 worker。后续需要验证长行走后的顺时针响应、预算内正式结束和 180 秒初始化可靠性。见[导航测量](reports/navigation-acceptance-2026-10-07.md#office-有序导航测量)。

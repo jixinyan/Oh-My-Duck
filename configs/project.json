@@ -5,6 +5,14 @@
   "entry_point": "omd.py",
   "release_readiness": {
     "state": "acceptance_in_progress",
+    "offline_release_validation": {
+      "state": "actual_cpu_campaign_cancellation_verified",
+      "control_eof": "outputs/acceptance/campaign-cancel-eof-20261007-01/acceptance.json",
+      "sigterm": "outputs/acceptance/campaign-cancel-sigterm-20261007-01/acceptance.json",
+      "resources_released": true,
+      "gpu_execution": "stopped",
+      "report": "docs/reports/offline-release-validation-2026-10-07.md"
+    },
     "runtime_observation_iteration": {
       "state": "cpu_and_office_matrix_verified_gpu_campaign_stopped_by_user",
       "source_revision": "32e35dd09ce7c278c6a264cf1fc9ab9926996efd",

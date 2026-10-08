@@ -3,12 +3,14 @@ import hashlib
 import json
 import os
 from pathlib import Path
+import signal
 import subprocess
 import sys
 
 from jsonschema import Draft202012Validator
 from verify_metric_campaign import verify_case
 from metric_plan import MOTIONS_SCHEMA, case_motions
+from oh_my_duck.infrastructure.owned_process import owned_process
 
 
 PLAN_SCHEMA = {
@@ -41,6 +43,10 @@ PLAN_SCHEMA = {
 
 
 def main():
+    def interrupted(_signum, _frame):
+        raise KeyboardInterrupt("Metric campaign cancellation requested")
+
+    signal.signal(signal.SIGTERM, interrupted)
     parser = argparse.ArgumentParser(description="Run sequential real policy-tool cases; stop on the first failure.")
     parser.add_argument("--plan", type=Path, default=Path("configs/experiments/metric-policy-acceptance.json"))
     parser.add_argument("--suite", required=True)
@@ -98,7 +104,11 @@ def main():
                        "--sequence", str(sequence_path)]
             print(f"Starting actual {args.suite}/{case['id']}", flush=True)
             with (args.output / (case["id"] + ".log")).open("w") as log:
-                subprocess.run(command, cwd=root, env=environment, stdout=log, stderr=subprocess.STDOUT, check=True)
+                with owned_process(command, record_path=args.output / (case["id"] + "-process.json"),
+                                   cwd=root, env=environment, stdout=log, stderr=subprocess.STDOUT) as worker:
+                    finished = worker.wait()
+                    if finished:
+                        raise subprocess.CalledProcessError(finished, command)
             result_path = destination / "result.json"
             result = json.loads(result_path.read_text())
             if not result["passed"] or not result["resources_released"]:
@@ -118,7 +128,7 @@ def main():
         if error is not None:
             record["failure"] = {"type": type(error).__name__, "message": str(error)}
             if record["cases"] and not record["cases"][-1]["passed"]:
-                record["cases"][-1]["state"] = "failed"
+                record["cases"][-1]["state"] = "aborted" if isinstance(error, KeyboardInterrupt) else "failed"
         destination_record.write_text(json.dumps(record, indent=2) + "\n")
 
 
