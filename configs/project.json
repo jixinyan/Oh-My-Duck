@@ -5,6 +5,27 @@
   "entry_point": "omd.py",
   "release_readiness": {
     "state": "acceptance_in_progress",
+    "cpu_external_scene": {
+      "state": "actual_scene_import_geometry_contact_configuration_and_finalized_cpu_models_verified",
+      "source_revision": "cbf0c19a53da48c77dd7ca2b7f4baaf8b6433aa6",
+      "scenes_verified": ["nvidia-office-6.0", "nvidia-hospital-rollers"],
+      "models_verified": ["allcollisions", "groundcontact_rollers"],
+      "downloaded_scene_files_verified": 3930,
+      "geometric_colliders_verified": 5682,
+      "environment_meshes_verified": 5680,
+      "environment_mesh_points_verified": 2101169,
+      "signed_scale_normalizations_verified": 164,
+      "hospital_xform_collider_descendant_checks": 125,
+      "actual_native_usd_imports": 4,
+      "finalized_cpu_models": 2,
+      "runtime_audits": [
+        "outputs/acceptance/external-scene-office-20261008-03/independent-audit.json",
+        "outputs/acceptance/external-scene-hospital-20261008-02/independent-audit.json"
+      ],
+      "gpu_acceptance_performed": false,
+      "solver_execution_performed": false,
+      "report": "docs/reports/external-scene-cpu-2026-10-08.md"
+    },
     "cpu_collision_model": {
       "state": "actual_two_world_contact_masks_ground_pairs_and_finalized_cpu_arrays_verified",
       "source_revision": "8858d9da5486d34f7d77f3793d7dbcb4adcfa50f",

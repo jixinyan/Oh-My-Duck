@@ -15,6 +15,8 @@ transport, recorded sensors, voice profiles, assets and independent installation
 materials and actual Newton imports using only CPU. The
 [CPU readiness record](docs/reports/cpu-development-readiness-2026-10-08.md)
 links source pins, measurements and reproduction instructions.
+Actual Office and Hospital imports passed geometry and contact-configuration
+checks for all 5682 geometric colliders and 164 signed-scale transformations.
 
 Newton uses OpenUSD 26.08 and verifies its unique provider and installed files
 before GPU allocation. Training, evaluation, diagnostic and direct runtime entry

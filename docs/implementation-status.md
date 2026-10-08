@@ -1,5 +1,7 @@
 # Implementation status
 
+> 2026-10-08：Office 与 Hospital 的实际 CPU 导入、5682 个几何 collider、164 处镜像缩放、接触过滤与两个 finalized model 检查通过；基于 2101169 个原始 points 重算 5680 个导入 mesh 的 world bounds，检查通过，全部来源及生成文件保持检查通过。Hospital 的 125 个 Xform 包含的碰撞几何均已核验。GPU 和 RL 保持停止，见[外部场景 CPU 验证](reports/external-scene-cpu-2026-10-08.md)。
+
 > 2026-10-08：碰撞参数处理位于 `task_binding/collision_model.py`，计算内容的 AST 保持一致。两种模型各两个实际 Newton world 的全部接触过滤、ground pair、摩擦与接触参数通过检查，两个 finalized CPU model 的数组复核通过。27 项配置及导入测试、422 个独立安装文件和 20 个调用通过，GPU 和 RL 保持停止。见[碰撞模型验证](reports/collision-model-2026-10-08.md)。
 
 > 2026-10-08：Newton 的训练、评估、诊断、直接环境创建与原生 RSL worker 共九条实际路径通过依赖异常检查，均在初始化 CUDA、Isaac、pxr 和 W&B 会话之前终止。锁定安装修复后，244 个 provider 文件检查通过。26 项配置及导入测试、源码编译、421 个独立安装文件与 20 个调用通过，GPU 和 RL 保持停止。见[入口验证](reports/newton-execution-preflight-2026-10-08.md)与[CPU 开发验证记录](reports/cpu-development-readiness-2026-10-08.md)。
@@ -221,7 +223,7 @@ is prepared but not launched. Default task recipes and native PPO algorithms rem
 | Voice interaction | Qwen ASR、已确认音色 TTS、原生 Harness、Newton/BAM 与独立 Verifier 的录音任务闭环已经通过；Mac 音频设备、合成中断与 CPU MuJoCo/BAM、Newton 任务执行中断通过，会话释放资源。Microduck 音频设备待验收。见[闭环记录](reports/end-to-end-2026-10-03.md)与[设备检查](reports/voice-interaction-validation-2026-09-29.md) |
 | MuJoCo RL | Both representative tasks × both native PPO frameworks passed the single-GPU lifecycle and completed replay |
 | Isaac/Newton RL | Both representative tasks × both native PPO frameworks passed the single-GPU lifecycle and completed replay |
-| Newton physics | Actual solver, canonical state/sensors, precise collisions, BAM cadence, DR and penalties audited |
+| Newton physics | Actual solver, canonical state/sensors, BAM cadence, DR and penalties audited; current CPU import/contact checks cover both robot variants and all Office/Hospital geometric colliders; current GPU runtime acceptance pending |
 | Published StandUp reference | Official frozen policy passes 64/64 CPU reset samples and 4/4 cases in each native backend; 12 videos checked; own training reproduction remains open |
 | Task behavior | All five-iteration policies fail behavior gates; long training and convergence acceptance remain |
 | Task replay | All 24 replay contexts completed; 60 videos and finite 61/14 traces checked |

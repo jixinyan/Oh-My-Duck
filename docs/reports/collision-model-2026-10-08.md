@@ -46,8 +46,9 @@ configurations, ten official policies and 29 pinned Harness files without CUDA.
 
 Raw native diagnostics, build/install logs and saved-evidence checks are retained
 beside these results. This validates actual builder configuration and finalized
-model data. Solver stepping, native Isaac callback execution, external scene
-geometry, BAM loads, rendering and learned-policy behavior retain their own
+model data. Actual Office and Hospital geometry passed the
+[external scene CPU checks](external-scene-cpu-2026-10-08.md).
+Solver stepping, native Isaac callback execution, BAM loads, rendering and learned-policy behavior retain their own
 acceptance requirements. GPU acceptance and RL remain stopped.
 All audit processes exited. The remote process observation is retained in
 `outputs/acceptance/collision-model-process-audit-20261008-01.log`.

@@ -14,6 +14,7 @@ stopped.
 | Converted assets | Both variants, complete conversion inputs and dependencies, source fingerprints and every generated file | [Source-verified assets](source-verified-assets-2026-10-08.md) |
 | OpenUSD and native imports | Unique patched OpenUSD 26.08 provider; six imports across three processes; source geometry, materials and joints preserved | [OpenUSD validation](openusd-readiness-2026-10-08.md) |
 | Newton contact configuration | Actual two-world source masks, explicit ground pairs and finalized CPU arrays for both robot variants; 27 tests and 422 installed files | [Collision model validation](collision-model-2026-10-08.md) |
+| External scene geometry | Actual Office and Hospital imports, all 5682 geometric colliders, 164 signed-scale transformations and two finalized CPU models | [External scene validation](external-scene-cpu-2026-10-08.md) |
 | Public CPU asset command | Four actual Newton imports, passive wheel joints, ordered progress, failed-result retention and output protection | [Public asset validation](model-assets-cli-2026-10-08.md) |
 | Newton execution entry points | Nine actual dependency failures before CUDA/Isaac initialization; actual locked setup repair; 26 tests and 421 independent installed files | [Execution preflight](newton-execution-preflight-2026-10-08.md) |
 | Current-source release preparation | Six stages, four scenes, ten policies, 29 pinned Harness files and actual model-provider metadata; CUDA uninitialized | [Execution preflight](newton-execution-preflight-2026-10-08.md) |

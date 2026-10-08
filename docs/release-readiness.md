@@ -4,6 +4,11 @@ The release workflow uses recorded speech, the pinned native Harness, official p
 
 ## Runtime preparation
 
+Actual Office and Hospital imports passed all 5682 geometric colliders, 164
+signed-scale transformations, source contact filtering and two finalized CPU
+models. Original geometry, generated files and scene hashes were checked in
+[external scene validation](reports/external-scene-cpu-2026-10-08.md).
+
 The actual collision configuration helper passed two-world checks for both robot
 variants and finalized CPU arrays. All source masks and explicit contact fields
 were checked; 27 tests and an independent installation of 422 files and 20 CLI

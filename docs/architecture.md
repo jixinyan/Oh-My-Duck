@@ -102,6 +102,8 @@ called directly on an actual USD stage without starting the simulator.
 geometry orientation and ground pairs to the actual Newton builder. Actual
 two-world configuration and finalized CPU data passed
 [collision model validation](reports/collision-model-2026-10-08.md).
+Actual Office and Hospital geometry, signed-scale normalization and finalized
+CPU models passed [external scene validation](reports/external-scene-cpu-2026-10-08.md).
 `task_binding/collisions.py` owns scene spawning and registers the native callback.
 
 RL and agentic share robot/policy contracts rather than importing each other's
