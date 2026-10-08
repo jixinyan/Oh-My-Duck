@@ -55,6 +55,8 @@ admission, 61/14/13 dimensions, official ONNX parity, upright endpoints, zero
 external obstacle contacts and five measured stopped samples. Saved observer
 PNG bytes and timestamps must match their original native events. Head RGB
 must decode at the declared dimensions.
+Repeated native publications are checked against the same episode and physical
+sequence; measured windows contain unique completed controls.
 
 Physical response uses the final 25 controls of each phase. Positive and
 negative head pitch changes must each exceed 0.03 rad in the requested

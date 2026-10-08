@@ -56,7 +56,22 @@ def verify(directory: Path, catalog: Path) -> dict:
     policy = verify_policy(directory, catalog)
     if policy["policies"] != ["alpha_stand", "velstand"] or policy["control_steps"] != 575:
         raise AssertionError("Pose campaign differs from its complete official policy schedule")
-    admitted = [sample for sample in samples if sample["control"] is not None and sample["control"]["executed_actions"]]
+    publications = [sample for sample in samples if sample["control"] is not None and sample["control"]["executed_actions"]]
+    indexed = {}
+    for sample in publications:
+        key = (sample["episode_id"], sample["sequence"])
+        if key in indexed:
+            for field in ("phase", "body_position_m", "body_twist", "body_twist_world", "joint_position_rad",
+                          "joint_velocity_rad_s", "contact_evidence"):
+                if sample[field] != indexed[key][field]:
+                    raise AssertionError("Repeated native pose publication changed its physical evidence")
+        else:
+            indexed[key] = sample
+    admitted = list(indexed.values())
+    if len({sample["episode_id"] for sample in admitted}) != 1:
+        raise AssertionError("Pose campaign changed its physical episode")
+    if any(sample["control"]["executed_actions"] != 1 or not sample["control"]["action_completed"] for sample in admitted):
+        raise AssertionError("Pose publication does not contain one completed native action")
     if any(sample["control"]["raw_sim_steps"] != 4 for sample in admitted):
         raise AssertionError("Pose control did not execute four actual physics substeps")
     if any(sample["contact_evidence"]["non_ground_external_contact_samples_total"] for sample in admitted):
@@ -141,7 +156,9 @@ def verify(directory: Path, catalog: Path) -> dict:
             if image.format != "PNG" or pixels.shape != (480, 640, 3) or np.ptp(pixels) == 0:
                 raise AssertionError("Pose observer camera does not contain an actual valid RGB frame")
     return {"passed": True, "scope": "Native command admission, actual CPU head pitch/body height response and return",
-            "control_steps": len(admitted), "raw_sim_steps": 4 * len(admitted), "phase_controls": controls,
+            "control_steps": len(admitted), "raw_sim_steps": 4 * len(admitted),
+            "control_publications": len(publications), "repeated_publications_verified": len(publications) - len(admitted),
+            "phase_controls": controls,
             "phase_means": means, "responses": responses, "camera_frames": len(frames), "policy_audit": policy,
             "source_revision": record["provenance"]["source_revision"],
             "input_sha256": {f"{name}.json": hashlib.sha256((directory / f"{name}.json").read_bytes()).hexdigest()
