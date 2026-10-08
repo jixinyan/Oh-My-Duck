@@ -18,7 +18,15 @@ def main():
     parser.add_argument("--source-root", type=Path, required=True)
     parser.add_argument("--packages", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--policy-record", type=Path)
+    parser.add_argument("--catalog", type=Path)
+    parser.add_argument("--metric-campaign", type=Path)
+    parser.add_argument("--metric-plan", type=Path)
     args = parser.parse_args()
+    if (args.policy_record is None) != (args.catalog is None):
+        raise ValueError("An actual policy record and catalogue must be provided together")
+    if (args.metric_campaign is None) != (args.metric_plan is None):
+        raise ValueError("An actual metric campaign and its declared plan must be provided together")
     root = args.source_root.resolve(strict=True)
     packages = args.packages.resolve(strict=True)
     if args.output.exists():
@@ -64,6 +72,14 @@ def main():
                 ["validate", "metric-audit", "--help"], ["validate", "policy-audit", "--help"],
                 ["validate", "release", "--help"], ["validate", "navigation-audit", "--help"],
                 ["validate", "release-plan"]]
+    if args.policy_record is not None:
+        commands.append(["validate", "policy-audit", "--directory", str(args.policy_record.resolve(strict=True)),
+                         "--catalog", str(args.catalog.resolve(strict=True)), "--output",
+                         str(args.output.resolve().with_name(args.output.stem + "-policy.json"))])
+    if args.metric_campaign is not None:
+        commands.append(["validate", "metric-audit", "--campaign", str(args.metric_campaign.resolve(strict=True)),
+                         "--plan", str(args.metric_plan.resolve(strict=True)), "--source-root", str(root),
+                         "--output", str(args.output.resolve().with_name(args.output.stem + "-metric.json"))])
     checks = []
     for arguments in commands:
         completed = subprocess.run([str(cli), *arguments], cwd=Path.home(), env=environment,

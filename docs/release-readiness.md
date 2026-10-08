@@ -10,6 +10,10 @@ audits. Use the locked CPU or Newton environment for physical execution. An inst
 command finds configuration through the checkout or an explicit `OMD_PROJECT_ROOT`.
 `omd validate release-plan` checks all declared inputs without initializing CUDA.
 
+The installed package audit accepts `--policy-record` with `--catalog` and
+`--metric-campaign` with `--metric-plan`. These inputs execute the installed ONNX
+and physical-record verifiers outside the checkout and preserve their reports.
+
 Use Python 3.12, Node.js and the locked environments in `environments/`. Install the voice client on the operator computer and the ASR, TTS and Isaac/Newton environments on the NVIDIA host. Keep the model services bound to localhost and use SSH forwarding between hosts. Voice setup requires an explicitly confirmed profile before task feedback can be synthesized.
 
 ```bash
