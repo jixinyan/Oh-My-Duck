@@ -1,6 +1,6 @@
 # RL framework integration
 
-Simulation backends and RL frameworks are independent choices. The current focus is RL: the simulation environment owns physics, task dynamics, observation/action semantics and episode boundaries; the framework adapter owns the vector-environment interface, algorithm configuration, learning loop and native checkpoints. Shared evaluation consumes compatible policies without depending on the training framework.
+Simulation backends and RL frameworks are independent choices. The simulation environment owns physics, task dynamics, observation/action semantics and episode boundaries; the framework adapter owns the vector-environment interface, algorithm configuration, learning loop and native checkpoints. Shared evaluation consumes compatible policies without depending on the training framework. GPU acceptance and RL training are currently stopped.
 
 ```mermaid
 flowchart LR
@@ -22,34 +22,32 @@ Run `python omd.py frameworks` for the registered compatibility matrix. `--backe
 
 | Combination | Implemented entry points | Validation / remaining work |
 |---|---|---|
-| MuJoCo + RSL-RL | Official train/export | Official flat walking 64-env / 5-iteration train and official ONNX export passed; gait quality not validated |
-| Isaac/Newton + RSL-RL | PD diagnostic train/export | 5-iteration GPU train, native checkpoint inspection and normalized ONNX numerical export passed |
-| Isaac/Newton + SB3 | PD diagnostic PPO train | 5-rollout GPU train passed, including 192 timeout snapshots; checkpoint + normalizer saved |
-| MuJoCo + SB3 | Official-task PPO train / native resume / export | 64-env / 5-rollout training and FP32 checkpoint reload passed; native continuation / 768 timeouts and normalized ONNX export passed |
+| MuJoCo + RSL-RL | Registered BAM tasks, native train/resume/export | Representative Walking and StandUp execution gates passed; learned behavior remains separately evaluated |
+| Isaac/Newton + RSL-RL | Registered BAM tasks, native train/resume/export | Representative execution gates passed; Newton physics and task-specific behavior retain independent evidence |
+| Isaac/Newton + SB3 | Registered BAM tasks, native PPO/resume/export | Representative execution gates and normalized export passed; official MuJoCo task metadata is used for export |
+| MuJoCo + SB3 | Registered BAM tasks, native PPO/resume/export | Representative execution gates, curriculum continuation and normalized export passed |
 
-The pinned upstream SB3 wrapper is subclassed locally to substitute exact pre-reset observations for automatic-reset terminal states. The same diagnostic environment supplies snapshots; no upstream files are modified. See [validation evidence](reports/isaac-rl-validation.md).
+Registered tasks use the owned shared SB3 adapter, including actual pre-reset observations, termination/truncation handling, observation history and curriculum progress. Both backends train through native SB3 PPO. The explicit PD diagnostic remains available for simulator diagnostics. See the [representative execution matrix](reports/rl-pipeline-acceptance.md) and [curriculum restoration](reports/resume-validation.md).
 
-Isaac SB3 does not yet implement native checkpoint resume or ONNX export. Its resume is explicitly rejected until matching normalization state is restored and verified. MuJoCo SB3 implements paired model/VecNormalize save and resume; its official-runner ONNX export has passed 32-input numerical parity (max error 9.54e-7). Training saves the upstream native `model.zip` and `model_vecnormalize.pkl`; retain both. A checkpoint from one framework cannot be resumed by another; a shared ONNX inference contract is a separate compatibility milestone. SB3 currently uses its upstream CPU NumPy VecEnv boundary around GPU simulation; do not assume the throughput or distributed capabilities of RSL-RL.
+SB3 saves `model.zip`, `vecnormalize.pkl` and `run.json` for either backend. Resume validates file hashes and restores the native model, optimizer, normalization and saved curriculum counter. Export retains the native actor and normalization, then verifies 32 numerical samples including normalization-clipping outliers. RSL-RL retains its native checkpoints and distributed learner. SB3 uses native vector environments and independent parallel learners; its NumPy boundary and PPO update semantics remain framework-specific.
 
-## Isaac diagnostic commands
+## Native task commands
 
 ```bash
 python omd.py setup --backend isaac-newton --rl-framework sb3
 python omd.py train --backend isaac-newton --rl-framework sb3 -- \
-  --task Omd-Microduck-PD-Diagnostic-v0 --help
+  Mjlab-StandUp-Flat-MicroDuck --help
 
-python omd.py submit --name omd-sb3-smoke-001 --gpus 1 -- \
-  python omd.py train --backend isaac-newton --rl-framework sb3 -- \
-  --task Omd-Microduck-PD-Diagnostic-v0 --num_envs 16 --max_iterations 5
+python omd.py train --backend isaac-newton --rl-framework sb3 -- \
+  Mjlab-StandUp-Flat-MicroDuck --num-envs 64 --iterations 5 --output outputs/sb3-newton-smoke-NEW
 
-python omd.py submit --name omd-rsl-smoke-001 --gpus 1 -- \
-  python omd.py train --backend isaac-newton --rl-framework rsl-rl -- \
-  --task Omd-Microduck-PD-Diagnostic-v0 --num_envs 16 --max_iterations 5
+python omd.py train --backend isaac-newton --rl-framework rsl-rl -- \
+  Mjlab-Velocity-Flat-MicroDuck --env.scene.num-envs 64 --agent.max-iterations 5
 ```
 
 SB3 is an optional locked extra (`stable-baselines3==2.7.1`); it is not a dependency of the root application or asset converter. Setup with `--rl-framework sb3` retains RSL-RL too. A later setup without the SB3 option synchronizes only default dependencies and may remove optional packages; rerun with the option to retain them.
 
-Both diagnostics use the same Newton task, 61 observations, 14 canonical joint actions, HOME offsets and 50 Hz control. Framework-specific hyperparameters live in `agent.py` and `sb3_agent.py`. PPO smoke runs validate integration, not learning quality, BAM locomotion equivalence or framework performance rankings.
+These commands require a separately authorized idle GPU. Current tasks preserve 61 actor observations, 14 canonical joint actions, HOME offsets, BAM M6 and 50 Hz control. Task and policy configuration is under `rl/tasks/`; framework implementations are under `rl/learners/`. Smoke execution and learned behavior have separate acceptance results.
 
 ## Adding another framework
 
@@ -59,7 +57,7 @@ Both diagnostics use the same Newton task, 61 observations, 14 canonical joint a
 4. Save native optimizer/checkpoint state, normalization statistics, framework identity, task/physics/source versions and policy contract. Implement explicit export with normalization and numerical output checks.
 5. Validate short headless learning, save/load continuation, inference parity and video before marking a combination supported for production experiments. Add framework-native algorithms incrementally; selecting SB3 currently selects its pinned PPO integration only.
 
-The [SB3 VecEnv contract](https://stable-baselines3.readthedocs.io/en/master/guide/vec_envs.html) differs from Gymnasium's reset/step API. Adapter boundary tests are required; matching method names alone is insufficient. The pinned Isaac Lab implementation is in `scripts/reinforcement_learning/sb3/train_sb3.py` and `source/isaaclab_rl/isaaclab_rl/sb3.py`.
+The owned `rl/learners/sb3/environment.py` implements the native SB3 vector-environment boundary. Adapter validation checks terminal observations, reset history and normalization alongside physical execution evidence.
 
 ## MuJoCo SB3 commands
 
@@ -72,14 +70,14 @@ python omd.py submit --name omd-mj-sb3-smoke --gpus 1 -- \
   Mjlab-Velocity-Flat-MicroDuck --num-envs 64 --iterations 5 --output outputs/my-sb3-run
 ```
 
-Resume adds `--resume outputs/my-sb3-run` and uses a new output directory. PPO remains framework-specific: SB3 uses actor observations for its critic, VecNormalize statistics, and constant learning rate with target-KL stopping. These differences are saved in `run.json`; do not call the algorithm identical to official RSL-RL. Both native files are required (`model.zip`, `vecnormalize.pkl`). The pre-reset recorder copies delay/history state and preserves the Torch RNG so collecting terminal observations does not advance the live sensor history. CPU regression tests exercise the actual pinned mjlab observation manager.
+Resume adds `--resume outputs/my-sb3-run` and uses a new output directory. Fresh SB3 runs default to the separate official critic observation group and previous-rollout KL feedback for the learning rate. Resume preserves the saved critic layout and learning-rate mode. `--critic-observations actor` and `--learning-rate-mode constant` are explicit experiment settings. Configuration and native PPO differences are saved in `run.json`. The pre-reset recorder copies delay/history state and preserves the Torch RNG so collecting terminal observations does not advance live sensor history.
 
 Local policy packaging for an official RSL-RL walking export uses `src/oh_my_duck/rl/artifacts/package_policy.py`. It invokes the official publisher dry-run and validates schema 2, records project/upstream provenance, and labels smoke artifacts unvalidated. It has no upload mode.
 
-SB3 export uses a registered inference runner extension with the original native SB3 policy and VecNormalize statistics. It inherits `OnPolicyRunner.export_policy_to_onnx` and calls official `mjlab_microduck.export.run_export`; task construction and metadata remain official. Run `python omd.py export --backend mujoco --rl-framework sb3 -- --run outputs/my-sb3-run --output outputs/my-sb3-export` inside a submitted job. `export.json` records graph parity including normalization-clipping outliers. No tensor remapping into an RSL-RL checkpoint is performed.
+SB3 export uses a registered inference runner extension with the native SB3 policy and VecNormalize statistics. It inherits `OnPolicyRunner.export_policy_to_onnx` and calls `oh_my_duck.rl.artifacts.export.run_export`, the owned official export implementation. Task construction and metadata use the official MuJoCo reference for both training backends. Run `python omd.py export --backend mujoco --rl-framework sb3 -- --run outputs/my-sb3-run --output outputs/my-sb3-export`. `export.json` records the training backend, metadata reference and graph parity. Newton SB3 export uses `.envs/mujoco-sb3`; its training uses `.envs/isaac-newton`.
 
 
-Current acceptance scope and native parallelism: [representative reproduction](rl-reproduction.md). W&B is now the default training logger, strictly offline; online account credentials are not used for training uploads. MuJoCo SB3 export accepts any registered official task and applies its numerical gate per export; acceptance evidence currently remains limited to the previously verified walking task.
+Current acceptance scope and native parallelism: [representative reproduction](rl-reproduction.md). Training reads the W&B project and mode from `configs/training.json`; the configured mode is `online`, with an explicit `WANDB_MODE` override. Diagnostic execution can select `offline`. All workers receive the selected mode and preserve local artifacts. Registered-task export applies its numerical gate per policy; task-specific behavior requires independent evaluation.
 
 SB3 checkpoints include an environment-progress companion in `run.json`, alongside
 the native model and VecNormalize files. It preserves the official task curriculum

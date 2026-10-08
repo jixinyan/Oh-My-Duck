@@ -10,6 +10,8 @@ tags:
   - sim-to-real
 ---
 
+> RL 操作说明已根据实际注册与配置维护，覆盖四种组合的恢复、导出、SB3 critic 与学习率、W&B online，以及一张空闲 GPU 上的 queue 流程。GPU 与 RL 保持停止，后续仍需完成当前源码的实际求解和学习行为验收，见[代表任务](rl-reproduction.md)与[训练流程](rl-campaigns.md)。
+
 > 2026-10-08：原生感知来源声明与启动参数检查完成。两个真实 CPU 会话、150 个控制步、600 个物理子步、48 项测试、42 组 Python/Node 参数和独立安装检查通过，原生资源全部关闭。GPU 与 RL 保持停止，见[感知来源验证](reports/perception-source-capabilities-2026-10-08.md)。
 
 > 2026-10-08：CPU 原生感知接口完成真实 RGBD、可见场景目标、距离及 bearing 的验证。五种状态、1253 个原生几何比较、物理状态保持、15 份资料复核、431 个安装文件和 24 个调用通过；GPU 与 RL 保持停止，见[CPU 感知验证](reports/cpu-scene-perception-2026-10-08.md)。

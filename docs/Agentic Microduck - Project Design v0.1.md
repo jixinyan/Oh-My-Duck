@@ -12,6 +12,8 @@ tags:
   - project-design
 ---
 
+> RL 的四种 backend/framework 组合使用原生 PPO、checkpoint 恢复和 normalized export。SB3 新训练使用独立 official critic 与 KL-adaptive learning rate；W&B 模式由训练配置及明确的环境变量决定。当前 GPU 与 RL 保持停止，训练计划可通过 queue 在明确分配的一张设备上依次执行，见[framework](rl-frameworks.md)与[训练流程](rl-campaigns.md)。
+
 > 原生感知工具、环境 metadata 和 scene_info 根据当前配置公布可用 source。模型服务使用明确的本地 endpoint；无效来源与连接错误通过工具传递。两个真实 CPU 会话、150 个控制步、600 个物理子步、48 项测试、42 组 Python/Node 参数及独立安装检查通过，见[感知来源验证](reports/perception-source-capabilities-2026-10-08.md)。GPU 与 RL 保持停止。
 
 > CPU 公寓与 Newton 使用相同原生感知工具和 frame 格式。CPU 接口使用当前 RGB、depth、segmentation 与真实相机 geometry，五种状态、1253 个原生几何比较、距离、bearing 和读取期间的物理状态保持通过；431 个独立安装文件及 24 个调用通过。GPU 与 RL 保持停止，见[CPU 感知验证](reports/cpu-scene-perception-2026-10-08.md)。

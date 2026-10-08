@@ -4,7 +4,10 @@ The acceptance scope is Flat Walking and Flat StandUp on MuJoCo/mjlab and Isaac
 Lab/Newton, with native RSL-RL PPO and Stable-Baselines3 PPO. The 33 maintained
 recipes are an extension inventory; only the two representative tasks are selected
 for full acceptance. `configs/tasks.json` owns bindings and evaluation factories;
-`configs/training.json` owns the selected scope and offline logging defaults.
+`configs/training.json` owns the selected scope and W&B configuration.
+GPU acceptance and RL training are currently stopped. Future authorized execution
+may use at most one idle device from GPUs 2–4, with zero compute processes and
+sustained zero utilization before allocation.
 
 ## Validation stages
 
@@ -43,15 +46,17 @@ batch size, seeds and iteration count. SB3 uses its native PPO and vectorized GP
 simulation. Concurrent independent SB3 runs do not imply distributed gradients.
 There is no decoupled asynchronous actor/learner or policy-lag algorithm.
 
-Single-GPU work runs locally; multi-GPU experiments use committed source snapshots
-through `omd submit`. Measure collection/learning time and aggregate transitions
-per second before choosing scale. Shared-host contention must be recorded.
+Execution uses immutable committed source snapshots and explicit device selection.
+The configured representative campaign retains 8192 environments per learner.
+Campaign queueing runs complete independent workflows sequentially on the allocated
+device. Existing users' processes are preserved. See [campaign execution](rl-campaigns.md).
 
 ## Artifacts and extension
 
-W&B runs offline, with native rank-zero RSL logging and SB3 TensorBoard integration.
-Never log in or sync to the saved account. Preserve checkpoints, normalizers,
-source revisions, native reward audits, failed attempts and videos locally.
+W&B uses `configs/training.json`, currently `online`, with native rank-zero RSL
+logging and SB3 TensorBoard integration. Explicit `WANDB_MODE=offline` selects
+offline diagnostics. Preserve checkpoints, normalizers, source revisions, native
+reward audits, failed attempts and videos locally.
 
 ONNX export uses the official runner path and deployment metadata reference;
 SB3 bakes VecNormalize's mean, variance, epsilon and clipping. Numerical parity
