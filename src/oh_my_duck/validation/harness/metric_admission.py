@@ -9,17 +9,18 @@ import subprocess
 import sys
 from uuid import uuid4
 
-from OpenGL import GL
-import torch
-
 from oh_my_duck.core.paths import project_root
-from oh_my_duck.integrations.edh_native import MicroDuckWorkerSession
-from oh_my_duck.robotics.microduck.official_policies import OFFICIAL_REVISION
-from oh_my_duck.validation.harness.control import available_port, control, expect_control_error, wait_boundary
-from oh_my_duck.validation.metric.case import require_upright_stop
 
 
 async def run(arguments):
+    from OpenGL import GL
+    import torch
+
+    from oh_my_duck.integrations.edh_native import MicroDuckWorkerSession
+    from oh_my_duck.robotics.microduck.official_policies import OFFICIAL_REVISION
+    from oh_my_duck.validation.harness.control import available_port, control, expect_control_error, wait_boundary
+    from oh_my_duck.validation.metric.case import require_upright_stop
+
     root = project_root()
     configuration = json.loads(arguments.scene_config.read_text())
     if configuration["backend"] != "cpu-mujoco-bam" or os.environ.get("CUDA_VISIBLE_DEVICES") != "":

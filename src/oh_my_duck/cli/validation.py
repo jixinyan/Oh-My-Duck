@@ -6,6 +6,7 @@ import sys
 COMMANDS = {
     "metric": ("metric.campaign", "执行真实 policy tool 的运动指标验收"),
     "metric-case": ("metric.case", "执行单个原生物理会话的运动序列"),
+    "metric-admission": ("harness.metric_admission", "检查准备中的动作请求、实际执行和明确修改命令"),
     "metric-audit": ("metric.verify", "复核运动样本、停止状态、相机与源码来源"),
     "policy-audit": ("metric.policy", "使用官方 ONNX 重新计算记录中的 policy action"),
     "policy-registry": ("harness.registry", "核验登记的 policy 包、来源、命令通道与 CPU 推断"),

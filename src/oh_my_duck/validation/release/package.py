@@ -80,6 +80,7 @@ def main():
                 ["voice", "--help"], ["voice-task", "--help"], ["voice-session", "--help"],
                 ["harness", "--help"], ["sim", "--help"], ["validate", "--help"], ["replay", "--help"],
                 ["validate", "metric-audit", "--help"], ["validate", "policy-audit", "--help"],
+                ["validate", "metric-admission", "--help"],
                 ["validate", "release", "--help"], ["validate", "navigation-audit", "--help"],
                 ["validate", "release-plan"], ["validate", "model-assets", "--help"],
                 ["validate", "pose", "--help"], ["validate", "pose-audit", "--help"],
