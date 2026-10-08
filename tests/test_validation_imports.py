@@ -15,6 +15,8 @@ ROOT = Path(__file__).resolve().parents[1]
     "oh_my_duck.validation.release.plans",
     "oh_my_duck.validation.harness.control",
     "oh_my_duck.experience.harness_replay",
+    "oh_my_duck.infrastructure.usd_runtime",
+    "oh_my_duck.rl.backends.isaac_newton.task_binding.collision_assets",
 ])
 def test_metadata_and_transport_imports_leave_execution_dependencies_unloaded(module):
     code = "import importlib,json,sys; importlib.import_module(sys.argv[1]); print(json.dumps(sorted(sys.modules)))"
