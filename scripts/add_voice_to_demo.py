@@ -1,6 +1,7 @@
 import argparse
 import hashlib
 import json
+import math
 from pathlib import Path
 import subprocess
 from urllib.parse import unquote, urlsplit
@@ -26,6 +27,12 @@ def main():
     if result["native_run"]["state"] != "succeeded" or not any(
             verdict["status"] == "passed" for verdict in result["native_run"]["verdicts"]):
         raise ValueError("语音任务没有通过原生验证")
+    video_report_path = args.video.with_suffix(".json")
+    video_report = json.loads(video_report_path.read_text())
+    if (video_report["runId"] != result["native_run"]["id"] or
+            video_report["runState"] != "succeeded" or video_report["formalVerdict"] != "passed" or
+            video_report["videoSha256"] != digest(args.video)):
+        raise ValueError("视频来源与语音任务记录不一致")
     response = Path(unquote(urlsplit(result["speech"]["audio"]["uri"]).path)).resolve(strict=True)
     if (digest(args.instruction_audio) != result["transcription"]["audio_sha256"] or
             digest(response) != result["speech"]["audio"]["sha256"]):
@@ -35,8 +42,13 @@ def main():
     frames.close()
     with wave.open(str(response)) as audio:
         response_duration = audio.getnframes() / audio.getframerate()
+    with wave.open(str(args.instruction_audio)) as audio:
+        instruction_duration = audio.getnframes() / audio.getframerate()
     duration = metadata["duration"]
-    offset_ms = round(max(0, duration - response_duration - 0.5) * 1000)
+    if (not math.isfinite(duration) or duration <= 0 or instruction_duration <= 0 or
+            response_duration <= 0 or instruction_duration + response_duration + 0.5 > duration):
+        raise ValueError("视频时长无法完整容纳指令音频和反馈音频")
+    offset_ms = round((duration - response_duration - 0.5) * 1000)
     command = [imageio_ffmpeg.get_ffmpeg_exe(), "-v", "error", "-n", "-i", str(args.video),
         "-i", str(args.instruction_audio), "-i", str(response), "-filter_complex",
         f"[2:a]adelay={offset_ms}:all=1[feedback];[1:a][feedback]amix=inputs=2:duration=longest:normalize=0,apad[audio]",
@@ -49,6 +61,8 @@ def main():
         "transcription": result["transcription"], "speech": result["speech"],
         "instruction_audio_sha256": digest(args.instruction_audio), "response_offset_ms": offset_ms,
         "video_source_sha256": digest(args.video), "video_sha256": digest(args.output),
+        "video_report_sha256": digest(video_report_path), "voice_result_sha256": digest(args.voice_result),
+        "instruction_duration_s": instruction_duration, "response_duration_s": response_duration,
         "duration_s": duration, "complete_decode": "passed",
         "live_microphone": result["live_microphone"], "speaker_playback": result["speaker_playback"]}
     args.output.with_suffix(".voice.json").write_text(json.dumps(manifest, ensure_ascii=False,

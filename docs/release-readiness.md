@@ -17,8 +17,8 @@ The release workflow uses recorded speech, the pinned native Harness, official p
 
 Native metric tool schemas advertise default speeds, units and measured completion
 requirements. Actual Luna calls passed four bounded CPU motions, Node startup,
-17 import tests and independent installation. Complete office navigation remains
-pending. See [tool parameters](reports/metric-tool-guidance-2026-10-08.md).
+17 import tests and independent installation. See
+[tool parameters](reports/metric-tool-guidance-2026-10-08.md).
 
 Native metric tools preserve pending requests and explicitly replace commands.
 Actual CPU admission, four caller deadlines, measured motion, stopping and
@@ -26,10 +26,10 @@ resource release passed 641 controls and 2564 substeps. Independent action
 recomputation, 17 import tests, 432 installed files and 25 CLI calls passed
 [request validation](reports/metric-request-admission-2026-10-08.md).
 
-The installed CPU voice task verified actual Qwen ASR, OpenAI `gpt-6-luna`, native
+The installed CPU interruption task verified actual Qwen ASR, OpenAI `gpt-6-luna`, native
 policy/sensor tools, interruption, confirmed-voice feedback and full resource
 release. Independent checks cover 1400 controls, 5600 substeps, 2427 events,
-296 original images and two decoded WAV files. Office navigation remains pending. See the
+296 original images and two decoded WAV files. See the
 [actual task and provider record](reports/cpu-voice-task-2026-10-08.md).
 
 Qwen ASR, Base TTS and VoiceDesign passed actual CPU Float32 inference in their
@@ -223,7 +223,7 @@ environments/demo/.venv/bin/python scripts/add_voice_to_demo.py --video outputs/
   --instruction-audio /absolute/path/command.wav --output outputs/demos/run-new-voice.mp4
 ```
 
-The renderer uses actual public events and source camera images. The audio step checks both WAV hashes against the task result, requires a successful native run with a passed Verifier result, and fully decodes the finished MP4. The generated manifest preserves source and output hashes, model identity and voice profile revision. The isolated `environments/demo` dependencies are locked; the renderer also requires `ffmpeg` and `ffprobe` on PATH. Supply `--font /absolute/path/unicode.ttf` on Linux for a font that covers the trace text; macOS uses Arial Unicode by default.
+The renderer uses actual public events and source camera images. Keep the silent video's adjacent `.json` report with the MP4. The audio step verifies its task ID, successful state, passed Verifier result and video SHA256 against the voice result. Both WAV hashes must match, and the video must contain the complete instruction and feedback without overlap. The finished MP4 receives a complete decode check. Its manifest preserves video/report/task/audio hashes, audio durations, model identity and voice profile revision. The isolated `environments/demo` dependencies are locked; the renderer also requires `ffmpeg` and `ffprobe` on PATH. Supply `--font /absolute/path/unicode.ttf` on Linux for a font that covers the trace text; macOS uses Arial Unicode by default.
 
 ## Evidence available on 2026-10-07
 
