@@ -1,5 +1,7 @@
 # Implementation status
 
+> 准备中的距离与角度请求保留原有身份，调用者等待超时保留原生执行。真实 CPU 检查通过 8 次重复请求拒绝、4 次调用者超时、2 次明确修改命令、641 个控制步和 2564 个物理子步；两个动作满足原有误差与停止条件。17 项测试、432 个安装文件、25 个调用和独立 ONNX 复核通过，资源全部关闭。GPU 与 RL 保持停止，见[动作请求验证](reports/metric-request-admission-2026-10-08.md)。
+
 > 原生任务等待和 voice-task 入口在请求任务状态、创建输出或连接服务之前检查有限的正数时间。19 项实际 API/CLI 检查、431 个独立安装文件及 24 个调用通过。GPU 与 RL 保持停止，见[等待参数验证](reports/native-wait-admission-2026-10-08.md)。
 
 > RL 使用说明根据当前原生 framework 注册和训练配置维护：四种组合支持 train、resume 与 normalized export；SB3 新训练使用独立 official critic 和 KL-adaptive learning rate，恢复时保留原有设置。W&B 配置为 online，GPU 与 RL 保持停止，后续允许同时使用一张空闲 GPU 2–4。参见[framework](rl-frameworks.md)、[代表任务](rl-reproduction.md)与[完整训练流程](rl-campaigns.md)。
@@ -240,7 +242,7 @@ is prepared but not launched. Default task recipes and native PPO algorithms rem
 | Component | Current state |
 |---|---|
 | Source organization | First-party code consolidated under `src/oh_my_duck`; obsolete `training/` packages removed |
-| CLI/application | Native task service interface, public validation/replay, scene schema, registered packages and voice workflow; 430 installed files, 24 CLI calls and actual CPU session lifecycle verified |
+| CLI/application | Native task service interface, public validation/replay, scene schema, registered packages and voice workflow; 432 installed files, 25 CLI calls and actual CPU metric request lifecycle verified |
 | Core contracts/tool catalog/recording | 七项仿真工具的完整 Draft 2020-12 Schema、实际 handler 与无效参数拒绝已经验证；JSONL、原生事件和 PNG 导出、SHA256 检查及 1080p agentic MP4 保留实际验证资料 |
 | Agentic Harness, skills, robot execution | 固定 EDH 原生会话、SSH GPU worker、真实模型、官方 ONNX、ActionGate 与独立 Verifier 已运行；CPU 公寓与 Newton Office 的固定场景导航、Office 四个 policy 的完整多动作任务和 Hospital 轮滑有序路线通过。三个场景各通过三个距离/角度会话；全部长距离请求精度、图像输入独立 VLN、多场景泛化与真机待验收 |
 | Perception and policy adapters | 官方十项 policy 与登记的训练包共享 61-to-14 推断及原生工具；实际 CPU Walking/StandUp 包执行、episodic 时长/接续与停止通过。Newton Office 的 velstand/alpha_walking、head RGB、observer 场景、ToF、IMU 与 odometry 已验证；学习行为、物体识别及物体效果待验收 |

@@ -19,6 +19,10 @@
 
 调用示例：`microduck.walk({"distance_m": 1.0})`、`microduck.rotate({"angle_deg": -45})`。动作准备要求当前原生 execution 已确认暂停，并具有至少五个实际停止样本。调用 `execution.resume` 后，控制器在每个实际控制步检查目标；内部命令每段最多 100 个控制步。到达目标后执行零 twist，取得五个停止样本后暂停。停止后的目标距离误差需要不超过 0.05 米，角度误差需要不超过 5 度。
 
+准备中的距离或角度动作保留其 `request_id`。下一次 `walk` 或 `rotate` 要求当前动作已经完成、失败、受到阻碍或被明确中断。准备动作后调用 `execution.resume` 执行该请求，随后读取确认暂停边界。主动修改动作时使用 `set_command` 明确设置新命令；原生执行仍要求调用 `execution.resume`。重复动作被拒绝时，原请求、command 和物理边界保持一致。
+
+`omd validate metric-admission` 在 CPU MuJoCo/BAM 的 Mesa 软件渲染环境中检查准备请求、实际距离和角度执行、明确修改命令与资源释放。调用者的等待超时保留原生执行，由原生预算控制执行期限；需要停止动作时使用原生停止接口。
+
 `task_progress.metric_motion` 包含 `requested`、`measured`、`unit`、`error`、`tolerance`、`phase`、`completed` 和原生 `sequence`。转向同时返回实际平移距离。MotionGuard 的障碍或运动停滞检查产生 `blocked`；目标进度不足返回 `failed` 和 `reason="metric_progress_stalled"`；停止后超出误差要求产生 `failed`，用户中断产生 `interrupted`。只有经过测量的目标与停止条件同时满足时，才返回 `completed=true`。目标动作结束后，`finish_policy` 仍检查确认边界与零命令停止证据；正式任务由独立 Verifier 判定。
 
 官方 catalog 保留十个 policy 的文件 hash、命令编码与执行条件。当前 `allcollisions` 机器人通过统一工具接口接入八个 policy；`roller` 与 `crouch` 要求对应的 roller 机器人模型。拾取、踢球、翻滚等物体效果需要各自的物理检查。距离和角度行为验证范围见[验证记录](reports/metric-camera-tools-2026-09-30.md)。

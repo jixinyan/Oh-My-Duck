@@ -9,6 +9,11 @@ Use `omd validate` for native acceptance and recorded-evidence audits, and
 [source map](docs/architecture.md#source-organization) lists the responsible module
 for each capability. The same commands are available through `python -m oh_my_duck`.
 
+Prepared distance and rotation requests retain their identity through native
+execution. Actual CPU motion, request admission, caller deadlines and cleanup
+passed [metric request checks](docs/reports/metric-request-admission-2026-10-08.md).
+Use `omd validate metric-admission` to exercise that lifecycle.
+
 Application services and voice use the same native task client for sessions,
 submission, status, stopping and closing. Tool arguments use complete JSON Schema
 Draft 2020-12. Actual CPU service lifecycle, 77 tests, 33 subtests, 430 independently

@@ -4,6 +4,12 @@ The release workflow uses recorded speech, the pinned native Harness, official p
 
 ## Runtime preparation
 
+Native metric tools preserve pending requests and explicitly replace commands.
+Actual CPU admission, four caller deadlines, measured motion, stopping and
+resource release passed 641 controls and 2564 substeps. Independent action
+recomputation, 17 import tests, 432 installed files and 25 CLI calls passed
+[request validation](reports/metric-request-admission-2026-10-08.md).
+
 The installed CPU voice task verified actual Qwen ASR, OpenAI `gpt-6-luna`, native
 policy/sensor tools, interruption, confirmed-voice feedback and full resource
 release. Independent checks cover 1400 controls, 5600 substeps, 2427 events,
