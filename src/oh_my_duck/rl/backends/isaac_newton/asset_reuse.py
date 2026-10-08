@@ -14,6 +14,11 @@ from oh_my_duck.rl.backends.isaac_newton.paths import asset_dir, require_asset, 
 
 
 def _source_revision(root: Path) -> str:
+    checkout = Path(subprocess.check_output([
+        "git", "rev-parse", "--show-toplevel",
+    ], cwd=root, text=True).strip()).resolve(strict=True)
+    if checkout != root.resolve(strict=True):
+        raise ValueError("Asset reuse requires the complete source checkout directory")
     changes = subprocess.check_output([
         "git", "status", "--porcelain", "--untracked-files=no",
     ], cwd=root, text=True)
@@ -32,6 +37,11 @@ def _conversion_inputs(root: Path) -> dict[str, str]:
     paths.extend(tools / name for name in
                  ("convert_asset.py", "asset_reference.py", "paths.py", "asset_names.py"))
     paths.extend((root / "configs/upstream.json", root / "environments/isaac-assets/pyproject.toml"))
+    paths.extend(root / name for name in (
+        "src/oh_my_duck/__init__.py", "src/oh_my_duck/core/__init__.py", "src/oh_my_duck/core/paths.py",
+        "src/oh_my_duck/rl/__init__.py", "src/oh_my_duck/rl/backends/__init__.py",
+        "src/oh_my_duck/rl/backends/isaac_newton/__init__.py",
+    ))
     return {str(path.relative_to(root)): hashlib.sha256(path.read_bytes()).hexdigest() for path in paths}
 
 
@@ -76,6 +86,8 @@ def reuse_asset(baseline_source: Path, model: str) -> dict:
     root = project_root()
     baseline = baseline_source.resolve(strict=True)
     current_revision, baseline_revision = _source_revision(root), _source_revision(baseline)
+    subprocess.run(["git", "merge-base", "--is-ancestor", baseline_revision, current_revision],
+                   cwd=root, check=True)
     target = asset_dir(model)
     if target.exists():
         raise FileExistsError(f"Asset reuse requires a new destination: {target}")
