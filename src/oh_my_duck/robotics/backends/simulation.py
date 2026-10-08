@@ -796,6 +796,34 @@ class CpuMujocoBamBackend(SimulationBackend):
         self.bind_goal(goal)
         return self.observe_control()
 
+    def _perception_capture(self) -> tuple[dict, object]:
+        from oh_my_duck.perception.mujoco import capture_world_points
+
+        self._require_owner()
+        observed = self.observe_control()
+        points, segmentation, eye = capture_world_points(self._renderer)
+        output = BytesIO()
+        self._np.save(output, points, allow_pickle=False)
+        measured = observed["measurements"]
+        frame = {"episode_id": observed["episode_id"], "sequence": observed["sequence"],
+                 "observed_at": observed["observed_at"], "rgb_png_base64": measured["rgb_png_base64"],
+                 "points_world_npy_base64": base64.b64encode(output.getvalue()).decode("ascii"),
+                 "camera_position_m": eye.tolist(), "body_position_m": measured["body_position_m"],
+                 "yaw_rad": measured["odometry"]["yaw_rad"], "distance_source": "simulator_ground_truth",
+                 "depth_semantics": "MuJoCo optical-axis meters reconstructed from the actual render frustum",
+                 "camera_frame_id": measured["camera_frame_id"]}
+        return frame, segmentation
+
+    def perception_frame(self) -> dict:
+        frame, _ = self._perception_capture()
+        return frame
+
+    def inspect_scene(self, prompt: str) -> dict:
+        from oh_my_duck.perception.mujoco import inspect_apartment_frame
+
+        frame, segmentation = self._perception_capture()
+        return inspect_apartment_frame(frame, segmentation, self.model, self._robot_root_id, prompt)
+
     def bind_goal(self, goal: dict) -> dict:
         self._require_owner()
         if not isinstance(goal, dict) or goal.get("kind") not in {"room", "dock", "object"}:
