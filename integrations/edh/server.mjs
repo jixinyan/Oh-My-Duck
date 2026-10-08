@@ -12,6 +12,7 @@ const edhRoot = resolve(process.env.OMD_EDH_SOURCE ?? '');
 const pinnedRevision = '8a5e685b22d032207f53db20454f0992a4ad60fd';
 const python = process.env.OMD_CPU_PYTHON;
 const catalogDir = process.env.OMD_POLICY_DIR;
+const policyRegistry = process.env.OMD_POLICY_REGISTRY;
 const dataDirectory = process.env.OMD_DATA_DIRECTORY;
 const baseURL = process.env.EDH_MODEL_BASE_URL;
 const model = process.env.EDH_MODEL;
@@ -202,9 +203,9 @@ function tool(operation, properties, required, services) {
   return (assignment) => ({
     name: `microduck__${operation}`,
     description: {
-      policy_catalog: 'List the verified official MicroDuck policies, their kind and command encoding.',
+      policy_catalog: 'List verified official and registered MicroDuck policy packages, command channels, provenance and behavior validation status.',
       scene_info: 'Read the current scene public geometry and navigation information.',
-      select_policy: 'Select an official policy at a confirmed stopped execution boundary.',
+      select_policy: 'Select a verified policy at a confirmed stopped execution boundary.',
       transition_policy: 'After a complete episodic policy reaches its native terminal boundary, explicitly select the next policy while preserving physical pose, velocity and action history. This transition does not confirm physical rest. Use a standing policy for recovery and measure the result.',
       finish_policy: 'End the current policy at a confirmed paused boundary; the native independent Verifier then checks the goal.',
       set_command: 'Set a bounded policy command at a confirmed paused boundary. Each command runs for 5–100 actual control steps. After proximity, contact, or stall, read fresh ToF and change twist before renewed motion; zero twist remains available for stopping.',
@@ -213,8 +214,8 @@ function tool(operation, properties, required, services) {
       task_progress: 'Read current physical position, velocity, contact evidence, bounded-command status, and native motion-pause reason.',
       observe: 'Read head RGB, ToF, IMU, all joints, odometry, metric progress, motion guard, current boundary and remaining native budget in one confirmed paused sample. Optional prompt and source must be provided together to include frame-bound perception. This reads fresh ToF for guarded recovery. Reuse this result for the current boundary.',
       wait_for_motion: 'Wait up to 90 seconds for the currently admitted native policy motion to reach a confirmed paused or ended boundary, then return measured progress and remaining budget. Call after execution.start or execution.resume; inspect the result before preparing another action. This does not issue actions or confirm physical rest.',
-      walk: 'Prepare the official locomotion policy (alpha_walking for standard feet, roller for the roller model) to move a signed distance in meters along the current heading. Positive moves forward; negative moves backward. Requires a confirmed paused execution and five measured stopped samples. Call execution.resume afterward. Native odometry controls completion and braking; read task_progress.metric_motion after the pause.' + metricRecovery,
-      rotate: 'Prepare the official locomotion policy (alpha_walking for standard feet, roller for the roller model) to turn by a signed angle in degrees. This maneuver includes translation; the measured translation_xy_m is reported. Positive is counterclockwise around world +Z; negative is clockwise. Requires a confirmed paused execution and five measured stopped samples. Call execution.resume afterward. Accumulated measured yaw controls completion and braking; read task_progress.metric_motion after the pause.' + metricRecovery,
+      walk: 'Prepare the configured locomotion policy to move a signed distance in meters along the current heading. Defaults are alpha_walking for standard feet and roller for the roller model; a policy registry can explicitly select another perpetual twist policy. Positive moves forward; negative moves backward. Requires a confirmed paused execution and five measured stopped samples. Call execution.resume afterward. Native odometry controls completion and braking; read task_progress.metric_motion after the pause.' + metricRecovery,
+      rotate: 'Prepare the configured locomotion policy to turn by a signed angle in degrees. Defaults are alpha_walking for standard feet and roller for the roller model; a policy registry can explicitly select another perpetual twist policy. This maneuver includes translation; the measured translation_xy_m is reported. Positive is counterclockwise around world +Z; negative is clockwise. Requires a confirmed paused execution and five measured stopped samples. Call execution.resume afterward. Accumulated measured yaw controls completion and braking; read task_progress.metric_motion after the pause.' + metricRecovery,
     }[operation],
     parameters: { type: 'object', properties, required, additionalProperties: false },
     output: {
@@ -355,6 +356,7 @@ const server = await startServer({
               backend: sceneConfiguration?.backend ?? 'cpu-mujoco-bam',
               native_task_id: nativeTaskId,
               catalog_dir: catalogDir,
+              ...(policyRegistry ? { policy_registry: policyRegistry } : {}),
               seed: Number(process.env.OMD_SCENE_SEED ?? 20260929),
               goal,
               spawn_pose: sceneConfiguration?.spawn_pose ?? { x_m: 0, y_m: 0, yaw_rad: 0 },

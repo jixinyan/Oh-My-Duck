@@ -5,11 +5,11 @@ from pathlib import Path
 
 import numpy as np
 
-from oh_my_duck.robotics.microduck.official_policies import OfficialPolicyCatalogue
+from oh_my_duck.robotics.policies.catalogue import PolicyCatalogue
 
 
-def verify(directory: Path, catalog: Path) -> dict:
-    catalogue = OfficialPolicyCatalogue(catalog)
+def verify(directory: Path, catalog: Path, registry: Path | None = None) -> dict:
+    catalogue = PolicyCatalogue(catalog, registry)
     samples_path = directory / "samples.json"
     events_path = directory / "events.json"
     samples = json.loads(samples_path.read_text())
@@ -27,7 +27,7 @@ def verify(directory: Path, catalog: Path) -> dict:
             raise AssertionError("Policy evidence differs from its admitted physical control")
         policy = catalogue.policies[inference["policy"]]
         if policy.sha256 != inference["policy_sha256"]:
-            raise AssertionError("Policy evidence differs from the pinned official ONNX")
+            raise AssertionError("Policy evidence differs from the verified ONNX")
         observation = np.asarray(inference["observation"], dtype=np.float32)
         action = np.asarray(inference["action"], dtype=np.float32)
         command = np.asarray(inference["command_block"], dtype=np.float32)
@@ -66,6 +66,7 @@ def verify(directory: Path, catalog: Path) -> dict:
     if sequences != list(range(1, sequences[-1] + 1)):
         raise AssertionError("Policy evidence omits a physical control sequence")
     return {"passed": True, "scope": "Recorded actual policy inputs, ONNX parity and native control publication",
+            "catalogue_revision": catalogue.revision,
             "control_steps": len(inputs), "serialized_updates": serialized, "policies": sorted(policies),
             "maximum_action_error": maximum_error,
             "input_sha256": {"samples.json": hashlib.sha256(samples_path.read_bytes()).hexdigest(),
@@ -77,9 +78,10 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--directory", type=Path, required=True)
     parser.add_argument("--catalog", type=Path, required=True)
+    parser.add_argument("--policy-registry", type=Path)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
-    result = verify(args.directory.resolve(strict=True), args.catalog.resolve(strict=True))
+    result = verify(args.directory.resolve(strict=True), args.catalog.resolve(strict=True), args.policy_registry)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     with args.output.open("x") as output:
         output.write(json.dumps(result, indent=2) + "\n")

@@ -8,10 +8,7 @@ from pathlib import Path
 
 import numpy as np
 
-from oh_my_duck.rl.artifacts.inference import cpu_session
-from oh_my_duck.rl.artifacts.publish.manifest import check_onnx
-from oh_my_duck.rl.backends.isaac_newton.contracts import OBSERVATION_NAMES
-from oh_my_duck.robotics.microduck.protocol import HOME, JOINT_NAMES
+from oh_my_duck.robotics.policies.joint_onnx import load_joint_session
 
 
 OFFICIAL_REPO = "pollen-robotics/microduck-policies"
@@ -74,6 +71,7 @@ class OfficialPolicy:
     unwind_s: float | None
     command: dict
     session: object
+    command_channels: tuple[str, ...] | None = None
 
 
 class OfficialPolicyCatalogue:
@@ -102,27 +100,7 @@ class OfficialPolicyCatalogue:
             digest = hashlib.sha256(path.read_bytes()).hexdigest()
             if digest != POLICY_SHA256[file]:
                 raise ValueError(f"Official policy SHA-256 differs: {file}")
-            shape = check_onnx(path)
-            if shape.recurrent or shape.obs_len != 61 or shape.action_len != 14:
-                raise ValueError(f"Official API-1 policy shape differs: {file}")
-            session = cpu_session(path)
-            if len(session.get_inputs()) != 1 or len(session.get_outputs()) != 1:
-                raise ValueError(f"Official policy tensor count differs: {file}")
-            if session.get_inputs()[0].type != "tensor(float)" or session.get_outputs()[0].type != "tensor(float)":
-                raise ValueError(f"Official policy tensor type differs: {file}")
-            metadata = session.get_modelmeta().custom_metadata_map
-            if tuple(metadata.get("joint_names", "").split(",")) != JOINT_NAMES:
-                raise ValueError(f"Official policy joint order differs: {file}")
-            if tuple(metadata.get("observation_names", "").split(",")) != OBSERVATION_NAMES:
-                raise ValueError(f"Official policy observation order differs: {file}")
-            home = np.asarray([float(value) for value in metadata.get("default_joint_pos", "").split(",")])
-            if home.shape != (14,) or not np.allclose(home, HOME, atol=5e-4, rtol=0):
-                raise ValueError(f"Official policy HOME differs: {file}")
-            if float(metadata.get("action_scale", "nan")) != 1.0:
-                raise ValueError(f"Official policy graph action scale differs: {file}")
-            value = session.run(None, {session.get_inputs()[0].name: np.zeros((1, 61), dtype=np.float32)})[0]
-            if value.shape != (1, 14) or value.dtype != np.float32 or not np.isfinite(value).all():
-                raise ValueError(f"Official policy CPU inference failed: {file}")
+            session = load_joint_session(path)
             name = item.get("name", Path(file).stem)
             if name in self.policies:
                 raise ValueError(f"Duplicate official policy name: {name}")
@@ -177,13 +155,14 @@ class OfficialPolicyCatalogue:
                                     else "standard_14_joint_microduck",
              "executable_here": policy.mode != "roller",
              "apartment_behavior_status": APARTMENT_BEHAVIOR_STATUS[policy.name]}
-            for policy in self.policies.values()
+            for policy in self.policies.values() if policy.command_channels is None
         ]
 
     @staticmethod
     def validate_command(policy: OfficialPolicy, *, velocity: tuple[float, float, float],
                          posture: str, head: tuple[float, ...], body: tuple[float, ...]) -> None:
-        channels = POLICY_COMMAND_CHANNELS[policy.name]
+        channels = (POLICY_COMMAND_CHANNELS[policy.name] if policy.command_channels is None
+                    else policy.command_channels)
         if "twist" not in channels and any(value != 0 for value in velocity):
             raise ValueError(f"{policy.name} does not accept a velocity command")
         if "head" not in channels and any(value != 0 for value in head):
@@ -208,9 +187,10 @@ class OfficialPolicyCatalogue:
             if posture not in {"sit", "stand"}:
                 raise ValueError("Posture must be sit or stand")
             command[0] = float(policy.command[posture])
-        elif policy.kind == "perpetual" and policy.name in {"alpha_walking", "velstand", "roller"}:
-            command[:3] = velocity
-        channels = POLICY_COMMAND_CHANNELS[policy.name]
+        channels = (POLICY_COMMAND_CHANNELS[policy.name] if policy.command_channels is None
+                    else policy.command_channels)
+        if policy.encoding == "constant":
+            command[:3] = velocity if "twist" in channels else policy.command.get("idle", (0.0,) * 3)
         if "head" in channels:
             command[3:7] = head
         if "body" in channels:

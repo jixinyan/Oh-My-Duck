@@ -7,6 +7,8 @@
 | Run declared metric cases | `omd validate metric` | `metric/campaign.py`, `metric/case.py` |
 | Audit saved physical measurements | `omd validate metric-audit` | `metric/verify.py` |
 | Recompute saved official policy actions | `omd validate policy-audit` | `metric/policy.py` |
+| Check registered training packages | `omd validate policy-registry` | `harness/registry.py` |
+| Execute registered perpetual and episodic policies | `omd validate policy-packages` | `harness/package_execution.py` |
 | Exercise physical motion boundaries | `omd validate motion-guard` | `harness/motion_guard.py`, `harness/control.py` |
 | Measure official CPU head/body pose commands | `omd validate pose` | `harness/pose.py` |
 | Audit pose commands and native physical responses | `omd validate pose-audit` | `harness/pose_records.py` |

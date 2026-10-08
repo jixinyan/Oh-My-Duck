@@ -24,7 +24,7 @@ from oh_my_duck.robotics.backends.simulation import (
     CpuMujocoBamBackend, MotionBusyError, SimulationBackend, _utc_now,
 )
 from oh_my_duck.robotics.microduck.protocol import HOME, JOINT_NAMES
-from oh_my_duck.robotics.microduck.official_policies import OfficialPolicyCatalogue
+from oh_my_duck.robotics.policies.catalogue import PolicyCatalogue
 from oh_my_duck.robotics.microduck.sim_sensors import camera_optical_pose, tof_directions
 from oh_my_duck.perception.rgbd import measure_target
 from oh_my_duck.core.paths import project_root
@@ -44,7 +44,8 @@ class IsaacNewtonBamBackend(CpuMujocoBamBackend):
                  device: str, floor_height_m: float = 0.0,
                  scene_id: str = "isaac_external", robot_model: str = "allcollisions",
                  provenance_path: Path | None = None, public_map_path: Path | None = None,
-                 observer_renderer: str = "newton_warp", startup: RuntimeStartup | None = None):
+                 observer_renderer: str = "newton_warp", startup: RuntimeStartup | None = None,
+                 policy_registry: Path | None = None):
         self._startup = RuntimeStartup(scene_id, robot_model) if startup is None else startup
         verify_usd_runtime()
         from isaaclab.assets import AssetBaseCfg
@@ -80,7 +81,7 @@ class IsaacNewtonBamBackend(CpuMujocoBamBackend):
         SimulationBackend.__init__(self, robot_id=robot_id, backend="isaac-newton",
                                    policy_path=None, task_id=scene_id)
         self._np, self._mujoco = np, mujoco
-        self.catalog = OfficialPolicyCatalogue(catalog_dir)
+        self.catalog = PolicyCatalogue(catalog_dir, policy_registry)
         self.active_policy = self.catalog.get("roller" if robot_model == "groundcontact_rollers" else "velstand")
         self.policy_sha256 = self.active_policy.sha256
         self._scene_path = scene_path.resolve(strict=True)
@@ -584,8 +585,9 @@ class IsaacNewtonBamBackend(CpuMujocoBamBackend):
         result["scene"] = self.scene_id
         result["robot_model"] = self.robot_model
         for policy in result["policies"]:
-            policy["executable_here"] = (policy["required_robot_mode"] != "groundcontact_rollers"
-                                          or self.robot_model == "groundcontact_rollers")
+            policy["executable_here"] = (policy["required_robot_mode"] == self.robot_model
+                if policy.get("source") == "registered_schema2_package" else
+                policy["required_robot_mode"] != "groundcontact_rollers" or self.robot_model == "groundcontact_rollers")
             policy["current_scene_behavior_status"] = "requires_actual_scene_validation"
         return result
 

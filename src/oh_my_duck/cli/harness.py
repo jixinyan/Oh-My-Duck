@@ -39,15 +39,26 @@ def main() -> int:
     parser.add_argument("--worker-python", type=str)
     parser.add_argument("--worker-edh-source", type=str)
     parser.add_argument("--worker-policy-dir", type=str)
+    parser.add_argument("--worker-policy-registry", type=str)
     parser.add_argument("--worker-cuda-device", type=int)
     parser.add_argument("--scene-config", type=Path)
     parser.add_argument("--policy-dir", type=Path,
                         default=root / ".cache/official-policies" / POLICY_REVISION)
+    parser.add_argument("--policy-registry", type=Path,
+                        help="Registered schema-2 policy packages on the local simulation host")
     parser.add_argument("--data-dir", type=Path,
                         default=root / ".cache/harness-data")
     parser.add_argument("--port", type=int, default=4318)
     parser.add_argument("--seed", type=int, default=20260929)
     args = parser.parse_args()
+    if args.policy_registry is not None and args.worker_policy_registry is not None:
+        raise ValueError("Choose a local or remote policy registry")
+    if args.policy_registry is not None and args.worker_host is not None:
+        raise ValueError("Remote simulation requires --worker-policy-registry")
+    if args.worker_policy_registry is not None:
+        registry_path = PurePosixPath(args.worker_policy_registry)
+        if args.worker_host is None or not registry_path.is_absolute() or ".." in registry_path.parts:
+            raise ValueError("Remote registry requires --worker-host and an absolute path without parent components")
     edh_source = args.edh_source.resolve(strict=True)
     revision = subprocess.run(
         ["git", "-C", str(edh_source), "rev-parse", "HEAD"],
@@ -182,6 +193,12 @@ def main() -> int:
         "TSX_TSCONFIG_PATH": str(edh_source / "tsconfig.runtime.json"),
         "TMPDIR": str(temp_dir),
     })
+    registry = (str(args.policy_registry.resolve(strict=True)) if args.policy_registry is not None
+                else args.worker_policy_registry)
+    if registry is None:
+        environment.pop("OMD_POLICY_REGISTRY", None)
+    else:
+        environment["OMD_POLICY_REGISTRY"] = registry
     if remote_worker is None:
         environment.pop("OMD_REMOTE_WORKER", None)
     else:

@@ -8,6 +8,8 @@ COMMANDS = {
     "metric-case": ("metric.case", "执行单个原生物理会话的运动序列"),
     "metric-audit": ("metric.verify", "复核运动样本、停止状态、相机与源码来源"),
     "policy-audit": ("metric.policy", "使用官方 ONNX 重新计算记录中的 policy action"),
+    "policy-registry": ("harness.registry", "核验登记的 policy 包、来源、命令通道与 CPU 推断"),
+    "policy-packages": ("harness.package_execution", "执行登记的长期及限定时长 policy 并检查原生控制"),
     "motion-guard": ("harness.motion_guard", "检查真实运动暂停、恢复与终止"),
     "pose": ("harness.pose", "执行官方 CPU 头部与身体姿态命令验证"),
     "pose-audit": ("harness.pose_records", "复核姿态命令、物理响应、相机与原生动作记录"),

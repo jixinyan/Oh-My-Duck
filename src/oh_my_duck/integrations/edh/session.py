@@ -291,8 +291,8 @@ class MicroDuckWorkerSession(NativeWorkerSession):
                         motion = MetricMotion(operation, args, measured,
                             robot_model=getattr(backend, "robot_model", "allcollisions"))
                         motion.request_id = request["request_id"]
-                        locomotion = ("roller" if getattr(backend, "robot_model", "allcollisions") == "groundcontact_rollers"
-                                      else "alpha_walking")
+                        locomotion = backend.catalog.locomotion_policy(
+                            getattr(backend, "robot_model", "allcollisions"))
                         selected = ({"policy_name": locomotion} if backend.active_policy.name == locomotion
                                     else backend.select_policy(locomotion, request["request_id"] + ":policy"))
                         command = backend.set_command(motion.command(measured), request["request_id"])

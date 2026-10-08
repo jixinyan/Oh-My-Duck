@@ -37,6 +37,7 @@ Application, robot, training, shared acceptance and replay modules live in `src/
 | Shared types and configuration | `core/` | `core/paths.py` |
 | Online robot execution | `robotics/backends/` | `simulation.py`, `isaac_official.py` |
 | Official robot assets and policies | `robotics/microduck/` | `official_policies.py` |
+| Native joint graph and training-package catalogue | `robotics/policies/` | `joint_onnx.py`, `catalogue.py` |
 | Task families | `rl/tasks/<family>/` | `environment.py`, `ppo.py` |
 | Shared task variants | `rl/tasks/shared/` | Symmetry and terrain definitions |
 | MDP and actor/critic | `rl/mdp/`, `rl/models/` | Observations, rewards, commands and curricula |
@@ -53,6 +54,7 @@ Application, robot, training, shared acceptance and replay modules live in `src/
 | Experience and replay export | `experience/` | `harness_replay.py` |
 | Measured policy acceptance | `validation/metric/` | `plans.py`, `case.py`, `campaign.py`, `verify.py`, `policy.py` |
 | Native task, pose and navigation acceptance | `validation/harness/` | `control.py`, `motion_guard.py`, `pose.py`, `pose_records.py`, `replay.py`, `navigation.py` |
+| Registered policy package admission and execution | `validation/harness/` | `registry.py`, `package_execution.py` |
 | Release preparation and package checks | `validation/release/` | `plans.py`, `worker.py`, `campaign.py`, `package.py` |
 | CPU Newton asset audit | `validation/release/` | `assets.py` / `omd validate model-assets` |
 | Setup and process ownership | `infrastructure/` | `bootstrap_isaac.py`, `usd_runtime.py`, `owned_process.py`, `acceptance_supervisor.py` |

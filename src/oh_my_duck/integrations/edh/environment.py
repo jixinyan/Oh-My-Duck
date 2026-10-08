@@ -94,9 +94,12 @@ class MicroDuckEnvironment:
         if self.backend is not None:
             raise RuntimeError("MicroDuck scene has already been initialized")
         catalog = Path(str(configuration["catalog_dir"])).resolve(strict=True)
+        registry = (Path(str(configuration["policy_registry"])).resolve(strict=True)
+                    if configuration.get("policy_registry") is not None else None)
         backend_name = configuration.get("backend", "cpu-mujoco-bam")
         if backend_name == "cpu-mujoco-bam":
-            self.backend = CpuMujocoBamBackend(robot_id="microduck", catalog_dir=catalog)
+            self.backend = CpuMujocoBamBackend(robot_id="microduck", catalog_dir=catalog,
+                                             policy_registry=registry)
         elif backend_name == "isaac-newton":
             from oh_my_duck.robotics.runtime_startup import RuntimeStartup
 
@@ -105,7 +108,7 @@ class MicroDuckEnvironment:
             from oh_my_duck.robotics.backends.isaac_official import IsaacNewtonBamBackend
 
             self.backend = IsaacNewtonBamBackend(
-                robot_id="microduck", catalog_dir=catalog,
+                robot_id="microduck", catalog_dir=catalog, policy_registry=registry,
                 scene_path=Path(str(configuration["usd_path"])).resolve(strict=True),
                 device=str(configuration.get("device", "cuda:0")),
                 scene_id=str(configuration["scene_id"]),
@@ -156,7 +159,7 @@ class MicroDuckEnvironment:
                             **({"dimensions_m": [8, 6]} if backend_name == "cpu-mujoco-bam" else
                                {"usd_path": configuration["usd_path"],
                                 "provenance_path": configuration["provenance_path"]}),
-                            "policy_revision": str(configuration["policy_revision"]),
+                            "policy_revision": self.backend.catalog.revision,
                             "seed": configuration["seed"], "spawn_pose": configuration.get("spawn_pose")},
         )
         return self._observation(state)

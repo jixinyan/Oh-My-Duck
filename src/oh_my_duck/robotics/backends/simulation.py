@@ -259,13 +259,16 @@ class SimulationBackend:
 
 class CpuMujocoBamBackend(SimulationBackend):
     def __init__(self, *, robot_id: str, policy_path: Path | None = None,
-                 task_id: str = "Mjlab-Velocity-Flat-MicroDuck", catalog_dir: Path | None = None):
+                 task_id: str = "Mjlab-Velocity-Flat-MicroDuck", catalog_dir: Path | None = None,
+                 policy_registry: Path | None = None):
         import mujoco
         import numpy as np
         from oh_my_duck.rl.evaluation.rehearsal import infer_policy as ip
 
         if (policy_path is None) == (catalog_dir is None):
             raise ValueError("Specify exactly one of policy_path or catalog_dir")
+        if policy_registry is not None and catalog_dir is None:
+            raise ValueError("A registered policy requires catalog_dir")
         super().__init__(robot_id=robot_id, backend="cpu-mujoco-bam", policy_path=policy_path, task_id=task_id)
         if catalog_dir is None:
             from oh_my_duck.rl.tasks.recipes import build_environment
@@ -279,9 +282,9 @@ class CpuMujocoBamBackend(SimulationBackend):
         self._np = np
         self.catalog = None
         if catalog_dir is not None:
-            from oh_my_duck.robotics.microduck.official_policies import OfficialPolicyCatalogue
+            from oh_my_duck.robotics.policies.catalogue import PolicyCatalogue
 
-            self.catalog = OfficialPolicyCatalogue(catalog_dir)
+            self.catalog = PolicyCatalogue(catalog_dir, policy_registry)
             self.active_policy = self.catalog.get("velstand")
             self.policy_sha256 = self.active_policy.sha256
             scene = Path(ip.MICRODUCK_XML).with_name("scene_apartment.xml")
@@ -359,9 +362,7 @@ class CpuMujocoBamBackend(SimulationBackend):
 
     def list_policies(self) -> dict:
         self._require_owner()
-        from oh_my_duck.robotics.microduck.official_policies import OFFICIAL_REVISION
-
-        return {"revision": OFFICIAL_REVISION, "scene": "scene_apartment.xml",
+        return {"revision": self.catalog.revision, "scene": "scene_apartment.xml",
                 "policies": self.catalog.describe_apartment()}
 
     def public_scene_info(self) -> dict:
@@ -944,6 +945,9 @@ class CpuMujocoBamBackend(SimulationBackend):
         selected = self.catalog.get(policy_name)
         if selected.mode == "roller" and getattr(self, "robot_model", "allcollisions") != "groundcontact_rollers":
             raise ValueError("Roller policy requires a roller robot model; current model is allcollisions")
+        if (selected.command_channels is not None and selected.mode != "roller"
+                and getattr(self, "robot_model", "allcollisions") != "allcollisions"):
+            raise ValueError("Registered standard-foot policy requires the allcollisions robot model")
         self.active_policy = selected
         self.policy_sha256 = selected.sha256
         self._selected_at_s = float(self.data.time)

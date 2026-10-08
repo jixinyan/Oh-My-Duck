@@ -3,6 +3,7 @@
 /.venv/
 /.cache
 /data/scenes/
+/checkpoints/
 /artifacts
 /outputs
 /logs
