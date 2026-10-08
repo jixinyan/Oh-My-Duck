@@ -15,4 +15,12 @@ Hospital 后退记录的修正运动从约 sequence 237 持续到 332。sequence
 
 固定源码 `caac1c9` 的 CPU 连续动作检查及独立复核通过，输出为 `outputs/acceptance/offline-sequence-20261007-01`。五次操作为 +1.0 米、−78°、−0.5 米、+78°、−0.5 米，最终误差依次为 0.021102 米、4.496450°、0.035872 米、4.712026°、0.040380 米。1208 个控制步与 4832 个物理子步，停止、来源、相机、重复观测和资源释放检查通过。
 
+固定源码 `caac1c9` 的 CPU 三组五动作矩阵及独立复核通过，输出为 `outputs/acceptance/offline-matrix-20261007-01`。最大距离误差为 0.035112 米，最大旋转误差为 3.777766°。全部所属进程正常退出、原生会话释放资源。实际 backend 检查覆盖 151 个控制步、站立保持、部分物理子步执行、重放拒绝和丢弃操作，结果保存为 `outputs/acceptance/offline-backend-contract-20261007-01.json`。
+
+十个固定官方 ONNX model 均通过来源 SHA256、ONNX checker、61→14 维度和 CPU 有限输出检查，结果为 `outputs/acceptance/offline-official-policies-20261007-01.json`。Graph 检查不提供对应技能的运动效果结论。十项固定音色资料检查通过，使用实际参考 WAV、SoundFile 与 SQLite，覆盖确认、修改、并发和文件完整性。实际 BAM/ToF 检查四项通过，包含两个附加检查。
+
 发布参数检查共 16 项通过，使用正式六阶段计划和实际场景配置，覆盖重复阶段编号、非有限数值、来源路径、模型、设备、renderer、出生位置和预算类型。`doctor --metadata-only` 与 `run_release_campaign.py --preflight-only` 提供无需 CUDA 的远程检查入口，检查记录与行为验收分别保存。
+
+固定源码 `793883738699ff5733ecf9f42f6df663ad6827d1` 的远程准备检查通过，完整记录为 `outputs/acceptance/offline-preflight-20261007-02`。六个阶段使用四份场景配置、九个来源文件；Office 的 2291 个资源文件及 Hospital 的 1639 个资源文件全部通过大小和 SHA256 检查，场景 USD、公用地图、标准脚和轮滑机器人资源身份通过核验。每份配置的十个官方 policy 均通过检查。远程部署的 29 个原生 Harness Python/schema 文件与固定 Git 内容一致；本地 Node 入口和固定来源同时核验。Provider 配置使用 `gpt-6-astra` 与 Responses API，记录仅保存模型和 API 类型。
+
+准备结果为 `preflight_passed`，`cuda_runtime_checked=false`、`gpu_acceptance_performed=false`。GPU 动作矩阵、Newton 连续导航、识别准确率、物体效果、训练 policy 行为与真机验收仍需相应环境的实际运行证据。

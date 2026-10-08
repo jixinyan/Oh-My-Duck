@@ -6,10 +6,19 @@
   "release_readiness": {
     "state": "acceptance_in_progress",
     "offline_release_validation": {
-      "state": "actual_cpu_campaign_cancellation_verified",
+      "state": "actual_cpu_motion_and_remote_metadata_verified",
       "control_eof": "outputs/acceptance/campaign-cancel-eof-20261007-01/acceptance.json",
       "sigterm": "outputs/acceptance/campaign-cancel-sigterm-20261007-01/acceptance.json",
       "resources_released": true,
+      "cpu_matrix": "outputs/acceptance/offline-matrix-20261007-01/independent-audit.json",
+      "cpu_continuous_sequence": "outputs/acceptance/offline-sequence-20261007-01/independent-audit.json",
+      "backend_behavior": "outputs/acceptance/offline-backend-contract-20261007-01.json",
+      "official_policy_graphs": "outputs/acceptance/offline-official-policies-20261007-01.json",
+      "remote_preflight": "outputs/acceptance/offline-preflight-20261007-02/preflight/result.json",
+      "remote_preflight_source": "793883738699ff5733ecf9f42f6df663ad6827d1",
+      "voice_profile_tests_passed": 10,
+      "release_plan_tests_passed": 16,
+      "cuda_runtime_checked": false,
       "gpu_execution": "stopped",
       "report": "docs/reports/offline-release-validation-2026-10-07.md"
     },

@@ -12,7 +12,7 @@ tags:
   - project-design
 ---
 
-> 无 GPU 开发包括验收进程所有权、SSH 连接中断处理和原生会话清理。控制连接关闭和 SIGTERM 已经通过实际 CPU policy 检查，取消结果、原始样本、资源释放与退出编号全部保存。GPU 验收及 RL 训练保持停止，见[检查记录](reports/offline-release-validation-2026-10-07.md)。
+> 无 GPU 检查覆盖实际 CPU metric motion、连续动作、原生 backend、官方 ONNX graph、固定音色资料及所属进程清理。远程发布准备检查根据固定 Git 内容核验部署的 Harness 源文件，并检查全部场景资源、机器人转换资源和官方 policy；元数据模式不初始化 CUDA。GPU 验收及 RL 训练保持停止，见[检查记录](reports/offline-release-validation-2026-10-07.md)。
 
 > 统一观测与原生等待接口通过固定源码的 CPU 连续动作及 Newton Office 五动作矩阵，安装包、既有导航和语音回放、实际 MP4 生成检查通过。GPU 验收已按用户要求停止，全部本次进程退出，Hospital 后退停滞与其他阶段仍需验证。后续设备要求没有任何 compute PID，不与 haomin 或其他用户共用 GPU，见[验收证据](reports/runtime-observation-acceptance-2026-10-07.md)。
 

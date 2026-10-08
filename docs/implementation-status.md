@@ -1,6 +1,6 @@
 # Implementation status
 
-> 2026-10-07：验收进程清理通过两次实际 CPU policy 检查，覆盖控制连接关闭和 SIGTERM，每次执行 85 个控制步，原生会话关闭、资源释放，所属进程退出且取消结果完整保留。远程 supervisor、metric campaign 和导航入口使用明确的进程所有权管理。GPU 验收及 RL 训练保持停止，见[检查记录](reports/offline-release-validation-2026-10-07.md)。
+> 2026-10-07：无 GPU 检查通过实际 CPU 五动作矩阵、五动作连续序列、独立复核、原生 backend 行为、十个官方 ONNX graph、十项固定音色资料检查和两种实际运动取消。远程发布准备检查通过六个阶段、四份场景配置、29 个固定 Harness 源文件和全部 Office/Hospital 资源文件的 SHA256 检查，没有初始化 CUDA。GPU 验收及 RL 训练保持停止，见[检查记录](reports/offline-release-validation-2026-10-07.md)。
 
 > 2026-10-07：统一观测与原生等待接口通过固定源码的 CPU 连续动作及 Newton Office 五动作矩阵，最大 Office 距离误差为 0.022404 米，最大角度误差为 3.239445°；原始记录通过独立复核。Hospital 第一组通过，后退动作停滞且误差 0.052917 米。GPU 验收已按用户要求停止，本地控制进程及远程 worker 全部退出，剩余阶段尚待验收。后续分配要求设备没有 compute PID，不能与 haomin 或其他用户共用 GPU。见[证据记录](reports/runtime-observation-acceptance-2026-10-07.md)。
 

@@ -4,7 +4,7 @@
 
 # Oh My Duck 🦆
 
-Acceptance process cancellation is verified with actual CPU policy motion: both control-channel closure and SIGTERM close the native session and preserve process exit evidence. Remote campaign supervision and reproduction are described in the [runtime acceptance guide](docs/runtime-release-acceptance.md). GPU acceptance and RL remain stopped.
+Actual CPU policy checks cover metric motion, continuous navigation commands, native backend behavior and cancellation cleanup. Remote preflight verifies all release scenes, official policy hashes and the pinned Harness sources without initializing CUDA. Results and reproduction are in the [offline validation report](docs/reports/offline-release-validation-2026-10-07.md) and [runtime acceptance guide](docs/runtime-release-acceptance.md). GPU acceptance and RL remain stopped.
 
 [![Status: active development](https://img.shields.io/badge/status-active_development-blue)](docs/implementation-status.md)
 [![RL behavior: pending](https://img.shields.io/badge/RL_behavior-pending-orange)](docs/reports/rl-walking-low-speed-launch-2026-09-29.md)
