@@ -14,6 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
     "oh_my_duck.cli.validation",
     "oh_my_duck.validation.release.plans",
     "oh_my_duck.validation.harness.control",
+    "oh_my_duck.validation.harness.metric_admission",
     "oh_my_duck.validation.harness.pose",
     "oh_my_duck.validation.harness.pose_records",
     "oh_my_duck.validation.harness.registry",
