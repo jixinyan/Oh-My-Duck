@@ -69,7 +69,7 @@ export function identifyModelClient(undici, baseURL, createParser, auditPath) {
     }
   }
   const previous = undici.getGlobalDispatcher();
-  const dispatcher = new undici.Agent().compose((dispatch) => (options, handler) => {
+  const dispatcher = new undici.EnvHttpProxyAgent().compose((dispatch) => (options, handler) => {
     if (new URL(options.origin).origin !== origin) return dispatch(options, handler);
     const headers = Array.isArray(options.headers)
       ? undici.util.parseHeaders(options.headers) : { ...options.headers };
