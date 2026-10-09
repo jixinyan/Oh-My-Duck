@@ -1,5 +1,13 @@
 # Release readiness
 
+Voice modules have explicit audio, profile, model, HTTP, device and session
+responsibilities. Current-source checks passed 24 unchanged definitions, 36
+WAV/SQLite/device-admission tests, three actual Qwen CPU models, four decoded WAV
+files and four matching ASR texts. Confirmed profile and database bytes remained
+unchanged; all five processes exited. Independent installation passed 434 files,
+three licenses and 26 CLI checks. See
+[voice source validation](reports/voice-audio-modules-2026-10-08.md).
+
 Recorded speech completed the CPU office task through Qwen ASR, OpenAI
 `gpt-6-luna` high, the pinned native Harness, official policies and the independent
 Verifier. Confirmed-voice feedback, 666 controls, 2664 physical substeps,

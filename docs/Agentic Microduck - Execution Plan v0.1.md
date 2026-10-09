@@ -10,6 +10,8 @@ tags:
   - sim-to-real
 ---
 
+> 语音源码按共享音频、音色资料、模型、HTTP、设备和会话组织，24 个函数和类保持原有计算。当前源码三个 Qwen 模型的 CPU 推理、四段音频及全部 ASR 回读、36 项音色与参数测试、434 个独立安装文件和 26 个调用通过；已确认音色与数据库内容保持一致，五个进程正常退出，见[语音源码验证](reports/voice-audio-modules-2026-10-08.md)。GPU 与 RL 保持停止。
+
 > CPU 录音导航完成 Qwen ASR、OpenAI `gpt-6-luna` high、原生 Harness、官方 policy、正式 Verifier 与固定音色反馈的实际执行。666 个控制步、2664 个物理子步、1323 个事件和 141 张原始图片通过独立核验，会话与五个进程全部关闭。174.54 秒的 1080p agentic MP4 通过完整解码与文字范围检查，见[语音导航验证](reports/cpu-voice-navigation-2026-10-08.md)。GPU 与 RL 保持停止。
 
 > 原生 CPU Luna 办公室导航完成正式验收：569 个控制步、2276 个子步、1040 个事件、113 个观察相机帧、12 次停止进度检查及完整 MP4 解码通过。会话与所属进程全部关闭，见[导航验证](reports/cpu-luna-navigation-2026-10-08.md)。GPU 与 RL 保持停止。

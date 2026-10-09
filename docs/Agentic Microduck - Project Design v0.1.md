@@ -12,6 +12,8 @@ tags:
   - project-design
 ---
 
+> 语音职责由 `voice/audio.py`、`profiles.py`、`qwen.py`、HTTP、设备与会话模块分别维护。24 个函数和类保持原有计算，三个 Qwen 模型完成当前源码的 CPU 推理，四段音频及全部 ASR 回读通过。36 项音色与参数测试、434 个独立安装文件及 26 个调用通过；固定音色、数据库内容和进程退出通过独立核验，见[语音源码验证](reports/voice-audio-modules-2026-10-08.md)。GPU 与 RL 保持停止。
+
 > CPU 录音导航连接 Qwen ASR、OpenAI `gpt-6-luna` high、原生 Harness、官方 policy、正式 Verifier 与已确认音色反馈。666 个控制步、2664 个物理子步、1323 个事件、141 张原始图片及五个进程正常结束通过独立核验，音色资料保持一致。174.54 秒的 1080p agentic MP4 通过完整解码与文字范围检查，见[语音导航验证](reports/cpu-voice-navigation-2026-10-08.md)。GPU 与 RL 保持停止。
 
 > OpenAI Luna 完成原生 CPU 公寓办公室任务，正式 Verifier 通过；569 个控制步、2276 个子步、1040 个事件、113 个观察相机帧与 12 次停止进度检查通过。1920×1080 MP4 完成完整解码，资源已关闭，见[导航验证](reports/cpu-luna-navigation-2026-10-08.md)。GPU 与 RL 保持停止。

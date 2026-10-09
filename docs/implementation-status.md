@@ -1,5 +1,7 @@
 # Implementation status
 
+> 语音模块按 WAV、音色资料、模型、HTTP 和音频设备组织，共享文件操作位于 `voice/audio.py`。24 个原有函数和类的计算内容保持一致；10 项音色资料测试、26 项模型参数测试、三个 Qwen 模型的实际 CPU 推理、四段 WAV 解码与全部 ASR 回读、434 个独立安装文件及 26 个调用通过。已确认音色与数据库内容保持一致，五个进程正常退出，见[语音源码验证](reports/voice-audio-modules-2026-10-08.md)。GPU 与 RL 保持停止。
+
 > CPU 录音导航完成实际 Qwen ASR、OpenAI `gpt-6-luna` high、原生 Harness、官方 policy 和固定音色反馈；正式 Verifier 为 passed。666 个控制步、2664 个物理子步、1323 个事件和 141 张原始图片通过独立核验，五个进程正常结束，音色资料保持一致。174.54 秒的 1080p agentic MP4 完成完整解码与文字范围检查，见[语音导航验证](reports/cpu-voice-navigation-2026-10-08.md)。GPU 与 RL 保持停止。
 
 > OpenAI Luna 通过原生 Harness 完成 CPU 公寓办公室导航，正式 Verifier 为 passed。569 个控制步、2276 个子步、1040 个事件、113 个观察相机帧与 12 次停止进度检查通过；1920×1080 MP4 完成编码和完整解码，会话资源已关闭，见[导航验证](reports/cpu-luna-navigation-2026-10-08.md)。GPU 与 RL 保持停止。
@@ -250,11 +252,11 @@ is prepared but not launched. Default task recipes and native PPO algorithms rem
 | Component | Current state |
 |---|---|
 | Source organization | First-party code consolidated under `src/oh_my_duck`; obsolete `training/` packages removed |
-| CLI/application | Native services, validation/replay, scene schemas, registered packages and voice; 433 installed files, 26 CLI calls, state-preserving retries, formal CPU Luna text/recorded-voice navigation and agentic MP4 verified |
+| CLI/application | Native services, validation/replay, scene schemas, registered packages and voice; 434 installed files, 26 CLI calls, state-preserving retries, formal CPU Luna text/recorded-voice navigation and agentic MP4 verified |
 | Core contracts/tool catalog/recording | 七项仿真工具的完整 Draft 2020-12 Schema、实际 handler 与无效参数拒绝已经验证；JSONL、原生事件和 PNG 导出、SHA256 检查及 1080p agentic MP4 保留实际验证资料 |
 | Agentic Harness, skills, robot execution | 固定 EDH 原生会话、SSH GPU worker、真实模型、官方 ONNX、ActionGate 与独立 Verifier 已运行；CPU 公寓与 Newton Office 的固定场景导航、Office 四个 policy 的完整多动作任务和 Hospital 轮滑有序路线通过。三个场景各通过三个距离/角度会话；全部长距离请求精度、图像输入独立 VLN、多场景泛化与真机待验收 |
 | Perception and policy adapters | 官方十项 policy 与登记的训练包共享 61-to-14 推断及原生工具；实际 CPU Walking/StandUp 包执行、episodic 时长/接续与停止通过。Newton Office 的 velstand/alpha_walking、head RGB、observer 场景、ToF、IMU 与 odometry 已验证；学习行为、物体识别及物体效果待验收 |
-| Voice interaction | 三个固定 Qwen 模型的 CPU 推理、安装入口和固定音色检查通过，音频回读文字为 2/3 一致，见[CPU 验证](reports/qwen-cpu-validation-2026-10-08.md)。Qwen ASR、已确认音色 TTS、原生 Harness 与正式 Verifier 的 CPU 录音导航通过；固定源码 Newton 录音任务、Mac 音频设备、合成中断和两种仿真任务执行中断分别具有验证记录，会话释放资源。Microduck 音频设备待验收。见[CPU 语音导航](reports/cpu-voice-navigation-2026-10-08.md)、[Newton 记录](reports/end-to-end-2026-10-03.md)与[设备检查](reports/voice-interaction-validation-2026-09-29.md) |
+| Voice interaction | [语音源码说明](../src/oh_my_duck/voice/README.md)列出 WAV、音色、模型、HTTP、设备和会话的职责。当前源码三个固定 Qwen 模型的实际 CPU 推理、四段 WAV 与全部 ASR 回读、已确认音色和数据库保持、36 项音色与参数测试通过，见[语音源码验证](reports/voice-audio-modules-2026-10-08.md)。Qwen ASR、已确认音色 TTS、原生 Harness 与正式 Verifier 的 CPU 录音导航通过；固定源码 Newton 录音任务、Mac 音频设备、合成中断和两种仿真任务执行中断分别具有验证记录，会话释放资源。Microduck 音频设备待验收。见[CPU 语音导航](reports/cpu-voice-navigation-2026-10-08.md)、[Newton 记录](reports/end-to-end-2026-10-03.md)与[设备检查](reports/voice-interaction-validation-2026-09-29.md) |
 | MuJoCo RL | Both representative tasks × both native PPO frameworks passed the single-GPU lifecycle and completed replay |
 | Isaac/Newton RL | Both representative tasks × both native PPO frameworks passed the single-GPU lifecycle and completed replay |
 | Newton physics | Actual solver, canonical state/sensors, BAM cadence, DR and penalties audited; current CPU import/contact checks cover both robot variants and all Office/Hospital geometric colliders; current GPU runtime acceptance pending |
