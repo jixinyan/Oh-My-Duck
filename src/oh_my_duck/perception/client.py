@@ -2,7 +2,8 @@ import json
 from urllib.parse import urlsplit
 from urllib.request import Request, urlopen
 
-from oh_my_duck.perception.validation import validate_response
+from oh_my_duck.perception.frames import decode_frame, validate_prompt
+from oh_my_duck.perception.validation import validate_measurements, validate_response
 
 
 class PerceptionClient:
@@ -17,11 +18,12 @@ class PerceptionClient:
         self.endpoint = endpoint.rstrip("/")
 
     def inspect(self, frame: dict, prompt: str) -> dict:
-        if not isinstance(prompt, str) or not prompt.strip() or len(prompt) > 120:
-            raise ValueError("Prompt must contain 1–120 characters")
+        validate_prompt(prompt)
+        decoded = decode_frame(frame)
         request = Request(self.endpoint + "/inspect", data=json.dumps({"frame": frame, "prompt": prompt},
                           allow_nan=False).encode(), headers={"Content-Type": "application/json"}, method="POST")
         with urlopen(request, timeout=120) as response:
             result = json.load(response)
         validate_response(frame, prompt, result)
+        validate_measurements(frame, result, decoded=decoded)
         return result

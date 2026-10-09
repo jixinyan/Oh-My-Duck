@@ -5,6 +5,10 @@ import json
 import math
 
 from PIL import Image
+import numpy as np
+
+from oh_my_duck.perception.frames import RGBDFrame, bbox_mask, decode_frame, decode_mask
+from oh_my_duck.perception.rgbd import measure_target
 
 
 def finite_numbers(values) -> bool:
@@ -54,7 +58,8 @@ def validate_response(frame: dict, prompt: str, result: dict) -> None:
             raise ValueError("Perception valid depth count is invalid")
         status = target["distance_status"]
         if status == "insufficient_valid_depth":
-            if count >= 8 or any(key in target for key in ("distance_m", "bearing_deg", "surface_position_world_m")):
+            if count >= 8 or any(key in target for key in (
+                    "distance_m", "distance_xy_m", "distance_interval_m", "bearing_deg", "surface_position_world_m")):
                 raise ValueError("Insufficient depth must not provide a measured target")
         elif status == "valid":
             interval = target["distance_interval_m"]
@@ -72,3 +77,30 @@ def validate_response(frame: dict, prompt: str, result: dict) -> None:
         image.verify()
         if image.size != (width, height):
             raise ValueError("Perception annotation geometry differs from its source image")
+
+
+def validate_measurements(frame: dict, result: dict, *, decoded: RGBDFrame | None = None) -> None:
+    source = decode_frame(frame) if decoded is None else decoded
+    for target in result["targets"]:
+        if target["detection_source"] == "yolo26" and target["mask_source"] == "yolo26_bbox":
+            if "mask_png_base64" in target:
+                raise ValueError("YOLO bbox measurements must use the recorded bounding box")
+            mask = bbox_mask(target["bbox_xyxy"], source.image.size)
+        elif target["detection_source"] == target["mask_source"] == "sam3.1":
+            mask = decode_mask(target["mask_png_base64"], source.image.size)
+            rows, columns = np.nonzero(mask)
+            if len(rows) < 8:
+                raise ValueError("SAM targets require at least eight mask pixels")
+            expected_box = [int(columns.min()), int(rows.min()), int(columns.max() + 1), int(rows.max() + 1)]
+            if target["bbox_xyxy"] != expected_box:
+                raise ValueError("SAM target box differs from the recorded mask")
+        else:
+            raise ValueError("Perception detection and mask sources are inconsistent")
+        expected = measure_target(mask, source.points_world_m, source.camera_position_m,
+                                  source.body_position_m, source.yaw_rad)
+        if (target["distance_status"] != expected["distance_status"]
+                or target["valid_depth_pixels"] != expected["valid_depth_pixels"]):
+            raise ValueError("Perception target depth status differs from its source pixels")
+        for field in ("distance_m", "distance_xy_m", "distance_interval_m", "bearing_deg", "surface_position_world_m"):
+            if field in expected and not np.allclose(target[field], expected[field], rtol=0, atol=1e-6):
+                raise ValueError(f"Perception target {field} differs from its source RGBD")

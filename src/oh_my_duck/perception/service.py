@@ -14,7 +14,9 @@ import torch
 from ultralytics import YOLO
 import uvicorn
 
-from oh_my_duck.perception.rgbd import measure_target, validate_pose
+from oh_my_duck.perception.frames import bbox_mask, decode_frame, encode_mask, validate_prompt
+from oh_my_duck.perception.rgbd import measure_target
+from oh_my_duck.perception.validation import validate_measurements, validate_response
 
 
 class InspectRequest(BaseModel):
@@ -23,7 +25,16 @@ class InspectRequest(BaseModel):
 
 
 class PerceptionModels:
-    def __init__(self, yolo_path: Path, sam_path: Path | None, output: Path):
+    def __init__(self, yolo_path: Path, sam_path: Path | None, output: Path, *, device: str = "cuda:0"):
+        self.device = torch.device(device)
+        if str(self.device) != device or not (device == "cpu" or (
+                self.device.type == "cuda" and self.device.index is not None)):
+            raise ValueError("Perception device must be cpu or an explicit cuda:N device")
+        if sam_path is not None and device != "cuda:0":
+            raise ValueError("Pinned SAM 3.1 requires cuda:0 within an explicitly selected GPU")
+        if self.device.type == "cuda" and (
+                not torch.cuda.is_available() or self.device.index >= torch.cuda.device_count()):
+            raise ValueError("The requested perception CUDA device is unavailable")
         self.yolo_path = yolo_path.resolve(strict=True)
         self.yolo = YOLO(str(self.yolo_path))
         self.output = output
@@ -39,15 +50,10 @@ class PerceptionModels:
 
     @torch.inference_mode()
     def inspect(self, frame: dict, prompt: str) -> dict:
-        if not prompt.strip() or len(prompt) > 120:
-            raise ValueError("Prompt must contain 1–120 characters")
-        pixels = base64.b64decode(frame["rgb_png_base64"], validate=True)
-        image = Image.open(BytesIO(pixels)).convert("RGB")
-        points = np.load(BytesIO(base64.b64decode(frame["points_world_npy_base64"], validate=True)), allow_pickle=False)
-        if points.shape != (image.height, image.width, 3):
-            raise ValueError("RGB and depth geometry differ")
-        validate_pose(frame["camera_position_m"], frame["body_position_m"], frame["yaw_rad"])
-        predictions = self.yolo.predict(image, device=0, conf=0.15, verbose=False)[0]
+        validate_prompt(prompt)
+        decoded = decode_frame(frame)
+        image, points = decoded.image, decoded.points_world_m
+        predictions = self.yolo.predict(image, device=str(self.device), conf=0.15, verbose=False)[0]
         boxes = predictions.boxes.xyxy.cpu().numpy()
         scores = predictions.boxes.conf.cpu().numpy()
         classes = predictions.boxes.cls.cpu().numpy().astype(int)
@@ -85,9 +91,7 @@ class PerceptionModels:
                 label, match = predictions.names[int(classes[index])], index
                 if prompt != "objects" and prompt.lower() not in label.lower():
                     continue
-                mask = np.zeros((image.height, image.width), dtype=bool)
-                left, top, right, bottom = np.rint(box).astype(int)
-                mask[max(top, 0):min(bottom, image.height), max(left, 0):min(right, image.width)] = True
+                mask = bbox_mask(box, image.size)
             measured = measure_target(mask, points, frame["camera_position_m"], frame["body_position_m"], frame["yaw_rad"])
             target = {"target_id": f"{frame['episode_id']}:{frame['sequence']}:{index}",
                       "label": label, "confidence": confidence, "bbox_xyxy": box.tolist(),
@@ -98,6 +102,7 @@ class PerceptionModels:
                                                                "confidence": float(scores[match])}}
             targets.append(target)
             if self.sam is not None:
+                target["mask_png_base64"] = encode_mask(mask)
                 overlay = np.asarray(annotated).copy()
                 overlay[mask] = (overlay[mask].astype(np.uint16) * 2 +
                                  np.asarray([30, 220, 120], dtype=np.uint16)) // 3
@@ -107,12 +112,15 @@ class PerceptionModels:
             draw.text((float(box[0]), float(box[1])), label, fill="white")
         output = BytesIO()
         annotated.save(output, format="PNG")
-        return {"episode_id": frame["episode_id"], "sequence": frame["sequence"],
+        result = {"episode_id": frame["episode_id"], "sequence": frame["sequence"],
                 "observed_at": frame["observed_at"], "prompt": prompt, "targets": targets,
                 "detection_source": "sam3.1" if self.sam is not None else "yolo26",
                 "models": self.model_hashes, "distance_source": frame["distance_source"],
                 "rgb_png_base64": base64.b64encode(output.getvalue()).decode(),
-                "image_sha256": hashlib.sha256(pixels).hexdigest()}
+                "image_sha256": hashlib.sha256(decoded.pixels).hexdigest()}
+        validate_response(frame, prompt, result)
+        validate_measurements(frame, result, decoded=decoded)
+        return result
 
 
 def main():
@@ -121,13 +129,15 @@ def main():
     parser.add_argument("--sam", type=Path)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--port", type=int, default=8784)
+    parser.add_argument("--device", default="cuda:0", help="cpu for YOLO or explicit cuda:N; SAM uses cuda:0")
     args = parser.parse_args()
-    models = PerceptionModels(args.yolo, args.sam, args.output)
+    models = PerceptionModels(args.yolo, args.sam, args.output, device=args.device)
     app = FastAPI()
 
     @app.get("/health")
     def health():
-        return {"models": models.model_hashes, "engine": "yolo26-sam31" if models.sam is not None else "yolo26"}
+        return {"models": models.model_hashes, "engine": "yolo26-sam31" if models.sam is not None else "yolo26",
+                "device": str(models.device), "measurement_validation": "source_rgbd"}
 
     @app.post("/inspect")
     def inspect(request: InspectRequest):
