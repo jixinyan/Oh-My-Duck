@@ -1,0 +1,31 @@
+{
+  "captured_at": "2026-10-09T16:41:28.871397+00:00",
+  "host": "jd_B300",
+  "scope": "实际 nvidia-smi 只读状态查询",
+  "queries": {
+    "devices.csv": {
+      "command": [
+        "nvidia-smi",
+        "--query-gpu=index,uuid,utilization.gpu,memory.used,memory.total",
+        "--format=csv,noheader,nounits"
+      ],
+      "sha256": "6cd493530792caadc72cf126af484da794e03391588cb395c8ec48ec007e1f5e"
+    },
+    "processes.csv": {
+      "command": [
+        "nvidia-smi",
+        "--query-compute-apps=gpu_uuid,pid,process_name,used_memory",
+        "--format=csv,noheader"
+      ],
+      "sha256": "d330b5643be9bce0d3f529e163d495ac36136ed66e712ac93f88463990cb0da0"
+    }
+  },
+  "device_count": 8,
+  "compute_rows": 3,
+  "unique_compute_pids": [
+    628870,
+    631111
+  ],
+  "gpu_work_started": false,
+  "cuda_initialized": false
+}

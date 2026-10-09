@@ -1,5 +1,4 @@
 import argparse
-import csv
 from contextlib import contextmanager
 from datetime import datetime, timezone
 import fcntl
@@ -20,6 +19,9 @@ from oh_my_duck.core.paths import project_root
 from oh_my_duck.experience.harness_replay import request, save_json
 from oh_my_duck.validation.release.plans import validate_plan
 from oh_my_duck.infrastructure.owned_process import owned_process
+from oh_my_duck.infrastructure.gpu_inventory import (
+    GPU_QUERY, PROCESS_QUERY, compute_processes, gpu_devices, require_exclusive_device,
+)
 
 
 def ssh(args, command, **kwargs):
@@ -32,23 +34,15 @@ def gpu_snapshot(args, output, name):
     sample = 0
     idle_since = None
     while True:
-        raw = ssh(args, "nvidia-smi --query-gpu=index,uuid,utilization.gpu,memory.used,memory.total --format=csv,noheader,nounits",
+        raw = ssh(args, shlex.join(GPU_QUERY),
                   check=True, capture_output=True, text=True).stdout
         (output / f"{name}-{sample:02d}.csv").write_text(raw)
-        rows = list(csv.reader(raw.splitlines(), skipinitialspace=True))
-        selected = [row for row in rows if int(row[0]) == args.gpu]
-        if len(selected) != 1 or float(selected[0][4]) - float(selected[0][3]) < 16384:
-            raise RuntimeError("Allocated GPU requires at least 16 GiB available")
-        processes = ssh(args, "nvidia-smi --query-compute-apps=gpu_uuid,pid,process_name,used_memory --format=csv,noheader",
+        processes = ssh(args, shlex.join(PROCESS_QUERY),
                         check=True, capture_output=True, text=True).stdout
         (output / f"{name}-{sample:02d}-processes.csv").write_text(processes)
-        occupied = [row for row in csv.reader(processes.splitlines(), skipinitialspace=True)
-                    if row[0] == selected[0][1]]
-        if occupied:
-            pids = sorted({int(row[1]) for row in occupied})
-            raise RuntimeError(f"Allocated GPU already has compute processes {pids}; exclusive use is required")
+        selected = require_exclusive_device(gpu_devices(raw), compute_processes(processes), args.gpu)
         now = time.monotonic()
-        if float(selected[0][2]) == 0:
+        if selected.utilization_percent == 0:
             if idle_since is None:
                 idle_since = now
             if now - idle_since >= 10:
@@ -188,7 +182,7 @@ def main():
             return 0
         save_json(output / "campaign.json", record)
         gpu_snapshot(args, output, "gpu-before")
-        processes = ssh(args, "nvidia-smi --query-compute-apps=gpu_uuid,pid,process_name,used_memory --format=csv,noheader",
+        processes = ssh(args, shlex.join(PROCESS_QUERY),
                         check=True, capture_output=True, text=True).stdout
         (output / "gpu-processes-before.csv").write_text(processes)
         for stage in plan["stages"]:
@@ -265,14 +259,14 @@ def main():
                             exit_code = navigation.wait()
             entry.update(state="passed" if exit_code == 0 else "failed", exit_code=exit_code,
                          elapsed_s=time.monotonic() - started, ended_at=datetime.now(timezone.utc).isoformat())
-            processes = ssh(args, "nvidia-smi --query-compute-apps=gpu_uuid,pid,process_name,used_memory --format=csv,noheader",
+            processes = ssh(args, shlex.join(PROCESS_QUERY),
                             check=True, capture_output=True, text=True).stdout
             (output / (stage["id"] + "-gpu-processes-after.csv")).write_text(processes)
             save_json(output / "campaign.json", record)
             print(json.dumps(entry), flush=True)
         record["passed"] = all(entry["state"] == "passed" for entry in record["stages"])
         record["state"] = "passed" if record["passed"] else "failed"
-        processes = ssh(args, "nvidia-smi --query-compute-apps=gpu_uuid,pid,process_name,used_memory --format=csv,noheader",
+        processes = ssh(args, shlex.join(PROCESS_QUERY),
                         check=True, capture_output=True, text=True).stdout
         (output / "gpu-processes-after.csv").write_text(processes)
         save_json(output / "campaign.json", record)

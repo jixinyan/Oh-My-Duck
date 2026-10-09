@@ -1,4 +1,3 @@
-"""Measure complete native PPO iterations and select an explicit environment count."""
 import math
 import os
 from pathlib import Path
@@ -6,6 +5,8 @@ import re
 import statistics
 import subprocess
 import threading
+
+from oh_my_duck.infrastructure.gpu_inventory import GPU_QUERY, PROCESS_QUERY, compute_processes, gpu_devices
 
 
 def measure(run, log, framework, count, warmup=10, updates=40):
@@ -60,20 +61,20 @@ class GpuSampler:
 
     def sample(self):
         try:
-            line = subprocess.check_output(['nvidia-smi', '--id=' + self.device,
-                '--query-gpu=uuid,memory.total,memory.used', '--format=csv,noheader,nounits'], text=True)
-            uuid, total, used = [x.strip() for x in line.strip().split(',')]
-            self.data['total_mib'] = int(total)
-            self.data['peak_mib'] = max(self.data['peak_mib'], int(used))
-            apps = subprocess.check_output(['nvidia-smi', '--query-compute-apps=gpu_uuid,pid',
-                                           '--format=csv,noheader'], text=True)
+            report = subprocess.check_output([*GPU_QUERY, '--id=' + self.device], text=True)
+            devices = gpu_devices(report)
+            if len(devices) != 1 or devices[0].index != int(self.device):
+                raise ValueError('GPU 测量记录与请求设备不一致')
+            device = devices[0]
+            self.data['total_mib'] = device.memory_total_mib
+            self.data['peak_mib'] = max(self.data['peak_mib'], device.memory_used_mib)
+            apps = subprocess.check_output(PROCESS_QUERY, text=True)
             foreign = set(self.data['foreign_pids'])
-            for line in apps.splitlines():
-                gpu, pid = [x.strip() for x in line.split(',')]
-                if gpu == uuid:
+            for process in compute_processes(apps):
+                if process.gpu_uuid == device.uuid:
                     try:
-                        if os.getsid(int(pid)) != os.getsid(0):
-                            foreign.add(int(pid))
+                        if os.getsid(process.pid) != os.getsid(0):
+                            foreign.add(process.pid)
                     except ProcessLookupError:
                         pass
             self.data['foreign_pids'] = sorted(foreign)

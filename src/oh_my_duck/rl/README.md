@@ -5,26 +5,25 @@ Use `python omd.py tasks`, `train`, `campaign`, `preview`, `export`, `compare`, 
 and `package` from the repository root. Generic simulators and PPO remain dependencies;
 Microduck environment definitions, motors and policy contracts are owned source.
 
-```text
-rl/
-├── tasks/
-│   ├── walking/            environment.py + ppo.py
-│   ├── stand_up/           environment.py + ppo.py
-│   ├── sit_stand/          environment.py + ppo.py
-│   ├── roller_walking/    environment.py + ppo.py
-│   ├── …                  one directory per task family
-│   ├── shared/            terrain, symmetry and backlash variants
-│   ├── recipes.py         construct a registered recipe
-│   └── catalog.py         inspect the complete task inventory
-├── mdp/                   shared observations, rewards, resets and curricula
-├── models/                framework-specific actor/critic builders
-├── backends/              MuJoCo and Isaac/Newton simulation adapters
-├── learners/              native RSL-RL and SB3 training/checkpoints
-├── training/              task/runtime/framework registration
-├── experiments/           campaigns, checkpoint recovery and video previews
-├── artifacts/             normalization-aware export and local packaging
-└── evaluation/            task batteries, sim2sim, CPU/BAM and video
-```
+| 功能 | 文件或目录 |
+| --- | --- |
+| 各任务系列的环境和 PPO 配置 | `tasks/<family>/environment.py`、`ppo.py` |
+| 共享地形、对称和 backlash 变体 | `tasks/shared/` |
+| 已注册任务构建及完整目录 | `tasks/recipes.py`、`catalog.py` |
+| 观测、奖励、重置与 curriculum | `mdp/` |
+| 各框架的 actor/critic 构建 | `models/` |
+| MuJoCo 与 Isaac/Newton 适配 | `backends/` |
+| 原生 RSL-RL、SB3 训练与 checkpoint | `learners/` |
+| 任务、运行环境与框架注册 | `training/` |
+| campaign、恢复与视频预览 | `experiments/` |
+| 归一化导出与本地 policy package | `artifacts/` |
+| 任务评估、sim2sim、CPU/BAM 与视频 | `evaluation/` |
+
+GPU 原生状态读取位于 `infrastructure/gpu_inventory.py`。
+`experiments/scaling.py` 使用该模块测量显存及竞争进程；
+`experiments/gpu_pool.py` 管理本项目 campaign 的设备租用；
+发布流程的持续空闲检查位于 `validation/release/campaign.py`。
+完整职责见[资源管理说明](../infrastructure/README.md)。
 
 ## Change or add a task
 

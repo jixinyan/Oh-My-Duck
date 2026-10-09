@@ -1,4 +1,3 @@
-"""Finish an existing preparation campaign and start each ready learner independently."""
 import argparse
 import json
 import os
@@ -10,6 +9,7 @@ import time
 from oh_my_duck.core.paths import project_root
 from .campaign import worker_environment
 from .preparation import validate_preparation
+from oh_my_duck.infrastructure.gpu_inventory import GPU_QUERY, PROCESS_QUERY, compute_processes, gpu_devices
 
 
 def free_devices(devices, preparation_runs, training_runs):
@@ -24,7 +24,7 @@ def free_devices(devices, preparation_runs, training_runs):
 
 
 def main():
-    parser = argparse.ArgumentParser(description=__doc__)
+    parser = argparse.ArgumentParser(description='接续已保存的训练准备记录，按实际空闲设备执行任务')
     parser.add_argument('--preparation', type=Path, required=True, help='Existing throughput supervisor output')
     parser.add_argument('--output', type=Path, required=True)
     parser.add_argument('--preview-gpu', default='0')
@@ -73,8 +73,8 @@ def main():
         raise SystemExit(128+signum)
     for sig in (signal.SIGINT, signal.SIGTERM):
         signal.signal(sig, stop)
-    gpu_rows = subprocess.check_output(['nvidia-smi', '--query-gpu=index,uuid', '--format=csv,noheader'], text=True)
-    uuids = {a.strip(): b.strip() for a,b in (line.split(',') for line in gpu_rows.splitlines())}
+    gpu_rows = subprocess.check_output(GPU_QUERY, text=True)
+    uuids = {str(device.index): device.uuid for device in gpu_devices(gpu_rows)}
     save()
     with (output/'previews.log').open('x') as log:
         preview = subprocess.Popen([sys.executable, '-m', 'oh_my_duck.rl.experiments.preview',
@@ -91,8 +91,8 @@ def main():
             if manifest['status'] != 'running':
                 release_old()
             available = free_devices(devices, manifest['runs'], report['runs'])
-            apps = subprocess.check_output(['nvidia-smi', '--query-compute-apps=gpu_uuid', '--format=csv,noheader'], text=True)
-            busy = set(apps.splitlines())
+            apps = subprocess.check_output(PROCESS_QUERY, text=True)
+            busy = {process.gpu_uuid for process in compute_processes(apps)}
             available = [d for d in available if uuids[d] not in busy]
             for i, requested in enumerate(plan['runs']):
                 name = requested['id']

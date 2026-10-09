@@ -62,7 +62,7 @@ Application, robot, training, shared acceptance and replay modules live in `src/
 | Release preparation and package checks | `validation/release/` | `plans.py`, `worker.py`, `campaign.py`, `package.py` |
 | CPU Newton asset audit | `validation/release/` | `assets.py` / `omd validate model-assets` |
 | Model perception and independent RGBD audit | `validation/` | `perception.py` / `omd validate perception` |
-| Setup and process ownership | `infrastructure/` | `bootstrap_isaac.py`, `usd_runtime.py`, `owned_process.py`, `acceptance_supervisor.py` |
+| Setup and process ownership | `infrastructure/` | [资源管理说明](../src/oh_my_duck/infrastructure/README.md)；`gpu_inventory.py`、`bootstrap_isaac.py`、`usd_runtime.py`、`owned_process.py`、`acceptance_supervisor.py` |
 
 `omd validate` selects an acceptance implementation through a lazy dispatcher.
 `omd replay` manages native sessions and exports terminal run evidence. Metric and
