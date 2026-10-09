@@ -6,6 +6,7 @@
 | Check remote metadata or run allocated-GPU stages | `omd validate release` | `release/campaign.py`, `release/worker.py` |
 | Run declared metric cases | `omd validate metric` | `metric/campaign.py`, `metric/case.py` |
 | Check pending motion requests and explicit command changes | `omd validate metric-admission` | `harness/metric_admission.py` |
+| Measure independent goal evidence across retained tasks | `omd validate task-continuation` | `harness/task_continuation.py` |
 | Audit saved physical measurements | `omd validate metric-audit` | `metric/verify.py` |
 | Recompute saved official policy actions | `omd validate policy-audit` | `metric/policy.py` |
 | Check registered training packages | `omd validate policy-registry` | `harness/registry.py` |

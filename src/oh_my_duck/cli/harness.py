@@ -34,6 +34,8 @@ def main() -> int:
     parser.add_argument("--model-api", choices=("chat-completions", "responses"))
     parser.add_argument("--check-model", action="store_true")
     parser.add_argument("--reasoning-effort", choices=("low", "medium", "high", "xhigh", "max"))
+    parser.add_argument("--max-output-tokens", type=int, default=4096,
+                        help="Native model response budget, including reasoning tokens (256–8192)")
     parser.add_argument("--worker-host", type=str)
     parser.add_argument("--worker-root", type=str)
     parser.add_argument("--worker-python", type=str)
@@ -51,6 +53,8 @@ def main() -> int:
     parser.add_argument("--port", type=int, default=4318)
     parser.add_argument("--seed", type=int, default=20260929)
     args = parser.parse_args()
+    if not 256 <= args.max_output_tokens <= 8192:
+        raise ValueError("Model output token budget must be between 256 and 8192")
     if args.policy_registry is not None and args.worker_policy_registry is not None:
         raise ValueError("Choose a local or remote policy registry")
     if args.policy_registry is not None and args.worker_host is not None:
@@ -191,6 +195,7 @@ def main() -> int:
         "EDH_MODEL_BASE_URL": base_url,
         "EDH_MODEL": model,
         "EDH_MODEL_API": model_api,
+        "OMD_MODEL_MAX_OUTPUT_TOKENS": str(args.max_output_tokens),
         "OMD_CHECK_MODEL": "1" if args.check_model else "0",
         "TSX_TSCONFIG_PATH": str(edh_source / "tsconfig.runtime.json"),
         "TMPDIR": str(temp_dir),

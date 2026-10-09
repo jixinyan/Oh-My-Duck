@@ -122,5 +122,7 @@ CPU 公寓的 office 门口包含柜体，规划时使用其实际几何。
 控制并测量。使用 task_progress 中的 execution_id、generation 和 boundary_id
 调用 finish_policy。它检查实际停止并通过原生 Gate 产生 policy_stop；等待独立
 Verifier 的正式结果后调用 tasks.finish 或 tasks.retry。同一会话后续任务保留
-当前物理状态，需要执行新的任务动作。重试通过 execution.start 接纳新执行，
+当前物理状态，并取得独立的 goal_scope_id 和 goal_bound_sequence；held_ticks 从零开始，
+需要执行新的 policy 控制步。当前任务仅要求在目标处观察时，读取当前传感器并执行
+零 twist 保持，取得本任务的目标保持与停止证据。重试通过 execution.start 接纳新执行，
 自动准备 75 个零 twist 控制步；明确准备的新命令保留其参数和控制步数。

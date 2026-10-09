@@ -175,7 +175,7 @@ class MicroDuckEnvironment:
     def bind_task(self, task_id: str) -> None:
         if task_id != self.configuration["native_task_id"]:
             raise ValueError("MicroDuck retained task identity differs")
-        self._backend()
+        self._backend().begin_task_goal()
 
     def observe(self) -> NativeObservation:
         return self._observation(self._backend().observe_control())

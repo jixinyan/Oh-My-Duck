@@ -20,6 +20,9 @@ const model = process.env.EDH_MODEL;
 const modelAPI = process.env.EDH_MODEL_API ?? 'chat-completions';
 const key = process.env.EDH_MODEL_API_KEY;
 const reasoningEffort = process.env.EDH_REASONING_EFFORT;
+const maxOutputTokens = Number(process.env.OMD_MODEL_MAX_OUTPUT_TOKENS ?? 4096);
+if (!Number.isSafeInteger(maxOutputTokens) || maxOutputTokens < 256 || maxOutputTokens > 8192)
+  throw new Error('Model output token budget must be between 256 and 8192');
 const remoteWorker = process.env.OMD_REMOTE_WORKER
   ? JSON.parse(process.env.OMD_REMOTE_WORKER) : null;
 if (reasoningEffort && !['low', 'medium', 'high', 'xhigh', 'max'].includes(reasoningEffort))
@@ -46,7 +49,7 @@ const closeModelTransport = identifyModelClient(
   resolve(dataDirectory, 'model-transport.jsonl'));
 if (process.env.OMD_CHECK_MODEL === '1') {
   const adapter = new ModelAdapter({ baseURL,
-    models: [{ id: model, inputModalities: ['text', 'image'], contextWindow: 32768, maxTokens: 4096 }],
+    models: [{ id: model, inputModalities: ['text', 'image'], contextWindow: 32768, maxTokens: maxOutputTokens }],
     ...(key ? { apiKey: () => key } : {}), timeoutMs: 180_000 });
   const info = await adapter.resolveModel('configured-vlm', model);
   if (reasoningEffort && !info.reasoning?.efforts.some((effort) => effort.id === reasoningEffort))
@@ -55,7 +58,7 @@ if (process.env.OMD_CHECK_MODEL === '1') {
   let finish;
   for await (const chunk of adapter.stream({ provider: 'configured-vlm', model,
     messages: [{ role: 'user', content: [{ type: 'text', text: 'Reply OK.' }] }],
-    maxTokens: 4096, ...(reasoningEffort ? { reasoningEffort } : {}),
+    maxTokens: maxOutputTokens, ...(reasoningEffort ? { reasoningEffort } : {}),
     signal: new AbortController().signal })) {
     if (chunk.type === 'text-delta') text += chunk.text;
     if (chunk.type === 'finish') finish = chunk.reason;
@@ -253,7 +256,7 @@ const server = await startServer({
       ...(reasoningEffort ? { reasoningEffort } : {}) } },
     adapters: [{ providers: ['configured-vlm'], adapter: new ModelAdapter({
       baseURL, models: [{ id: model, inputModalities: ['text', 'image'],
-        contextWindow: 32768, maxTokens: 4096 }],
+        contextWindow: 32768, maxTokens: maxOutputTokens }],
       ...(key ? { apiKey: () => key } : {}),
       timeoutMs: 180_000,
       resolveImage: (ref, signal) => images.readImageRequest(ref,
@@ -261,7 +264,7 @@ const server = await startServer({
     }) }],
     contextManagement: {
       compaction: { thresholdRatio: 0.7, retainRatio: 0.15,
-        headroomTokens: 4096, maxTokens: 8192 },
+        headroomTokens: maxOutputTokens, maxTokens: 8192 },
       visualHistory: { maxImages: 12 },
     },
     assignmentLifetimeMs: 3_600_000,

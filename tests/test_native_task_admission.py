@@ -77,3 +77,15 @@ def test_previous_context_requires_multiple_audio_inputs(tmp_path):
                             env=environment, capture_output=True, text=True, timeout=30)
     assert result.returncode == 2 and "需要至少两项录音" in result.stderr
     assert not output.exists()
+
+
+@pytest.mark.parametrize("budget", [0, 255, 8193, 32768])
+def test_invalid_model_budget_fails_before_provider_or_sdk_loading(budget):
+    root = Path(__file__).resolve().parents[1]
+    environment = {**os.environ, "PYTHONPATH": str(root / "src"), "CUDA_VISIBLE_DEVICES": ""}
+    result = subprocess.run([sys.executable, "-m", "oh_my_duck", "harness",
+                             "--max-output-tokens", str(budget)], cwd=Path.home(),
+                            env=environment, capture_output=True, text=True, timeout=30)
+    assert result.returncode != 0
+    assert "Model output token budget must be between 256 and 8192" in result.stderr
+    assert "FileNotFoundError" not in result.stderr and "KeyError" not in result.stderr

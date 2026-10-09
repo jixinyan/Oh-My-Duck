@@ -521,9 +521,11 @@ class IsaacNewtonBamBackend(CpuMujocoBamBackend):
                 raise ValueError("Route waypoints require finite XY meters and positive radius")
         self._goal = goal.copy()
         self._route_visits = []
-        self._route_last_sequence = -1
+        self._route_last_sequence = self._sequence
         self._goal_held_ticks = 0
         self._goal_checked_sequence = -1
+        self._goal_scope_id = uuid4().hex
+        self._goal_bound_sequence = self._sequence
         return {"episode_id": self.episode_id, "goal": self._goal,
                 "supported_check_ids": ["goal_reached"]}
 

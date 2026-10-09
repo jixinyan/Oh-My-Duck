@@ -851,8 +851,18 @@ class CpuMujocoBamBackend(SimulationBackend):
         self._goal = goal.copy()
         self._goal_held_ticks = 0
         self._goal_checked_sequence = -1
+        self._goal_scope_id = uuid4().hex
+        self._goal_bound_sequence = self._sequence
         return {"episode_id": self.episode_id, "goal": self._goal,
                 "supported_check_ids": ["goal_reached"]}
+
+    def begin_task_goal(self) -> dict:
+        self._require_owner()
+        if self._goal is None:
+            raise RuntimeError("Task binding requires an existing native goal")
+        if self._pending_inference is not None:
+            raise MotionBusyError("Task binding requires all policy actions to be settled")
+        return self.bind_goal(self._goal)
 
     def _goal_measurement(self) -> tuple[bool, dict, dict, list[float]]:
         if self._goal is None:
@@ -923,6 +933,8 @@ class CpuMujocoBamBackend(SimulationBackend):
         _, target, state, robot = self._goal_measurement()
         complete = self._goal_held_ticks >= self._goal["hold_ticks"]
         evidence = {"robot_world_position_m": robot, "target": target,
+                    "goal_scope_id": self._goal_scope_id,
+                    "goal_bound_sequence": self._goal_bound_sequence,
                     "height_m": state["height_m"], "tilt_rad": state["tilt_rad"],
                     "upright_minimum_height_m": 0.09,
                     "upright_maximum_tilt_rad": math.radians(25),

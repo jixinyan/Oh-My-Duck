@@ -602,9 +602,6 @@ class MicroDuckWorkerSession(NativeWorkerSession):
 
     async def open_task(self, arguments: dict[str, Any]) -> dict[str, Any]:
         await self._await_motion_cleanup()
-        state = await self._device.on_owner(self._environment._backend()._goal_measurement)
-        if state[0]:
-            raise RuntimeError("Retained MicroDuck scene already occupies this task goal")
         opened = await super().open_task(arguments)
         run_task_id = opened["run_task_id"]
         def initial_command() -> dict:
