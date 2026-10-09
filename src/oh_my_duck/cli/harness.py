@@ -11,6 +11,7 @@ import tomllib
 from urllib.parse import urlsplit
 
 from oh_my_duck.core.paths import project_root
+from oh_my_duck.integrations.model_settings import add_model_arguments, resolve_model_settings, validate_model_options
 
 
 EDH_REVISION = "8a5e685b22d032207f53db20454f0992a4ad60fd"
@@ -30,12 +31,8 @@ def main() -> int:
     parser.add_argument("--cpu-python", type=Path,
                         default=root / ".cache/cpu-apartment-locked-venv/bin/python")
     parser.add_argument("--simulation-python", type=Path)
-    parser.add_argument("--model", type=str)
-    parser.add_argument("--model-api", choices=("chat-completions", "responses"))
+    add_model_arguments(parser)
     parser.add_argument("--check-model", action="store_true")
-    parser.add_argument("--reasoning-effort", choices=("low", "medium", "high", "xhigh", "max"))
-    parser.add_argument("--max-output-tokens", type=int, default=4096,
-                        help="原生模型输出预算，包含 reasoning tokens（256–8192）")
     parser.add_argument("--worker-host", type=str)
     parser.add_argument("--worker-root", type=str)
     parser.add_argument("--worker-python", type=str)
@@ -53,8 +50,7 @@ def main() -> int:
     parser.add_argument("--port", type=int, default=4318)
     parser.add_argument("--seed", type=int, default=20260929)
     args = parser.parse_args()
-    if not 256 <= args.max_output_tokens <= 8192:
-        raise ValueError("模型输出 token 预算必须介于 256 和 8192 之间")
+    validate_model_options(args.model, args.model_api, args.reasoning_effort, args.max_output_tokens)
     if args.policy_registry is not None and args.worker_policy_registry is not None:
         raise ValueError("Choose a local or remote policy registry")
     if args.policy_registry is not None and args.worker_host is not None:
@@ -105,7 +101,7 @@ def main() -> int:
         )
         selected = json.loads(remote.stdout)
         model, base_url, token = (selected[key] for key in ("model", "base_url", "token"))
-        model_api = "responses" if selected["wire_api"] == "responses" else "chat-completions"
+        model_api = selected["wire_api"]
     elif args.provider_config is None:
         model = os.environ["EDH_MODEL"]
         base_url = os.environ["EDH_MODEL_BASE_URL"]
@@ -116,7 +112,7 @@ def main() -> int:
         provider = provider_data["model_providers"][provider_data["model_provider"]]
         model = provider_data["model"]
         base_url = provider["base_url"]
-        model_api = "responses" if provider.get("wire_api") == "responses" else "chat-completions"
+        model_api = provider.get("wire_api", "chat")
         if "experimental_bearer_token" in provider and "env_key" in provider:
             raise ValueError("Provider has conflicting credential sources")
         token = (provider["experimental_bearer_token"]
@@ -129,13 +125,9 @@ def main() -> int:
     if token is not None and (not isinstance(token, str) or not token or
                               any(char.isspace() for char in token)):
         raise ValueError("Provider credential is missing or invalid")
-    if args.model is not None:
-        if not args.model.strip() or any(char.isspace() for char in args.model):
-            raise ValueError("Model ID must be nonempty and contain no whitespace")
-        model = args.model
-    model_api = args.model_api or model_api
-    if model_api not in ("chat-completions", "responses"):
-        raise ValueError("Model API must be chat-completions or responses")
+    settings = resolve_model_settings(model, model_api, model=args.model, model_api=args.model_api,
+                                      reasoning_effort=args.reasoning_effort,
+                                      max_output_tokens=args.max_output_tokens)
     remote_worker = None
     worker_paths = (args.worker_root, args.worker_python, args.worker_edh_source,
                     args.worker_policy_dir)
@@ -193,9 +185,9 @@ def main() -> int:
         "OMD_EDH_PORT": str(args.port),
         "OMD_SCENE_SEED": str(args.seed),
         "EDH_MODEL_BASE_URL": base_url,
-        "EDH_MODEL": model,
-        "EDH_MODEL_API": model_api,
-        "OMD_MODEL_MAX_OUTPUT_TOKENS": str(args.max_output_tokens),
+        "EDH_MODEL": settings.model,
+        "EDH_MODEL_API": settings.model_api,
+        "OMD_MODEL_MAX_OUTPUT_TOKENS": str(settings.max_output_tokens),
         "OMD_CHECK_MODEL": "1" if args.check_model else "0",
         "TSX_TSCONFIG_PATH": str(edh_source / "tsconfig.runtime.json"),
         "TMPDIR": str(temp_dir),
@@ -210,10 +202,10 @@ def main() -> int:
         environment.pop("OMD_REMOTE_WORKER", None)
     else:
         environment["OMD_REMOTE_WORKER"] = json.dumps(remote_worker, allow_nan=False)
-    if args.reasoning_effort is None:
+    if settings.reasoning_effort is None:
         environment.pop("EDH_REASONING_EFFORT", None)
     else:
-        environment["EDH_REASONING_EFFORT"] = args.reasoning_effort
+        environment["EDH_REASONING_EFFORT"] = settings.reasoning_effort
     if scene_configuration is None:
         environment.pop("OMD_SCENE_CONFIGURATION", None)
     else:

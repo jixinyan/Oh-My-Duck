@@ -10,6 +10,7 @@ from urllib.parse import urlsplit
 from oh_my_duck.core.paths import project_root
 from oh_my_duck.experience.harness_replay import save_json
 from oh_my_duck.validation.release.plans import validate_plan
+from oh_my_duck.integrations.model_settings import add_model_arguments, resolve_model_settings, validate_model_options
 
 
 def main():
@@ -19,8 +20,10 @@ def main():
     parser.add_argument("--edh-source", type=Path, required=True)
     parser.add_argument("--harness-manifest", type=Path, required=True)
     parser.add_argument("--provider-config", type=Path, required=True)
+    add_model_arguments(parser, max_output_tokens=8192, reasoning_effort='high')
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
+    validate_model_options(args.model, args.model_api, args.reasoning_effort, args.max_output_tokens)
     root = project_root()
     args.plan = args.plan if args.plan.is_absolute() else root / args.plan
     args.output.mkdir(parents=True, exist_ok=False)
@@ -49,8 +52,11 @@ def main():
         if (endpoint.scheme not in {"http", "https"} or not endpoint.hostname or endpoint.username or
                 endpoint.password or endpoint.query or endpoint.fragment):
             raise ValueError("Model provider requires a valid endpoint")
-        result["model"] = provider_data["model"]
-        result["model_api"] = provider.get("wire_api", "chat")
+        settings = resolve_model_settings(provider_data['model'], provider.get('wire_api', 'chat'),
+            model=args.model, model_api=args.model_api, reasoning_effort=args.reasoning_effort,
+            max_output_tokens=args.max_output_tokens)
+        result.update(settings.metadata())
+        result['model_settings'] = settings.metadata()
         for index, name in enumerate(scenes):
             output = args.output / f"scene-{index}.json"
             subprocess.run([sys.executable, str(root / "omd.py"), "doctor", "--runtime", "isaac-newton",

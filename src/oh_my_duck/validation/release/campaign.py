@@ -22,11 +22,22 @@ from oh_my_duck.infrastructure.owned_process import owned_process
 from oh_my_duck.infrastructure.gpu_inventory import (
     GPU_QUERY, PROCESS_QUERY, compute_processes, gpu_devices, require_exclusive_device,
 )
+from oh_my_duck.integrations.model_settings import (
+    add_model_arguments, resolve_model_settings, validate_model_options,
+)
 
 
 def ssh(args, command, **kwargs):
-    return subprocess.run(["ssh", "-T", "-o", "BatchMode=yes", "-o", "ServerAliveInterval=30",
+    return subprocess.run(["ssh", "-T", "-o", "BatchMode=yes", "-o", "ConnectTimeout=10",
+                           "-o", "ServerAliveInterval=30", "-o", "ServerAliveCountMax=1",
                            args.worker_host, command], **kwargs)
+
+
+def gpu_query_timeout(deadline):
+    remaining = deadline - time.monotonic()
+    if remaining <= 0:
+        raise TimeoutError('GPU 状态检查超过三十秒期限，已保存的采样继续保留')
+    return remaining
 
 
 def gpu_snapshot(args, output, name):
@@ -35,13 +46,14 @@ def gpu_snapshot(args, output, name):
     idle_since = None
     while True:
         raw = ssh(args, shlex.join(GPU_QUERY),
-                  check=True, capture_output=True, text=True).stdout
+                  check=True, capture_output=True, text=True, timeout=gpu_query_timeout(deadline)).stdout
         (output / f"{name}-{sample:02d}.csv").write_text(raw)
         processes = ssh(args, shlex.join(PROCESS_QUERY),
-                        check=True, capture_output=True, text=True).stdout
+                        check=True, capture_output=True, text=True, timeout=gpu_query_timeout(deadline)).stdout
         (output / f"{name}-{sample:02d}-processes.csv").write_text(processes)
         selected = require_exclusive_device(gpu_devices(raw), compute_processes(processes), args.gpu)
         now = time.monotonic()
+        gpu_query_timeout(deadline)
         if selected.utilization_percent == 0:
             if idle_since is None:
                 idle_since = now
@@ -49,9 +61,7 @@ def gpu_snapshot(args, output, name):
                 return
         else:
             idle_since = None
-        if time.monotonic() >= deadline:
-            raise RuntimeError("Allocated GPU did not become idle; occupation samples are preserved")
-        time.sleep(2)
+        time.sleep(min(2, gpu_query_timeout(deadline)))
         sample += 1
 
 
@@ -99,6 +109,11 @@ def preflight(args, root, output, remote_output, revision):
                "--edh-source", args.worker_edh_source, "--harness-manifest", remote_output + "/harness-source.json",
                "--provider-config", args.remote_provider_config,
                "--output", remote_output + "/preflight"]
+    for flag, value in (('--model', args.model), ('--model-api', args.model_api),
+                        ('--reasoning-effort', args.reasoning_effort),
+                        ('--max-output-tokens', args.max_output_tokens)):
+        if value is not None:
+            command += [flag, str(value)]
     with (output / "preflight.log").open("x") as log:
         try:
             ssh(args, "cd " + shlex.quote(args.worker_root) + " && " + shlex.join(command),
@@ -109,9 +124,11 @@ def preflight(args, root, output, remote_output, revision):
     actual = json.loads((output / "preflight/result.json").read_text())
     if not actual["passed"] or actual["source_revision"] != revision or actual["cuda_runtime_checked"]:
         raise RuntimeError("Remote metadata preflight failed its source and readiness checks")
+    settings = resolve_model_settings(actual['model'], actual['model_api'],
+        reasoning_effort=actual['reasoning_effort'], max_output_tokens=actual['max_output_tokens'])
     return {"passed": True, "local_harness_revision": local_pin,
             "remote_report_sha256": hashlib.sha256((output / "preflight/result.json").read_bytes()).hexdigest(),
-            "cuda_runtime_checked": False}
+            "cuda_runtime_checked": False, 'model_settings': settings.metadata()}
 
 
 @contextmanager
@@ -140,11 +157,13 @@ def main():
     parser.add_argument("--worker-policy-dir", required=True)
     parser.add_argument("--edh-source", type=Path, required=True)
     parser.add_argument("--remote-provider-config", required=True)
+    add_model_arguments(parser, max_output_tokens=8192, reasoning_effort='high')
     parser.add_argument("--gpu", type=int, choices=(2, 3, 4))
     parser.add_argument("--preflight-only", action="store_true")
     parser.add_argument("--port", type=int, default=4365)
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
+    validate_model_options(args.model, args.model_api, args.reasoning_effort, args.max_output_tokens)
     if not args.preflight_only and args.gpu is None:
         raise ValueError("GPU acceptance requires one allocated physical device from 2–4")
     if re.fullmatch("[a-z][a-z0-9-]*", args.output.name) is None:
@@ -175,6 +194,10 @@ def main():
     with stage_record(output, record, record), lock_path.open("a") as lease:
         fcntl.flock(lease.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
         record["preflight"] = preflight(args, root, output, remote_output, revision)
+        effective = record['preflight']['model_settings']
+        settings = resolve_model_settings(effective['model'], effective['model_api'],
+            reasoning_effort=effective['reasoning_effort'], max_output_tokens=effective['max_output_tokens'])
+        record['model_settings'] = settings.metadata()
         if args.preflight_only:
             record["state"] = "preflight_passed"
             save_json(output / "campaign.json", record)
@@ -230,7 +253,7 @@ def main():
                             raise RuntimeError("Acceptance server port is already in use")
                     command = [sys.executable, str(root / "omd.py"), "harness", "--edh-source", str(args.edh_source),
                         "--remote-provider-config", args.remote_provider_config, "--ssh-host", args.worker_host,
-                        "--remote-python", args.worker_python, "--model-api", "responses", "--reasoning-effort", "high",
+                        "--remote-python", args.worker_python, *settings.arguments(),
                         "--worker-host", args.worker_host, "--worker-root", args.worker_root,
                         "--worker-python", args.worker_python, "--worker-edh-source", args.worker_edh_source,
                         "--worker-policy-dir", args.worker_policy_dir, "--worker-cuda-device", str(args.gpu),
