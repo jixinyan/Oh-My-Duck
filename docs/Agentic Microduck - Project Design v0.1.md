@@ -219,6 +219,12 @@ HTTP 服务提供 `/v1/transcriptions` 和 `/v1/speech`。客户端核对输入�
 `execution.start`、ActionGate 和独立 Verifier。`NativeTaskClient` 提供
 `open`、`submit`、`status`、`wait`、`stop`、`close`，应用和语音使用同一接口。
 任务等待要求有限的正数时间，调用者等待超时保持原生任务执行。
+`submit` 接受调用者明确选择的 `context_run_ids`，最多四项同一打开会话中的
+已结束任务。原生服务核查归属并生成历史指令、结果与正式验证结论；
+连续任务等待 session 收尾到 `ready`，继续使用当前世界状态。
+Planner 使用原生 `skills.search` 与 `skills.load` 读取持久经验。
+已关闭会话和服务重启后的历史会话保持只读；声音资料和原生 skill library
+通过持久存储保留。语音交互和录音文件入口见[语音交互](voice-interaction.md)。
 
 ### 6.1 当前工具
 

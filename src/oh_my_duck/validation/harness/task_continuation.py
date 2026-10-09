@@ -98,7 +98,7 @@ async def native_continuation(args, output):
 
 def run(args):
     if os.environ.get("CUDA_VISIBLE_DEVICES") != "":
-        raise ValueError("CPU task continuation requires CUDA_VISIBLE_DEVICES to be empty")
+        raise ValueError("CPU 连续任务检查要求 CUDA_VISIBLE_DEVICES 为空")
     import numpy as np
     import torch
 
@@ -113,10 +113,10 @@ def run(args):
         "catalog_dir": str(args.catalog.resolve(strict=True)), "seed": 20261009,
         "goal": {"kind": "room", "room": "office", "hold_ticks": 5},
         "spawn_pose": {"x_m": 2.0, "y_m": 0.0, "yaw_rad": 0.0},
-        "task_instruction": "Measure independent goal evidence across retained tasks.",
+        "task_instruction": "检查连续任务的独立目标证据与当前物理状态。",
     }
     difference = subprocess.check_output(["git", "diff", "HEAD"], cwd=root)
-    report = {"passed": False, "scope": "CPU retained goal evidence lifecycle",
+    report = {"passed": False, "scope": "CPU 连续任务的独立目标证据生命周期",
               "source_revision": subprocess.check_output(["git", "rev-parse", "HEAD"], cwd=root, text=True).strip(),
               "source_has_tracked_changes": bool(difference),
               "source_diff_sha256": hashlib.sha256(difference).hexdigest(),
@@ -144,21 +144,21 @@ def run(args):
 
         report["renderer"] = GL.glGetString(GL.GL_RENDERER).decode("utf-8")
         if not any(name in report["renderer"].lower() for name in ("llvmpipe", "softpipe")):
-            raise RuntimeError("CPU continuation requires a Mesa software renderer")
+            raise RuntimeError("CPU 连续任务检查要求 Mesa software renderer")
         original = backend.check_goal()
         try:
             environment.bind_task("another-task")
         except ValueError:
             assert backend.check_goal() == original
         else:
-            raise AssertionError("Another task identity was admitted")
+            raise AssertionError("外来任务编号通过了接纳检查")
         backend.infer_policy()
         try:
             environment.bind_task("goal-continuation")
         except MotionBusyError:
             assert backend.check_goal() == original
         else:
-            raise AssertionError("Task binding admitted an unsettled policy action")
+            raise AssertionError("任务绑定接纳了未完成的 policy action")
         backend.discard_pending_inference()
         report["foreign_task_rejected"] = True
         report["pending_action_rejected"] = True
@@ -171,7 +171,7 @@ def run(args):
                 if isinstance(before[key], np.ndarray):
                     np.testing.assert_array_equal(before[key], after[key])
                 elif before[key] != after[key]:
-                    raise AssertionError(f"Task binding changed physical state: {key}")
+                    raise AssertionError(f"任务绑定改变了物理状态：{key}")
             initial = backend.check_goal()
             evidence = initial["checks"]["goal_reached"]["evidence"]
             assert not initial["complete"] and evidence["held_ticks"] == 0

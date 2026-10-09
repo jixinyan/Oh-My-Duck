@@ -63,6 +63,15 @@ Actual CPU native session lifecycle and resource release, 77 tests, 33 subtests,
 430 independent installed files and 24 CLI calls passed
 [interface validation](reports/native-application-interfaces-2026-10-08.md).
 
+连续录音通过 `--context-previous-task` 明确引用上一项成功任务；交互式
+`execute_recording` 接受 `context_run_ids`。同一会话的历史摘要由原生服务
+核查和生成，Planner 通过 `skills.search`、`skills.load` 读取持久经验。
+当前任务独立保存 `task_start` 与目标保持记录。CPU 生命周期检查通过
+300 次控制、1,200 次物理步骤，源码检查通过 101 项接口测试及 5 项子测试，
+独立安装检查通过 438 个文件和 29 项 CLI 调用。
+连续录音模型任务的正式验收进度见
+[任务历史引用](reports/voice-task-context-2026-10-09.md)。
+
 CPU apartment and Newton scenes use one packaged JSON Schema through the Python
 CLI and native Node server. Seven actual configurations and 23 invalid variants
 produce identical admission results. Actual public startup, graceful exit, 64

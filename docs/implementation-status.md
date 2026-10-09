@@ -1,6 +1,6 @@
 # Implementation status
 
-Updated: 2026-10-08.
+Updated: 2026-10-09.
 
 ## Execution conditions
 
@@ -21,7 +21,7 @@ work requirements and dependencies are in the
 | Component | Verified scope | Remaining acceptance |
 | --- | --- | --- |
 | Source organization | Owned code under `src/oh_my_duck`; native Node deployment under `integrations/edh`; capability source maps | Continue documenting new capability and adapter entry points |
-| CLI/application | Native services, validation/replay, scene schemas, registered packages and voice; 436 installed files, three licenses and 27 CLI calls | Clean-environment reproduction of complete declared workflows |
+| CLI/application | 原生服务、验证与记录、场景 Schema、policy package 与语音；438 个安装文件、三份 license、29 项 CLI 调用 | 完整工作流程在独立环境中的执行检查 |
 | Core types, tools and recording | Complete Draft 2020-12 Schemas, finite arguments, actual handlers, request identity, JSONL/native events, original image hashes and MP4 | New tools require their actual implementation and relevant execution evidence |
 | Native Harness | Fixed EDH, actual models, official policies, sensors, ActionGate and independent Verifier; CPU text/recorded-voice office tasks passed | Current-source multi-scene long navigation and repeated task statistics |
 | Policy tools | Metric units, pose response, policy transitions, bounded commands, state-preserving retries, progress and stop evidence | All long-distance precision, current Newton controller and object effects |
@@ -45,6 +45,7 @@ identifies each implementation.
 
 | Capability | Recorded result | Evidence |
 | --- | --- | --- |
+| 连续任务的物理记录 | 300 次控制、1,200 次物理步骤；独立目标保持记录、原生连续任务、实际状态保留和资源关闭；101 项接口测试及 5 项子测试通过 | [任务历史引用](reports/voice-task-context-2026-10-09.md) |
 | Recorded-voice office navigation | Formal Verifier passed; 666 controls, 2664 substeps, 1323 events, 141 original images, confirmed-profile feedback, five process exits; fully decoded 174.54-second 1080p agentic MP4 | [Voice navigation](reports/cpu-voice-navigation-2026-10-08.md) |
 | Luna text navigation | Formal Verifier passed; 569 controls, 2276 substeps, 1040 events, 113 observer frames, 12 stop-progress checks and fully decoded 1080p MP4 | [Text navigation](reports/cpu-luna-navigation-2026-10-08.md) |
 | Voice interruption | Actual ASR/model/tools/feedback; 1400 controls, 5600 substeps, 2427 events, 296 original images, two WAV files, unchanged profile and full cleanup | [Interruption](reports/cpu-voice-task-2026-10-08.md) |

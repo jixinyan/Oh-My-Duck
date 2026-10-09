@@ -5,6 +5,7 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createInterface } from 'node:readline';
 import { identifyModelClient } from './model-transport.mjs';
+import { assignmentModelAdapter } from './model-context.mjs';
 import { createRequire } from 'node:module';
 import { perceptionSources, validateSceneConfiguration } from './scene-configuration.mjs';
 
@@ -41,7 +42,8 @@ const [{ ContractValidator }, { OpenAICompatibleAdapter, OpenAIResponsesAdapter 
   import(resolve(edhRoot, 'apps/server/src/index.ts')),
 ]);
 const { startServer, createNativeWorkerEnvironment } = serverModule;
-const ModelAdapter = modelAPI === 'responses' ? OpenAIResponsesAdapter : OpenAICompatibleAdapter;
+const ModelAdapter = assignmentModelAdapter(
+  modelAPI === 'responses' ? OpenAIResponsesAdapter : OpenAICompatibleAdapter);
 const { createParser } = createRequire(resolve(edhRoot,
   'harness/agent-runtime/models/package.json'))('eventsource-parser');
 const closeModelTransport = identifyModelClient(

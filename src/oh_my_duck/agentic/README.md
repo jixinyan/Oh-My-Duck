@@ -16,6 +16,12 @@ execution and experience records. Run records preserve the server's identity,
 execution domain and formal task state. `stop` waits for terminal execution and
 requires device confirmation.
 
+`submit(instruction, context_run_ids=...)` 接受同一打开会话中最多四项已结束
+任务的不同编号。原生服务核查归属并生成后续任务的历史摘要；提交等待
+任务收尾与 session 的 `ready` 状态，关闭要求确认资源释放。
+Planner 通过原生 `skills.search` 和 `skills.load` 读取持久经验，
+已关闭会话保持只读。
+
 Voice uses this same implementation in `omd voice-task` and `omd voice-session`.
 The [deployment guide](../../../docs/harness-native-integration.md) describes
 the pinned native server and simulator environment.

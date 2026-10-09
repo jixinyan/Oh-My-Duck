@@ -76,6 +76,51 @@ environments/voice-client/.venv/bin/python omd.py voice-session \
 
 `execute_recording` 将 ASR 文本原样传入原生任务，记录 catalogue digest、run ID、正式 verdict 和音色版本；任务完成后使用已确认音色播放状态反馈。原生 Harness 负责规划、工具选择、执行权限、记忆与独立 Verifier。录音和播音均属于 Microduck 语音模块。
 
+后续命令可以通过 `context_run_ids` 明确选择同一原生 session 中最多四项已结束任务。
+编号来自 `voice.task.started` 的 `runId`，当前 session/run 身份也通过 `status` 返回。
+原生服务核查任务归属和终止状态，将历史指令、结果、正式验证结论与 skill ID
+写入新任务的 `history_summary`。新任务使用当前世界物理状态和实际传感器。
+
+```json
+{"request_id":"task-2","command":"execute_recording","audio":"/absolute/path/followup.wav","context_run_ids":["FIRST_RUN_ID"]}
+```
+
+`context_run_ids` 必须是数组，编号为 1–80 个 ASCII 字母、数字或连字符，最多四个且不能重复。
+格式错误在 ASR 请求之前终止；跨会话引用和正在执行的任务由原生服务拒绝。
+原生历史摘要编码上限为 16 KiB；服务在接纳位置检查完整摘要。
+`transcribe` 接收 `context_run_ids` 时终止请求。
+连续提交等待原生 session 完成任务收尾并返回 `ready`；等待上限为 240 秒，
+身份、来源、资源状态与收尾错误在读取位置终止。
+关闭会话要求原生服务确认 `closed` 与 `resources=released`。
+
+每项原生任务创建独立的 `goal_scope_id`，记录 `goal_bound_sequence`，并从零累计
+`held_ticks`。任务绑定保留 episode、位姿、速度、当前 policy 和上一动作；目标条件
+继续使用场景原有定义。读取当前传感器和目标状态保留保持次数，新的实际 policy
+控制步才能增加计数。到达后的观察任务需要读取当前传感器、执行零 twist 保持，
+取得本任务的目标与停止证据。Newton 路线中的 waypoint 记录也按任务重新开始。
+
+`omd harness --max-output-tokens 8192` 明确设置模型输出预算，包含 reasoning tokens。
+默认值为 4096，接受范围为 256–8192；原生 context compaction 保留对应输出空间。
+模型没有完成输出时保留原生错误与停止边界。
+
+文件方式也能在同一会话内依次执行多个真实录音。`--context-previous-task`
+明确让每项后续任务引用上一项成功任务；该参数需要至少两个输入文件。
+
+```bash
+omd voice-task --audio /absolute/path/command.wav /absolute/path/followup.wav \
+  --context-previous-task --persona '语音验收小鸭' \
+  --harness-url http://127.0.0.1:4318 \
+  --profile official-apartment-office --scenario navigate-office \
+  --asr-url http://127.0.0.1:18761 --tts-url http://127.0.0.1:18762 \
+  --language-hint Chinese --output outputs/voice/sequence-new
+```
+
+每项任务分别保存转写、引用、提交、原生 run 和固定音色反馈。
+任务失败或传输错误终止文件序列并关闭会话。`result.json` 的 `tasks` 保存完整序列，
+顶层任务字段记录最近完成的任务，单文件调用继续支持原有字段。
+跨会话经验通过原生 `skills.search` 和 `skills.load` 按需读取。
+已关闭会话及服务重启后的历史会话保持只读。
+
 `stop` 同时中断音频请求和原生任务，只有收到 native execution 的终止与 device confirmation 才发出 `voice.task.stop_confirmed` 和 `voice.stopped`。过期合成结果不会播放。物理制动检查由运动工具提供；执行中断记录原生控制边界和动作计数。设备、模型、传输与确认错误会终止会话并保留记录。
 
 文件方式执行完整任务使用 `voice-task`；操作示例和实际结果见[上线验收](release-readiness.md)。2026-10-03 已完成录音文件、Qwen ASR、真实模型、Newton/BAM、正式目标验证和固定音色合成闭环。Microduck 音频设备尚待验证。
