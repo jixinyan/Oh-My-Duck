@@ -223,7 +223,17 @@ environments/demo/.venv/bin/python scripts/add_voice_to_demo.py --video outputs/
   --instruction-audio /absolute/path/command.wav --output outputs/demos/run-new-voice.mp4
 ```
 
-The renderer uses actual public events and source camera images. Keep the silent video's adjacent `.json` report with the MP4. The audio step verifies its task ID, successful state, passed Verifier result and video SHA256 against the voice result. Both WAV hashes must match. The instruction plays at the beginning; feedback starts after the recorded task video completes, with its final frame held for the complete response and a 0.5-second tail. For a task exported from another host, provide the copied feedback WAV through `--response-audio /absolute/path/feedback.wav`; its hash must match the unchanged task record. The finished MP4 receives a complete decode check. Its manifest preserves video/report/task/audio hashes, source and final durations, model identity and voice profile revision. The isolated `environments/demo` dependencies are locked; the renderer also requires `ffmpeg` and `ffprobe` on PATH. Supply `--font /absolute/path/unicode.ttf` on Linux for a font that covers the trace text; macOS uses Arial Unicode by default.
+Renderer 使用实际公开事件与原始相机图片。无声 MP4 必须保留相邻的 `.json`
+记录；音频步骤检查相同 task ID、成功状态、正式 Verifier 结果和视频 SHA256，
+两个 WAV 的 SHA256 也必须与任务记录一致。指令音频完整播放后保留至少
+0.5 秒，再播放原生任务视频；正式任务画面结束后播放反馈，并保持最终画面
+直到完整反馈与 0.5 秒尾部结束。跨主机导出的反馈通过
+`--response-audio /absolute/path/feedback.wav` 指定，原始任务记录保持原有内容。
+完成的 MP4 通过完整解码检查，manifest 保存视频、报告、任务、音频与处理脚本
+的 SHA256、各段时长、播放时间、模型身份和音色 revision。
+`environments/demo` 使用锁定依赖，renderer 需要 PATH 中的 `ffmpeg` 和
+`ffprobe`。Linux 通过 `--font /absolute/path/unicode.ttf` 指定覆盖任务文字的
+字体；macOS 默认使用 Arial Unicode。
 
 ## Evidence available on 2026-10-07
 

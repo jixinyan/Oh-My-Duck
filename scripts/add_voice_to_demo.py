@@ -50,14 +50,16 @@ def main():
     fps = metadata["fps"]
     if (not math.isfinite(source_duration) or source_duration <= 0 or
             not math.isfinite(fps) or fps <= 0 or instruction_duration <= 0 or
-            response_duration <= 0 or instruction_duration + 0.5 > source_duration):
-        raise ValueError("视频时长无法完整容纳指令音频")
+            response_duration <= 0):
+        raise ValueError("视频和音频必须具有有效时长")
+    instruction_lead = math.ceil((instruction_duration + 0.5) * fps) / fps
     final_hold = response_duration + 0.5
-    duration = source_duration + final_hold
-    offset_ms = round(source_duration * 1000)
+    duration = instruction_lead + source_duration + final_hold
+    offset_ms = round((instruction_lead + source_duration) * 1000)
     command = [imageio_ffmpeg.get_ffmpeg_exe(), "-v", "error", "-n", "-i", str(args.video),
         "-i", str(args.instruction_audio), "-i", str(response), "-filter_complex",
-        f"[0:v]tpad=stop_mode=clone:stop_duration={final_hold}[video];"
+        f"[0:v]tpad=start_mode=clone:start_duration={instruction_lead}:"
+        f"stop_mode=clone:stop_duration={final_hold}[video];"
         f"[2:a]adelay={offset_ms}:all=1[feedback];[1:a][feedback]amix=inputs=2:duration=longest:normalize=0,apad[audio]",
         "-map", "[video]", "-map", "[audio]", "-c:v", "libx264", "-preset", "veryfast",
         "-crf", "18", "-pix_fmt", "yuv420p", "-c:a", "aac", "-b:a", "192k",
@@ -78,8 +80,11 @@ def main():
         "video_source_sha256": digest(args.video), "video_sha256": digest(args.output),
         "video_report_sha256": digest(video_report_path), "voice_result_sha256": digest(args.voice_result),
         "instruction_duration_s": instruction_duration, "response_duration_s": response_duration,
+        "instruction_lead_s": instruction_lead, "native_video_offset_s": instruction_lead,
         "source_duration_s": source_duration, "final_frame_hold_s": final_hold,
+        "native_video_starts_after_instruction": True,
         "feedback_starts_after_source_video": True,
+        "audio_step_sha256": digest(Path(__file__)),
         "duration_s": encoded["duration"], "complete_decode": "passed",
         "live_microphone": result["live_microphone"], "speaker_playback": result["speaker_playback"]}
     args.output.with_suffix(".voice.json").write_text(json.dumps(manifest, ensure_ascii=False,

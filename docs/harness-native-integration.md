@@ -70,6 +70,10 @@ CUDA_VISIBLE_DEVICES='' PYTHONPATH=src .cache/cpu-apartment-locked-venv/bin/pyth
 
 CLI 从 provider TOML 的 `wire_api` 选择固定 EDH 的 Responses 或 Chat Completions adapter。`--model-api` 可以明确选择接口；`--model` 可以明确选择模型。`--reasoning-effort` 使用 adapter 声明的能力和原生调用参数，服务拒绝请求时立即终止。模型 HTTP 请求使用项目客户端名称 `Oh-My-Duck/0.1`，凭证保留在进程内存。
 
+模型连接读取 `HTTP_PROXY`、`HTTPS_PROXY`、`NO_PROXY` 及对应的小写环境变量。
+代理连接由固定依赖 Undici 的 `EnvHttpProxyAgent` 管理；服务结束时关闭所属
+dispatcher，并恢复原有 dispatcher。实际模型检查与正式任务使用相同连接配置。
+
 `--data-dir` 中的 `model-transport.jsonl` 保存模型请求身份、HTTP 状态、Responses 结束状态、服务错误和 token 用量。记录不包含认证 header、请求内容或模型文字。SSE 使用固定 EDH 依赖的 `eventsource-parser` 读取；模型数据原样进入原生 adapter，服务错误立即终止当前请求。
 
 在分配 GPU 仿真前，使用相同的私有配置检查实际模型请求：
