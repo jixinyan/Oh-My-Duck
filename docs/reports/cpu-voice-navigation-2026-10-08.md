@@ -11,6 +11,7 @@
 | --- | --- |
 | Runtime source | `e440bc19b098ca5d0bba28d1fde7ee3a8e1ea9cf` |
 | Media source | `3f7f3c4e827c7bb1249c768dceb033277092bc95` |
+| Package source | `1f8e070d183d656ed88e09c0aaf0d03ba456f694` |
 | Native Harness | `8a5e685b22d032207f53db20454f0992a4ad60fd` |
 | Official policy catalogue | `1b56c396825c052a4e26e95cf2b8d8298af9e9b4` |
 | Qwen/Qwen3-ASR-0.6B | `5eb144179a02acc5e5ba31e748d22b0cf3e303b0` |
@@ -79,7 +80,7 @@ Model check、Harness、voice-task、ASR 和 TTS 五个所属进程均以 exit c
 
 ## 安装与媒体检查
 
-Runtime source 的 wheel、source distribution 和项目目录之外的独立安装通过
+Package source 的 wheel、source distribution 和项目目录之外的独立安装通过
 433 个源码/资源文件、三份许可证和 26 个实际 CLI 调用。检查包含保留的
 1208 个真实 ONNX policy 输出和连续五动作的独立物理资料复核。
 媒体入口使用真实保留资料验证 task/run 身份与 WAV SHA256，两个不匹配输入
@@ -139,6 +140,7 @@ environments/demo/.venv/bin/python scripts/add_voice_to_demo.py \
 - `outputs/acceptance/cpu-voice-loop-20261008-07/independent-lifecycle-audit.json`
 - `outputs/acceptance/cpu-voice-loop-20261008-07/remote-cleanup.json`
 - `outputs/acceptance/voice-media-20261008-03-install/result.json`
+- `outputs/acceptance/voice-release-20261008-01-install/result.json`
 - `outputs/acceptance/voice-media-admission-20261008-03/result.json`
 - `outputs/acceptance/cpu-voice-video-20261008-07-02/result.json`
 - `outputs/demos/cpu-luna-voice-office-20261008-07.mp4`
