@@ -137,7 +137,9 @@ def main():
     @app.get("/health")
     def health():
         return {"models": models.model_hashes, "engine": "yolo26-sam31" if models.sam is not None else "yolo26",
-                "device": str(models.device), "measurement_validation": "source_rgbd"}
+                "device": str(models.device), "measurement_validation": "source_rgbd",
+                "yolo_parameter_devices": sorted({str(parameter.device) for parameter in models.yolo.model.parameters()}),
+                "cuda_initialized": torch.cuda.is_initialized()}
 
     @app.post("/inspect")
     def inspect(request: InspectRequest):
