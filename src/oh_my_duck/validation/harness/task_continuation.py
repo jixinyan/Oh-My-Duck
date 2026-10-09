@@ -7,18 +7,19 @@ from pathlib import Path
 import subprocess
 from uuid import uuid4
 
-import numpy as np
-import torch
-
 from oh_my_duck.core.paths import project_root
-from oh_my_duck.integrations.edh.environment import MicroDuckEnvironment
-from oh_my_duck.robotics.backends.simulation import MotionBusyError
 from oh_my_duck.robotics.microduck.official_policies import OFFICIAL_REVISION
 
 
 def run(args):
     if os.environ.get("CUDA_VISIBLE_DEVICES") != "":
         raise ValueError("CPU task continuation requires CUDA_VISIBLE_DEVICES to be empty")
+    import numpy as np
+    import torch
+
+    from oh_my_duck.integrations.edh.environment import MicroDuckEnvironment
+    from oh_my_duck.robotics.backends.simulation import MotionBusyError
+
     root = project_root()
     output = args.output.resolve()
     output.mkdir(parents=True, exist_ok=False)

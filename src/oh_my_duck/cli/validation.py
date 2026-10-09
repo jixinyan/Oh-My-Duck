@@ -9,6 +9,7 @@ COMMANDS = {
     "metric-admission": ("harness.metric_admission", "检查准备中的动作请求、实际执行和明确修改命令"),
     "execution-retry": ("harness.execution_retry", "检查原生执行重试、连续物理状态与目标判定"),
     "task-continuation": ("harness.task_continuation", "检查连续任务的独立目标证据与连续物理状态"),
+    "voice-context": ("harness.voice_context", "复核连续录音任务、原生历史引用、正式目标判定与音频"),
     "metric-audit": ("metric.verify", "复核运动样本、停止状态、相机与源码来源"),
     "policy-audit": ("metric.policy", "使用官方 ONNX 重新计算记录中的 policy action"),
     "policy-registry": ("harness.registry", "核验登记的 policy 包、来源、命令通道与 CPU 推断"),

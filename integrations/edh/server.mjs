@@ -22,7 +22,7 @@ const key = process.env.EDH_MODEL_API_KEY;
 const reasoningEffort = process.env.EDH_REASONING_EFFORT;
 const maxOutputTokens = Number(process.env.OMD_MODEL_MAX_OUTPUT_TOKENS ?? 4096);
 if (!Number.isSafeInteger(maxOutputTokens) || maxOutputTokens < 256 || maxOutputTokens > 8192)
-  throw new Error('Model output token budget must be between 256 and 8192');
+  throw new Error('模型输出 token 预算必须介于 256 和 8192 之间');
 const remoteWorker = process.env.OMD_REMOTE_WORKER
   ? JSON.parse(process.env.OMD_REMOTE_WORKER) : null;
 if (reasoningEffort && !['low', 'medium', 'high', 'xhigh', 'max'].includes(reasoningEffort))

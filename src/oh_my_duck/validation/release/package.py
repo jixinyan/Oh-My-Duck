@@ -83,6 +83,7 @@ def main():
                 ["validate", "metric-admission", "--help"],
                 ["validate", "execution-retry", "--help"],
                 ["validate", "task-continuation", "--help"],
+                ["validate", "voice-context", "--help"],
                 ["validate", "release", "--help"], ["validate", "navigation-audit", "--help"],
                 ["validate", "release-plan"], ["validate", "model-assets", "--help"],
                 ["validate", "pose", "--help"], ["validate", "pose-audit", "--help"],

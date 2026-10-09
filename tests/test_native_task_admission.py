@@ -87,5 +87,5 @@ def test_invalid_model_budget_fails_before_provider_or_sdk_loading(budget):
                              "--max-output-tokens", str(budget)], cwd=Path.home(),
                             env=environment, capture_output=True, text=True, timeout=30)
     assert result.returncode != 0
-    assert "Model output token budget must be between 256 and 8192" in result.stderr
+    assert "模型输出 token 预算必须介于 256 和 8192 之间" in result.stderr
     assert "FileNotFoundError" not in result.stderr and "KeyError" not in result.stderr

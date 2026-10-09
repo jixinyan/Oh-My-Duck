@@ -859,9 +859,9 @@ class CpuMujocoBamBackend(SimulationBackend):
     def begin_task_goal(self) -> dict:
         self._require_owner()
         if self._goal is None:
-            raise RuntimeError("Task binding requires an existing native goal")
+            raise RuntimeError("任务绑定需要已有的原生目标")
         if self._pending_inference is not None:
-            raise MotionBusyError("Task binding requires all policy actions to be settled")
+            raise MotionBusyError("任务绑定需要全部 policy action 完成处理")
         return self.bind_goal(self._goal)
 
     def _goal_measurement(self) -> tuple[bool, dict, dict, list[float]]:

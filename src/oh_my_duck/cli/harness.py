@@ -35,7 +35,7 @@ def main() -> int:
     parser.add_argument("--check-model", action="store_true")
     parser.add_argument("--reasoning-effort", choices=("low", "medium", "high", "xhigh", "max"))
     parser.add_argument("--max-output-tokens", type=int, default=4096,
-                        help="Native model response budget, including reasoning tokens (256–8192)")
+                        help="原生模型输出预算，包含 reasoning tokens（256–8192）")
     parser.add_argument("--worker-host", type=str)
     parser.add_argument("--worker-root", type=str)
     parser.add_argument("--worker-python", type=str)
@@ -54,7 +54,7 @@ def main() -> int:
     parser.add_argument("--seed", type=int, default=20260929)
     args = parser.parse_args()
     if not 256 <= args.max_output_tokens <= 8192:
-        raise ValueError("Model output token budget must be between 256 and 8192")
+        raise ValueError("模型输出 token 预算必须介于 256 和 8192 之间")
     if args.policy_registry is not None and args.worker_policy_registry is not None:
         raise ValueError("Choose a local or remote policy registry")
     if args.policy_registry is not None and args.worker_host is not None:
