@@ -2,6 +2,7 @@ import asyncio
 import json
 import math
 from pathlib import Path
+import re
 from urllib.parse import quote
 from uuid import uuid4
 
@@ -9,6 +10,15 @@ import httpx
 
 
 TERMINAL_STATES = {"succeeded", "failed", "cancelled", "interrupted", "unknown"}
+
+
+def validate_context_run_ids(value: object) -> tuple[str, ...]:
+    if (not isinstance(value, (list, tuple)) or len(value) > 4
+            or any(not isinstance(item, str) or re.fullmatch(r"[A-Za-z0-9-]{1,80}", item) is None
+                   for item in value)
+            or len(set(value)) != len(value)):
+        raise ValueError("context_run_ids 必须包含最多四个不同的原生任务编号")
+    return tuple(value)
 
 
 class NativeTaskClient:
@@ -31,6 +41,7 @@ class NativeTaskClient:
             timeout=httpx.Timeout(connect=10, read=600, write=30, pool=10))
         self.session_id = None
         self.run_id = None
+        self._source = None
         self._submission = asyncio.Lock()
 
     def _save(self, name, value):
@@ -53,34 +64,56 @@ class NativeTaskClient:
         self.session_id = record["id"]
         self._save("session.json", record)
         source = record["configuration"]["mode"]
-        if source not in {"simulation", "hardware"} or self.expected_source not in {None, source}:
+        if (record["profileId"] != self.profile_id or record["state"] != "ready"
+                or record["resources"] != "held" or source not in {"simulation", "hardware"}
+                or self.expected_source not in {None, source}):
             raise ValueError("Harness session 与所选执行领域不一致")
+        self._source = source
         return record
 
     async def status(self):
         if self.run_id is None:
             raise RuntimeError("尚未提交 Harness task")
         run = await self._request("GET", f"/api/runs/{quote(self.run_id, safe='')}?events=none")
-        if (run["id"] != self.run_id or run["source"] not in {"simulation", "hardware"}
-                or self.expected_source not in {None, run["source"]}):
+        if run["id"] != self.run_id or run["source"] != self._source:
             raise ValueError("Harness task 身份或来源不一致")
         self._save(f"{self.run_id}-status.json", run)
         return run
 
-    async def submit(self, instruction: str):
-        if not instruction.strip():
-            raise ValueError("语音指令必须有内容")
+    async def _wait_ready(self):
+        async with asyncio.timeout(240):
+            while True:
+                record = await self._request("GET", f"/api/sessions/{quote(self.session_id, safe='')}")
+                self._save("session-status.json", record)
+                if (record["id"] != self.session_id or record["profileId"] != self.profile_id
+                        or record["configuration"]["mode"] != self._source
+                        or record["resources"] != "held"):
+                    raise ValueError("Harness session 身份、来源或资源状态不一致")
+                if record["state"] == "ready":
+                    return record
+                if (record["state"] not in {"running", "draining"} or self.run_id is None
+                        or record["taskHistory"]["lastRunId"] != self.run_id):
+                    raise RuntimeError("Harness session 无法接受下一项任务")
+                await asyncio.sleep(0.2)
+
+    async def submit(self, instruction: str, *, context_run_ids: tuple[str, ...] = ()):
+        if (not isinstance(instruction, str) or not instruction.strip()
+                or len(instruction.encode("utf-16-le")) > 8000):
+            raise ValueError("语音指令必须包含 1–4000 个 UTF-16 code unit")
+        context = validate_context_run_ids(context_run_ids)
         async with self._submission:
             if self.session_id is None:
                 raise RuntimeError("必须打开 Harness session")
             if self.run_id is not None and (await self.status())["state"] not in TERMINAL_STATES:
                 raise RuntimeError("已有任务正在执行；请中断任务后提交新指令")
+            await self._wait_ready()
             route = f"/api/sessions/{quote(self.session_id, safe='')}/tasks"
             catalog = await self._request("GET", route)
             if self.scenario not in catalog["tasks"]:
                 raise ValueError("scenario 不在当前原生任务目录中")
             submission = {"scenario": self.scenario, "requestId": str(uuid4()),
-                "catalogRevision": catalog["descriptor"]["digest"], "instruction": instruction}
+                "catalogRevision": catalog["descriptor"]["digest"], "instruction": instruction,
+                "contextRunIds": list(context)}
             self._save(f"{submission['requestId']}-submission.json", submission)
             result = await self._request("POST", route, submission)
             self.run_id = result["runId"]
@@ -115,6 +148,9 @@ class NativeTaskClient:
             if self.session_id is not None:
                 record = await self._request("POST", f"/api/sessions/{quote(self.session_id, safe='')}/close", {})
                 self._save("session-closed.json", record)
+                if (record["id"] != self.session_id or record["profileId"] != self.profile_id
+                        or record["state"] != "closed" or record["resources"] != "released"):
+                    raise RuntimeError("Harness session 尚未确认关闭并释放资源")
                 self.session_id = None
         finally:
             await self._client.aclose()

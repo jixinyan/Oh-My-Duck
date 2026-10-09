@@ -10,7 +10,8 @@ from oh_my_duck.core.contracts.events import EpisodeEvent
 from oh_my_duck.core.contracts.identity import ExecutionDomain, Identity
 from oh_my_duck.core.contracts.sensors import PayloadRef
 from oh_my_duck.experience.jsonl import JsonlEpisodeRecorder
-from oh_my_duck.integrations.native_client import NativeTaskClient
+from oh_my_duck.agentic.harness import HarnessBridge
+from oh_my_duck.integrations.native_client import validate_context_run_ids
 from oh_my_duck.voice.base import AudioDevice
 from oh_my_duck.voice.remote import RemoteVoiceServices
 
@@ -19,7 +20,7 @@ class VoiceSession:
     def __init__(
         self, device: AudioDevice, services: RemoteVoiceServices, *, persona_id: str,
         robot_id: str, domain: ExecutionDomain, log_path: Path | None,
-        tasks: NativeTaskClient | None = None,
+        tasks: HarnessBridge | None = None,
     ):
         self.device = device
         self.services = services
@@ -65,7 +66,7 @@ class VoiceSession:
         task.add_done_callback(completed)
 
     async def _transcribe(self, request_id: str, audio: PayloadRef, language_hint: str | None,
-                          execute: bool, generation: int) -> None:
+                          execute: bool, generation: int, context_run_ids: tuple[str, ...]) -> None:
         result = await self.services.transcribe(audio, language_hint=language_hint)
         self.emit("voice.transcription.completed", asdict(result), request_id)
         if execute:
@@ -73,8 +74,9 @@ class VoiceSession:
                 if generation != self._generation:
                     self.emit("voice.task.discarded", {"text": result.text}, request_id)
                     return
-                submitted = await self.tasks.submit(result.text)
-                self.emit("voice.task.started", {**submitted, "transcription": asdict(result)}, request_id)
+                submitted = await self.tasks.submit(result.text, context_run_ids=context_run_ids)
+                self.emit("voice.task.started", {**submitted, "transcription": asdict(result),
+                    "context_run_ids": list(context_run_ids)}, request_id)
             run = await self.tasks.wait()
             self.emit("voice.task.ended", {"run_id": run["id"], "state": run["state"],
                 "verdicts": run["verdicts"], "error": run["error"]}, request_id)
@@ -155,8 +157,13 @@ class VoiceSession:
         if not isinstance(request_id, str) or not request_id:
             raise ValueError("request_id 必须是非空字符串")
         if command == "status":
+            harness = None if self.tasks is None else {
+                "session_id": self.tasks.session_id, "run_id": self.tasks.run_id,
+                "profile_id": self.tasks.profile_id, "scenario": self.tasks.scenario,
+            }
             self.emit(
-                "voice.status", {**self.device.status(), "pending_requests": list(self._pending)},
+                "voice.status", {**self.device.status(), "pending_requests": list(self._pending),
+                                 "harness": harness},
                 request_id,
             )
         elif command == "begin_recording":
@@ -178,6 +185,9 @@ class VoiceSession:
         elif command in {"transcribe", "execute_recording"}:
             if command == "execute_recording" and self.tasks is None:
                 raise RuntimeError("execute_recording 需要配置原生 Harness session")
+            if command == "transcribe" and "context_run_ids" in message:
+                raise ValueError("context_run_ids 仅用于 execute_recording")
+            context = validate_context_run_ids(message.get("context_run_ids", ()))
             if "audio" in message:
                 audio = PayloadRef(Path(message["audio"]).expanduser().resolve(strict=True).as_uri(), "audio/wav")
             else:
@@ -187,7 +197,7 @@ class VoiceSession:
             self._start_request(
                 request_id, command,
                 self._transcribe(request_id, audio, message.get("language_hint"),
-                    command == "execute_recording", self._generation),
+                    command == "execute_recording", self._generation, context),
             )
         elif command == "speak":
             if self.device.status()["recording_id"] is not None:
