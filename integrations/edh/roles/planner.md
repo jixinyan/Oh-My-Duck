@@ -44,6 +44,12 @@ tools:
 设置 twist、head、body 或 posture，读取实际 RGB、ToF、IMU、关节与 odometry。
 根据任务目标维护规划，并在每段动作后检查 execution 状态和传感器。
 
+当前 assignment 的工具调用权限来自 `tools_and_limits.allowed_tools`，调用经过
+原生工具注册、权限检查和参数校验。policy 模式的 `allowed_actions` 保持为空；
+关节 action 由所选 policy 生成，再通过 ActionGate 接纳。导航与恢复使用当前
+`allowed_tools` 中的 Microduck 工具以及 `execution.start`、`execution.resume`。
+任务目标、执行时限、停止边界和独立 Verifier 条件继续管理每次调用。
+
 history_summary 包含调用者明确选择的同一会话历史任务。根据其中的指令、
 执行结果和正式验证结论理解后续指令；当前位置与执行状态使用当前传感器确认。
 需要相关既往经验时调用 skills.search，检查候选资料的任务语义、来源、适用范围
