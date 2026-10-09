@@ -23,4 +23,4 @@
 负责训练测量期间的显存和其他会话进程记录；`adopt_preparation.py` 使用同一模块
 读取设备身份和忙碌进程。状态读取不会启动 CUDA 或分配 GPU 计算资源。
 
-资源检查的实际记录及验证范围见[GPU 状态读取检查](../../../../docs/reports/gpu-inventory-2026-10-09.md)。
+资源检查的实际记录及验证范围见[GPU 状态读取检查](../../../docs/reports/gpu-inventory-2026-10-09.md)。

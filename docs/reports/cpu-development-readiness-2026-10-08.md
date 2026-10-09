@@ -8,6 +8,9 @@ stopped.
 
 | Capability | Verified scope | Evidence |
 | --- | --- | --- |
+| GPU 状态读取与接纳 | 实际八设备和重复进程记录；31 项检查；GPU 2 持续空闲检查及 GPU 4 占用拒绝；实际测量线程退出；439 个安装文件、Mac 29 项和 Linux 27 项 CLI 调用 | [GPU 状态检查](gpu-inventory-2026-10-09.md) |
+| 连续语音及任务历史 | 实际 Qwen 与 Luna 的两项正式任务、745 次控制、2,980 次物理步骤、166 张原始 PNG；两次经验搜索、独立目标、固定音色、归属检查和完整退出 | [任务历史](voice-task-context-2026-10-09.md) |
+| 客户端音频动态库 | macOS 与 Ubuntu 22.04 的实际 PortAudio、libsndfile 加载及独立安装通过 | [音频动态库](native-audio-readiness-2026-10-09.md) |
 | Original RGBD model measurements | Five actual CPU YOLO frames/targets, original-pixel geometry, 90 rejected alterations, three process exits and closed service; 436 installed files and 27 CLI calls | [Measurement validation](perception-measurements-2026-10-08.md) |
 | Shared voice audio modules | 24 original definitions preserved; 36 WAV/SQLite/device-admission tests, three actual Qwen CPU models, four decoded WAV files and four matching ASR texts; unchanged confirmed profile/database, five process exits, 434 installed files and 26 CLI calls | [Voice source validation](voice-audio-modules-2026-10-08.md) |
 | Native recorded-voice office task | Actual Qwen ASR, OpenAI Luna, official policy and sensor tools, passed formal Verifier and confirmed-voice feedback; 666 controls, 2664 substeps, 1323 events, 141 decoded original images, 174.54-second 1080p MP4 fully decoded, unchanged voice profile and five processes exited | [CPU voice navigation](cpu-voice-navigation-2026-10-08.md) |
@@ -50,6 +53,8 @@ and `voice/qwen.py` owns model inference; the [voice source map](../../src/oh_my
 `perception/frames.py` owns RGBD and PNG admission, `perception/validation.py` owns source measurement checks,
 and `validation/perception.py` owns actual model calls and independent saved-data audit;
 `infrastructure/usd_runtime.py` owns installed OpenUSD verification.
+`infrastructure/gpu_inventory.py` 负责原生设备及进程读取；
+[资源管理说明](../../src/oh_my_duck/infrastructure/README.md)列出环境、进程、来源与提交入口。
 Public execution and audit commands remain available from installed packages.
 All verification processes exited. Source, configuration, wheel, source
 distribution and evidence hashes are recorded in the corresponding reports.

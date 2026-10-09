@@ -57,6 +57,10 @@ omd validate release \
 
 The controller checks clean source before each stage and holds an exclusive local campaign lease. The selected GPU must have zero compute processes and remain at zero utilization for ten seconds with at least 16 GiB available. Any existing compute PID rejects admission, including an idle process. Allocation remains within devices 2–4 and never shares a GPU with haomin or another user's workload. Occupancy and process samples are preserved. Admission stops after thirty seconds without sufficient idle observations. Metric artifacts are copied from the remote worker. Navigation exports actual events, camera bytes, formal verdicts and independent audit results. Each completed stage records its exit code and elapsed time; a failed stage prevents overall acceptance. Configuration and transport errors propagate and record the aborted campaign and any active stage. RL training remains stopped.
 
+原生 CSV 读取与独占设备检查位于 `infrastructure/gpu_inventory.py`。
+发布流程与训练准备、测量复用该模块。实际设备记录、持续空闲检查及安装结果见
+[GPU 状态读取检查](reports/gpu-inventory-2026-10-09.md)。
+
 The controller owns each launched process and saves its PID, process group, cancellation signals, exit status and cleanup timing. Remote metric stages use `run_owned_acceptance.py`: closing the SSH input channel requests cancellation, including after a transport disconnect. The remote supervisor interrupts only its own campaign, and that campaign closes its own physical worker. Interrupted metric stages copy available artifacts and lifecycle records back to the controller. Navigation cancellation gives the runner time to close its native session before the controller closes its server. Graceful cleanup has a 120-second deadline; exceeded deadlines produce termination evidence and an explicit failure.
 
 Actual CPU cancellation checks cover both control-channel closure and SIGTERM during official policy motion. Each executed 85 control steps, preserved the cancelled result, closed the native session and released resources without a cleanup timeout. Reproduce with the locked CPU environment and pinned policies:

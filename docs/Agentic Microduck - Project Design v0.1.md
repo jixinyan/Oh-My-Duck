@@ -3,7 +3,7 @@ title: Agentic Microduck — 项目概览与详细设计
 version: 0.3
 status: Implementation in progress
 created: 2026-09-05
-updated: 2026-10-08
+updated: 2026-10-09
 tags:
   - microduck
   - embodied-ai
@@ -26,16 +26,18 @@ Oh My Duck 为 Microduck 提供仿真、训练、技能工具、主动感知、�
 
 | 范围 | 当前证据 | 完整验收要求 |
 | --- | --- | --- |
-| 原生模型与工具执行 | Luna CPU 文字导航与录音导航、独立 Verifier、原始传感器、agentic MP4 和资源释放通过 | 当前源码的多场景长导航、全部动作精度及重复任务统计 |
+| 原生模型与工具执行 | Luna CPU 文字、录音与连续任务、两项正式任务及历史引用、独立 Verifier、原始传感器、agentic MP4 和资源释放通过 | 当前源码的多场景长导航、全部动作精度及重复任务统计 |
 | 语音与固定音色 | 三个 Qwen 模型的实际 CPU 推理、四段 WAV 与全部 ASR 回读、36 项音色与参数测试通过 | 识别准确率、交互延迟、音质与 Microduck 音频设备 |
 | 感知 | 当前 CPU RGBD、真实 CPU YOLO 与原始像素测量复核；固定源码 Newton RGBD 和 SAM3.1 + YOLO26 服务记录 | 当前 SAM GPU 验收、独立标注评估、目标跟踪和真机校准 |
 | 训练与导出 | Walking/StandUp × 两个 backend × 两个原生 PPO 的执行流程、恢复、归一化导出与回放记录 | 自训练有效行为、多个 seed、sim2sim 与最终评估 |
 | Newton 资产与准备 | 两种机器人、Office/Hospital 几何、CPU solver/contact、依赖检查与发布准备通过 | 当前源码的实际 GPU 求解、初始化、渲染及完整运行验收 |
-| 安装与扩展 | 434 个 source/resource 文件、三份许可证、26 个独立安装调用通过 | 从干净环境复现所声明的完整流程 |
+| 安装与扩展 | 439 个 source/resource 文件、三份许可证、Mac 29 项及 Linux 27 项安装调用通过；统一原生 GPU 状态读取及实际接纳检查 | 从干净环境复现所声明的完整流程 |
 | 真机 | 统一接口和官方运行时来源已记录 | 实际 Microduck 的传输、音频、传感器、控制与任务验收 |
 
 证据入口：[当前状态](implementation-status.md)、[CPU 开发验证](reports/cpu-development-readiness-2026-10-08.md)、
 [语音导航](reports/cpu-voice-navigation-2026-10-08.md)、[发布要求](release-readiness.md)。
+连续语音历史、音频动态库与资源检查分别见[任务历史](reports/voice-task-context-2026-10-09.md)、
+[音频动态库](reports/native-audio-readiness-2026-10-09.md)、[GPU 状态读取](reports/gpu-inventory-2026-10-09.md)。
 GPU 验收与 RL 保持停止。后续获得执行授权时，同时最多使用一张空闲 GPU 2–4；
 设备要求没有 compute PID 且持续零 utilization。其他用户和项目的进程保留。
 
