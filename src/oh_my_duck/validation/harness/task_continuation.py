@@ -73,6 +73,10 @@ async def native_continuation(args, output):
             await wait_boundary(session)
             progress = await control(port, secret, task_id, "progress", {})
             assert progress["task_start"] == start and progress["sequence"] - start["sequence"] == 75
+            initial_goal = start["goal_check"]["checks"]["goal_reached"]["evidence"]
+            current_goal = progress["goal_check"]["checks"]["goal_reached"]["evidence"]
+            assert current_goal["goal_scope_id"] == initial_goal["goal_scope_id"]
+            assert current_goal["goal_bound_sequence"] == initial_goal["goal_bound_sequence"] == start["sequence"]
             assert session._device.executed_actions == 75 and session._device.raw_sim_steps == 300
             assert progress["stopped_samples"] >= 5
             finish = await control(port, secret, task_id, "finish_policy", {
@@ -147,14 +151,14 @@ def run(args):
             raise RuntimeError("CPU 连续任务检查要求 Mesa software renderer")
         original = backend.check_goal()
         try:
-            environment.bind_task("another-task")
+            environment.begin_task_goal("another-task")
         except ValueError:
             assert backend.check_goal() == original
         else:
             raise AssertionError("外来任务编号通过了接纳检查")
         backend.infer_policy()
         try:
-            environment.bind_task("goal-continuation")
+            environment.begin_task_goal("goal-continuation")
         except MotionBusyError:
             assert backend.check_goal() == original
         else:
@@ -165,7 +169,7 @@ def run(args):
         scopes = []
         for index in range(2):
             before = physical_state()
-            environment.bind_task("goal-continuation")
+            environment.begin_task_goal("goal-continuation")
             after = physical_state()
             for key in before:
                 if isinstance(before[key], np.ndarray):
@@ -178,6 +182,7 @@ def run(args):
             assert evidence["goal_bound_sequence"] == before["sequence"]
             assert backend._goal == configuration["goal"]
             for _ in range(10):
+                environment.bind_task("goal-continuation")
                 environment.observe()
                 assert not environment.check(["goal_reached"])[0].value
                 assert backend.check_goal() == initial

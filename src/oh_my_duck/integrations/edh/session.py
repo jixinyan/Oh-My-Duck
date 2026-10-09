@@ -610,6 +610,12 @@ class MicroDuckWorkerSession(NativeWorkerSession):
         await self._await_motion_cleanup()
         opened = await super().open_task(arguments)
         run_task_id = opened["run_task_id"]
+
+        def begin_goal() -> None:
+            self._require_control_lease(run_task_id)
+            self._environment.begin_task_goal(self._native_task_id)
+
+        await self._device.on_owner(begin_goal)
         observed = await self._device.on_owner(self._control_observation)
         self._require_control_lease(run_task_id)
         self._task_start = {
