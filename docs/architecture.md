@@ -37,6 +37,7 @@ Application, robot, training, shared acceptance and replay modules live in `src/
 | Shared native CPU/Newton scene configuration | `integrations/edh/` | `scene.schema.json`, `scene_configuration.py`; Node admission in `integrations/edh/scene-configuration.mjs` at the repository root |
 | Application dependencies, tools and skills | `agentic/` | [Source map](../src/oh_my_duck/agentic/README.md), `application.py`, `harness/base.py`, `tools/`, `skills/` |
 | Native task HTTP client | `integrations/` | `native_client.py`; implements `HarnessBridge` for voice and application services |
+| 原生 Harness 与发布流程模型设置 | `integrations/` | [接入说明](../src/oh_my_duck/integrations/README.md)；`model_settings.py` 验证并传递模型、API、reasoning effort 与 token 预算 |
 | Shared types and configuration | `core/` | `core/paths.py` |
 | Online robot execution | `robotics/backends/` | `simulation.py`, `isaac_official.py` |
 | Official robot assets and policies | `robotics/microduck/` | `official_policies.py` |

@@ -26,7 +26,8 @@ GPU 验收与 RL 保持停止。后续获得执行授权时，同时最多使用
 | 感知 | CPU RGBD 与几何复核，固定源码 SAM3.1 + YOLO26 服务记录 | 独立标注、识别准确率、距离误差与目标跟踪 |
 | 语音 | 三个固定 Qwen 模型 CPU 推理、四段 WAV 与全部回读、36 项音色和参数测试 | 主观音质、指令语料、交互延迟、机载设备 |
 | 资产与依赖 | 两种模型、Office/Hospital CPU 导入、官方 contact model 和发布准备 | 当前源码 GPU 求解、首次 kernel 初始化与渲染 |
-| 安装与记录 | 439 个文件、三份许可证、Mac 29 项及 Linux 27 项独立调用，原生事件与 agentic MP4 | 干净环境完整流程复现、可分发模型与资产说明 |
+| 安装与记录 | 440 个文件、三份许可证、Mac 29 项及 Linux 27 项独立调用，原生事件与 agentic MP4 | 干净环境完整流程复现、可分发模型与资产说明 |
+| 发布模型设置 | 共享模型参数、实际原生 SDK 请求、六阶段四场景发布前检查、查询期限与中止记录 | 当前源码完整 GPU 验收的模型、场景及来源保持一致 |
 | GPU 资源检查 | 实际设备及重复进程记录、31 项检查、占用拒绝与持续空闲检查；公共源码入口明确 | 后续获得执行授权时重新检查设备，并运行完整声明的 GPU 验收 |
 
 每项证据使用对应源码和配置，详细记录见[CPU 开发验证](reports/cpu-development-readiness-2026-10-08.md)、
@@ -34,6 +35,7 @@ GPU 验收与 RL 保持停止。后续获得执行授权时，同时最多使用
 [当前状态](implementation-status.md)和[发布要求](release-readiness.md)。
 连续任务与资源读取记录见[任务历史](reports/voice-task-context-2026-10-09.md)和
 [GPU 状态读取检查](reports/gpu-inventory-2026-10-09.md)。
+[发布模型设置](reports/release-model-settings-2026-10-09.md)保存本地与远程一致的实际运行参数。
 完整产品范围由[Project Design](Agentic%20Microduck%20-%20Project%20Design%20v0.1.md)维护。
 
 ## 1. 步骤、依赖和完成依据

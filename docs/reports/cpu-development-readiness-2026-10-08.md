@@ -8,6 +8,7 @@ stopped.
 
 | Capability | Verified scope | Evidence |
 | --- | --- | --- |
+| 发布模型设置与查询期限 | 117 项检查、实际原生 Luna 请求、完整六阶段四场景发布前检查、三十秒查询期限及中止记录；440 个安装文件、Mac 29 项与 Linux 27 项 CLI 调用 | [发布模型设置](release-model-settings-2026-10-09.md) |
 | GPU 状态读取与接纳 | 实际八设备和重复进程记录；31 项检查；GPU 2 持续空闲检查及 GPU 4 占用拒绝；实际测量线程退出；439 个安装文件、Mac 29 项和 Linux 27 项 CLI 调用 | [GPU 状态检查](gpu-inventory-2026-10-09.md) |
 | 连续语音及任务历史 | 实际 Qwen 与 Luna 的两项正式任务、745 次控制、2,980 次物理步骤、166 张原始 PNG；两次经验搜索、独立目标、固定音色、归属检查和完整退出 | [任务历史](voice-task-context-2026-10-09.md) |
 | 客户端音频动态库 | macOS 与 Ubuntu 22.04 的实际 PortAudio、libsndfile 加载及独立安装通过 | [音频动态库](native-audio-readiness-2026-10-09.md) |

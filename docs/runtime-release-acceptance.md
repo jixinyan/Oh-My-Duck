@@ -26,12 +26,19 @@ resolved dependencies and generated files have been verified. See the
 
 `--preflight-only` checks matching clean source, both pinned Harness revisions, the actual remote environment versions, every declared stage and motion parameter, all downloaded scene file sizes and SHA256 values, public map references, converted robot assets, the ten official policy models and the selected provider metadata. CUDA visibility is cleared and no simulation worker starts. The output records `preflight_passed`, `gpu_acceptance_performed: false` and the actual per-scene checks. Full GPU execution performs the same preflight before admission.
 
+发布流程接受 `--model`、`--model-api`、`--reasoning-effort` 和
+`--max-output-tokens`。模型标识与 API 按配置选择，也可以明确指定；
+发布流程默认使用 `high` 和 8192 token。输出预算范围为 256–8192，包含 reasoning tokens。
+发布前检查与 `campaign.json` 保存同一份有效设置，导航启动使用这些设置。
+模型配置验证及参数传递位于 `integrations/model_settings.py`。
+
 ```bash
 omd validate release --preflight-only \
   --worker-host jd_B300 --worker-root "$OMD_WORKER_ROOT" \
   --worker-python "$OMD_WORKER_PYTHON" --worker-edh-source "$OMD_WORKER_EDH" \
   --worker-policy-dir "$OMD_WORKER_POLICIES" --edh-source "$OMD_LOCAL_EDH" \
   --remote-provider-config "$OMD_PROVIDER_CONFIG" \
+  --model gpt-6-luna --model-api responses --reasoning-effort high --max-output-tokens 8192 \
   --output outputs/acceptance/runtime-preflight-new
 ```
 
@@ -52,6 +59,7 @@ omd validate release \
   --worker-python "$OMD_WORKER_PYTHON" --worker-edh-source "$OMD_WORKER_EDH" \
   --worker-policy-dir "$OMD_WORKER_POLICIES" --edh-source "$OMD_LOCAL_EDH" \
   --remote-provider-config "$OMD_PROVIDER_CONFIG" --gpu 2 \
+  --model gpt-6-luna --model-api responses --reasoning-effort high --max-output-tokens 8192 \
   --output outputs/acceptance/runtime-release-20261007-01
 ```
 
@@ -60,6 +68,9 @@ The controller checks clean source before each stage and holds an exclusive loca
 原生 CSV 读取与独占设备检查位于 `infrastructure/gpu_inventory.py`。
 发布流程与训练准备、测量复用该模块。实际设备记录、持续空闲检查及安装结果见
 [GPU 状态读取检查](reports/gpu-inventory-2026-10-09.md)。
+三十秒期限覆盖每次 SSH 设备及进程查询、采样间隔和最终接纳检查。
+期限耗尽时立即传播错误，保留已有 CSV 与中止记录。实际参数、查询期限和完整发布前检查见
+[发布模型设置](reports/release-model-settings-2026-10-09.md)。
 
 The controller owns each launched process and saves its PID, process group, cancellation signals, exit status and cleanup timing. Remote metric stages use `run_owned_acceptance.py`: closing the SSH input channel requests cancellation, including after a transport disconnect. The remote supervisor interrupts only its own campaign, and that campaign closes its own physical worker. Interrupted metric stages copy available artifacts and lifecycle records back to the controller. Navigation cancellation gives the runner time to close its native session before the controller closes its server. Graceful cleanup has a 120-second deadline; exceeded deadlines produce termination evidence and an explicit failure.
 

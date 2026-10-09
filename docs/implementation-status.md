@@ -21,7 +21,8 @@ work requirements and dependencies are in the
 | Component | Verified scope | Remaining acceptance |
 | --- | --- | --- |
 | Source organization | Owned code under `src/oh_my_duck`; native Node deployment under `integrations/edh`; capability source maps | Continue documenting new capability and adapter entry points |
-| CLI/application | 原生服务、验证与记录、场景 Schema、policy package 与语音；439 个安装文件、三份 license、Mac 29 项与 Linux 27 项 CLI 调用 | 完整工作流程在独立环境中的执行检查 |
+| CLI/application | 原生服务、验证与记录、场景 Schema、policy package 与语音；440 个安装文件、三份 license、Mac 29 项与 Linux 27 项 CLI 调用 | 完整工作流程在独立环境中的执行检查 |
+| 发布模型设置 | 共享模型与 API 参数；实际原生 Luna 调用；六阶段、四场景完整发布前检查；查询期限与失败记录 | 声明的实际 GPU 导航运行验收 |
 | GPU 资源读取 | 公共 CSV 模块、实际设备及重复进程记录、31 项检查、占用拒绝及持续空闲检查 | 每次分配重新检查实际状态；当前 GPU 运行验收保持停止 |
 | Core types, tools and recording | Complete Draft 2020-12 Schemas, finite arguments, actual handlers, request identity, JSONL/native events, original image hashes and MP4 | New tools require their actual implementation and relevant execution evidence |
 | Native Harness | Fixed EDH, actual models, official policies, sensors, ActionGate and independent Verifier; CPU text/recorded-voice office tasks passed | Current-source multi-scene long navigation and repeated task statistics |
@@ -50,6 +51,7 @@ Linux 独立安装检查通过 438 个文件和 27 项 CLI 调用。
 
 | Capability | Recorded result | Evidence |
 | --- | --- | --- |
+| 发布模型与查询期限 | 117 项检查，实际原生 SDK 模型请求、六阶段四场景发布前检查；440 个安装文件；三十秒查询期限与中止记录 | [发布模型设置](reports/release-model-settings-2026-10-09.md) |
 | GPU 资源读取 | 31 项实际记录检查、持续空闲检查、占用拒绝及测量线程退出；439 个安装文件、Mac 29 项与 Linux 27 项 CLI 调用 | [GPU 状态读取](reports/gpu-inventory-2026-10-09.md) |
 | 连续语音与任务历史 | 两项正式任务通过；745 次控制、2,980 次物理步骤、1,784 项事件、166 张 PNG；历史引用、两次经验搜索、独立目标记录、固定音色反馈与资源释放；438 个安装文件、Mac 29 项和 Linux 27 项 CLI 检查通过 | [任务历史引用](reports/voice-task-context-2026-10-09.md) |
 | Recorded-voice office navigation | Formal Verifier passed; 666 controls, 2664 substeps, 1323 events, 141 original images, confirmed-profile feedback, five process exits; fully decoded 174.54-second 1080p agentic MP4 | [Voice navigation](reports/cpu-voice-navigation-2026-10-08.md) |
