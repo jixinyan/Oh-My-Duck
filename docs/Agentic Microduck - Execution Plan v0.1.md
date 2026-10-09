@@ -10,6 +10,8 @@ tags:
   - sim-to-real
 ---
 
+> CPU 录音导航完成 Qwen ASR、OpenAI `gpt-6-luna` high、原生 Harness、官方 policy、正式 Verifier 与固定音色反馈的实际执行。666 个控制步、2664 个物理子步、1323 个事件和 141 张原始图片通过独立核验，会话与五个进程全部关闭。174.54 秒的 1080p agentic MP4 通过完整解码与文字范围检查，见[语音导航验证](reports/cpu-voice-navigation-2026-10-08.md)。GPU 与 RL 保持停止。
+
 > 原生 CPU Luna 办公室导航完成正式验收：569 个控制步、2276 个子步、1040 个事件、113 个观察相机帧、12 次停止进度检查及完整 MP4 解码通过。会话与所属进程全部关闭，见[导航验证](reports/cpu-luna-navigation-2026-10-08.md)。GPU 与 RL 保持停止。
 
 > 原生执行重试与目标信息读取完成真实 CPU 检查：三次执行、200 个控制步、800 个子步、六次启动拒绝、三次物理状态保持检查和独立 ONNX 复核。18 项导入测试、433 个安装文件及 26 个调用通过，见[原生重试验证](reports/native-execution-retry-2026-10-08.md)。GPU 与 RL 保持停止。
@@ -28,7 +30,7 @@ tags:
 
 > 2026-10-08：训练计划的计数、比例与 allocation 参数完成启动前检查，已有任务、原生 PPO 和全部已提交计划保持原有内容。Linux 110 项测试、三项子测试与独立安装的 430 个文件和 24 个调用通过。GPU 与 RL 保持停止，见[训练输入验证](reports/campaign-input-admission-2026-10-08.md)。
 
-> 2026-10-08：CPU 语音任务完成实际 Qwen ASR、OpenAI `gpt-6-luna` high、原生 policy/sensor 工具、中断及固定音色反馈检查。1400 个控制步、5600 个物理子步、2427 个事件、296 张原始图片、两段 WAV、音色资料与五个进程退出通过独立核验；办公室导航尚待正式验收。GPU 与 RL 保持停止，见[任务记录](reports/cpu-voice-task-2026-10-08.md)。
+> CPU 任务中断完成实际 Qwen ASR、OpenAI `gpt-6-luna` high、原生 policy/sensor 工具及固定音色反馈检查。1400 个控制步、5600 个物理子步、2427 个事件、296 张原始图片、两段 WAV、音色资料与五个进程退出通过独立核验。见[中断记录](reports/cpu-voice-task-2026-10-08.md)。GPU 与 RL 保持停止。
 
 > 2026-10-08：三个固定 Qwen 模型完成 CPU 推理，26 项设备检查、72 次无效参数调用及安装后六次 CUDA 不可用调用通过。三段 WAV、音色资料、数据库内容、独立 CLI 和全部模型进程退出检查通过；三段回读文字中两段一致，一段保留「你好／您好」差异。430 个安装文件和 24 个调用通过。GPU 与 RL 保持停止，见[CPU 语音验证](reports/qwen-cpu-validation-2026-10-08.md)。
 

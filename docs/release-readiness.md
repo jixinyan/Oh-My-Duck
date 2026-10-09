@@ -1,5 +1,14 @@
 # Release readiness
 
+Recorded speech completed the CPU office task through Qwen ASR, OpenAI
+`gpt-6-luna` high, the pinned native Harness, official policies and the independent
+Verifier. Confirmed-voice feedback, 666 controls, 2664 physical substeps,
+1323 events, 141 original images and all five process exits passed independent
+checks. The profile remained unchanged. Its 174.54-second 1080p agentic MP4
+passed complete decoding and every-frame text-boundary checks, with the original
+instruction before the task video and fixed-voice feedback afterwards. See
+[CPU voice navigation](reports/cpu-voice-navigation-2026-10-08.md).
+
 Native retries preserve physical state and bind commands to admitted executions.
 Progress tools expose native goal targets and hold evidence. Three actual CPU
 executions, 200 controls, 800 substeps, independent ONNX parity, 18 import tests,

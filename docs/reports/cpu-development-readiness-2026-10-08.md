@@ -8,6 +8,7 @@ stopped.
 
 | Capability | Verified scope | Evidence |
 | --- | --- | --- |
+| Native recorded-voice office task | Actual Qwen ASR, OpenAI Luna, official policy and sensor tools, passed formal Verifier and confirmed-voice feedback; 666 controls, 2664 substeps, 1323 events, 141 decoded original images, 174.54-second 1080p MP4 fully decoded, unchanged voice profile and five processes exited | [CPU voice navigation](cpu-voice-navigation-2026-10-08.md) |
 | Native Luna office task | Actual OpenAI model, official policy and sensors; passed formal Verifier, 569 controls, 2276 substeps, 1040 events, 113 observer frames, 12 progress checks, full MP4 decode and resource release | [CPU model navigation](cpu-luna-navigation-2026-10-08.md) |
 | Native execution retries and goal evidence | Three executions preserve complete physical state; 200 controls, 800 substeps, six rejected starts and three read-only checks; independent ONNX parity, 18 import tests, 433 installed files and 26 CLI calls | [Retry validation](native-execution-retry-2026-10-08.md) |
 | Metric tool parameters | Native units, speeds and turn translation; actual Luna four-motion execution, 17 import tests, 432 installed files and 25 CLI calls | [Tool guidance](metric-tool-guidance-2026-10-08.md) |

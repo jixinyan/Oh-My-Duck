@@ -1,5 +1,7 @@
 # Implementation status
 
+> CPU 录音导航完成实际 Qwen ASR、OpenAI `gpt-6-luna` high、原生 Harness、官方 policy 和固定音色反馈；正式 Verifier 为 passed。666 个控制步、2664 个物理子步、1323 个事件和 141 张原始图片通过独立核验，五个进程正常结束，音色资料保持一致。174.54 秒的 1080p agentic MP4 完成完整解码与文字范围检查，见[语音导航验证](reports/cpu-voice-navigation-2026-10-08.md)。GPU 与 RL 保持停止。
+
 > OpenAI Luna 通过原生 Harness 完成 CPU 公寓办公室导航，正式 Verifier 为 passed。569 个控制步、2276 个子步、1040 个事件、113 个观察相机帧与 12 次停止进度检查通过；1920×1080 MP4 完成编码和完整解码，会话资源已关闭，见[导航验证](reports/cpu-luna-navigation-2026-10-08.md)。GPU 与 RL 保持停止。
 
 > 原生重试保留完整物理状态，并为新执行准备所属的有界命令；进度工具返回同一 sequence 的原生目标信息。三次执行、200 个控制步、800 个子步、六次启动拒绝、三次读取检查与独立 ONNX 复核通过；18 项导入测试、433 个安装文件和 26 个调用通过，见[原生重试验证](reports/native-execution-retry-2026-10-08.md)。GPU 与 RL 保持停止。
@@ -18,7 +20,7 @@
 
 > 2026-10-08：训练计划在启动 worker 与创建输出目录之前检查整数计数、有限比例及 search 配置。全部已提交训练计划保持原有内容；本地 108 项测试与三项子测试通过，两项检查因可选环境路径缺失跳过，Linux 的 110 项测试与三项子测试全部通过。独立安装核验 430 个文件、三份许可证和 24 个公开调用。GPU 与 RL 保持停止，见[训练输入验证](reports/campaign-input-admission-2026-10-08.md)。
 
-> 2026-10-08：CPU 录音任务通过实际 Qwen ASR、OpenAI `gpt-6-luna` high、原生 policy/sensor 工具、中断与固定音色反馈检查。1400 个控制步、5600 个物理子步、2427 个事件、296 张原始图片和两段 WAV 通过独立核验；音色资料保持一致，会话关闭，五个进程全部退出。办公室导航尚未完成，没有正式 Verifier 结果。GPU 与 RL 保持停止，见[CPU 语音任务记录](reports/cpu-voice-task-2026-10-08.md)。
+> CPU 任务中断通过实际 Qwen ASR、OpenAI `gpt-6-luna` high、原生 policy/sensor 工具与固定音色反馈检查。1400 个控制步、5600 个物理子步、2427 个事件、296 张原始图片和两段 WAV 通过独立核验；音色资料保持一致，会话关闭，五个进程全部退出。见[任务中断记录](reports/cpu-voice-task-2026-10-08.md)。GPU 与 RL 保持停止。
 
 > 2026-10-08：Qwen ASR、Base TTS 和 VoiceDesign 完成真实 CPU 推理，模型参数均为 CPU Float32，CUDA 未初始化。两个锁定环境通过 26 项设备检查和 72 次无效参数调用，安装后的包完成六次 CUDA 不可用检查。三段 WAV、固定音色、独立 CLI 查询及进程退出检查通过，430 个安装文件和 24 个调用通过；三段音频回读有两段文字一致，一段保留「你好／您好」差异。GPU 与 RL 保持停止，见[CPU 语音验证](reports/qwen-cpu-validation-2026-10-08.md)。
 
@@ -248,11 +250,11 @@ is prepared but not launched. Default task recipes and native PPO algorithms rem
 | Component | Current state |
 |---|---|
 | Source organization | First-party code consolidated under `src/oh_my_duck`; obsolete `training/` packages removed |
-| CLI/application | Native services, validation/replay, scene schemas, registered packages and voice; 433 installed files, 26 CLI calls, state-preserving retries, formal CPU Luna navigation and trace MP4 verified |
+| CLI/application | Native services, validation/replay, scene schemas, registered packages and voice; 433 installed files, 26 CLI calls, state-preserving retries, formal CPU Luna text/recorded-voice navigation and agentic MP4 verified |
 | Core contracts/tool catalog/recording | 七项仿真工具的完整 Draft 2020-12 Schema、实际 handler 与无效参数拒绝已经验证；JSONL、原生事件和 PNG 导出、SHA256 检查及 1080p agentic MP4 保留实际验证资料 |
 | Agentic Harness, skills, robot execution | 固定 EDH 原生会话、SSH GPU worker、真实模型、官方 ONNX、ActionGate 与独立 Verifier 已运行；CPU 公寓与 Newton Office 的固定场景导航、Office 四个 policy 的完整多动作任务和 Hospital 轮滑有序路线通过。三个场景各通过三个距离/角度会话；全部长距离请求精度、图像输入独立 VLN、多场景泛化与真机待验收 |
 | Perception and policy adapters | 官方十项 policy 与登记的训练包共享 61-to-14 推断及原生工具；实际 CPU Walking/StandUp 包执行、episodic 时长/接续与停止通过。Newton Office 的 velstand/alpha_walking、head RGB、observer 场景、ToF、IMU 与 odometry 已验证；学习行为、物体识别及物体效果待验收 |
-| Voice interaction | 三个固定 Qwen 模型的 CPU 推理、安装入口和固定音色检查通过，音频回读文字为 2/3 一致，见[CPU 验证](reports/qwen-cpu-validation-2026-10-08.md)。Qwen ASR、已确认音色 TTS、原生 Harness、Newton/BAM 与独立 Verifier 的录音任务闭环已经通过；Mac 音频设备、合成中断与 CPU MuJoCo/BAM、Newton 任务执行中断通过，会话释放资源。Microduck 音频设备待验收。见[闭环记录](reports/end-to-end-2026-10-03.md)与[设备检查](reports/voice-interaction-validation-2026-09-29.md) |
+| Voice interaction | 三个固定 Qwen 模型的 CPU 推理、安装入口和固定音色检查通过，音频回读文字为 2/3 一致，见[CPU 验证](reports/qwen-cpu-validation-2026-10-08.md)。Qwen ASR、已确认音色 TTS、原生 Harness 与正式 Verifier 的 CPU 录音导航通过；固定源码 Newton 录音任务、Mac 音频设备、合成中断和两种仿真任务执行中断分别具有验证记录，会话释放资源。Microduck 音频设备待验收。见[CPU 语音导航](reports/cpu-voice-navigation-2026-10-08.md)、[Newton 记录](reports/end-to-end-2026-10-03.md)与[设备检查](reports/voice-interaction-validation-2026-09-29.md) |
 | MuJoCo RL | Both representative tasks × both native PPO frameworks passed the single-GPU lifecycle and completed replay |
 | Isaac/Newton RL | Both representative tasks × both native PPO frameworks passed the single-GPU lifecycle and completed replay |
 | Newton physics | Actual solver, canonical state/sensors, BAM cadence, DR and penalties audited; current CPU import/contact checks cover both robot variants and all Office/Hospital geometric colliders; current GPU runtime acceptance pending |

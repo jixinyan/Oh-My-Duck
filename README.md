@@ -4,99 +4,11 @@
 
 # Oh My Duck 🦆
 
-Use `omd validate` for native acceptance and recorded-evidence audits, and
-`omd replay` for session management and terminal run export. The
-[source map](docs/architecture.md#source-organization) lists the responsible module
-for each capability. The same commands are available through `python -m oh_my_duck`.
-
-Prepared distance and rotation requests retain their identity through native
-execution. Actual CPU motion, request admission, caller deadlines and cleanup
-passed [metric request checks](docs/reports/metric-request-admission-2026-10-08.md).
-Use `omd validate metric-admission` to exercise that lifecycle.
-
-Native motion tools advertise default speeds, units and completion requirements.
-The Planner observes actual translation after turning. See the
-[parameter guide](docs/metric-policy-tools.md) and
-[CPU tool checks](docs/reports/metric-tool-guidance-2026-10-08.md).
-
-Native retries retain physical state and bind a bounded command to each new
-execution. Progress tools expose the native goal target and hold evidence.
-Actual CPU lifecycle, independent ONNX checks and installation passed
-[retry validation](docs/reports/native-execution-retry-2026-10-08.md).
-Use `omd validate execution-retry` to exercise that lifecycle.
-
-OpenAI `gpt-6-luna` completed the native CPU apartment office task with official
-policies, actual sensors and a passed independent Verifier result. The
-[navigation record](docs/reports/cpu-luna-navigation-2026-10-08.md) includes the
-1920×1080 MP4 with simulation frames, head RGB and agentic trace.
-
-Application services and voice use the same native task client for sessions,
-submission, status, stopping and closing. Tool arguments use complete JSON Schema
-Draft 2020-12. Actual CPU service lifecycle, 77 tests, 33 subtests, 430 independently
-installed files and 24 CLI calls passed
-[interface validation](docs/reports/native-application-interfaces-2026-10-08.md).
-The [application source map](src/oh_my_duck/agentic/README.md) locates each interface.
-
-CPU apartment perception uses the shared native tools to return actual head RGB,
-visible geometry, calibrated distance and bearing. Five software-rendered states
-and 1253 native pixel intersections passed
-[independent CPU checks](docs/reports/cpu-scene-perception-2026-10-08.md).
-Tool parameters advertise the scene's configured perception sources. Actual
-native sessions, endpoint validation and installed entry points passed
-[source-selection checks](docs/reports/perception-source-capabilities-2026-10-08.md).
-
-Training campaigns validate integer counts and finite search fractions before
-creating outputs or launching workers. All committed plans preserve their
-configuration; 110 Linux CPU tests and independent installation passed
-[campaign input validation](docs/reports/campaign-input-admission-2026-10-08.md).
-
-Qwen ASR, Base TTS and VoiceDesign passed actual CPU inference with fixed model
-commits and the same confirmed voice profile. Three generated WAV files, installed
-model admission, profile preservation and process release passed
-[CPU voice validation](docs/reports/qwen-cpu-validation-2026-10-08.md).
-ASR text matched two of the three generated utterances; recognition accuracy
-requires separate evaluation. GPU acceptance and RL remain stopped.
-
-The [installed CPU voice-task check](docs/reports/cpu-voice-task-2026-10-08.md)
-verified actual Qwen ASR → OpenAI `gpt-6-luna` → native policy/sensor tools →
-interruption → fixed-voice feedback. The run preserved 1400 controls, 5600 physical
-substeps, 2427 events and 296 original images; all resources were released.
-This CPU voice record covers confirmed interruption and fixed-voice feedback.
-
-Verified CPU paths cover actual policy motion, stopping, cancellation, native SDK
-transport, recorded sensors, voice profiles, assets and independent installation.
-`omd validate pose` exercises head/body commands through the native Harness and
-ActionGate; [measured response, return and independent audits](docs/reports/native-pose-2026-10-08.md)
-passed with software rendering. `omd validate pose-audit` checks the saved evidence.
-`omd validate model-assets` audits both robot variants, passive joints, geometry,
-materials and actual Newton imports using only CPU. The
-[CPU readiness record](docs/reports/cpu-development-readiness-2026-10-08.md)
-links source pins, measurements and reproduction instructions.
-Actual Office and Hospital imports passed geometry and contact-configuration
-checks for all 5682 geometric colliders and 164 signed-scale transformations.
-Official solver contact data passed four actual Newton CPU model constructions
-and native MuJoCo Warp compilations across both robot variants and scenes.
-
-Training packages can be registered with `omd harness --policy-registry` and
-selected through native tools. The registry declares each package's model,
-command channels and SHA256. Registered locomotion also uses distance/angle tools.
-Actual CPU execution of retained Walking and StandUp packages, episodic
-completion, transition and stopping passed
-[integration checks](docs/reports/policy-packages-2026-10-08.md). The
-[registry guide](docs/policy-registry.md) describes package admission and commands.
-
-Newton uses OpenUSD 26.08 and verifies its unique provider and installed files
-before GPU allocation. Training, evaluation, diagnostic and direct runtime entry
-points passed [actual preflight validation](docs/reports/newton-execution-preflight-2026-10-08.md).
-GPU acceptance and RL remain stopped. The
-[runtime acceptance guide](docs/runtime-release-acceptance.md) defines subsequent
-authorized execution and resource requirements.
-
 [![Status: active development](https://img.shields.io/badge/status-active_development-blue)](docs/implementation-status.md)
 [![RL behavior: pending](https://img.shields.io/badge/RL_behavior-pending-orange)](docs/reports/rl-walking-low-speed-launch-2026-09-29.md)
 [![CPU motion: verified](https://img.shields.io/badge/CPU_motion-verified-2ea44f)](docs/reports/offline-release-validation-2026-10-07.md)
 [![CPU Luna navigation: verified](https://img.shields.io/badge/CPU_Luna_navigation-verified-2ea44f)](docs/reports/cpu-luna-navigation-2026-10-08.md)
-[![Voice: native task verified](https://img.shields.io/badge/voice-native_task_verified-green)](docs/reports/end-to-end-2026-10-03.md)
+[![Voice: native task verified](https://img.shields.io/badge/voice-native_task_verified-green)](docs/reports/cpu-voice-navigation-2026-10-08.md)
 [![Release: acceptance in progress](https://img.shields.io/badge/release-acceptance_in_progress-blue)](docs/release-readiness.md)
 [![Isaac Office: agentic navigation verified](https://img.shields.io/badge/Isaac_Office-agentic_navigation_verified-green)](docs/reports/metric-camera-tools-2026-09-30.md)
 [![Isaac Hospital: roller and crouch verified](https://img.shields.io/badge/Isaac_Hospital-roller_and_crouch_verified-green)](docs/reports/multiskill-demos-2026-10-01.md)
@@ -117,6 +29,22 @@ Oh My Duck is the implementation of **Agentic Microduck**: a robotics foundation
 
 This is the target experience. The project is under active development; [implementation status](docs/implementation-status.md) distinguishes working components from planned capabilities. Physical-robot validation is deferred until hardware is available.
 
+## Verified workflows
+
+| Workflow | Evidence |
+| --- | --- |
+| 录音指令 → Qwen ASR → Luna → 官方 policy → Verifier → 固定音色反馈 | [CPU 语音导航与 agentic MP4](docs/reports/cpu-voice-navigation-2026-10-08.md) |
+| 文字指令 → 原生 Harness → 办公室导航 | [Luna CPU 导航](docs/reports/cpu-luna-navigation-2026-10-08.md) |
+| 米制前进、角度转向、读取传感器、停止与保留物理状态的重试 | [工具参数](docs/metric-policy-tools.md)、[原生重试](docs/reports/native-execution-retry-2026-10-08.md) |
+| 原始 RGBD、可见目标、距离与 bearing | [CPU 感知](docs/reports/cpu-scene-perception-2026-10-08.md)、[感知来源](docs/reports/perception-source-capabilities-2026-10-08.md) |
+| Walking/StandUp 训练包登记、执行与 policy 接续 | [Policy registry](docs/policy-registry.md)、[训练包验收](docs/reports/policy-packages-2026-10-08.md) |
+| Qwen CPU 推理、音色持久保存与任务中断 | [模型与音色](docs/reports/qwen-cpu-validation-2026-10-08.md)、[执行中断](docs/reports/cpu-voice-task-2026-10-08.md) |
+| CPU 原生执行、资产、依赖与独立安装 | [CPU 开发验收](docs/reports/cpu-development-readiness-2026-10-08.md) |
+
+GPU 验收与 RL 当前保持停止。当前源码的 Newton 运行、多场景长导航、识别准确率、
+学习行为与 Microduck 设备需要各自的验收；范围和执行要求见
+[发布准备](docs/release-readiness.md)与[运行验收流程](docs/runtime-release-acceptance.md)。
+
 ## What the project provides
 
 | Capability | Purpose |
@@ -136,27 +64,51 @@ The duck's name, voice and remembered experiences give it continuity. Learning n
 
 ![Project architecture: interaction, external harness, robot tools, simulation and experience recording.](docs/diagrams/project-overview.svg)
 
-**外部 Harness 负责 agent loop。** Oh My Duck 提供机器人工具、执行适配、训练、语音服务与证据。`omd harness` 使用固定版本 `8a5e685b22d032207f53db20454f0992a4ad60fd` 的 Embodied-DeepSeek-Harness 原生 SessionEnvironment、ActionGate 和独立 Verifier，连接官方预训练 ONNX 策略及 CPU MuJoCo/BAM 公寓。真实 Astra 会话已读取图像与状态传感器、调用工具、执行 14 关节动作，并完成有界控制、暂停、策略切换、恢复和 `finish_policy` 正式结束。从 corridor 固定出生位置完成的 office 导航执行了 760 个实际控制步，末段零命令停止，外部障碍接触累计 0；独立 Verifier 判定 passed，Planner 调用原生 `tasks.finish`。[公寓导航验收](docs/reports/harness-office-navigation-2026-09-30.md)。
+**外部 Harness 负责 agent loop。** `omd harness` 使用固定版本
+`8a5e685b22d032207f53db20454f0992a4ad60fd` 的 Embodied-DeepSeek-Harness
+原生 SessionEnvironment、ActionGate 和独立 Verifier。Oh My Duck 提供语音、
+机器人工具、执行适配、训练和原始证据；工具共享原生任务接口和完整 JSON Schema。
+部署与模型连接方式见[原生 Harness 使用说明](docs/harness-native-integration.md)。
 
-High-frequency joint control stays with the policy/runtime. The harness chooses tasks and can observe, interrupt or replan; a model response is not itself evidence that a physical task succeeded.
+High-frequency joint control stays with the policy/runtime. The harness chooses tasks and can observe, interrupt or replan. Independent verification uses the resulting physical state.
 
-`microduck.observe` returns head RGB, 64 ToF measurements, IMU, 14 servo measurements, odometry, motion progress and the remaining native execution budget at a confirmed physical boundary. Optional frame-bound perception uses an explicit source. `microduck.wait_for_motion` waits for the native motion boundary, allowing the Planner to continue with measured results. Clean fixed-source CPU continuous motions and the current-source Newton Office five-motion matrix passed independent review; package installation and actual replay rendering also passed. The [runtime acceptance campaign](docs/runtime-release-acceptance.md) is stopped at the user's request. Hospital reverse motion and the remaining stages require acceptance. Future allocation requires zero compute processes on the selected device, with no GPU sharing. See the [evidence and remaining scope](docs/reports/runtime-observation-acceptance-2026-10-07.md).
+`microduck.observe` returns head RGB, 64 ToF measurements, IMU, 14 servo measurements,
+odometry, motion progress, goal evidence and the remaining execution budget at a
+confirmed physical boundary. `microduck.wait_for_motion` waits for that boundary.
+`microduck.walk(distance_m)` and `microduck.rotate(angle_deg)` use measured
+odometry, braking and five stopped samples. Turns report their actual translation.
+The [tool guide](docs/metric-policy-tools.md) defines units, speeds and completion
+requirements; the [metric matrix](docs/reports/metric-controller-acceptance-2026-10-07.md)
+records measurements and source pins.
 
-The current foot controller passed three CPU MuJoCo/BAM apartment sessions and three Newton Office sessions. Each scene tested +0.5 m, −0.5 m, +1.0 m and ±45°. Maximum position/angle errors were 3.52 cm / 3.78° in the apartment and 2.16 cm / 4.96° in Office. All ten actions achieved measured upright stopping with zero external-obstacle contacts. The reproducible matrix preserves raw events, camera frames, source/runtime hashes and session cleanup. An independent artifact verifier reconstructs each motion from physical samples and checks native image bytes, source hashes, stopping and execution counters. Target progress monitoring reports stalled commands and confirms stopping. A physically stationary target within tolerance enters zero-command braking and completes after measured stopping. See the [measured cases and scope](docs/reports/metric-controller-acceptance-2026-10-07.md) and [acceptance commands](docs/release-readiness.md#metric-policy-matrix).
-
-External Isaac USD scenes enter through `omd harness --scene-config`; the native Python worker can run on an explicitly selected remote GPU over SSH. The Harness calls `microduck.walk(distance_m)` and `microduck.rotate(angle_deg)` through official `alpha_walking`, with measured progress, braking and five stopped samples. Newton Office tests passed at 0.4 and 1.0 meters and +45°, −45° and +270°; turns include measured translation. Head RGB uses the official forward camera frame, and the observer camera includes the duck and Office geometry. A real Astra/high session executed the distance tool under Newton/BAM, completed 313 control steps without external obstacle contact, and obtained a passed independent verdict before native `tasks.finish`. The 60.3-second agentic MP4 combines actual robot frames, head RGB, public Planner text, plans, tool parameters and the formal verdict. See the [tools and camera acceptance record](docs/reports/metric-camera-tools-2026-09-30.md), [tool parameters](docs/metric-policy-tools.md) and [recording instructions](docs/harness-native-integration.md#agentic-mp4). Multi-scene long navigation and policy-specific object effects remain open; CPU tools have separately verified `kick_left` followed by `alpha_stand`.
+External Isaac USD scenes enter through `omd harness --scene-config`. A native
+Python worker can run on an explicitly selected remote GPU over SSH. Standard
+feet use official `alpha_walking`; the roller model uses `roller` and exposes its
+four passive wheel joints. `--policy-registry` also makes verified training
+packages available to the same tools. See [policy registration](docs/policy-registry.md),
+[scene configuration](docs/harness-native-integration.md#场景配置) and
+[agentic MP4 production](docs/harness-native-integration.md#agentic-mp4).
 
 ![Actual Newton Office robot frame and head RGB with recorded Planner text, metric tool feedback and a passed independent verdict.](docs/assets/office-agentic/metric-demo.png)
 
-Hospital 的官方 `roller` 完成东向、北向和西向三阶段导航，行走段端点位移累计 5.44 米，独立 Verifier 与原始记录复核通过。最终误差 9.56 厘米，连续停止 80 个样本，累计外部障碍接触为零；170 秒 MP4 包含实际场景、head RGB、工具参数和公开 agentic trace。两次未满足动作精度要求的结果完整保留，模型根据当前测量继续完成路线。[导航证据](docs/reports/navigation-acceptance-2026-10-07.md)与[自动验收入口](docs/navigation-acceptance.md)记录固定场景范围、原始图片和资源释放。
+Hospital 的官方 `roller` 完成东向、北向和西向三阶段导航，行走段端点位移累计
+5.44 米，独立 Verifier 与原始记录复核通过；170 秒 MP4 包含实际场景、head RGB、
+工具参数和公开 agentic trace。[导航证据](docs/reports/navigation-acceptance-2026-10-07.md)
+记录固定场景的测量、原始图片和资源释放。
 
-当前控制器的 Office 有序路线测得 3.05 米行走段累计位移，最终目标误差 11.68 厘米，零外部接触；两次顺时针转弯触发停滞并通过传感器与有界命令继续运动。最终停止保持因 2400 秒时间预算拒绝，run failed，没有正式 Verifier 结果。自动入口已保存 4266 个事件、549 张原始图片并释放 worker；顺时针响应、预算内正式完成和初始化可靠性继续验收。[Office 测量](docs/reports/navigation-acceptance-2026-10-07.md#office-有序导航测量)。
+`microduck.inspect_scene(prompt, source)` provides frame-bound target boxes,
+surface distance and bearing. The isolated SAM3.1 + YOLO26 service performs
+text-prompt segmentation and box association; the explicit `simulator_ground_truth`
+source uses native shape masks and calibrated ray distances. Results retain their
+detection, mask and distance sources. See [perception tools](docs/perception-navigation.md).
 
-`microduck.inspect_scene(prompt, source)` provides frame-bound target boxes, surface distance and bearing. Its isolated SAM3.1 + YOLO26 service runs actual text-prompt segmentation and box association on Newton Office RGBD, using the existing local SAM3.1 checkpoint on the GPU host. Actual wall, desk, floor and plant masks returned valid simulator ray distances; empty detections and incorrect YOLO class associations remain visible in the results. Recognition accuracy and hardware perception require separate evaluation. The explicit `simulator_ground_truth` source uses visible native shape masks and Newton ray-hit distances. See [perception and navigation tools](docs/perception-navigation.md).
-
-A real native-Harness Office task now navigates three stages with repeated desk observations, walking turns, measured stopping and replanning after stalled turns. Its explicitly authorized simulator-ground-truth route passed the independent Verifier after 3689 control steps; final goal error was 0.162 m and desk-bound clearance was 1.043 m. A 193.3-second MP4 records the duck, perception captures and agentic trace. Three long walking segments exceeded the tools' strict 5 cm endpoint tolerance and retain their failed states. See the [navigation demo and validation scope](docs/reports/perception-vln-demo-2026-09-30.md).
-
-The furnished NVIDIA Hospital runs the official roller robot with four passive wheel joints, `roller` locomotion and an episodic `crouch` policy. A real native-Harness task used SAM3.1 + YOLO26 on current head images, measured wheel rotation, lowered and recovered the body, and passed independent destination verification. Its 63.4-second MP4 combines actual scene cameras and public agentic trace. Current roller metric control passed three independent sessions covering +0.5 m, −0.5 m, +1.0 m and ±45°; maximum errors were 4.93 cm and 3.75°. All five motions achieved measured upright stopping with zero external-obstacle contacts, and their saved artifacts passed independent verification. The complete Office task also passed with `sitstand`, `alpha_stand`, `ground_pick` and `alpha_walking`: measured sitting/standing, head control, reaching, continuous-state recovery and navigation; final target error 4.55 cm, 80 stopped samples and zero external-obstacle contacts. Its 169.1-second MP4 includes actual scene and head cameras with public agentic trace. Six model observations retain their actual empty detections. Object carrying, recognition accuracy and RTX rendering require separate acceptance. See the [Office task measurements](docs/reports/office-skills-acceptance-2026-10-07.md), [Hospital evidence and videos](docs/reports/multiskill-demos-2026-10-01.md) and [metric evidence](docs/reports/metric-controller-acceptance-2026-10-07.md).
+Recorded Hospital and Office tasks demonstrate multiple official policies:
+`roller` and `crouch` for locomotion and body motion; `sitstand`, `alpha_stand`,
+`ground_pick` and `alpha_walking` for sitting, standing, head control, reaching,
+recovery and navigation. Their videos combine actual scene cameras, head RGB,
+tool parameters and independent verdicts. See the
+[Office task](docs/reports/office-skills-acceptance-2026-10-07.md) and
+[Hospital tasks](docs/reports/multiskill-demos-2026-10-01.md).
 
 ## Train with MuJoCo or Isaac / Newton
 
@@ -164,19 +116,33 @@ The furnished NVIDIA Hospital runs the official roller robot with four passive w
 
 RL frameworks are a separate extension axis: RSL-RL and Stable-Baselines3 are the initial supported integrations, with explicit adapters for each supported simulation backend. Framework-native checkpoints and normalization remain part of the policy artifact; framework-independent evaluation enables comparison. See [RL framework choices and extension](docs/rl-frameworks.md).
 
-Both training backends are part of the project scope. The official backend remains available after the Isaac migration. **Isaac uses Newton**, initially targeting its MuJoCo-Warp solver; a PhysX substitution is not an equivalent backend.
+Both training backends are part of the project scope. The official backend remains available after the Isaac migration. **Isaac uses Newton** with its MuJoCo-Warp solver.
 
-Representative RL tasks are flat-ground Walking and StandUp. Task recipes, MDP functions, robot assets and actor/critic settings are maintained in the [RL and robotics modules](docs/architecture.md#source-organization); both backends build on this owned source. BAM actuator behavior, joint mapping, observation/action timing and normalization must match before comparing learning results. Compatible joint policies follow the official **61-observation / 14-action, 50 Hz** contract. Vision/navigation policies need their own adapters; an arbitrary VLA cannot be deployed by simply renaming its output.
+Representative RL tasks are flat-ground Walking and StandUp. Task recipes, MDP functions, robot assets and actor/critic settings are maintained in the [RL and robotics modules](docs/architecture.md#source-organization); both backends build on this owned source. BAM actuator behavior, joint mapping, observation/action timing and normalization must match before comparing learning results. Compatible joint policies follow the official **61-observation / 14-action, 50 Hz** interface. Vision/navigation policies integrate through explicit action and observation adapters.
 
 Task families have separate environment and PPO configurations under `rl/tasks/<family>/`; see the [RL source map](src/oh_my_duck/rl/README.md). [Training campaigns](docs/rl-campaigns.md) assign independent task/framework runs to GPUs, with explicit sharing and checkpoint recovery when needed.
 
-Training and evaluation run headlessly. `omd preview` creates checkpoint videos and a local gallery alongside numerical metrics. The training host is `jd_B300`; W&B records training under the verified project account and keeps local artifacts. The previous MuJoCo/RSL Walking run finished 50,000 updates, and both Newton/RSL StandUp runs finished 15,000; all three completed export and packaging but failed final behavior acceptance. Eight paired Walking control/low-speed-boost learners passed preparation gates and entered full training. The user stopped all eight on 2026-09-30 at 01:10 UTC; checkpoints, outputs and W&B files remain preserved. Final behavior evaluation is pending, and training will not restart automatically. Locomotion tools await policy behavior acceptance. See the [Walking launch record](docs/reports/rl-walking-low-speed-launch-2026-09-29.md), [stop record](docs/reports/rl-walking-user-stop-2026-09-30.md), and [implementation status](docs/implementation-status.md).
+Training and evaluation run headlessly. `omd preview` creates checkpoint videos
+and a local gallery alongside numerical metrics. The training host is `jd_B300`;
+W&B records online under the verified project account and keeps local artifacts.
+Training is stopped, with checkpoints, exports and logs preserved. Learned-policy
+behavior requires its own acceptance. See [training workflows](docs/rl-campaigns.md)
+and [implementation status](docs/implementation-status.md).
 
 ## A voice and history that persist
 
 Voice setup is a deliberate choice: **describe → generate → listen → confirm → save**. Daily TTS uses the active voice profile; restarting or switching execution backends does not silently choose a new voice.
 
-Qwen3 ASR, VoiceDesign and Base TTS use confirmed voice profiles across processes. Recorded speech now runs through the native Harness, actual model tools, official policies, Newton/BAM, independent Verifier and fixed-voice feedback. The verified Office task completed 480 control steps with a final target error of 0.090916 m. A 91.4-second agentic MP4 includes actual simulation views, public task trace, recorded instruction and synthesized feedback. `voice-task` runs this file-based workflow; `voice-session` provides device recording, playback and native task submission. Active-task interruption passed with actual CPU MuJoCo/BAM and Newton policy actions: device-confirmed termination, unchanged action counters afterwards and session resource release. Mac microphone and speaker behavior has separate verification. Microduck audio hardware remains pending. The [release readiness guide](docs/release-readiness.md) includes installed-runtime checks and video production using locked environments. See [voice interaction](docs/voice-interaction.md) and [acceptance evidence](docs/reports/end-to-end-2026-10-03.md).
+Qwen3 ASR, VoiceDesign and Base TTS use confirmed voice profiles across processes.
+`voice-task` connects recorded speech to the native Harness, model-selected policy
+tools, independent Verifier and fixed-voice feedback. `voice-session` provides
+device recording, playback, task submission and interruption. Actual CPU and
+Newton records verify stopping and resource release; Mac audio devices have
+separate checks. Microduck audio hardware requires its own acceptance.
+See [voice interaction](docs/voice-interaction.md),
+[CPU voice navigation](docs/reports/cpu-voice-navigation-2026-10-08.md),
+[task interruption](docs/reports/cpu-voice-task-2026-10-08.md) and
+[Newton voice acceptance](docs/reports/end-to-end-2026-10-03.md).
 
 Episodes preserve what was heard, observed, requested, executed and spoken—including cancellation and partial playback. Simulation and real-world experiences remain labeled separately. The external harness decides how to summarize and retrieve this evidence.
 
@@ -228,7 +194,12 @@ Python modules live in `src/oh_my_duck/`. The native Node deployment lives in
 | Public commands | [cli/](src/oh_my_duck/cli/) |
 
 
-The public development entry point is `python omd.py --help`. Voice file inference runs through `python -m oh_my_duck.cli.voice` in the isolated ASR and TTS environments. Backend dependencies remain isolated.
+Use `omd harness` for the native agent deployment, `omd validate` for actual
+acceptance and recorded-evidence audits, and `omd replay` for session management
+and terminal run export. The same commands are available through
+`python -m oh_my_duck`; `python omd.py --help` is the source entry point.
+Voice inference uses the isolated ASR and TTS environments. Installed-runtime
+checks and video commands are in the [release guide](docs/release-readiness.md).
 
 ## Upstream
 
