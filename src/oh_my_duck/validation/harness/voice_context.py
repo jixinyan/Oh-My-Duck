@@ -58,10 +58,12 @@ def verify(directory: Path) -> dict:
         progress = [item["result"] for item in tools if item["tool"] in (
             "microduck.observe", "microduck.task_progress", "microduck.wait_for_motion")]
         assert progress and progress[-1]["stopped_samples"] >= 5 and not progress[-1]["fallen"]
-        start, finish = progress[0], progress[-1]
+        start, finish = progress[0]["task_start"], progress[-1]
+        assert start["run_task_id"] == run["id"]
         start_evidence = start["goal_check"]["checks"]["goal_reached"]["evidence"]
         final_evidence = finish["goal_check"]["checks"]["goal_reached"]["evidence"]
         scope = final_evidence["goal_scope_id"]
+        assert all(item["task_start"] == start for item in progress)
         assert scope == start_evidence["goal_scope_id"] and scope != previous_scope
         assert start_evidence["held_ticks"] == 0 and not start["goal_check"]["complete"]
         assert final_evidence["goal_bound_sequence"] == start["sequence"]

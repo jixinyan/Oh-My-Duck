@@ -6,7 +6,7 @@
 | Check remote metadata or run allocated-GPU stages | `omd validate release` | `release/campaign.py`, `release/worker.py` |
 | Run declared metric cases | `omd validate metric` | `metric/campaign.py`, `metric/case.py` |
 | Check pending motion requests and explicit command changes | `omd validate metric-admission` | `harness/metric_admission.py` |
-| Measure independent goal evidence across retained tasks | `omd validate task-continuation` | `harness/task_continuation.py` |
+| 检查连续任务的独立目标证据 | `omd validate task-continuation` | `harness/task_continuation.py` |
 | 复核连续录音任务与原生历史引用 | `omd validate voice-context` | `harness/voice_context.py` |
 | Audit saved physical measurements | `omd validate metric-audit` | `metric/verify.py` |
 | Recompute saved official policy actions | `omd validate policy-audit` | `metric/policy.py` |
