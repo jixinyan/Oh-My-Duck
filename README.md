@@ -187,7 +187,7 @@ Python modules live in `src/oh_my_duck/`. The native Node deployment lives in
 | Verified joint graphs and training packages | [robotics/policies/](src/oh_my_duck/robotics/policies/) |
 | Physical records, policy and release audits | [validation/](src/oh_my_duck/validation/) |
 | Perception services and frame validation | [perception/](src/oh_my_duck/perception/) |
-| Qwen audio and confirmed voice profiles | [voice/](src/oh_my_duck/voice/) |
+| Qwen audio and confirmed voice profiles | [voice source map](src/oh_my_duck/voice/README.md) |
 | Episode records and replay export | [experience/](src/oh_my_duck/experience/) |
 | Shared types and configuration | [core/](src/oh_my_duck/core/) |
 | Environments, processes and tracking | [infrastructure/](src/oh_my_duck/infrastructure/) |

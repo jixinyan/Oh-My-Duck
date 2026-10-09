@@ -14,7 +14,8 @@ import torch
 import uvicorn
 
 from oh_my_duck.core.contracts.sensors import PayloadRef
-from oh_my_duck.voice.profiles import SQLiteVoiceProfileStore, _sha256, _source_path, _validate_wav
+from oh_my_duck.voice.audio import _sha256, _source_path, _validate_wav
+from oh_my_duck.voice.profiles import SQLiteVoiceProfileStore
 
 
 class SpeechRequest(BaseModel):

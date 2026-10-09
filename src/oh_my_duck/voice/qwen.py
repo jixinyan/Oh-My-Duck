@@ -3,14 +3,12 @@ from pathlib import Path
 from threading import Lock
 from uuid import uuid4
 
-import numpy as np
-import soundfile as sf
 import torch
 from huggingface_hub import snapshot_download
 
 from oh_my_duck.core.contracts.sensors import PayloadRef
+from oh_my_duck.voice.audio import _sha256, _source_path, _validate_wav, _write_audio
 from oh_my_duck.voice.base import VoiceCandidate, VoiceProfile
-from oh_my_duck.voice.profiles import _sha256, _source_path, _validate_wav
 
 
 ASR_MODEL = "Qwen/Qwen3-ASR-0.6B"
@@ -34,21 +32,6 @@ def _model_options(device: str) -> dict:
             raise RuntimeError("CUDA 不可用")
         return {"device_map": device, "dtype": torch.bfloat16}
     raise ValueError("device 必须是 cpu 或 cuda 设备")
-
-
-def _audio_ref(path: Path) -> PayloadRef:
-    _validate_wav(path)
-    return PayloadRef(uri=path.resolve().as_uri(), media_type="audio/wav", sha256=_sha256(path))
-
-
-def _write_audio(path: Path, waveform: np.ndarray, sample_rate: int) -> PayloadRef:
-    if sample_rate <= 0 or waveform.size == 0 or not np.isfinite(waveform).all():
-        raise ValueError("模型生成了无效音频")
-    path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
-    with path.open("xb") as output:
-        sf.write(output, waveform, sample_rate, format="WAV", subtype="PCM_16")
-    path.chmod(0o600)
-    return _audio_ref(path)
 
 
 class QwenSpeechRecognition:

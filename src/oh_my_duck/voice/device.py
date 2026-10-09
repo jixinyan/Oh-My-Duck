@@ -9,7 +9,7 @@ import sounddevice as sd
 import soundfile as sf
 
 from oh_my_duck.core.contracts.sensors import PayloadRef
-from oh_my_duck.voice.profiles import _sha256, _source_path, _validate_wav
+from oh_my_duck.voice.audio import _sha256, _source_path, _validate_wav
 
 
 @dataclass
