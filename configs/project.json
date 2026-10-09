@@ -5,6 +5,25 @@
   "entry_point": "omd.py",
   "release_readiness": {
     "state": "acceptance_in_progress",
+    "perception_measurements": {
+      "state": "actual_cpu_yolo_original_rgbd_and_independent_installation_verified",
+      "source_revision": "ef770314da146d45b68fdad0bacc6e9183d57344",
+      "command": "omd validate perception",
+      "actual_model_frames": 5,
+      "actual_model_targets": 5,
+      "invalid_measurements_rejected": 90,
+      "owned_processes_exited": 3,
+      "source_and_resource_files_verified": 436,
+      "installed_cli_checks_passed": 27,
+      "yolo_device": "cpu",
+      "cuda_initialized": false,
+      "gpu_acceptance_performed": false,
+      "runtime_result": "outputs/acceptance/perception-measurements-20261008-01/result.json",
+      "independent_audit": "outputs/acceptance/perception-measurements-release-20261008-01/result.json",
+      "installed_package": "outputs/acceptance/perception-measurements-20261008-01-install/result.json",
+      "installed_measurement_audit": "outputs/acceptance/perception-measurements-20261008-01-install/independent-perception.json",
+      "report": "docs/reports/perception-measurements-2026-10-08.md"
+    },
     "voice_audio_modules": {
       "state": "shared_audio_modules_actual_cpu_models_profiles_and_installed_package_verified",
       "source_revision": "05e337d9c1dd8bcc59de8db24b75a18bbfc596e0",

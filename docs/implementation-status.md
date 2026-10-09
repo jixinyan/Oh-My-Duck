@@ -21,12 +21,12 @@ work requirements and dependencies are in the
 | Component | Verified scope | Remaining acceptance |
 | --- | --- | --- |
 | Source organization | Owned code under `src/oh_my_duck`; native Node deployment under `integrations/edh`; capability source maps | Continue documenting new capability and adapter entry points |
-| CLI/application | Native services, validation/replay, scene schemas, registered packages and voice; 434 installed files, three licenses and 26 CLI calls | Clean-environment reproduction of complete declared workflows |
+| CLI/application | Native services, validation/replay, scene schemas, registered packages and voice; 436 installed files, three licenses and 27 CLI calls | Clean-environment reproduction of complete declared workflows |
 | Core types, tools and recording | Complete Draft 2020-12 Schemas, finite arguments, actual handlers, request identity, JSONL/native events, original image hashes and MP4 | New tools require their actual implementation and relevant execution evidence |
 | Native Harness | Fixed EDH, actual models, official policies, sensors, ActionGate and independent Verifier; CPU text/recorded-voice office tasks passed | Current-source multi-scene long navigation and repeated task statistics |
 | Policy tools | Metric units, pose response, policy transitions, bounded commands, state-preserving retries, progress and stop evidence | All long-distance precision, current Newton controller and object effects |
 | Policy registry | Ten official joint graphs and registered training packages; actual CPU Walking/StandUp package execution, complete episodic duration and continuation | Learned behavior, scene generalization and hardware |
-| Perception | Current CPU RGBD geometry and target measurements; fixed-source Newton sensors and SAM3.1 + YOLO26 service records | Independently labelled recognition/distance accuracy, tracking and calibration |
+| Perception | Current CPU RGBD geometry, actual CPU YOLO, original-pixel measurement checks and saved-data audit; fixed-source Newton sensors and SAM3.1 + YOLO26 records | Current-source SAM mask/inference GPU acceptance, independently labelled accuracy, tracking and calibration |
 | Voice interaction | Shared audio module; three fixed Qwen CPU models, four decoded WAV files and four matching ASR texts; 36 profile/admission tests; confirmed profile/database preservation | Voice quality, command-corpus accuracy, interaction latency and Microduck devices |
 | Voice task | Actual Qwen ASR → OpenAI `gpt-6-luna` high → native tools → formal Verifier → confirmed-profile feedback; CPU interruption and resource release | Live hardware recording/playback and broader speech-task statistics |
 | MuJoCo RL | Both representative tasks and both native PPO frameworks have training/resume/export/replay lifecycle evidence | Effective learned behavior and final representative acceptance |
@@ -53,6 +53,7 @@ identifies each implementation.
 | Metric tool parameters | Actual Luna four-motion execution, declared units/default speeds and original error/stop requirements | [Tool parameters](reports/metric-tool-guidance-2026-10-08.md) |
 | Metric admission and wait | Duplicate requests, explicit command replacement, caller deadlines, measured motion and physical resource closure; finite positive native waits | [Metric lifecycle](reports/metric-request-admission-2026-10-08.md), [wait admission](reports/native-wait-admission-2026-10-08.md) |
 | Current CPU perception | Five rendered states, 1253 native geometry intersections, target distance/bearing and unchanged physics during reads | [CPU perception](reports/cpu-scene-perception-2026-10-08.md) |
+| Model RGBD measurements | Five actual CPU YOLO frames/targets, independent distance/position/bearing checks, 90 rejected alterations, three process exits, 436 installed files and 27 CLI calls | [Measurement validation](reports/perception-measurements-2026-10-08.md) |
 | Configured perception sources | Shared Python/Node admission, native metadata/tool schema and two actual CPU sessions | [Source selection](reports/perception-source-capabilities-2026-10-08.md) |
 | Training package tools | Actual Walking/StandUp packages; 725 controls, 145 frames, 87 stopped samples, full episodic duration and transition | [Registered packages](reports/policy-packages-2026-10-08.md) |
 | Head/body commands | 575 controls, actual positive/negative pitch and body-height response, return, 115 camera frames and stopped-state audit | [Pose tools](reports/native-pose-2026-10-08.md) |

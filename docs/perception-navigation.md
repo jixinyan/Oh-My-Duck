@@ -20,6 +20,8 @@ CPU 接口读取 MuJoCo 的 optical-axis depth，并使用实际单目 render fr
 
 YOLO 单独运行时使用框区域，结果可能包含背景深度；`mask_source="yolo26_bbox"` 保留这一含义。SAM 分割或 simulator ground truth 使用目标像素。RGB 单独输入不具备该模块要求的 calibrated depth geometry。真机适配需要提供对应的深度数据、相机标定与位姿；当前真机感知尚未验收。
 
+模型服务与客户端从原始 world points、camera/body pose 和对应目标像素复算距离、区间、位置、bearing 与有效像素数量。SAM 返回 `mask_png_base64`，使用源图像尺寸的灰度 PNG，像素值为零或 255；目标框与实际 mask 一致。几何结果使用 `1e-6` 的计算容差。输入图像、深度尺寸、部分 NaN、Infinity、帧身份或测量来源无效时，调用在检查位置返回错误。
+
 ## 独立服务
 
 Linux NVIDIA 环境使用 `environments/perception/uv.lock`，与 Newton 环境分开。YOLO26 使用官方 headless Ultralytics 包；SAM 源码固定为 `2345a4ad109ac29c569da749c91d84f10dc08c40`。
@@ -27,8 +29,8 @@ Linux NVIDIA 环境使用 `environments/perception/uv.lock`，与 Newton 环境�
 ```sh
 UV_PROJECT_ENVIRONMENT="$PWD/.envs/perception" uv sync --project environments/perception --locked
 PYTHONPATH=src .envs/perception/bin/python scripts/fetch_perception_models.py --output checkpoints/perception
-PYTHONPATH=src CUDA_VISIBLE_DEVICES=0 .envs/perception/bin/python -m oh_my_duck.perception.service \
-  --yolo checkpoints/perception/yolo26s.pt --output outputs/perception-service --port 8784
+PYTHONPATH=src CUDA_VISIBLE_DEVICES='' .envs/perception/bin/python -m oh_my_duck.perception.service \
+  --device cpu --yolo checkpoints/perception/yolo26s.pt --output outputs/perception-service-cpu --port 8784
 ```
 
 启用 SAM 3.1 需要已经获得官方模型访问权限的 Hugging Face 账号：
@@ -37,12 +39,23 @@ PYTHONPATH=src CUDA_VISIBLE_DEVICES=0 .envs/perception/bin/python -m oh_my_duck.
 .envs/perception/bin/hf auth login
 PYTHONPATH=src .envs/perception/bin/python scripts/fetch_perception_models.py \
   --output checkpoints/perception --include-sam
-PYTHONPATH=src CUDA_VISIBLE_DEVICES=0 .envs/perception/bin/python -m oh_my_duck.perception.service \
-  --yolo checkpoints/perception/yolo26s.pt --sam checkpoints/perception/sam3.1/sam3.1_multiplex.pt \
+PYTHONPATH=src CUDA_VISIBLE_DEVICES="${OMD_GPU_ID:?}" .envs/perception/bin/python -m oh_my_duck.perception.service \
+  --device cuda:0 --yolo checkpoints/perception/yolo26s.pt --sam checkpoints/perception/sam3.1/sam3.1_multiplex.pt \
   --output outputs/perception-service-sam31 --port 8784
 ```
 
-服务只监听 `127.0.0.1`，仿真 worker 通过 scene config 的 `perception_endpoint` 调用。每项响应记录实际 checkpoint SHA256 与源 RGB SHA256，客户端检查 episode 和物理 sequence。
+服务只监听 `127.0.0.1`，仿真 worker 通过 scene config 的 `perception_endpoint` 调用。每项响应记录实际 checkpoint SHA256 与源 RGB SHA256，客户端检查 episode、物理 sequence 和原始 RGBD 测量。`/health` 公布模型身份、选择的 device、YOLO 参数所在设备、CUDA 初始化状态和测量检查方式。GPU 与 RL 当前保持停止；后续已授权 GPU 执行只使用一张没有 compute PID、持续零 utilization 的设备 2–4，并明确设置 `OMD_GPU_ID`。
+
+原始帧目录包含 `*-frame.json`，每份文件具有当前图像、world points、camera/body pose、episode、sequence、时间与距离来源。模型调用及保存资料复核使用同一公开入口：
+
+```sh
+omd validate perception --frames outputs/actual-rgbd-frames \
+  --endpoint http://127.0.0.1:8784 --output outputs/perception-capture-NEW
+omd validate perception --capture outputs/perception-capture-NEW \
+  --output outputs/perception-audit-NEW
+```
+
+工具保存原始帧字节、实际模型响应、模型服务身份和每项文件 SHA256。复核从原始像素独立计算目标几何，检查无效测量、mask PNG 编码和输出目录保护。新推理与已有资料检查分别记录。源码位置见[感知源码说明](../src/oh_my_duck/perception/README.md)。
 
 `jd_B300` 已有权重 `/home/jixin/workspace/checkpoints/sam3.1/sam3.1_multiplex.pt`，SHA256 为 `0567debeec80ba4ac6369540c6c248025283cb3ff2b92827509e57e2b3541cb6`。可以将该路径直接传给 `--sam`。锁定环境使用 `setuptools==80.9.0`，满足固定 SAM 源码的 `pkg_resources` 依赖；`sam31.load_predictor` 检查 checkpoint 参数、派生 RoPE buffer 与 multiplex `init_state` 参数，将公共 session 接口的参数传递给实际 multiplex 方法。
 

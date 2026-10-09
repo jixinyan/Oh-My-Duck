@@ -8,6 +8,7 @@ stopped.
 
 | Capability | Verified scope | Evidence |
 | --- | --- | --- |
+| Original RGBD model measurements | Five actual CPU YOLO frames/targets, original-pixel geometry, 90 rejected alterations, three process exits and closed service; 436 installed files and 27 CLI calls | [Measurement validation](perception-measurements-2026-10-08.md) |
 | Shared voice audio modules | 24 original definitions preserved; 36 WAV/SQLite/device-admission tests, three actual Qwen CPU models, four decoded WAV files and four matching ASR texts; unchanged confirmed profile/database, five process exits, 434 installed files and 26 CLI calls | [Voice source validation](voice-audio-modules-2026-10-08.md) |
 | Native recorded-voice office task | Actual Qwen ASR, OpenAI Luna, official policy and sensor tools, passed formal Verifier and confirmed-voice feedback; 666 controls, 2664 substeps, 1323 events, 141 decoded original images, 174.54-second 1080p MP4 fully decoded, unchanged voice profile and five processes exited | [CPU voice navigation](cpu-voice-navigation-2026-10-08.md) |
 | Native Luna office task | Actual OpenAI model, official policy and sensors; passed formal Verifier, 569 controls, 2276 substeps, 1040 events, 113 observer frames, 12 progress checks, full MP4 decode and resource release | [CPU model navigation](cpu-luna-navigation-2026-10-08.md) |
@@ -46,6 +47,8 @@ Source responsibilities are listed in the [architecture source map](../architect
 `robotics/policies/` owns common joint ONNX admission and the training-package catalogue;
 `voice/audio.py` owns shared WAV/URI/SHA256 operations, `voice/profiles.py` owns confirmed voices,
 and `voice/qwen.py` owns model inference; the [voice source map](../../src/oh_my_duck/voice/README.md) lists HTTP, device and session modules;
+`perception/frames.py` owns RGBD and PNG admission, `perception/validation.py` owns source measurement checks,
+and `validation/perception.py` owns actual model calls and independent saved-data audit;
 `infrastructure/usd_runtime.py` owns installed OpenUSD verification.
 Public execution and audit commands remain available from installed packages.
 All verification processes exited. Source, configuration, wheel, source

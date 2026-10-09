@@ -202,7 +202,7 @@ function tool(operation, properties, required, services) {
     output: {
       schema: { type: 'object', additionalProperties: true },
       render: (_args, value) => [
-        { type: 'text', text: JSON.stringify(value) },
+        { type: 'text', text: JSON.stringify(value, (key, item) => key === 'mask_png_base64' ? undefined : item) },
         ...(value.image_ref ? [{ type: 'image', attachment: value.image_ref }] : []),
       ],
     },

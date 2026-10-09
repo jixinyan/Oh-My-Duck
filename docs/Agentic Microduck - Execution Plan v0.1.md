@@ -243,6 +243,9 @@ CPU 和 Newton 的公开感知接口使用当前图像、depth、segmentation �
 头部观察与图像关联同一 physical sequence；过期、缺失和无效测量具有明确结果。
 
 独立核对 frame、SHA256、目标框、mask、bearing、几何距离和读期间物理状态。
+模型服务与客户端从原始像素复算测量，SAM 保留源图像尺寸的二值 PNG mask。
+使用 `omd validate perception` 执行真实模型调用及已保存资料复核，
+当前 CPU 结果见[测量验证](reports/perception-measurements-2026-10-08.md)。
 识别与距离误差使用独立标注，目标跟踪保留时间、身份、丢失与停止规则。
 仿真噪声、聚合与延迟依据实际设备标定。
 交付传感器、主动观察、模型服务、calibration 和测量资料，见[感知工具](perception-navigation.md)。

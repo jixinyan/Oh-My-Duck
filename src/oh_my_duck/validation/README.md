@@ -17,6 +17,7 @@
 | Run model-driven navigation | `omd validate navigation` | `harness/navigation.py` |
 | Audit saved navigation | `omd validate navigation-audit` | `harness/navigation_replay.py` |
 | Audit an independent package installation | `omd validate package-audit` | `release/package.py` |
+| Run model perception or audit original RGBD measurements | `omd validate perception` | `perception.py` |
 
 Use the corresponding command with `--help` for required paths and parameters.
 `omd replay` handles session open/task/status/export/close through

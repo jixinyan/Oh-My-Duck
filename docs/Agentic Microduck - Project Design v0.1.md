@@ -28,7 +28,7 @@ Oh My Duck 为 Microduck 提供仿真、训练、技能工具、主动感知、�
 | --- | --- | --- |
 | 原生模型与工具执行 | Luna CPU 文字导航与录音导航、独立 Verifier、原始传感器、agentic MP4 和资源释放通过 | 当前源码的多场景长导航、全部动作精度及重复任务统计 |
 | 语音与固定音色 | 三个 Qwen 模型的实际 CPU 推理、四段 WAV 与全部 ASR 回读、36 项音色与参数测试通过 | 识别准确率、交互延迟、音质与 Microduck 音频设备 |
-| 感知 | 当前 CPU RGBD 与几何复核；固定源码 Newton RGBD 和 SAM3.1 + YOLO26 服务记录 | 独立标注的识别与距离评估、目标跟踪和真机校准 |
+| 感知 | 当前 CPU RGBD、真实 CPU YOLO 与原始像素测量复核；固定源码 Newton RGBD 和 SAM3.1 + YOLO26 服务记录 | 当前 SAM GPU 验收、独立标注评估、目标跟踪和真机校准 |
 | 训练与导出 | Walking/StandUp × 两个 backend × 两个原生 PPO 的执行流程、恢复、归一化导出与回放记录 | 自训练有效行为、多个 seed、sim2sim 与最终评估 |
 | Newton 资产与准备 | 两种机器人、Office/Hospital 几何、CPU solver/contact、依赖检查与发布准备通过 | 当前源码的实际 GPU 求解、初始化、渲染及完整运行验收 |
 | 安装与扩展 | 434 个 source/resource 文件、三份许可证、26 个独立安装调用通过 | 从干净环境复现所声明的完整流程 |
@@ -298,6 +298,10 @@ quaternion 顺序在具体格式中声明。`robot_id` 表示设备，`persona_i
 可用 source 随当前配置公布；模型服务使用明确 endpoint，连接错误在调用位置返回。
 目标框、图像、模型与距离来源接受独立检查。带有目标标注的识别准确率、距离误差、
 移动目标跟踪和真机校准分别评估。
+模型服务和客户端从原始 RGBD 复算全部目标几何；SAM 保存与源图像一致的二值 PNG mask。
+`omd validate perception` 提供真实模型调用、原始资料保存和独立测量复核，
+实现位置见[感知源码说明](../src/oh_my_duck/perception/README.md)，
+当前 CPU 结果见[测量验证](reports/perception-measurements-2026-10-08.md)。
 世界真值用于评估、奖励或 critic；可部署 actor 只使用目标设备实际可获得的信息。
 
 ## 8. Policy 适配与扩展
