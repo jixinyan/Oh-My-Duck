@@ -8,6 +8,7 @@ import numpy as np
 from PIL import Image
 import soundfile as sf
 
+from oh_my_duck.validation.harness.replay import audit_motion_guard_pauses
 from oh_my_duck.voice.audio import _source_path
 
 
@@ -45,7 +46,18 @@ def verify(directory: Path) -> dict:
             assert context["finalVerification"]["status"] == "passed"
             assert context["finalVerification"]["verdictId"] in [item["verdict_id"] for item in previous_run["verdicts"]]
             native = latest["run:" + run["id"]]["value"]
-            planner = native["assignments"][native["decisionAssignmentId"]]
+            published = native["assignments"][native["decisionAssignmentId"]]
+            assert published["detailsStored"] is True
+            history_key = "assignment-history:" + json.dumps(
+                [run["id"], published["id"]], separators=(",", ":"))
+            archive = latest[history_key]["value"]
+            assert archive["format"] == "edh.assignment-history.v1" and archive["runId"] == run["id"]
+            planner = archive["assignment"]
+            assert all(planner[key] == published[key] for key in
+                       ("id", "sessionId", "member", "status", "model", "tools"))
+            assert planner["brief"]["task_scope"]["task_id"] == run["id"]
+            assert planner["brief"]["assignment_id"] == planner["id"]
+            assert archive["lastObservationId"] == published["lastObservationId"]
             assert previous_run["id"] in planner["brief"]["history_summary"]
             assert context["finalVerification"]["verdictId"] in planner["brief"]["history_summary"]
             assert {"skills.search", "skills.load"} <= set(planner["tools"])
@@ -58,6 +70,7 @@ def verify(directory: Path) -> dict:
         progress = [item["result"] for item in tools if item["tool"] in (
             "microduck.observe", "microduck.task_progress", "microduck.wait_for_motion")]
         assert progress and progress[-1]["stopped_samples"] >= 5 and not progress[-1]["fallen"]
+        audit_motion_guard_pauses(events, run["id"])
         start, finish = progress[0]["task_start"], progress[-1]
         assert start["run_task_id"] == run["id"]
         start_evidence = start["goal_check"]["checks"]["goal_reached"]["evidence"]

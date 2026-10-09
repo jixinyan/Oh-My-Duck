@@ -36,6 +36,9 @@ def audit_motion_guard_pauses(events: list[dict], run_id: str, warmup_policy: st
     boundaries = [event for event in events if event["type"] == "execution.updated" and
                   event["detail"]["execution"]["state"] in ("paused", "ended") and
                   event["detail"]["execution"]["device_confirmed"]]
+    initial_guards = {}
+    selections = [event for event in events if event["type"] == "tool.completed" and
+                  event["detail"].get("tool") in ("microduck.select_policy", "microduck.transition_policy")]
     for progress_event in guarded:
         progress = progress_event["detail"]["result"]
         guard = progress["motion_guard"]
@@ -73,22 +76,50 @@ def audit_motion_guard_pauses(events: list[dict], run_id: str, warmup_policy: st
             raise AssertionError("Motion guard differs from the native stop generation")
         command_event = commands.get(guard["command_request_id"])
         if command_event is None and guard.get("metric_request_id") is None:
+            identity = (guard["execution_id"], guard["command_request_id"])
+            if identity in initial_guards:
+                origin_event, origin = initial_guards[identity]
+                if (guard != origin["motion_guard"] or any(progress[key] != origin[key] for key in
+                        ("episode_id", "sequence", "simulation_time_s", "body_position_m", "body_twist",
+                         "command_block", "command_segment"))):
+                    raise AssertionError("Retained initial guard differs from its recorded physical pause")
+                changed = [event for event in selections
+                           if origin_event["sequence"] < event["sequence"] < progress_event["sequence"]]
+                expected_policy = (changed[-1]["detail"]["result"]["policy_name"] if changed
+                                   else origin["policy_name"])
+                expected_stop = 0 if changed else origin["stopped_samples"]
+                if progress["policy_name"] != expected_policy or progress["stopped_samples"] != expected_stop:
+                    raise AssertionError("Retained initial guard lacks its policy-selection evidence")
+                continue
             segment = progress.get("command_segment", {})
+            task_start = progress.get("task_start")
+            initial_sequence = 0 if task_start is None else task_start["sequence"]
+            initial_policy = warmup_policy if task_start is None else task_start["policy_name"]
+            if task_start is not None and (task_start["run_task_id"] != run_id or
+                                           task_start["episode_id"] != progress["episode_id"]):
+                raise AssertionError("Initial guard differs from its recorded task identity")
             initial_start = [event for event in events if event["type"] == "tool.completed" and
                              event["detail"].get("tool") == "execution.start" and
                              event["detail"]["result"]["execution"]["execution_id"] == execution["execution_id"] and
                              event["sequence"] < progress_event["sequence"]]
             if (len(initial_start) == 1 and segment.get("request_id") == guard["command_request_id"] and
-                    segment.get("effective_after_sequence") == 0 and
+                    segment.get("effective_after_sequence") == initial_sequence and
                     segment.get("max_control_steps") == segment.get("used_control_steps") == 75 and
                     guard["reason"] == "command_segment_complete" and
-                    guard["sequence"] == guard["used_control_steps"] == guard["max_control_steps"] == 75 and
-                    progress["policy_name"] == warmup_policy and progress["stopped_samples"] >= 5 and
+                    guard["sequence"] == initial_sequence + 75 and
+                    guard["used_control_steps"] == guard["max_control_steps"] == 75 and
+                    progress["policy_name"] == initial_policy and progress["stopped_samples"] >= 5 and
                     progress["command_block"] == [0] * 13 and
                     guard["command"]["twist"] == [0, 0, 0] and
                     guard["command"]["head"] == [0] * 4 and guard["command"]["body"] == [0] * 6 and
                     not any(event["sequence"] < progress_event["sequence"] for event in
-                            [*commands.values(), *metric_commands.values()])):
+                            [*commands.values(), *metric_commands.values()]) and
+                    all(initial_start[0]["detail"]["result"]["execution"][key] == 0
+                        for key in ("control_steps", "raw_sim_steps", "policy_calls")) and
+                    matching[-1]["detail"]["execution"]["control_steps"] == 75 and
+                    matching[-1]["detail"]["execution"]["raw_sim_steps"] == 300 and
+                    matching[-1]["detail"]["execution"]["policy_calls"] == 75):
+                initial_guards[identity] = (progress_event, progress)
                 continue
         if command_event is None and guard.get("metric_request_id") in metric_commands:
             metric_event = metric_commands[guard["metric_request_id"]]
