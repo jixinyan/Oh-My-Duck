@@ -2,6 +2,12 @@
 
 `voice-session` 在本机操作 PortAudio 输入和输出设备，使用 JSONL 接受命令并输出 `EpisodeEvent`。ASR 与 TTS 分别运行在独立的 Python 环境中，以 FastAPI 提供 HTTP 服务。客户端使用 HTTPX 的异步连接。远端服务只绑定 `127.0.0.1`；跨主机连接使用 SSH 本地端口转发。
 
+Linux 客户端需要 PortAudio 动态库。Ubuntu 与 Debian 可以通过
+`sudo apt-get install libportaudio2` 安装对应系统依赖，参见
+[sounddevice 安装文档](https://python-sounddevice.readthedocs.io/en/latest/installation.html)。
+`omd doctor --runtime voice-client` 加载实际 PortAudio 与 libsndfile，记录库版本；
+缺少动态库时在检查位置报错。录音和播放设备由 `voice-session` 的参数明确选择。
+
 客户端环境为 `environments/voice-client`，包含 `sounddevice`、`soundfile`、NumPy 和 HTTPX。ASR 环境为 `environments/voice-asr`，TTS 环境为 `environments/voice`。在各自主机的项目根目录安装锁定依赖，并将临时文件放在被 Git 忽略的项目目录：
 
 ```bash

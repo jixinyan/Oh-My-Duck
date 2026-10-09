@@ -83,6 +83,16 @@ def main():
         if installed != expected:
             raise RuntimeError(f"{package}: 需要 {expected}，当前版本为 {installed}")
         checks[package] = installed
+    if args.runtime == "voice-client":
+        import sounddevice as sd
+        import soundfile as sf
+
+        portaudio_version, portaudio_description = sd.get_portaudio_version()
+        checks["audio_libraries"] = {
+            "portaudio_version": portaudio_version,
+            "portaudio_description": portaudio_description,
+            "libsndfile_version": sf.__libsndfile_version__,
+        }
     if args.runtime == "isaac-newton":
         from oh_my_duck.infrastructure.usd_runtime import verify_usd_runtime
 

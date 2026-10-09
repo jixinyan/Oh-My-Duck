@@ -43,6 +43,10 @@ identifies each implementation.
 
 ## Actual CPU workflows and evidence
 
+客户端的 PortAudio 与 libsndfile 加载检查已在 macOS 和 Ubuntu 22.04 通过；
+Linux 独立安装检查通过 438 个文件和 27 项 CLI 调用。
+记录见 [音频动态库检查](reports/native-audio-readiness-2026-10-09.md)。
+
 | Capability | Recorded result | Evidence |
 | --- | --- | --- |
 | 连续任务的物理记录 | 300 次控制、1,200 次物理步骤；独立目标保持记录、原生连续任务、实际状态保留和资源关闭；101 项接口测试及 5 项子测试通过 | [任务历史引用](reports/voice-task-context-2026-10-09.md) |

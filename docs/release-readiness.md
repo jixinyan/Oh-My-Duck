@@ -30,6 +30,10 @@ The 1920×1080 MP4 passed full decoding. See
 
 The release workflow uses recorded speech, the pinned native Harness, official policies, actual simulation sensors, independent task verification, and the confirmed voice profile. Each acceptance run has a unique directory and preserves source revisions, model identity, task events and measured physics. Native task waits and the voice-task CLI require a finite positive timeout before requests or output creation; [API, CLI and installation checks](reports/native-wait-admission-2026-10-08.md) passed.
 
+`omd doctor --runtime voice-client` 加载实际 PortAudio 和 libsndfile，记录动态库
+版本。macOS、Ubuntu 的加载检查及缺失动态库的接纳检查已通过，见
+[音频动态库检查](reports/native-audio-readiness-2026-10-09.md)。
+
 ## Runtime preparation
 
 Native metric tool schemas advertise default speeds, units and measured completion
