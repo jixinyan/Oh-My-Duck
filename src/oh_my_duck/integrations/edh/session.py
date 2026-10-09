@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+from copy import deepcopy
 import json
 import secrets
 from typing import Any
@@ -34,6 +35,7 @@ class MicroDuckWorkerSession(NativeWorkerSession):
         self._motion_cleanup_task: asyncio.Task[None] | None = None
         self._guard_tof_boundary_id: str | None = None
         self._metric_motion: MetricMotion | None = None
+        self._task_start: dict[str, Any] | None = None
 
     async def _await_motion_cleanup(self) -> None:
         task = self._motion_cleanup_task
@@ -45,7 +47,10 @@ class MicroDuckWorkerSession(NativeWorkerSession):
     def _progress_result(self, observed: dict) -> dict:
         measured = observed["measurements"]
         gate = self._gate
-        snapshot = None if gate is None else gate.snapshot()
+        snapshot = (None if gate is None or self._request is None or
+                    self._request["task_id"] != self._run_task_id else gate.snapshot())
+        if self._task_start is None or self._task_start["run_task_id"] != self._run_task_id:
+            raise RuntimeError("任务进度缺少当前任务的起始物理记录")
         return {
             "episode_id": observed["episode_id"], "sequence": observed["sequence"],
             "simulation_time_s": observed["simulation_time_s"],
@@ -54,6 +59,7 @@ class MicroDuckWorkerSession(NativeWorkerSession):
             "stopped_samples": measured["stopped_samples"],
             "required_stopped_samples": STOP_SAMPLES,
             "goal_check": observed["goal_check"],
+            "task_start": deepcopy(self._task_start),
             "metric_motion": None if self._metric_motion is None else self._metric_motion.result,
             "motion_guard": self._motion_guard,
             "command_segment": None if self._motion_segment is None else {
@@ -604,6 +610,14 @@ class MicroDuckWorkerSession(NativeWorkerSession):
         await self._await_motion_cleanup()
         opened = await super().open_task(arguments)
         run_task_id = opened["run_task_id"]
+        observed = await self._device.on_owner(self._control_observation)
+        self._require_control_lease(run_task_id)
+        self._task_start = {
+            "run_task_id": run_task_id,
+            **{key: observed[key] for key in ("episode_id", "sequence", "simulation_time_s", "goal_check")},
+            **{key: observed["measurements"][key] for key in
+               ("body_position_m", "body_twist", "policy_name", "joint_position_rad", "joint_velocity_rad_s")},
+        }
         def initial_command() -> dict:
             self._require_control_lease(run_task_id)
             return self._environment._backend().set_command(

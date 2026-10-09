@@ -1,14 +1,98 @@
 import argparse
+import asyncio
 import hashlib
 from importlib.metadata import version
 import json
 import os
 from pathlib import Path
+import secrets
 import subprocess
 from uuid import uuid4
 
 from oh_my_duck.core.paths import project_root
 from oh_my_duck.robotics.microduck.official_policies import OFFICIAL_REVISION
+
+
+async def native_continuation(args, output):
+    from oh_my_duck.integrations.edh.session import MicroDuckWorkerSession
+    from oh_my_duck.validation.harness.control import available_port, control, wait_boundary
+
+    port, secret = available_port(), secrets.token_hex(32)
+    configuration = {
+        "backend": "cpu-mujoco-bam", "native_task_id": "native-continuation",
+        "catalog_dir": str(args.catalog.resolve(strict=True)), "seed": 20261009,
+        "goal": {"kind": "room", "room": "office", "hold_ticks": 5},
+        "spawn_pose": {"x_m": 0.0, "y_m": 0.0, "yaw_rad": 0.0},
+        "task_instruction": "检查原生任务绑定、实际控制、独立目标记录与连续物理状态",
+        "control_port": port, "control_secret": secret,
+    }
+    statuses = []
+
+    async def emit(message):
+        if message["event"] == "update":
+            statuses.append(message["data"]["status"])
+
+    session = MicroDuckWorkerSession(emit)
+    records, previous = [], None
+    released = False
+    try:
+        await session.initialize({"provider": "microduck", "scene_configuration": configuration,
+                                  "native_task_id": "native-continuation", "policy_id": "official-microduck-onnx",
+                                  "execution_mode": "policy",
+                                  "schema_path": str(args.edh_source / "harness/contracts/schema/physical.schema.json"),
+                                  "monitor_every_actions": 1, "policy_max_actions_per_inference": 1})
+        for _ in range(2):
+            task_id = uuid4().hex
+            await session.open_task({"native_task_id": "native-continuation", "run_task_id": task_id,
+                                     "catalog_task_id": "native-continuation"})
+            initial = await control(port, secret, task_id, "progress", {})
+            start = initial["task_start"]
+            assert start["run_task_id"] == task_id and initial["execution"] is None
+            assert start["sequence"] == initial["sequence"] and start["episode_id"] == initial["episode_id"]
+            assert start["goal_check"]["checks"]["goal_reached"]["evidence"]["held_ticks"] == 0
+            if previous is not None:
+                assert start["sequence"] == previous["sequence"] and start["episode_id"] == previous["episode_id"]
+                assert start["body_position_m"] == previous["body_position_m"]
+                assert start["body_twist"] == previous["body_twist"]
+                assert start["goal_check"]["checks"]["goal_reached"]["evidence"]["goal_scope_id"] != (
+                    previous["goal_check"]["checks"]["goal_reached"]["evidence"]["goal_scope_id"])
+            request = {
+                "schema_version": "physical.subgoal.v1", "task_id": task_id, "team_run_id": task_id,
+                "goal_id": "native-continuation", "attempt_id": "attempt-1",
+                "instruction": configuration["task_instruction"], "entities": {"robot": "microduck"},
+                "required_capabilities": ["policy-navigation"],
+                "success_contract": {"id": "native-continuation", "version": "1",
+                                     "all": [{"check_id": "goal_reached", "check": "native_goal_reached", "args": []}],
+                                     "source": {"kind": "benchmark", "reference": "native-continuation"}},
+                "budget": {"max_control_steps": 100, "max_wall_time_s": 300},
+                "context_refs": [], "decision_owner_id": "planner",
+                "owner_assignment_id": "continuation-acceptance", "idempotency_key": uuid4().hex,
+            }
+            await session.start({"request": request, "native_task_id": "native-continuation",
+                                 "observation_ttl_s": 30, "device_timeout_s": 120, "policy_timeout_s": 30})
+            await wait_boundary(session)
+            progress = await control(port, secret, task_id, "progress", {})
+            assert progress["task_start"] == start and progress["sequence"] - start["sequence"] == 75
+            assert session._device.executed_actions == 75 and session._device.raw_sim_steps == 300
+            assert progress["stopped_samples"] >= 5
+            finish = await control(port, secret, task_id, "finish_policy", {
+                key: progress["execution"][key] for key in ("execution_id", "generation", "boundary_id")})
+            assert finish["execution"]["state"] == "ended" and finish["execution"]["device_confirmed"]
+            assert finish["execution"]["stop_reason"] == "policy_stop"
+            previous = await control(port, secret, task_id, "progress", {})
+            records.append({"initial": initial, "final": previous, "finish": finish})
+            await session.close_task()
+    finally:
+        closed = await session.close()
+        released = (closed["closed"] and session._device._closed and
+                    not session._control_server.is_serving() and not session._policy_server.is_serving())
+        (output / "native-tasks.json").write_text(json.dumps(
+            {"tasks": records, "execution_updates": statuses, "resources_released": released},
+            ensure_ascii=False, indent=2, allow_nan=False) + "\n")
+        if not released:
+            raise AssertionError("原生任务检查未释放全部会话资源")
+    return {"passed": True, "tasks": len(records), "policy_control_steps": 150,
+            "raw_sim_steps": 600, "resources_released": released}
 
 
 def run(args):
@@ -119,17 +203,20 @@ def run(args):
         assert scopes[0]["final"]["sequence"] == scopes[1]["initial"]["sequence"]
         assert scopes[0]["initial"]["checks"]["goal_reached"]["evidence"]["goal_scope_id"] != (
             scopes[1]["initial"]["checks"]["goal_reached"]["evidence"]["goal_scope_id"])
-        report["passed"] = True
     finally:
         environment.close()
         report["resources_released"] = True
         report["cuda_initialized"] = torch.cuda.is_initialized()
         save()
+    report["native_session"] = asyncio.run(native_continuation(args, output))
+    report["passed"] = True
+    save()
     return report
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--catalog", type=Path, required=True)
+    parser.add_argument("--edh-source", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
     print(json.dumps(run(parser.parse_args()), indent=2, allow_nan=False))
