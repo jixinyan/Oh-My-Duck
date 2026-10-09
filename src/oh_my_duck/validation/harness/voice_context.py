@@ -65,6 +65,7 @@ def verify(directory: Path) -> dict:
         assert run["executions"] and all(item["state"] == "ended" and item["device_confirmed"] for item in run["executions"])
         execution = run["executions"][-1]
         assert execution["control_steps"] >= 5 and execution["raw_sim_steps"] == 4 * execution["control_steps"]
+        assert execution["policy_calls"] == execution["control_steps"]
         assert execution["stop_reason"] == "policy_stop"
         tools = [item["detail"] for item in events if item["type"] == "tool.completed"]
         progress = [item["result"] for item in tools if item["tool"] in (
@@ -126,6 +127,9 @@ def verify(directory: Path) -> dict:
     return {"passed": True, "scope": "连续录音任务、原生历史引用、独立目标检查与已确认音色",
             "tasks": reports, "session_id": session["id"], "session_resources_released": True,
             "gpu_acceptance_performed": False,
+            "checker_source_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
+            "motion_guard_checker_source_sha256": hashlib.sha256(Path(__file__).with_name("replay.py").read_bytes()).hexdigest(),
+            "task_record_sha256": hashlib.sha256((directory / "task/result.json").read_bytes()).hexdigest(),
             "journal_sha256": hashlib.sha256((directory / "data/records.jsonl").read_bytes()).hexdigest()}
 
 
