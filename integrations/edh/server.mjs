@@ -67,7 +67,7 @@ if (process.env.OMD_CHECK_MODEL === '1') {
   }
   if (!text.trim() || finish?.kind !== 'stop') throw new Error('Model probe did not complete with text');
   await closeModelTransport();
-  process.stdout.write(`${JSON.stringify({ model, modelAPI, reasoningEffort, finish, text })}\n`);
+  process.stdout.write(`${JSON.stringify({ model, modelAPI, reasoningEffort, maxOutputTokens, finish, text })}\n`);
   process.exit(0);
 }
 const validator = new ContractValidator(JSON.parse(await readFile(
