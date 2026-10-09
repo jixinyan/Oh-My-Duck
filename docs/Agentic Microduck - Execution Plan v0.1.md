@@ -198,6 +198,9 @@ W&B 读取 `configs/training.json` 的 online 配置和明确的环境变量，�
 交付真实模型任务、正式 verdict、完整事件、执行身份、物理资料与资源关闭。
 通过条件包含实际目标完成、独立 Verifier 和原始证据复核。
 现有 CPU 文字和录音导航具有对应报告，当前源码的多场景长任务继续独立验收。
+两项连续录音已通过 CPU 正式 Verifier 和独立复核，包含任务历史引用、
+经验搜索、新的目标保持记录、两个固定音色反馈 WAV 与资源释放，
+见[任务历史引用](reports/voice-task-context-2026-10-09.md)。
 运行方式见[原生部署](harness-native-integration.md)。
 
 ### 第 11 步：显式录音与 ASR

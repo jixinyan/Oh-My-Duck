@@ -49,7 +49,7 @@ Linux 独立安装检查通过 438 个文件和 27 项 CLI 调用。
 
 | Capability | Recorded result | Evidence |
 | --- | --- | --- |
-| 连续任务的物理记录 | 300 次控制、1,200 次物理步骤；独立目标保持记录、原生连续任务、实际状态保留和资源关闭；101 项接口测试及 5 项子测试通过 | [任务历史引用](reports/voice-task-context-2026-10-09.md) |
+| 连续语音与任务历史 | 两项正式任务通过；745 次控制、2,980 次物理步骤、1,784 项事件、166 张 PNG；历史引用、两次经验搜索、独立目标记录、固定音色反馈与资源释放；438 个安装文件、Mac 29 项和 Linux 27 项 CLI 检查通过 | [任务历史引用](reports/voice-task-context-2026-10-09.md) |
 | Recorded-voice office navigation | Formal Verifier passed; 666 controls, 2664 substeps, 1323 events, 141 original images, confirmed-profile feedback, five process exits; fully decoded 174.54-second 1080p agentic MP4 | [Voice navigation](reports/cpu-voice-navigation-2026-10-08.md) |
 | Luna text navigation | Formal Verifier passed; 569 controls, 2276 substeps, 1040 events, 113 observer frames, 12 stop-progress checks and fully decoded 1080p MP4 | [Text navigation](reports/cpu-luna-navigation-2026-10-08.md) |
 | Voice interruption | Actual ASR/model/tools/feedback; 1400 controls, 5600 substeps, 2427 events, 296 original images, two WAV files, unchanged profile and full cleanup | [Interruption](reports/cpu-voice-task-2026-10-08.md) |

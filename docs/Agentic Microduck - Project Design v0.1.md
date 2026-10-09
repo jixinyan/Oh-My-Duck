@@ -223,6 +223,10 @@ HTTP 服务提供 `/v1/transcriptions` 和 `/v1/speech`。客户端核对输入�
 已结束任务。原生服务核查归属并生成历史指令、结果与正式验证结论；
 连续任务等待 session 收尾到 `ready`，继续使用当前世界状态。
 Planner 使用原生 `skills.search` 与 `skills.load` 读取持久经验。
+每项任务保存 `task_start`，保留当前 episode、sequence、位姿、速度和 policy，
+并开始新的目标保持记录。暂停证据保留原始执行身份，当前 policy 与停止
+计数通过实际选择回执核查。两项连续录音任务的 CPU 正式验收、历史摘要、
+经验搜索、固定音色和资源释放见[任务历史引用](reports/voice-task-context-2026-10-09.md)。
 已关闭会话和服务重启后的历史会话保持只读；声音资料和原生 skill library
 通过持久存储保留。语音交互和录音文件入口见[语音交互](voice-interaction.md)。
 

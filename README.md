@@ -141,7 +141,9 @@ Newton records verify stopping and resource release; Mac audio devices have
 separate checks. Microduck audio hardware requires its own acceptance.
 录音指令支持在同一会话中依次执行，并明确引用之前的任务结果。
 Planner 通过原生 `skills.search` 和 `skills.load` 读取持久经验；
-连续语音模型任务的验收范围见[任务历史引用](docs/reports/voice-task-context-2026-10-09.md)。
+两项连续录音任务在 CPU MuJoCo/BAM 中通过正式 Verifier，包含明确的历史引用、
+经验搜索、独立目标记录和固定音色反馈。
+验收范围见[任务历史引用](docs/reports/voice-task-context-2026-10-09.md)。
 See [voice interaction](docs/voice-interaction.md),
 [CPU voice navigation](docs/reports/cpu-voice-navigation-2026-10-08.md),
 [task interruption](docs/reports/cpu-voice-task-2026-10-08.md) and

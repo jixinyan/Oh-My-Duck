@@ -73,7 +73,9 @@ Actual CPU native session lifecycle and resource release, 77 tests, 33 subtests,
 当前任务独立保存 `task_start` 与目标保持记录。CPU 生命周期检查通过
 300 次控制、1,200 次物理步骤，源码检查通过 101 项接口测试及 5 项子测试，
 独立安装检查通过 438 个文件和 29 项 CLI 调用。
-连续录音模型任务的正式验收进度见
+两项连续录音模型任务均通过正式 Verifier；独立复核包含 745 次控制、
+2,980 次物理步骤、1,784 项事件、166 张 PNG、两个固定音色反馈 WAV、
+跨会话引用拒绝和资源释放。实际记录见
 [任务历史引用](reports/voice-task-context-2026-10-09.md)。
 
 CPU apartment and Newton scenes use one packaged JSON Schema through the Python
