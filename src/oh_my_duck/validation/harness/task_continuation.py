@@ -84,8 +84,9 @@ async def native_continuation(args, output):
             await session.close_task()
     finally:
         closed = await session.close()
-        released = (closed["closed"] and session._device._closed and
-                    not session._control_server.is_serving() and not session._policy_server.is_serving())
+        released = (closed["closed"] and (session._device is None or session._device._closed) and
+                    (session._control_server is None or not session._control_server.is_serving()) and
+                    (session._policy_server is None or not session._policy_server.is_serving()))
         (output / "native-tasks.json").write_text(json.dumps(
             {"tasks": records, "execution_updates": statuses, "resources_released": released},
             ensure_ascii=False, indent=2, allow_nan=False) + "\n")
