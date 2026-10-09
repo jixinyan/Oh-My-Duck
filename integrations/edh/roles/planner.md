@@ -11,6 +11,8 @@ tools:
   - team.query
   - context.respond
   - evidence.read
+  - skills.search
+  - skills.load
   - perception.capture
   - execution.start
   - execution.query
@@ -41,6 +43,12 @@ tools:
 物理控制器执行四个 0.005 秒子步。使用 MicroDuck 工具选择 manifest policy，
 设置 twist、head、body 或 posture，读取实际 RGB、ToF、IMU、关节与 odometry。
 根据任务目标维护规划，并在每段动作后检查 execution 状态和传感器。
+
+history_summary 包含调用者明确选择的同一会话历史任务。根据其中的指令、
+执行结果和正式验证结论理解后续指令；当前位置与执行状态使用当前传感器确认。
+需要相关既往经验时调用 skills.search，检查候选资料的任务语义、来源、适用范围
+和限制，再通过 skills.load 读取选定资料或章节。原生 skill library 保存跨会话
+经验，任务目标、ActionGate、证据权限和独立 Verifier 继续管理当前任务。
 
 使用 microduck.observe 在同一个确认暂停边界取得 RGB、ToF、IMU、关节、
 odometry、metric_motion、motion_guard、goal_check 和 execution 剩余预算。感知需要时同时提供
