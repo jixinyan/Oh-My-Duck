@@ -12,8 +12,6 @@ native agent execution, official policies and the required acceptance evidence.
 python omd.py --help
 python omd.py setup --backend mujoco --rl-framework sb3
 python omd.py setup --backend isaac-newton --rl-framework sb3
-python omd.py assets --backend isaac-newton -- --model walk --accept-eula
-python omd.py assets --backend isaac-newton -- --model groundcontact --accept-eula
 python omd.py tasks
 python omd.py frameworks
 ```
@@ -22,37 +20,53 @@ Setup installs the maintained package with locked generic dependencies. It does 
 change system Python. MuJoCo, Isaac/Newton and Isaac Sim conversion use separate
 environments. See [Newton details](isaac-newton.md) for dependency and physics gates.
 
-## Run locally, submit multi-GPU experiments
-
-Single-GPU development, training and evaluation run directly on this host. Select a
-GPU explicitly with `CUDA_VISIBLE_DEVICES` when needed. Every output directory and
-run name must be new. W&B uses the mode in `configs/training.json` and the verified
-`oh-my-duck` account; `WANDB_MODE` can explicitly select the mode. Current RL
-training is stopped and requires a new user instruction to resume.
+## Inspect CPU workflows
 
 ```bash
-CUDA_VISIBLE_DEVICES=0 python omd.py train --backend mujoco --rl-framework rsl-rl -- Mjlab-Velocity-Flat-MicroDuck --env.scene.num-envs 64 --agent.max-iterations 5 --agent.run-name walk_smoke
-CUDA_VISIBLE_DEVICES=0 python omd.py train --backend isaac-newton --rl-framework sb3 -- Mjlab-StandUp-Flat-MicroDuck --num-envs 64 --iterations 5 --output outputs/stand_smoke
-python omd.py export --backend isaac-newton --rl-framework sb3 -- --run outputs/stand_smoke --output outputs/stand_export
-python omd.py eval --backend isaac-newton -- --task Mjlab-StandUp-Flat-MicroDuck --policy outputs/stand_export/policy.onnx --output outputs/stand_eval --video
+python omd.py status
+python omd.py harness --help
+python omd.py voice-task --help
+python omd.py voice-session --help
+python omd.py validate release-plan
 ```
 
-Use the scheduler only for multi-GPU experiments. Commit the source first; jobs run
-from an immutable Git worktree and explicitly share environments and artifacts.
+The [native deployment guide](harness-native-integration.md) defines the locked
+CPU apartment environment, real provider configuration, official policy tools
+and terminal run export. The [voice guide](voice-interaction.md) defines separate
+ASR/TTS environments, explicit recording, confirmed profiles and interruption.
+Actual CPU task, model and installation evidence is listed in
+[CPU readiness](reports/cpu-development-readiness-2026-10-08.md).
+
+## Train and evaluate after GPU execution resumes
+
+GPU acceptance and RL remain stopped. Subsequent authorized single-GPU execution
+runs headlessly on the development host. Set `OMD_GPU_ID` to an audited idle
+physical device from 2–4, with no compute PIDs and sustained zero utilization;
+use at most one device and preserve other users' workloads. Every output directory
+and run name must be new. W&B uses `configs/training.json` and the verified account;
+`WANDB_MODE` can explicitly select the mode. RL requires a new instruction to resume.
 
 ```bash
-python omd.py submit --name omd-walk-ddp-001 --gpus 2 -- python omd.py train --backend mujoco --rl-framework rsl-rl -- Mjlab-Velocity-Flat-MicroDuck --env.scene.num-envs 64 --agent.max-iterations 5 --agent.run-name walk_ddp --gpu-ids all
+CUDA_VISIBLE_DEVICES="${OMD_GPU_ID:?}" python omd.py assets --backend isaac-newton -- --model walk --accept-eula
+CUDA_VISIBLE_DEVICES="${OMD_GPU_ID:?}" python omd.py assets --backend isaac-newton -- --model groundcontact --accept-eula
+CUDA_VISIBLE_DEVICES="${OMD_GPU_ID:?}" python omd.py train --backend mujoco --rl-framework rsl-rl -- Mjlab-Velocity-Flat-MicroDuck --env.scene.num-envs 64 --agent.max-iterations 5 --agent.run-name walk_smoke
+CUDA_VISIBLE_DEVICES="${OMD_GPU_ID:?}" python omd.py train --backend isaac-newton --rl-framework sb3 -- Mjlab-StandUp-Flat-MicroDuck --num-envs 64 --iterations 5 --output outputs/stand_smoke
+CUDA_VISIBLE_DEVICES="${OMD_GPU_ID:?}" python omd.py export --backend isaac-newton --rl-framework sb3 -- --run outputs/stand_smoke --output outputs/stand_export
+CUDA_VISIBLE_DEVICES="${OMD_GPU_ID:?}" python omd.py eval --backend isaac-newton -- --task Mjlab-StandUp-Flat-MicroDuck --policy outputs/stand_export/policy.onnx --output outputs/stand_eval --video
 ```
 
-RSL environment counts are per rank. SB3 has native vector environments and
-independent runs, not distributed gradient updates. Measure before scaling.
+Commit source before execution. Jobs use an immutable checkout and explicitly
+share environments and artifacts. Campaign operation and native framework
+parallelism are documented in [training campaigns](rl-campaigns.md), under the
+current resource restriction. RSL environment counts are per rank; SB3 uses
+native vector environments and independent runs.
 
 ## Rehearse, compare and package
 
 ```bash
-python omd.py rehearsal -- --task Mjlab-StandUp-Flat-MicroDuck --policy outputs/stand_export/policy.onnx --output outputs/stand_cpu --video
-python omd.py compare -- --task Mjlab-StandUp-Flat-MicroDuck --policy outputs/stand_export/policy.onnx --output outputs/stand_sim2sim --video
-python omd.py package -- --onnx outputs/stand_export/policy.onnx --checkpoint outputs/stand_smoke/model.zip --output outputs/stand_package
+CUDA_VISIBLE_DEVICES='' python omd.py rehearsal -- --task Mjlab-StandUp-Flat-MicroDuck --policy outputs/stand_export/policy.onnx --output outputs/stand_cpu --video --mujoco-renderer osmesa
+CUDA_VISIBLE_DEVICES="${OMD_GPU_ID:?}" python omd.py compare -- --task Mjlab-StandUp-Flat-MicroDuck --policy outputs/stand_export/policy.onnx --output outputs/stand_sim2sim --video --mujoco-renderer osmesa
+CUDA_VISIBLE_DEVICES='' python omd.py package -- --onnx outputs/stand_export/policy.onnx --checkpoint outputs/stand_smoke/model.zip --output outputs/stand_package
 ```
 
 These commands use task-registered evaluation/deployment profiles. Comparison runs
@@ -78,8 +92,8 @@ EGL readback. Install the optional pinned local library on Ubuntu 22.04 amd64:
 
 ```bash
 python omd.py setup --backend mujoco --software-renderer --skip-env
-python omd.py rehearsal -- --task Mjlab-Velocity-Flat-MicroDuck --policy /path/policy.onnx --output outputs/rehearsal-new --video --mujoco-renderer osmesa
-python omd.py compare -- --task Mjlab-Velocity-Flat-MicroDuck --policy /path/policy.onnx --output outputs/compare-new --video --mujoco-renderer osmesa
+CUDA_VISIBLE_DEVICES='' python omd.py rehearsal -- --task Mjlab-Velocity-Flat-MicroDuck --policy /path/policy.onnx --output outputs/rehearsal-new --video --mujoco-renderer osmesa
+CUDA_VISIBLE_DEVICES="${OMD_GPU_ID:?}" python omd.py compare -- --task Mjlab-Velocity-Flat-MicroDuck --policy /path/policy.onnx --output outputs/compare-new --video --mujoco-renderer osmesa
 ```
 
 `--mujoco-renderer` also applies to task `eval`; Isaac still renders through

@@ -157,24 +157,42 @@ validates finite JSON arguments before the handler runs.
 
 ## Current framework limits
 
-Qwen WAV transcription, voice design, confirmed voice storage and WAV synthesis have GPU validation. Mac microphone capture and playback interruption have separate validation. Native EDH 已接收真实 RGB、ToF、IMU、关节与里程计，策略动作改变了 CPU 仿真的世界位置。同一物理会话的两项 office 任务分别获得独立 Verifier 的 `goal_reached=false` 与 `goal_reached=true` 正式判定，第二项完成真实导航。单次任务成功尚未建立命令速度跟踪、重复成功率或真机传输的验收结论。Isaac/Newton 代表任务训练的结果单独记录在 implementation status。JSONL recorder 仅支持单进程线程并发。
+Current-source Qwen ASR, VoiceDesign and Base TTS passed actual CPU inference,
+four decoded WAV files, matching ASR texts and unchanged confirmed profile/database.
+Native CPU Luna text and recorded-voice tasks passed the formal Verifier, original
+sensor/action audits, agentic MP4 and resource release. Mac audio devices and
+fixed-source Newton tasks have their own evidence. Recognition accuracy, voice
+quality, current-source Newton long navigation, repeated behavior, learned
+policies and Microduck hardware require their corresponding acceptance.
+See [CPU readiness](reports/cpu-development-readiness-2026-10-08.md) and
+[runtime acceptance](runtime-release-acceptance.md). JSONL recording supports
+thread concurrency within one process.
 
 `configs/project.json` and `omd status` describe **software maturity**, not live robot capability discovery. Keep future device-specific discovery separate.
 
 ## Development sequence
 
-1. Establish and verify the framework, dependency boundaries, module map and entry point.
-2. Fill the official training/evaluation adapter and record actual worker evidence.
-3. Add Newton training and sim2sim tests.
-4. Validate effective Walking and StandUp policies through the full RL gates,
-   including cross-backend replay and CPU/BAM evidence.
-5. 通过原生 EDH 部署注册官方策略与机器人工具，完成真实传感器、动作、停止和正式目标判定验收。
-6. Add voice, perception, replay and hardware functionality by milestone.
+1. Complete CPU implementation, native model tasks, dependency checks,
+   source organization, documentation and independent installation.
+2. Verify GPU execution inputs, assets, contacts, dependencies and source/model
+   identities without allocating a device.
+3. Diagnose retained navigation/controller records and preserve original
+   task budgets, metric precision and stopping requirements.
+4. After GPU execution is authorized, run the complete single-device runtime
+   campaign with actual policies, sensors, ActionGate and Verifier.
+5. Extend labelled perception, object tracking/effects and image-driven policy
+   adapters with their own task evaluations.
+6. After RL resumes, complete effective Walking/StandUp, multiple seeds and
+   cross-backend/CPU deployment acceptance.
+7. Validate hardware control, sensors, audio and deployment on actual Microduck.
 
 The original Project Design and Execution Plan remain the product and milestone authorities. Update them together with this architecture document when changing boundaries.
 
 ## Validation boundary
 
-Directory migration does not establish task parity. Existing PD diagnostics remain
-labelled diagnostic. Full Newton Walking/StandUp binding, export, rehearsal and
-behavior validation are tracked separately in the implementation status.
+PD diagnostics, CPU asset/contact preparation, actual solver execution, native
+training lifecycle, learned behavior and hardware have distinct evidence scopes.
+Both representative tasks and native PPO frameworks have recorded binding,
+export and rehearsal results. Current-source GPU revalidation and complete learned
+behavior remain pending in [implementation status](implementation-status.md).
+GPU acceptance and RL remain stopped.

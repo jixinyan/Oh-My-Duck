@@ -106,9 +106,16 @@ Before committing, inspect the staged diff and ensure no ignored artifacts or cr
 
 Update the original design and execution documents when scope, module responsibilities or milestone status changes. Record executed behavior, measured results and remaining acceptance requirements. Preserve experiment identities and source revisions. Require semantic review for source audits, actual native model tasks for Harness acceptance and behavioral evaluation for learned policies.
 
-Resource allocation is explicit and based on the experiment. The user permits single-node multi-GPU jobs and does not impose an artificial runtime or task-count cap. Never infer that reserving more GPUs automatically parallelizes a single-GPU trainer.
+GPU acceptance and RL remain stopped. The current development scope uses CPU
+execution and prepares GPU code and inputs. Future authorized execution may use
+at most one physical GPU from devices 2–4. Allocation requires zero compute PIDs
+and sustained zero utilization; preserve other users' workloads. Every attempt
+uses explicit resources, immutable committed source and a unique output directory.
+Retained failed attempts, checkpoints and original evidence remain available.
 
-**执行方式更新（2026-09-08，用户最新指示）**：单 GPU 开发、验证和训练直接在开发机 headless 运行。调度训练失败后，当前完整训练也获准使用本机空闲的 8 张 GPU；多卡 job 仍是可选执行方式。所有尝试使用独立输出目录和固定源码，保留此前失败记录。
+Native RSL-RL distributed learning and SB3 independent-run orchestration retain
+their framework semantics. Resource availability and execution authorization are
+checked for the actual campaign.
 
 
 ## Diagrams

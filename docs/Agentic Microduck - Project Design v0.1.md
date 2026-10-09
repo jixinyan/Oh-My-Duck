@@ -1,6 +1,6 @@
 ---
 title: Agentic Microduck — 项目概览与详细设计
-version: 0.2
+version: 0.3
 status: Implementation in progress
 created: 2026-09-05
 updated: 2026-10-08
@@ -12,914 +12,430 @@ tags:
   - project-design
 ---
 
-> 语音职责由 `voice/audio.py`、`profiles.py`、`qwen.py`、HTTP、设备与会话模块分别维护。24 个函数和类保持原有计算，三个 Qwen 模型完成当前源码的 CPU 推理，四段音频及全部 ASR 回读通过。36 项音色与参数测试、434 个独立安装文件及 26 个调用通过；固定音色、数据库内容和进程退出通过独立核验，见[语音源码验证](reports/voice-audio-modules-2026-10-08.md)。GPU 与 RL 保持停止。
-
-> CPU 录音导航连接 Qwen ASR、OpenAI `gpt-6-luna` high、原生 Harness、官方 policy、正式 Verifier 与已确认音色反馈。666 个控制步、2664 个物理子步、1323 个事件、141 张原始图片及五个进程正常结束通过独立核验，音色资料保持一致。174.54 秒的 1080p agentic MP4 通过完整解码与文字范围检查，见[语音导航验证](reports/cpu-voice-navigation-2026-10-08.md)。GPU 与 RL 保持停止。
-
-> OpenAI Luna 完成原生 CPU 公寓办公室任务，正式 Verifier 通过；569 个控制步、2276 个子步、1040 个事件、113 个观察相机帧与 12 次停止进度检查通过。1920×1080 MP4 完成完整解码，资源已关闭，见[导航验证](reports/cpu-luna-navigation-2026-10-08.md)。GPU 与 RL 保持停止。
-
-> 重试保留当前物理状态，新执行使用所属的有界命令；进度工具公布原生目标范围和实际保持计数。三次真实 CPU 执行、200 个控制步、800 个子步、独立 ONNX 复核、18 项导入测试、433 个安装文件和 26 个调用通过，见[原生重试验证](reports/native-execution-retry-2026-10-08.md)。GPU 与 RL 保持停止。
-
-> 原生距离与角度工具公布默认速度、单位与完成要求，标准模型转向使用前向、侧向和 yaw 命令，Planner 根据实际平移重新观察位置。真实 Luna 的四个有界动作、17 项导入测试和独立安装检查通过，见[工具参数验证](reports/metric-tool-guidance-2026-10-08.md)。GPU 与 RL 保持停止。
-
-> 原生任务等待和语音入口要求明确的有限正数时间，19 项 API/CLI 参数检查与独立安装检查通过，见[等待参数验证](reports/native-wait-admission-2026-10-08.md)。GPU 与 RL 保持停止。
-
-> 距离与角度工具保留准备请求，明确修改动作通过 set_command 执行；调用者等待超时保留原生执行。真实 CPU 的 8 次重复请求拒绝、4 次超时、2 次明确修改命令、641 个控制步与 2564 个物理子步通过检查；17 项测试、432 个安装文件、25 个调用和独立 ONNX 复核通过，见[动作请求验证](reports/metric-request-admission-2026-10-08.md)。GPU 与 RL 保持停止。
-
-> RL 的四种 backend/framework 组合使用原生 PPO、checkpoint 恢复和 normalized export。SB3 新训练使用独立 official critic 与 KL-adaptive learning rate；W&B 模式由训练配置及明确的环境变量决定。当前 GPU 与 RL 保持停止，训练计划可通过 queue 在明确分配的一张设备上依次执行，见[framework](rl-frameworks.md)与[训练流程](rl-campaigns.md)。
-
-> 原生感知工具、环境 metadata 和 scene_info 根据当前配置公布可用 source。模型服务使用明确的本地 endpoint；无效来源与连接错误通过工具传递。两个真实 CPU 会话、150 个控制步、600 个物理子步、48 项测试、42 组 Python/Node 参数及独立安装检查通过，见[感知来源验证](reports/perception-source-capabilities-2026-10-08.md)。GPU 与 RL 保持停止。
-
-> CPU 公寓与 Newton 使用相同原生感知工具和 frame 格式。CPU 接口使用当前 RGB、depth、segmentation 与真实相机 geometry，五种状态、1253 个原生几何比较、距离、bearing 和读取期间的物理状态保持通过；431 个独立安装文件及 24 个调用通过。GPU 与 RL 保持停止，见[CPU 感知验证](reports/cpu-scene-perception-2026-10-08.md)。
-
-> 训练计划在创建输出和启动 worker 前检查整数计数与有限比例，原生 framework、任务和全部已提交计划保持原有内容。Linux 110 项测试、三项子测试、430 个独立安装文件及 24 个调用通过；GPU 与 RL 保持停止，见[训练输入验证](reports/campaign-input-admission-2026-10-08.md)。
-
-> CPU 任务中断使用实际 Qwen ASR、OpenAI `gpt-6-luna` high、原生 policy/sensor 工具与固定音色反馈。1400 个控制步、5600 个物理子步、2427 个事件、296 张原始图片、两段 WAV 和全部资源释放通过核验。见[中断记录](reports/cpu-voice-task-2026-10-08.md)。GPU 与 RL 保持停止。
-
-> 三个固定 Qwen 模型完成 CPU Float32 推理，已确认音色、数据库内容、三段 WAV 和安装后的入口通过核验。26 项设备检查、72 次无效参数调用及六次 CUDA 不可用调用通过；三段回读文字中两段一致，一段保留「你好／您好」差异。GPU 与 RL 保持停止，见[CPU 语音验证](reports/qwen-cpu-validation-2026-10-08.md)。
-
-> 应用和语音使用原生任务客户端，工具参数使用完整 JSON Schema Draft 2020-12。实际 CPU 会话、任务目录检查、关闭及资源释放通过，77 项测试、33 项子测试、430 个独立安装文件和 24 个调用通过。具体职责位于[应用源码说明](../src/oh_my_duck/agentic/README.md)，结果见[接口验证](reports/native-application-interfaces-2026-10-08.md)。GPU 与 RL 保持停止。
-
-> CPU 公寓与 Newton 场景使用相同的已打包 JSON Schema，公开入口支持出生位置与原生目标配置。7 份配置及 23 组无效配置的 Python/Node 检查、实际启动与退出、64 项测试、431 个独立安装文件和 24 个调用通过。机器人、RL 和原生执行的 345 个文件保持一致，GPU 与 RL 保持停止，见[场景配置验证](reports/native-scene-configuration-2026-10-08.md)。
-
-> 训练 policy 包可通过 `--policy-registry` 登记，在原生 Harness 中调用，并明确选择距离/角度工具使用的 policy。真实 Walking 与 StandUp 包的 CPU 执行、限定时长结束、站立策略接续和停止通过：725 次控制、2900 个物理步、145 个相机帧及 87 个停止样本。37 项测试、429 个安装文件、24 个调用及当前源码发布准备通过，四条 Newton 构造路径在申请 CUDA 资源之前拒绝无效包。学习行为与 GPU 执行继续保持独立验收要求，见[训练包接入验证](reports/policy-packages-2026-10-08.md)。
-
-> 原生 CPU 姿态命令经 Harness 和 ActionGate 完成实际验证，头部 pitch 与身体高度的正反向响应、归零响应、575 次控制、115 个相机帧和停止状态通过核验。执行与独立资料检查分别位于 `validation/harness/pose.py` 与 `pose_records.py`，公开入口为 `omd validate pose` 和 `pose-audit`。30 项测试、425 个安装文件及 22 个独立调用通过，当前源码发布准备检查通过。GPU 和 RL 保持停止，见[姿态验证](reports/native-pose-2026-10-08.md)。
-
-> 官方 solver 材质与接触掩码位于 `task_binding/contact_model.py`，原生 manager 编译 MuJoCo Warp 接触数据。两种机器人、Office 和 Hospital 的四个实际 CPU solver model 通过十项参数、独立 body 掩码及 21 项非接触数据检查，计算内容的 AST 保持一致；28 项配置及导入测试、423 个安装文件与 20 个独立调用通过。GPU 和 RL 保持停止，见[接触模型验证](reports/contact-model-2026-10-08.md)。
-
-> Office 与 Hospital 的实际 CPU 导入、全部 5682 个几何 collider、164 处镜像缩放、source filters 和两个 finalized model 检查通过。导入 mesh 的 world bounds、场景文件和生成文件保持检查通过，Hospital 的 Xform 碰撞几何完整导入。GPU 和 RL 保持停止，见[外部场景 CPU 验证](reports/external-scene-cpu-2026-10-08.md)。
-
-> Newton 接触配置位于 `task_binding/collision_model.py`，原生 callback 传入实际 builder。两种机器人模型的双 world 配置及 finalized CPU 数组通过全部接触过滤、ground pair 和摩擦参数检查，计算内容的 AST 保持一致；27 项配置及导入测试、422 个独立安装文件和 20 个调用通过。GPU 和 RL 保持停止，见[碰撞模型验证](reports/collision-model-2026-10-08.md)。
-
-> Newton 的实际训练、评估、诊断、直接环境创建与原生 RSL worker 在分配 GPU 之前检查 OpenUSD provider 和安装内容。九条真实调用路径、锁定安装修复、26 项配置及导入测试、421 个安装文件与 20 个独立调用通过。GPU 和 RL 保持停止，见[入口验证](reports/newton-execution-preflight-2026-10-08.md)与[CPU 开发验证记录](reports/cpu-development-readiness-2026-10-08.md)。
-
-> Newton 使用 OpenUSD 26.08，安装及启动前检查覆盖唯一 provider 与 244 个安装文件。USD 碰撞准备与 Newton 模型 callback 分别位于 `task_binding/collision_assets.py` 和 `task_binding/collisions.py`；两种模型的实际 CPU 导入、摩擦、材质绑定和几何保持检查通过，保留全部 14 个 servo。公开 `omd validate model-assets` 核验四个 passive wheel joint、记录完整过程并保护输出目录，四次实际 CPU 导入通过。24 项配置及导入测试、421 个独立安装文件与 20 个调用通过。GPU 和 RL 保持停止，见[CPU Newton 资产验证](reports/openusd-readiness-2026-10-08.md)与[公开资产验收](reports/model-assets-cli-2026-10-08.md)。
-
-> 原生 worker 按环境、动作设备、会话工具和进程通信组织在 `integrations/edh/`，公开入口保持 `oh_my_duck.integrations.edh_native`。实际 CPU 连续动作、任务权限、policy 转换、原生 SDK 通信、执行取消与独立安装通过，远程 Newton adapter 导入通过。两种 robot conversion asset 支持经过完整来源检查的明确复用，当前源码的六阶段发布准备检查通过。独立安装核验 418 个文件与 19 个命令，GPU 和 RL 保持停止。见[资产验证](reports/source-verified-assets-2026-10-08.md)、[原生 worker 验证](reports/native-worker-modules-2026-10-08.md)与[架构及源码职责](architecture.md)。
-
-> 验收实现按运动指标、原生 Harness 和发布流程分别组织在 `validation/`，原生 session 管理与记录导出属于 `experience/`。公开入口为 `omd validate`、`omd replay` 和 `python -m oh_my_duck`；来源检查覆盖实际实现文件与固定 Git 内容。独立安装检查支持明确的命令时限和逐项过程记录，实际完整检查与中断验证通过。实际 CPU 连续动作、取消执行、ONNX 重算、独立安装和远程准备检查通过，见[命令过程验证](reports/installed-audit-lifecycle-2026-10-08.md)、[当前验收](reports/validation-modules-2026-10-08.md)与[架构及源码职责](architecture.md)。
-
-> 无 GPU 检查覆盖实际 CPU metric motion、连续动作、原生 backend、官方 ONNX graph、固定音色资料及所属进程清理。远程发布准备检查根据固定 Git 内容核验部署的 Harness 源文件，并检查全部场景资源、机器人转换资源和官方 policy；元数据模式不初始化 CUDA。GPU 验收及 RL 训练保持停止，见[检查记录](reports/offline-release-validation-2026-10-07.md)。
-
-> 感知入口检查当前帧的 episode、sequence、时间、查询、图像 SHA256、距离来源和模型身份，并验证目标几何及标注图像。Camera/body 位置与 yaw 在模型调用前检查有效性，已有实际 RGBD 资料复算和无效资料拒绝检查通过。
-
-> Policy 输入与 ActionGate 接纳的动作在序列化前绑定，包含来源 SHA256、61→14 维输入输出、13 维命令和物理 sequence。每个 metric case 自动重算实际官方 ONNX；CPU 矩阵与连续序列的 2556 个控制步输出完全一致。
-
-> 独立安装检查核验 wheel、源码包和安装后的 390 个源码及资源文件、三份许可证及十个项目目录之外的 CLI 入口。实际 episodic policy 转换和接续站立通过 CPU 检查；GPU 与真机行为仍使用独立实际验收。
-
-> 统一观测与原生等待接口通过固定源码的 CPU 连续动作及 Newton Office 五动作矩阵，安装包、既有导航和语音回放、实际 MP4 生成检查通过。GPU 验收已按用户要求停止，全部本次进程退出，Hospital 后退停滞与其他阶段仍需验证。后续设备要求没有任何 compute PID，不与 haomin 或其他用户共用 GPU，见[验收证据](reports/runtime-observation-acceptance-2026-10-07.md)。
-
-> 2026-10-07：统一暂停观测通过 `microduck.observe` 返回相机、ToF、IMU、servo、odometry、进度与原生剩余执行时间，可附带明确来源的当前帧感知。`microduck.wait_for_motion` 等待确认边界，全部动作仍由原生 ActionGate 接纳。连续运动检查保存每次参数和物理样本，初始化记录各阶段耗时。统一验收使用固定源码，串行执行单个 GPU 的矩阵、连续动作与原生导航，见[执行说明](runtime-release-acceptance.md)。
-
-> 2026-10-07：当前控制器的 Office 有序导航测得 3.052359 米行走段累计位移和 0.116789 米最终目标误差，三段行走满足原有精度，零外部接触。两次顺时针转弯停滞并执行实际恢复。2400 秒预算拒绝最终保持恢复调用，任务 failed，没有正式 Verifier；完整事件、图像和资源释放记录保留。长行走后的顺时针响应、预算内正式完成和原生初始化可靠性仍需验证。见[Office 测量](reports/navigation-acceptance-2026-10-07.md#office-有序导航测量)。
-
-> 2026-10-07：Hospital 官方轮滑 policy 完成东向、北向和西向的有序路线，行走段端点位移累计 5.438808 米，最终目标误差 0.095637 米，80 个连续停止样本与零外部接触。独立 Verifier、原始记录复核和 170 秒 agentic MP4 检查通过。感知来源明确为 simulator ground truth，两次未达到严格精度的动作保留实际状态。自动验收入口负责会话、任务、原始图像、独立复核和资源释放，见[导航证据](reports/navigation-acceptance-2026-10-07.md)。
-
-> 2026-10-07：完整 Office 多动作任务通过真实模型、原生 Harness、Newton/BAM 与独立 Verifier。四个官方 policy 展示坐立、头部控制、伸头、连续状态的站立恢复和导航；999 个控制步，最终目标误差 0.045512 米，80 个连续停止样本，外部障碍接触为零。标准脚部署使用官方 sitstand 的 30/50 求解参数与 Newton 直接执行，轮滑保留 10/20 与 CUDA graph，训练配置保持原有设置。实际模型感知调用与图像来源通过检查，识别准确率和图像输入独立 VLN 需要单独验收。见[完整证据](reports/office-skills-acceptance-2026-10-07.md)。
-
-> 2026-10-07：同一控制器源码在 CPU 公寓、Newton Office 和 Newton Hospital 完成九个会话、十五次动作，各场景覆盖 +0.5 米、−0.5 米、+1.0 米与 ±45°。CPU 最大距离/角度误差为 0.035112 米/3.777766°，Office 为 0.021602 米/4.952898°，Hospital 为 0.049210 米/3.746165°。全部动作确认直立停止、零外部接触和资源释放，连续物理样本、相机字节、来源与执行计数通过本地独立复核。见[完整测量](reports/metric-controller-acceptance-2026-10-07.md)。
-
-> metric controller 根据实际状态完成目标、零命令制动和最多三次修正。物理状态已经停止且原始目标误差满足要求时进入制动，后续检查最终误差与至少五个连续停止样本。50 个控制步内目标进度不足时返回 `metric_progress_stalled` 并确认停止。多场景导航泛化需要独立 Verifier 验收。GPU 使用范围为 2–4，同时最多使用一张设备，RL 保持停止。操作见[验收说明](release-readiness.md#metric-policy-matrix)。
-
-> 2026-10-03：完整录音任务经 Qwen ASR、原生 Harness、官方 policy、Newton/BAM 与独立 Verifier 通过，并使用已确认音色生成反馈。语音模块通过 `voice-task` 和 `voice-session` 接入任务，保留指令、事件、传感器、动作边界和正式 verdict。CPU MuJoCo/BAM 与 Newton 的任务中断及会话释放通过；标准脚与轮滑模型的 0.5 米、45°工具取得满足误差要求的实际停止结果。`doctor` 检查实际依赖与服务，视频制作使用独立锁定环境。上线状态以[验收要求](release-readiness.md)和[当前证据](reports/end-to-end-2026-10-03.md)为准。
-
-> 多 policy 执行（2026-10-01）：Newton/BAM 可使用官方 roller 模型，保持 61 个 observation、14 个 servo action 和 50 Hz，另外返回四个 passive wheel joint 的实际测量。原生 Harness 在 NVIDIA Hospital 调用 `roller`、`crouch` 和实际 SAM3.1 + YOLO26，独立目标检查通过，生成 63.4 秒 agentic MP4。Office 坐立、头部控制和 ground_pick 已通过独立物理测量；完整多动作导航尚未完成。roller 米制终点精度、识别准确率、RTX 渲染、物体携带与真机尚待验收。见[当前验证范围](reports/multiskill-demos-2026-10-01.md)。
-
-> 多阶段导航（2026-09-30）：原生 Harness 在 Newton Office 完成大厅、绕行和办公桌接近，7 次当前桌子观测、3 次 walk 与 7 次 rotate 调用形成实际闭环。执行 3689 控制步，独立 Verifier passed、run succeeded，桌前几何距离 1.0434 米，实际相机和 agentic trace 生成 193.3 秒 MP4。所有 GT 感知、公共地图与路线坐标明确标注；3 段长行走的严格终点精度未通过，保留实际 failed 状态与重新规划过程。会话与 GPU worker 已释放，RL 保持停止。单一场景行为、图像输入独立 VLN policy、多场景泛化与真机的范围分别记录。见[验证记录](reports/perception-vln-demo-2026-09-30.md)。
-
-> 感知工具（2026-09-30）：`microduck.inspect_scene` 返回当前 head RGB 的目标框、距离、bearing 和标注图像。实际 Newton 的两个相机朝向获得 21 个有效 ground truth 目标；独立 SAM3.1 + YOLO26 服务使用 jd_B300 已有 checkpoint，完成实际 Office RGBD 的墙面、桌子、地面与植物分割及有效射线距离检查。模型空目标和 YOLO 类别关联结果原样保留，识别准确率与真机需要独立评估。多阶段导航使用明确授权的 simulator ground truth，独立检查按顺序通过 checkpoint 与最终直立保持。接口和验证范围见[感知与导航工具](perception-navigation.md)。
-
-> 当前工具与相机（2026-09-30）：原生 Harness 可调用 `microduck.walk(distance_m)` 与 `microduck.rotate(angle_deg)`，距离/角度目标由当前物理 odometry 控制，停止后检查 0.05 米/5 度误差及五个实际停止样本。Newton Office 已验证 0.4/1.0 米和 +45°/−45°/+270°；转向伴随平移并返回测量值。head RGB 使用官方 optical pose 与近裁剪，observer 取景包含机器人和场景，原生 segmentation 检查通过。真实 Astra/high 的距离工具任务完成 313 控制步并获得独立 Verifier passed，原始事件与相机生成 60.3 秒 agentic MP4。RL 保持停止；CPU 距离/角度、多场景长导航、物体效果与真机待验证。见[工具接口](metric-policy-tools.md)及[验证记录](reports/metric-camera-tools-2026-09-30.md)。
-
-> 当前核查（2026-09-30）：上一轮 Walking 与两个 StandUp 完整训练的最终行为验收均未通过。用户已停止 Walking 低速干预的全部八组配对训练及预览、评估进程；checkpoint、输出与 W&B 文件保留，不自动恢复。语音 HTTP 服务、Mac 内置扬声器与麦克风完成实际音频验证。官方预训练策略已在 CPU MuJoCo/BAM 公寓中经原生 EDH ActionGate 执行，真实 Astra 会话完成图像与状态传感器读取、暂停、策略切换、恢复及 `finish_policy`。同一物理会话的首项 office 任务正式判定为 failed；第二项从目标外继续导航，独立 Verifier 判定 passed，run 状态 succeeded。当前没有可用真机。见[Walking 停止记录](reports/rl-walking-user-stop-2026-09-30.md)、[真实闭环记录](reports/harness-apartment-live-2026-09-30.md)与[实现进度](implementation-status.md)。
-
-> 2026-09-30 Walking 因果修复门禁完成时记录：将低速命令 tracking signal 作为独立、可恢复校验的单因素干预，默认关闭，不改变官方任务或 PPO 语义。8 个 run 的 smoke、导出、恢复、8192 容量和 CPU/BAM rehearsal 门禁已完成，当时按最小目标在门禁后停止；后续启动与停止分别见[Walking 启动记录](reports/rl-walking-low-speed-launch-2026-09-29.md)和[停止记录](reports/rl-walking-user-stop-2026-09-30.md)，行为验收仍待完成，尚未封装为 locomotion tool。门禁证据见[门禁记录](reports/rl-walking-low-speed-gates-2026-09-30.md)。
-
-> 2026-09-30 保护变体：`Mjlab-ProtectiveFall-Flat-MicroDuck` 已注册为独立实验性入口，使用完整碰撞资产和保护 reward primitives；它不改变官方 VelStand/代表性任务，也不代表已有可调用 locomotion tool。只有完成 Newton、导出、CPU/BAM 与行为门禁后，才能把策略注册到上层 tool。
-
-> 2026-09-30 Harness 接入：`omd harness` 使用固定 EDH `main@8a5e685` 的原生会话、ActionGate、execution tools 和独立 Verifier。CPU MuJoCo/BAM 公寓的固定出生位置导航已获得正式 passed；perpetual、scripted 和 episodic policy 使用统一接口，CPU `kick_left` 到 `alpha_stand` 的连续物理执行已验证。外部 Isaac USD 场景通过 `--scene-config` 接入，Python worker 支持 SSH 与明确指定的 GPU。真实 Astra/high 在 NVIDIA Office 执行官方 `velstand` 和 `alpha_walking`，300 个控制步产生 0.4047 m 位移；100 个零命令控制步后确认 78 个停止样本，独立 Verifier 判定 passed，Planner 将计划项目设为 done 并调用 `tasks.finish`，run 为 succeeded。原始事件与相机帧用于同步制作 agentic MP4。原有墙面 ToF 和近障碍暂停另已完成独立验收。多场景长距离导航、RGB 地标质量与多 policy 物体效果仍需验证；jd_B300 自训练 Walking/StandUp 的行为门禁保持开放，RL 保持停止。见[agentic Demo](reports/isaac-agentic-office-demo-2026-09-30.md)与[近障碍停止与可视化](reports/isaac-proximity-2026-09-30.md)。
-
-> 2026-09-30 官方上游同步：官方 `microduck_rl` develop 与 `microduck` main 已复核到 `configs/upstream.json` 的提交。项目发布边界现支持官方前馈 API-1 与显式状态 LSTM API-2 的严格 float32/61→14 校验，并保留失败清空状态；相机 UYVY、8×8 ToF 逐射线保护和足底 odometry anchor 数据已有自有确定性适配。保护跌倒奖励项只作为独立实验接口，完整 VelStand expert-BC、TCP body server、硬件 provisioning 和实际 Newton 行为门禁仍待完成。详见 [官方上游复核](reports/upstream-review-2026-09-30.md)。
-
-> 2026-09-26 RL 进度：`jd_B300` 上 9 月 23 日启动的三组训练在完整预算前中断，checkpoint 与日志均已保存，退出代码 247 的原因尚未确认。MuJoCo/RSL-RL Walking 官方配置对照已在 GPU 6 进入 50000 次更新的完整训练；Newton/RSL-RL StandUp 的 seed 42、43 均保存了已完成 5001 次更新的原生 checkpoint，恢复计数修复已通过真实 Newton 连续两次恢复验证。两组正式恢复已分别在 GPU 2、1 进入完整接续训练，日志确认从第 5001 次更新继续，且已连续运行至标签 5005。官方固定源码与当前 Flat 任务配置、直接引用的 MDP 函数和 BAM 已完成核查，现有证据尚未确认训练行为差异的单一原因。Walking 与 StandUp 的最终行为验收仍待完整训练和评估。见 [中断训练诊断](reports/rl-jd-interrupted-2026-09-26.md) 与 [官方实现核对](reports/rl-official-comparison-2026-09-26.md)。下方保留历史记录。
-
-> 2026-09-23：用户授权通过 SSH 使用 `jd_B300` 的空闲 GPU。Linux x86_64 的 CUDA 13 训练环境通过实际 GPU 检查，macOS 与 Linux 分别通过同组 55 项 CPU 测试；W&B 在线账号和项目已验证，Isaac 资产转换通过。Walking 在 GPU 6、Newton StandUp 的 seed 42 和 43 分别在 GPU 2、1 进入完整训练预算并出现正常更新，最终行为验收仍待完成。项目范围保持语音、机器人 tools、仿真执行、训练与经验记录；外部 Harness 负责通用 agent loop 和长期记忆。见 [当前状态](reports/project-status-2026-09-23.md)。下方保留历史验证记录。
-
-> 2026-09-21 验收与恢复：Walking 采用逐阶段评分版本 3；检查复用覆盖完整源码和配置；SB3 使用指定 checkpoint 目录并核对训练预算。53 项 CPU 测试通过，Microduck GPU 仿真和历史策略重新评分尚未执行。见 [验证记录](reports/project-review-2026-09-21.md)。
-
-> 2026-09-21 服务器迁移：按用户最终决定，仅迁移 Git 管理的源码、配置、锁文件与文档，合入并推送 main；checkpoint、normalizer、日志、视频、离线 W&B 和本地环境不上传。完整数据归档已取消，原训练产物保留在旧文件系统。原 Walking job 已不在调度 API 中，不自动恢复；既有策略结论保留为历史证据，不代表重新训练必然复现。见 [迁移交接与恢复说明](server-migration-2026-09-21.md)。
-
-> 2026-09-14 策略复盘：231 份已完成周期预览均未通过完整行走标准。最近五个 checkpoint 中，MuJoCo SB3 官方课程、MuJoCo RSL 延后课程相对更值得做无推扰验证；Newton RSL 延后课程后期前进退步，Newton SB3 两组前进仍弱。延后平滑没有通用收益。横向瞬时误差包含快速摆动，不能直接等同持续侧滑；暂停状态和验收标准不变，本次仅分析既有视频与轨迹。见 [策略表现复盘](reports/rl-walking-policy-assessment-2026-09-14.md)。
-
-> 2026-09-14 暂停状态：调度器将 `omd-walk-pacing-0913-01` 标记为 **Suspended**，八组日志均停止在 07:38 UTC 左右，本地 `running` 为滞后记录。暂停原因未返回，不能归因于代码或调度抢占。各组最后日志约 19803–41043 / 50000 更新；最近 checkpoint、normalizer、日志及视频保留，最终验收未执行。本次查询未重启或重新提交任务。见 [暂停与 checkpoint 记录](reports/rl-walking-suspension-2026-09-14.md)。
-
-> 2026-09-13 完整训练迭代：前轮因果 job 已 Succeeded，32 个回放及两个 Newton 任务的全部门槛完成，四份周期导出与官方路径数值误差均为 0。无推扰对照确认 SB3 主动行走很弱；Newton RSL 在两后端的 play 配置下均有前进/转向响应，训练配置差异仍待定位。下一轮已提交单节点 8 GPU 的 Walking 配对完整训练（`omd-walk-pacing-0913-01`，已 Running，八组流水线已启动）：四种后端/框架组合，各比较官方任务课程和延后动作平滑课程，8192 环境、50000 更新；同一 job 内检查通过自动训练，定期视频与最终无推扰/跨后端/CPU 验收。该课程调整是待检验假设，不是已证实修复；StandUp 后续验收仍开放。见 [完整实验记录](reports/rl-walking-pacing-2026-09-13.md)。
-
-> 2026-09-13 调度方式更新：后续常规 job 一次执行必要启动检查、完整训练预算及最终评估/视频；检查通过后自动继续，不再常规单独提交短验证 job。当前已在运行的 `omd-rl-causal-0913-01` 仍是原定短验证任务：32 个回放已完成，两任务周期导出已通过数值一致性检查，StandUp 最后容量检查尚在执行。
-
-> 2026-09-13 诊断完成：`omd-rl-diagnose-0912-02` 的 49 个用例全部执行，不能等同于行为通过。Newton RSL 最终起身在两后端 seed=42 均 4/4；CPU/BAM 17 个种子中趴倒 14/17，其余三种姿态各 17/17。其他起身策略仍为 2/4，Walking 未完成验收；Newton Walking 有前进/转向能力，但横向摆动与跨后端前进失败需分开诊断。下一轮补齐只改变推扰强度的配对对照和视频，并验证 Newton 周期导出的真实训练回调；暂不盲目恢复完整训练。下一轮 `omd-rl-causal-0913-01` 已 Running（1 节点 4 张 H800，32 个回放对照后执行两任务短训练门槛）；24 项 CPU 测试与 9 个子测试通过。详见 [因果回放记录](reports/rl-causal-replay-2026-09-13.md)。以下为历史快照。
-
-> 2026-09-12 恢复迭代：用户授权继续打通 RL，并使用单节点多 GPU 调度 job。先对保留的成功/失败策略进行奖励、课程阶段、训练/验收条件和 CPU 稳定性诊断，再按证据修复；不盲目重启旧长训练。已准备 49 个固定策略诊断案例，任务清单与扩展边界见 [RL 任务目录](rl-task-catalog.md)。下方暂停记录为历史快照。 第二次诊断提交已接受（`omd-rl-diagnose-0912-02`，1 节点 4 GPU），当前等待项目配额；第一次因共享锁超时失败。另修复 Newton 周期导出的 actuator 元数据索引错误，13 项 CPU 测试通过；这不是策略学习失败的已证实根因，GPU 回归仍待执行。详见 [本轮诊断记录](reports/rl-learning-diagnostics-2026-09-12.md)。
-
-> 当前状态：训练已暂停（2026-09-09）。按用户要求，所有剩余训练与后台预览已停止，已确认本项目 RL 进程为 0；checkpoint/日志/视频保留，不自动恢复。Newton RSL 起身最终策略在 seed=42 的 Newton、MuJoCo、CPU/BAM 三处均 4/4，但多 seed 稳定性尚未验收；MuJoCo RSL seed=43 起身为 2/4，修复版 SB3 与 Walking 尚未达到目标。下一阶段优先 debug 无效策略的原因，先定位训练/评估/奖励课程/框架适配差异，再决定是否恢复完整训练。详见 [暂停状态与调试交接](reports/rl-debug-handoff-2026-09-09.md)。下方均为历史快照，项目整体 scope 不变。
-
-> 旧训练清理（2026-09-09）：按用户要求，依据连续行为评估主动停止旧 MuJoCo RSL 行走、两后端旧 SB3 行走，以及原始官方 4096 环境行走对照；四组 checkpoint/日志/视频和停止原因均保留。六组训练继续：Newton RSL 行走、四组修复版 SB3、MuJoCo RSL 起身 seed=43（已完成启动检查并进入完整训练）。Newton RSL 起身已完成 15000 轮，最终原生四姿态通过；部署验收仍未完成。详见 [停止依据与记录](reports/sb3-critic-transfer-2026-09-09.md)。下方为较早快照。
-
-> SB3 修复与迁移验证（2026-09-09）：SB3 已补齐独立 official critic（StandUp 74D / Walking 76D，actor 仍为 61D）、原生 PPO 的 KL 学习率反馈、随机初始 episode phase，以及对应 terminal/normalizer/导出/恢复。29 项测试和 9 个子测试通过；旧 checkpoint 的 32-update 对照中平均 KL 从 0.073 降至 0.012。新四组 `sb3-repair-0909-01` 使用固定源码 `bea3eb1`、8192 环境，四组均已重新通过门槛并产生完整 PPO 更新，实际进程 W&B offline 已核验；尚未宣称行为收敛。Newton 起身 13000 在两种原生后端均 12/12 通过；CPU/BAM 趴倒仅 3/17。Walking 14000 去推力后两后端仍能前进/转向，但 CPU 前进失败。RSL 两后端配置和初始 actor 相同，GPU 探索随机流不同；MuJoCo 学习差异尚不能归为单一原因。详见 [修复与迁移记录](reports/sb3-critic-transfer-2026-09-09.md)。 已完成 14 组固定策略交叉测试：MuJoCo 自训练起身在两后端均 9/12（仰卧均失败），Newton 起身均 12/12。保留推力的 Walking 标准测试仍未通过；去推力结果仅作诊断。SB3 修复已合入并推送 main `49b56de`；后续分支 `feat/rl-transfer-validation` 的 seed=43 对照已在 GPU 1 启动检查，源码 `1cb7738`，保持官方奖励/PPO/8192 环境不变。
-
-> 最新行为复查（2026-09-09 02:29 UTC）：八组 8192 环境训练中，两组 MuJoCo StandUp 已完成（RSL 3/4、SB3 0/4），Newton RSL StandUp 在 6000–13000 的多个 checkpoint 原生四姿态通过，跨后端/CPU 与多种子验收仍待最终评估；Newton RSL Walking 已有前进/转向响应但横向 RMSE 未通过。Newton SB3 StandUp 连续十次 0/4 且 KL 仍过冲，按用户既有要求停止并保留完整 10000 轮 checkpoint；其余五组继续。SB3 当前 critic 仅用 61D actor 观测，官方 RSL critic 为 74D；PPO 更新与归一化也有差异，尚未实现训练条件等价，不能将失败归因于框架本身。见 [行为与框架诊断](reports/rl-framework-status-2026-09-09.md)。相关实现与诊断已合入 main（`6902943`），后续从 main 开独立修复分支。以下 2026-09-08 条目为历史快照，已被本条最新状态覆盖。
-
-> 进程清理（2026-09-08）：已结束旧 `shared-gpu7-0908-01` 的五个暂停训练及其附属服务，共 26 个进程，释放 GPU 7 约 23.2 GiB 显存。当前八组训练、两组原版对照及有效视频任务继续；保留 checkpoint/normalizer 的哈希未变。审计：`outputs/maintenance/process-cleanup-0908-01/result.json`。
-
-> 最新决定（2026-09-08）：按用户要求，八个代表性训练组合统一使用 **8192 环境**，停止进一步扩容测速。复用已完成且配置一致的 64-env/5-update、导出、CPU 视频和 8192 容量证据；不足的门槛逐组补齐后立即完整训练。新八组分配到八张卡，原有对照在 0/7 保留并共享资源；W&B offline，每 1000 更新保存 checkpoint。配置：`configs/experiments/representative-8192.json`。`fixed-8192-0908-01` 已启动；八组均已通过所需门槛并产生完整 PPO 训练更新；实际 GPU 进程和 W&B offline 已核验。见 [固定规模训练记录](reports/rl-fixed-8192-2026-09-08.md)。
-
-> 最新训练矩阵与环境选档（2026-09-08）：按用户要求，两个代表任务 × MuJoCo/Isaac-Newton × RSL-RL/SB3 都进入训练计划。每个组合按预热后的实际 PPO 吞吐选择环境数，保留 15% VRAM 余量，不统一锁死为 8192，也不盲目填满显存。已有原版对照保留；空闲卡分批准备和训练，其他项目占用的卡不动。`measured-env-0908-03`（固定源码 `f9fcf80`）已在 1/6/2/3/4/5 六卡通过首批六组 64-env/5-update 训练检查，其余两个 Newton+SB3 组合等空闲卡。导出、回放及吞吐选档继续；编排已改为每组通过自己的门槛即进入完整训练，取消八组等齐；新 worker 的 CPU 回放释放 GPU 名额。当前在运行的准备保留，`independent-full-0908-01`（源码 `392776a`）已启动衔接编排，每组准备完成即可接入长训练，不重复测量；交接检查时尚无新组进入 full。前两次启动问题及产物保留；20 项测试及 9 个子测试通过，行为复现仍待验收。见 [环境选档记录](reports/rl-environment-selection-2026-09-08.md)。
-
-> 最新训练观察方式（2026-09-08）：不再由助手持续轮询/分析训练；后台每 1000 次原生 PPO 更新（每环境 24000 个控制 steps）保存 checkpoint 视频，并保留最终 checkpoint 视频。中途不再执行多种子诊断；两组原版训练结束后统一做 CPU/BAM 视频和 16 组重置评估。已有训练继续，原中途诊断和旧预览 watcher 已由新后台视频 worker 替换。视频画廊：`outputs/previews/official-periodic-0908-01/index.html`。
-
-> 最新资源授权（2026-09-08）：用户重新开放空闲 GPU。Walking 保持 GPU 7；StandUp 已从 2000 轮完整 checkpoint 在 GPU 0 原生续训，配置/课程恢复检查通过；评估使用 GPU 1。GPU 0 后续进入其他用户任务，吞吐受干扰。Walking 的 4096/8192/16384 环境吞吐测试有效，其中 8192 最好；32768 受后来进入的其他用户八卡任务干扰，后续 StandUp 扩容测试已停止，尚未改变长训练规模。两组仍各 4096 环境、headless、W&B offline。按同课程阶段的任务趋势和固定姿态回放决定继续或停止，不凭总 reward 或预算盲目续训。见 [资源与训练评审](reports/official-training-resource-review-2026-09-08.md)。
-
-> 最新官方核查（2026-09-08）：历史 Velocity2 与当前固定 Velocity 的六组 train/play 配置仅日志命名不同，StandUp 配置一致；发布 Walking/StandUp 的字节哈希已追溯到官方 runtime 提交，但确切训练 run 仍未知。CAD 重导出未发现大幅接触凸包变化。原版与 owned 的 1500 轮回放都未通过完整任务；目前仅两组官方原版在 GPU 7、4096 环境/组、W&B offline 继续训练。owned/部分 Newton 保持暂停，第二项调参实验未启动。检查器已修正续训 checkpoint 路径并独立跟踪两项原版任务。以下较早日期的状态为历史记录；最新证据见 [官方历史核查](reports/official-source-history-2026-09-08.md) 和 [实现状态](implementation-status.md)。
-
-> 当前实现状态（2026-09-07）：源码按 `src/oh_my_duck/{rl,agentic,robotics,core,perception,voice,experience,infrastructure,cli}` 分域，旧 `training/` 包已移除。两个代表任务、两个仿真后端与两个原生 PPO 已有 smoke/恢复/导出证据；行为、sim2sim 和最终统一验收单独记录。单卡本机运行，多卡才提交 job；W&B 离线。采用“模块成批实现 → 静态/CPU 检查 → 必要物理门槛 → 统一端到端验收”的开发节奏。结构重构、单卡 pipeline 修复和完整训练编排已合入 main（5ef433b）：8/8 短训练、恢复、导出与本地打包通过；全部 8 个组合已完成单卡训练/恢复/导出/打包及双后端、CPU/BAM 回放；60 段 720p 视频和 61/14 轨迹已检查。MuJoCo 显式使用 OSMesa 渲染，Isaac 保持原生 Newton；SB3 课程进度恢复已补齐并验证。短训练策略均未通过行为标准，长训练收敛与 Newton 多卡验收尚未完成；旧任务 a52ff51b 于 2026-09-08 查询时已不存在于平台 API，不能作为通过证据。详见 [当前状态](implementation-status.md) 与 [端到端证据](reports/rl-pipeline-acceptance.md)。
-
-> RL 组织与训练计划（2026-09-07）：任务按家族目录组织，每个目录分离 `environment.py` 与 `ppo.py`；共享 MDP、仿真后端和原生 learner 保持独立。完整训练使用单节点 8 GPU，每卡独立训练一个 Walking/StandUp × MuJoCo/Newton × RSL-RL/SB3 组合，4096 环境/卡，采用任务默认 50,000/15,000 轮；每 250 轮保存 checkpoint。完整训练状态更新（2026-09-08）：`omd-rl-full-0907-01`（平台 ID `b2bab260`）已 Failed；日志为空、无可查询 pod，原因未确定，未生成训练 manifest。按用户最新指示，已在本机 8 张 H200 启动独立尝试 `full-local-0908-01`，沿用固定源码 `1f45996` 和原训练预算；截至 2026-09-08 02:08 UTC，8/8 已进入正式训练，初期 reward 有提升，但 SB3 StandUp 存在明显回撤；完整训练与行为验收尚未完成。见 [reward 记录](reports/reward-trends-2026-09-08.md)。提交前检查、实际 job 状态和行为验收见 [训练计划](rl-campaigns.md) 与 [当前进度](implementation-status.md)。
-
-> 训练处置更新（2026-09-08）：已停止退化的 MuJoCo SB3 两组，保留全部产物；其余六组从 native checkpoint 集中到 GPU 7 续训，其他卡留给用户项目。新增 `omd preview` 周期 checkpoint 视频画廊；初期视频只显示部分能力，未通过完整行为验收。SB3 固定学习率的 KL 过冲已有对照证据，新增显式学习率参数用于独立实验，未改动保留训练或官方任务语义。见 [处置与诊断记录](reports/rl-recovery-2026-09-08.md)。 04:04 UTC 复查后，Newton SB3 StandUp 因回报回落、高 KL 和回放四种姿态均未通过，也已暂停诊断；现在五组在 GPU 7 继续。
-
-> 官方复现边界：MuJoCo + RSL-RL 才是官方基线，SB3/Newton 属于扩展。流程验证不等于学到官方能力；原版与重构版的同条件训练/评估对照尚未完成。静态审计还发现 StandUp reset 的跨后端写入改写待数值验证，不能先断言它等价或是失败原因。见 [官方基线审计](reports/official-baseline-audit-2026-09-08.md)。
-
 # Agentic Microduck
 
-## 项目概览与详细设计 · v0.2
+## 1. 产品与验收范围
 
-**一句话定位：让外部 Embodied Harness 驱动一只可交互、可扩展、拥有持久声音与共同经历的 Microduck；本项目提供技能工具、主动感知、仿真/真机适配、语音与经验记录，以及官方 MuJoCo 和 Isaac/Newton 双训练后端。**
+Oh My Duck 为 Microduck 提供仿真、训练、技能工具、主动感知、语音交互与可追溯的经验记录。
+通用 Embodied Harness 负责模型接入、规划、工具选择、长期记忆和任务调度。
+用户通过文字或显式录音提交指令，能够查询进度、中断动作，并听到已确认音色的反馈。
 
-本文件保留原文件名以维持链接，内容已随 2026-09-06 的用户决策更新至 v0.2。当前已开始工程实现；功能状态以本节及[实现进度](implementation-status.md)为准，设计提案不等于已验证能力。完整逐文件审计仍在进行，Isaac 迁移与真机试验尚未完成。
+目标交互包含“找到红球并接近”“观察左侧”“跟随目标”和“停止当前任务”。
+每项能力具有独立的行为验收，任务结果引用实际传感器与执行状态。
+身份、声音及共同经历跨会话保存；运动能力通过数据、训练、评估和部署改进。
 
-**当前执行条件**：用户已停止本轮八组 Walking 训练及预览、评估进程，保存现有 checkpoint 与输出，不自动恢复。当前没有真机。上层使用固定 EDH 原生运行时，物理任务可在 CPU MuJoCo/BAM 公寓或远程 GPU Newton/BAM Office 执行。距离和角度工具按实际 odometry 控制，命令按控制步限定，ToF、外部接触和位姿停滞可请求原生 Gate 暂停。两个场景的单一 seed 导航均获得独立 Verifier 正式 passed，Newton 的距离工具与相机另有完整记录。见[公寓导航验收](reports/harness-office-navigation-2026-09-30.md)和[Newton 工具验证](reports/metric-camera-tools-2026-09-30.md)。
+| 范围 | 当前证据 | 完整验收要求 |
+| --- | --- | --- |
+| 原生模型与工具执行 | Luna CPU 文字导航与录音导航、独立 Verifier、原始传感器、agentic MP4 和资源释放通过 | 当前源码的多场景长导航、全部动作精度及重复任务统计 |
+| 语音与固定音色 | 三个 Qwen 模型的实际 CPU 推理、四段 WAV 与全部 ASR 回读、36 项音色与参数测试通过 | 识别准确率、交互延迟、音质与 Microduck 音频设备 |
+| 感知 | 当前 CPU RGBD 与几何复核；固定源码 Newton RGBD 和 SAM3.1 + YOLO26 服务记录 | 独立标注的识别与距离评估、目标跟踪和真机校准 |
+| 训练与导出 | Walking/StandUp × 两个 backend × 两个原生 PPO 的执行流程、恢复、归一化导出与回放记录 | 自训练有效行为、多个 seed、sim2sim 与最终评估 |
+| Newton 资产与准备 | 两种机器人、Office/Hospital 几何、CPU solver/contact、依赖检查与发布准备通过 | 当前源码的实际 GPU 求解、初始化、渲染及完整运行验收 |
+| 安装与扩展 | 434 个 source/resource 文件、三份许可证、26 个独立安装调用通过 | 从干净环境复现所声明的完整流程 |
+| 真机 | 统一接口和官方运行时来源已记录 | 实际 Microduck 的传输、音频、传感器、控制与任务验收 |
 
-**当前开发策略**：完整项目 scope 保持本文第 1–10 节的交互、工具、感知、声音、经验与训练设计。数据结构与接口、机器人后端、技能、工具、感知、策略、Harness、语音、记录、训练和应用装配已有独立模块。CPU MuJoCo/BAM 公寓与 Newton/BAM Office 已验证真实传感器、官方 ONNX 推理、ActionGate 和独立 Verifier。Newton 距离/角度工具与相机具有实际物理证据，正式模型任务完成计划与停止。Qwen 语音文件推理、Mac 音频服务与停止边界已通过实际验证。用户当前停止八组 Walking 训练及预览、评估进程；自训练策略的完整行为验收、多场景长导航、物体效果和真机执行仍需完成。各模块证据见[实现进度](implementation-status.md)。
+证据入口：[当前状态](implementation-status.md)、[CPU 开发验证](reports/cpu-development-readiness-2026-10-08.md)、
+[语音导航](reports/cpu-voice-navigation-2026-10-08.md)、[发布要求](release-readiness.md)。
+GPU 验收与 RL 保持停止。后续获得执行授权时，同时最多使用一张空闲 GPU 2–4；
+设备要求没有 compute PID 且持续零 utilization。其他用户和项目的进程保留。
 
-**RL框架扩展（2026-09-06）**：当前训练环境服务于RL，仿真后端（MuJoCo / Isaac-Newton）与RL框架（首批RSL-RL / Stable-Baselines3）独立选择。新增 `--rl-framework` 与兼容矩阵入口 `omd frameworks`；不同框架共用任务、观测/动作和评测契约，各自适配VecEnv、算法配置、checkpoint、normalizer与导出。Isaac/Newton上的RSL-RL与SB3 PPO均已通过短训练，SB3额外验证192次超时重置；RSL-RL归一化ONNX导出数值检查通过；MuJoCo SB3 已完成官方 walking 的 64 环境/5 轮训练和恢复训练，并验证 768 次超时；MuJoCo SB3 已通过官方 runner 扩展导出及 32 组输入数值检查；Isaac SB3 恢复/导出仍待实现，不将所有组合标为已支持。后续框架通过注册扩展，详见[RL框架接入](rl-frameworks.md)。
+## 2. 已确定的设计
 
-**官方兼容性补审（2026-09-06）**：已全文审读官方 `AGENTS.md`，官方 CPU 回归测试 199 通过、1 跳过。MuJoCo 官方 flat walking 64 环境/5 轮训练及官方导出成功。官方预训练策略的 CPU BAM 回放完成 14 秒并生成视频，但前进/转向跟踪不足，不能标记 walking 验证通过。此前 Isaac PD 诊断不等同于官方 BAM 任务迁移。所有新增组合均须通过官方约定的 settle、smoke、归一化导出、回放和 schema-2 格式检查；不因时间目标简化物理/任务契约。见[兼容性审计与证据](reports/official-rl-compliance.md)。
+| 编号 | 设计要求 |
+| --- | --- |
+| D01 | 维护官方 mjlab/MuJoCo-Warp 与 Isaac Lab/Newton 两个训练 backend；Isaac 使用 Newton 的 MuJoCo-Warp solver。 |
+| D02 | 两个 backend 共享任务要求、观测动作格式、命令序列和评估语义，使用独立锁定环境。 |
+| D03 | 复用外部通用 Harness 的 agent loop、推理、规划、记忆和任务调度。 |
+| D04 | 感知、主动观察、policy、状态读取和停止作为工具提供给上层模型。 |
+| D05 | 仿真与真机使用相同的单位、工具参数、结果类型和取消语义；能力由实际后端声明。 |
+| D06 | 开放权重语音模型优先，允许外部 Linux/NVIDIA 主机推理。 |
+| D07 | 语音使用显式开始录音、结束提交和文字合成语音；持续监听与全双工属于扩展。 |
+| D08 | setup 通过描述、试听和明确确认保存声音，日常使用活动版本，用户主动修改后才能切换。 |
+| D09 | 保存观察、工具、执行结果和语音事件，向 Harness 提供带来源的长期 experience。 |
+| D10 | 支持 joint policy，并为 velocity policy、VLN、VLA 和 action sequence 提供明确适配接口。 |
+| D11 | 训练和评估全程 headless，资源明确分配，输出、源码和 checkpoint 来源完整保存；执行遵守当前 GPU 使用限制。 |
+| D12 | 模块、入口、依赖、文档、Git 记录和可复现验收属于工程交付。 |
 
-**最新进度（2026-09-06）**：MuJoCo基础设备/CPU仿真/EGL检查通过。用户明确同意EULA后，Isaac资产转换重试成功；Newton诊断在2个环境完成100步，实际solver为 `SolverMuJoCo`、设备 `cuda:0`，原始资产质量/惯量/质心/关节范围/armature及动作顺序检查通过。相机位姿刷新和本地地面资产修复后，视频重跑通过并完成人工检查。RSL-RL与SB3各完成16环境、5轮短训练；RSL-RL导出与Torch的16组输入比较通过（最大误差约3.6e-7）。17项轻量测试与7项安装环境CPU测试通过。BAM、完整行走训练和sim2sim仍未完成。详见[实时进度](implementation-status.md)。
+当前应用规模为一个 robot、一个外部 host 和一个活动任务。接口保留 robot/persona/session 身份。
+声音设计按 setup 需要运行；ASR 和 TTS 使用各自锁定环境。不同部署方式通过同一服务接口连接。
 
-**Isaac 参考审读（2026-09-06）**：已静态审读 `kabilankb/isaaclab-microduck` 默认分支的固定版本 `4310fe0`，借鉴独立任务包、显式 Newton/MJWarp 配置、资产转换与行为评测方法。参考实现仍缺 BAM 与观测延迟，关节排列和最终 solver 参数需独立验证；它不替代官方 MuJoCo 基线，也不表示本项目 Isaac 已实现。第 03–07 步按环境 → 资产与映射 → BAM → 同策略 sim2sim → 训练导出逐步验收，详见[审读与迁移细化](reports/isaac-newton-reference-review.md)。独立功能使用分支，每个可检查阶段及时提交；完整项目 scope 保持不变。
+| 本项目维护 | 外部 Harness 维护 | 独立扩展与研究 |
+| --- | --- | --- |
+| 机器人模型、执行器、训练任务、导出与部署适配 | 模型接入、推理与规划 | 通用 VLN/VLA 数据与训练 |
+| 传感器、policy、技能工具及执行结果 | 工具选择、并发任务与取消调度 | 复杂地图、重定位及全屋导航 |
+| 仿真/真机接口和能力发现 | 长期记忆、检索、角色与表达内容 | NFC、物体交互及多机器人 |
+| 录音、ASR、音色资料、TTS 和播放事件 | 决定何时观察、重试与反馈 | 唤醒词、持续监听及全双工 |
+| Episode 证据、回放与评估 | 组织带证据的共同经历 | 根据失败记录构建新训练任务 |
 
-**框架验收（2026-09-06）**：8 项轻量测试通过，覆盖模块依赖隔离、工具注册/请求关联、事件域与证据保存、50 Hz 时序及 Newton 禁止静默降级；Python 语法编译通过。此处为早期框架验收记录；后续 GPU 训练/回放结果见最新进度。见[验证记录](reports/framework-validation.md)。
+## 3. 官方来源与硬件
 
-原始想法文档 `Agentic Microduck.md` 未随本次两份设计材料导入；当前完整范围以本文为准。
+运行版本由 [`configs/upstream.json`](../configs/upstream.json) 固定。
+Microduck task、MDP、模型、BAM、runner、导出与回放属于可编辑的项目源码，
+来源与 Apache 许可证保存在 `third_party/microduck_rl/`。通用模拟器和原生 PPO 保持依赖。
 
-逐步开发与验收安排见 [执行计划 v0.1](Agentic%20Microduck%20-%20Execution%20Plan%20v0.1.md)。
+| 来源 | 固定提交或版本 |
+| --- | --- |
+| `microduck_rl` | `cfe1c2adcceb55f6b6e369c888b31c6873175c55` |
+| `microduck` | `f0d934e761a0bc96a6a7d1b5bc1260ce5a4120e5` |
+| Isaac Lab | `v3.0.0-beta2.patch1` / `ffff603eafc6b74264a5261cc0183d6a65390d78` |
+| Native Embodied-DeepSeek-Harness | `8a5e685b22d032207f53db20454f0992a4ad60fd` |
 
-**阅读路径**：先看第 1–4 节理解定位、范围和模块；第 5–10 节定义实现接口与关键流程；第 11–14 节用于安排开发和验收。当前图示以内嵌 Mermaid 保存，可在 GitHub 阅读；代码边界见[架构与扩展指南](architecture.md)。
+硬件信息使用已审读的官方来源；最终设备参数和实际可用能力须按设备版本核查。
 
----
+| 硬件 | 已记录的信息 | 接入要求 |
+| --- | --- | --- |
+| 计算 | RK3566、AI 加速器、1 GB RAM、32 GB 存储 | 板载采集和控制，外部主机运行大模型 |
+| 麦克风与扬声器 | 官方采音和播放代码 | 明确采集所有权、格式、播放进度与停止 |
+| RGB 相机 | 前置相机，最终分辨率和视场待确认 | 保存内外参、安装位置和版本 |
+| ToF / compact LiDAR | 8×8 区域，VL53L5CX / VL53L8CX 驱动 | 64 区测距、有效性、单位与坐标系 |
+| 双 IMU | 头部和身体 | 分别保存安装坐标系和实际数据 |
+| 舵机 | 15 自由度，当前 policy 使用 14 个，嘴部独立 | 关节名称、编号、HOME、动作映射与控制周期 |
+| 嘴部 | 可抓取结构 | 有对象效果的独立任务与物理验收 |
+| NFC | 头部和嘴部天线的产品信息 | 驱动、可用接口和实际读取验收 |
+| 电池与网络 | 可更换电池、Wi-Fi、Bluetooth | 运行状态、通信中断与命令有效期 |
 
-## 1. 产品定位与用户体验
+连接设备时声明实际传感器、技能、音频和限制。缺失或过期测量返回明确状态。
+依赖缺失传感器的工具在启动位置拒绝请求。硬件接口与试验范围见
+[官方审读](reports/official-rl-compliance.md)和[真机接入要求](harness-native-integration.md)。
 
-### 1.1 用户最终获得什么
-
-本项目面向 Microduck 用户、开源贡献者和机器人学习研究者，提供三类能力：
-
-1. **玩与交互**：通过一句语音或文本命令，让小鸭执行技能、观察周围、反馈进度和结果。
-2. **开发与扩展**：替换大脑、添加传感器工具、接入新的 RL / VLN / VLA 策略，在仿真与真机上使用相同的调用接口。
-3. **训练与部署**：选择官方 mjlab / MuJoCo-Warp 或 Isaac Lab / Newton 定义任务、训练策略、开展 sim2sim 评测并导出兼容策略包。
-
-用户体验强调连续性：小鸭有固定名字和声音，能够通过外部 harness 的长期记忆记住用户偏好及真实发生的共同经历。更换模型、重启或开启新会话，不应重置声音身份。
-
-### 1.2 一个目标体验
-
-> 用户按下录音按钮：“小鸭，找到红球，走到它前面。”
->
-> ASR 将录音转成文本，harness 调用观察工具识别目标，再启动接近目标的技能。技能持续执行，上层可调用状态或传感器工具了解进度。
->
-> 到达后，小鸭用 setup 时确认的音色说：“找到啦，我停在球前面了。”
->
-> 如果用户重新录音说“先停下”，harness 取消当前技能，小鸭在确认执行状态后回应。
-
-这是后续整体验收场景，不是第一项迁移任务的交付承诺。第一个技术里程碑仍是官方行走基线向 Isaac Lab + Newton 的迁移验证。
-
-### 1.3 “养成”具体体现在哪里
-
-| 维度 | 用户能感受到的变化 | 数据依据与归属 |
-|---|---|---|
-| 身份持续 | 一直使用同一个名字与音色 | 本项目保存声音配置；harness 保存角色配置 |
-| 用户偏好 | 记得用户偏好的称呼、表达方式 | harness 的记忆与检索 |
-| 共同经历 | 能提起“上次一起找到的红球” | 本项目记录观察与任务结果，harness 组织为经验 |
-| 技能成长 | 新安装的技能可用，已测技能的成功率提高 | 版本化技能与评测结果 |
-
-长期记忆不会自动改变 RL policy 的权重。真正的运动能力改善通过数据、训练、评测和部署形成闭环；对话中的成长描述应与已记录的事实一致。
-
-## 2. 已确定的决策与范围
-
-### 2.1 已确定
-
-| 编号 | 决策 |
-|---|---|
-| D01 | 支持两种正式训练后端：官方 mjlab / MuJoCo-Warp，以及 Isaac Lab / Newton。Isaac 必须使用 Newton，优先 MuJoCo-Warp solver。 |
-| D02 | 官方 mjlab 后端持续维护，既可独立训练，也用于 sim2sim 对照；两后端共用策略契约、命令序列和评测输出语义。迁移收益通过实验衡量。 |
-| D03 | 直接复用另一个项目的通用 Embodied Harness；该项目负责 agent loop、推理、规划、记忆及任务调度机制。 |
-| D04 | 感知、主动观察、动作技能和状态查询均作为工具提供给上层大脑。 |
-| D05 | 仿真与真机必须共用工具语义、输入输出协议和 harness 接口。 |
-| D06 | 模型选择以开放权重为优先，允许外部 Linux + NVIDIA 主机推理。 |
-| D07 | 首版语音不要求持续监听或原生全双工；核心是录音转写和文字合成语音。 |
-| D08 | 用户在 setup 中描述、试听并确认音色，之后一直使用该声音，除非用户主动修改。 |
-| D09 | 记录可追溯的观察、工具调用、实际执行结果和语音事件，供 harness 构建长期 experience。 |
-| D10 | 为 RL、VLN、VLA 保留适配接口；具体模型须满足 Microduck 的观测、动作和运行资源要求。 |
-| D11 | 服务器运行经 job 提交、全程 headless、按需保存离屏视频；允许单节点多 GPU，无额外项目级时长/数量上限。 |
-| D12 | 优先建立服务整个项目的模块化框架和稳定衔接边界，再逐项实现功能；Git、清晰入口、文件管理、完整项目总览 README 及原始文档进度同步属于工程交付。 |
-
-### 2.2 首版建议，允许后续调整
-
-- 录音采用显式开始 / 结束的交互，例如电脑或手机页面上的录音按钮；具体 UI 载体尚未选定。
-- ASR 基线为 `Qwen3-ASR-0.6B`。
-- setup 声音设计使用 `Qwen3-TTS-12Hz-1.7B-VoiceDesign`；日常合成使用 `Qwen3-TTS-12Hz-0.6B-Base`，复用确认后的参考声音。
-- 面向 harness 的工具与主机服务优先使用 Python；硬件控制复用官方 Rust 运行时。
-- 使用单机器人、单主机和单活动任务作为初始实现规模，接口保留多机器人标识。
-- 语音模型按需要加载，声音设计不与持续训练或日常推理强制常驻同一 GPU。
-
-### 2.3 项目边界
-
-| 本项目负责 | 通用 harness 项目负责 | 后续扩展 |
-|---|---|---|
-| Microduck 资产、Isaac 任务、执行器适配、训练与导出 | 上层模型接入、推理与规划 | VLN / VLA 数据采集与微调 |
-| 传感器、技能、状态等工具适配 | 工具选择、并发任务管理与取消协议 | 复杂导航、地图与重定位 |
-| 仿真 / 真机后端与能力发现 | 长期记忆、经验检索、总结与个性管理 | NFC 与嘴部交互技能 |
-| 录音、ASR、声音设计、TTS、播放状态 | 决定说什么、如何解释结果 | 唤醒词、持续监听、全双工模型 |
-| 机器人执行结果、记录、回放和评测 | 决定何时观察、监控、重试或重新规划 | 多机器人与跨设备协作 |
-
-我们提供一个接入上述 harness 的参考应用。参考应用不再实现第二套长期记忆或 agent 调度系统。
-
-## 3. 官方基础与硬件约束
-
-### 3.1 已有软件链路
-
-`microduck_rl` 当前使用 **mjlab + MuJoCo Warp + PPO / RSL-RL** 训练，已有 GPU 并行环境、BAM 执行器建模、随机化、ONNX 导出和 CPU MuJoCo 回放。迁移不是从 CPU 仿真第一次转向 GPU；其目标是接入 Isaac 任务与感知生态，并建立统一开发环境。[S01][S02]
-
-`microduck` 提供板载运行时：`robotd` 管理控制与策略，`tofd` 提供深度，`mediad` 提供视频与远程接口等。已有协议是适配起点。设计文档描述的目标架构与当前实现可能存在差异，开发时须核查被调用的方法及部署版本。[S03][S04]
-
-调研时记录的仓库快照：
-
-- `microduck_rl`：`1e79c29c97d8b38aee9eefde77a545860ba7658e`
-- `microduck`：`bc41fb5c9a9b39894669c1e022e375cf83800382`
-
-这两个提交用于标记调研起点，不构成已验证的运行组合。实施 M0 时重新核对内容并生成实际版本锁定文件。
-
-### 3.2 硬件与能力发现
-
-| 硬件 | 官方公布 / 代码可见的信息 | 设计影响 |
-|---|---|---|
-| 计算 | RK3566，AI 加速器，1 GB RAM，32 GB 存储 | 小鸭负责采集、播放和控制；大模型初期在外部主机运行 |
-| 麦克风与扬声器 | 产品规格包含麦克风和扬声器；已有采音与声音播放代码 | 需要可复用的音频输入 / 输出接口 |
-| RGB 相机 | 前置；最终分辨率与视场待定 | 不将驱动当前默认分辨率视作最终产品参数 |
-| ToF / compact LiDAR | 8×8 测距矩阵；驱动支持 VL53L5CX / VL53L8CX | 提供 64 区测距及有效性状态，不宣称高密度全向点云 |
-| 双 IMU | 头部、身体各一个 | 标明参考坐标系及实际可读取的数据 |
-| 舵机 | 15 自由度；官方当前策略输出覆盖其中 14 个，嘴部单独控制 | 模型自由度、策略动作与硬件编号分别映射 |
-| 嘴部 | 可抓取结构 | 独立工具及后续受限物体交互任务 |
-| NFC | 产品规格为头部、嘴部各一处天线 | 驱动与稳定接口尚未在本次审读中确认，作为扩展能力 |
-| 电池与连接 | 可更换电池，Wi-Fi、Bluetooth | 通过已有状态接口判断运行条件；网络连接不承担高频关节闭环 |
-
-来源为官方规格与关键实现。[S05][S06][S07] 上游明确说明部分产品参数尚未定型；开发板也可能缺少部分传感器。
-
-**能力发现是入口要求**：连接时返回 `camera`、`tof`、`audio_capture`、`audio_playback`、`nfc`、`skills` 等实际能力。缺失能力时返回明确的 `unsupported` / `unavailable`，不得以全零数据冒充测量结果。
-
-例如，缺少 ToF 的仿真场景或真机仍可使用站立技能，但依赖测距的接近目标工具应拒绝启动或使用事先定义的降级策略。
-
-## 4. 总体架构与模块
+## 4. 模块与部署位置
 
 ```mermaid
 flowchart TB
-  User[用户文本与录音] --> Voice[ASR / 固定声音 TTS / 播放]
-  User --> Bridge[Harness Bridge]
-  Voice <--> Bridge
-  Bridge <--> Harness[外部推理 / 规划 / 调度 / 记忆]
-  Bridge <--> Tools[感知 / 技能 / 状态工具]
-  Tools <--> Sim[仿真执行后端]
-  Tools <--> Real[官方真机运行时适配]
-  Tools --> Episodes[Episode 证据记录]
-  Voice --> Episodes
-  Episodes --> Harness
+  User[文字或显式录音] --> ASR[Qwen ASR]
+  User --> Client[原生任务客户端]
+  ASR --> Client
+  Client <--> Harness[外部 Harness：规划、工具选择、记忆]
+  Harness <--> Tools[感知、policy、状态与停止工具]
+  Tools <--> CPU[CPU MuJoCo/BAM]
+  Tools <--> Newton[Isaac Lab/Newton/BAM]
+  Tools -.设备验收.-> Robot[Microduck 官方运行时]
+  Tools --> Evidence[Episode、物理状态、图像与原生事件]
+  Evidence --> Harness
+  Harness --> TTS[Qwen Base TTS]
+  Profile[已确认 VoiceProfile] --> TTS
+  TTS --> Audio[音频设备与播放记录]
+  Audio --> Evidence
 ```
 
-图中的外部 Harness 是独立项目；工具、声音、后端适配与事件记录属于本项目。双向箭头表示请求和结果回传。训练链路与在线交互链路独立运行，通过版本化策略包连接。
+| ID | 模块 | 输入与输出 | 职责 |
+| --- | --- | --- | --- |
+| M01 | 交互入口 | 文字、录音、setup → 请求 | 文本、录音、试听、连接和停止入口 |
+| M02 | 音频设备 | 采集或播放请求 → 文件与状态 | 本机和机载音频、播放中断及资源关闭 |
+| M03 | ASR | 音频 → 转写 | 格式检查、模型调用和来源记录 |
+| M04 | VoiceDesign | 描述与参考文本 → 候选 | setup 与主动修改声音 |
+| M05 | VoiceProfile Store | 确认 → 不可变版本与活动选择 | 音频、文字、模型修订与 SQLite 事务 |
+| M06 | TTS | 回复与活动音色 → WAV | 固定声音合成与播放事件 |
+| M07 | Harness 接入 | 请求与事件 ↔ 原生服务 | `NativeTaskClient`、原生会话与身份 |
+| M08 | Tool Catalog | Schema 与参数 → handler 结果 | 完整 JSON Schema、有限数值和实际能力 |
+| M09 | 主动感知 | 观察请求 → 当前帧目标与测量 | RGB、ToF、IMU、几何、检测来源和头部观察 |
+| M10 | Policy 与技能 | 参数与观测 → 动作与结果 | 策略适配、终止条件和必要的连续反馈 |
+| M11 | Robot Backend | 统一调用 ↔ 执行后端 | 模拟器、官方运行时和设备能力 |
+| M12 | 训练与导出 | 任务与配置 → 可评估的 policy 包 | 两个 backend、两个 PPO、恢复、导出与评估 |
+| M13 | Episode 记录 | 观察、请求、执行和语音 → 证据 | 原始资料、时间关联、回放与经验接口 |
 
-### 4.1 模块职责
+外部 Linux/NVIDIA 主机运行仿真、训练、模型和工具服务。Harness 可同机或独立部署。
+Microduck 板载运行官方控制、传感器及音频路径。交互设备提供录音和声音确认。
+高频关节控制保持 50 Hz；上层推理与查询通过工具和确认边界连接。
 
-| ID | 模块 | 输入 → 输出 | 责任边界 |
-|---|---|---|---|
-| M01 | 交互入口 | 录音 / 文本 / setup 操作 → 请求 | 录音按钮、试听、连接状态和文本备用入口 |
-| M02 | 音频设备适配 | 录音请求 / 音频 → 音频片段 / 播放进度 | 本机设备与 Microduck 音频设备切换 |
-| M03 | ASR 服务 | 音频片段 → 转写结果 | 采样率转换、模型调用与文本结果；不规划动作 |
-| M04 | 声音设计 | 自然语言描述 → 候选参考声音 | setup / 用户修改时运行，确认后保存 |
-| M05 | Voice Profile Store | 声音确认 → 持久配置 | 参考音频、文本、模型修订与活动声音版本 |
-| M06 | TTS 与播放 | 回复文本 + 声音配置 → 音频 / 播放事件 | 日常固定音色合成、停止播放和声音复用 |
-| M07 | Harness Bridge | 指令 / 观察 / 事件 ↔ harness | 唯一 agent 接入点，映射外部协议 |
-| M08 | Tool Catalog | 工具描述 / 调用 → 类型化工具结果 | 能力声明、参数校验、状态与错误语义 |
-| M09 | 感知工具 | 读取 / 观察请求 → 带时间与坐标系的观察 | RGB、ToF、姿态、状态、主动注视 / 扫描 |
-| M10 | 技能运行与策略适配 | 任务参数 + 观测 → 命令 / 任务结果 | RL / VLN / VLA 适配及所需本地执行循环 |
-| M11 | Robot Backend | 标准调用 ↔ 仿真 / 真机 | 将统一语义映射到 Isaac 或官方运行时 |
-| M12 | Isaac 训练与导出 | 资产 + 任务 + 配置 → 可评估策略包 | 训练、回放、评测、兼容导出 |
-| M13 | Episode Recorder | 所有关键事件 → 可追溯记录 | 原始证据、时间关联与回放；不自行总结长期记忆 |
+## 5. 语音与持久声音
 
-### 4.2 部署位置
+### 5.1 请求和中断
 
-- **外部 NVIDIA 主机**：Isaac 训练 / 仿真、语音推理、工具服务；harness 可同机也可另行部署。
-- **Microduck 板载**：官方运动控制、传感器采集、音频采集与播放、必要的本地命令超时处理。
-- **交互设备**：setup、录音触发、试听及文本输入，可与推理主机合一。
-- **大脑**：遵循外部 harness 的模型部署方式，本项目不固定 VLM。
+1. 用户明确开始录音，结束后提交完整音频。
+2. ASR 生成文字，原生任务客户端保留录音、请求、会话和模型来源。
+3. Harness 规划并调用机器人工具，独立 Verifier 使用实际结果。
+4. 反馈文字交给 TTS，TTS 读取活动 VoiceProfile。
+5. 音频设备保存播放开始、完成、中断及已播放进度。
 
-允许外部主机运行 VLN 等策略并向小鸭发送速度目标；底层行走策略与电机闭环保持板载。实际模型并发数、显存占用与延迟在目标 GPU 上测量，不预先承诺。
+开始新录音可以停止当前播音。动作取消使用独立的任务停止接口，并等待设备确认。
+提交“停止”指令后由 Harness 调用相应工具；持续监听具有自己的接收和中断验收要求。
+文字入口使用同一任务链路。语音模块提供转写和合成，任务规划由 Harness 执行。
 
-## 5. 语音设计：轻量入口与持久声音身份
+### 5.2 模型与环境
+
+| 功能 | 模型 | 固定 revision |
+| --- | --- | --- |
+| ASR | `Qwen/Qwen3-ASR-0.6B` | `5eb144179a02acc5e5ba31e748d22b0cf3e303b0` |
+| 声音设计 | `Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign` | `5ecdb67327fd37bb2e042aab12ff7391903235d3` |
+| 日常 TTS | `Qwen/Qwen3-TTS-12Hz-0.6B-Base` | `5d83992436eae1d760afd27aff78a71d676296fc` |
+
+CPU 使用 Float32，CUDA 使用 BFloat16；设备参数在模型 SDK 导入和模型下载之前检查。
+ASR 与 TTS 各自使用锁定环境。模型身份保存在转写、合成和候选记录中。
+当前源码的实际 CPU 结果见[语音模块验证](reports/voice-audio-modules-2026-10-08.md)。
+音质、自由情绪控制、识别准确率和交互延迟均有各自的评估范围。
+
+### 5.3 Setup 与版本
 
 ```mermaid
 flowchart LR
-  Describe[描述声音] --> Design[按需 VoiceDesign]
-  Design --> Listen[试听候选]
-  Listen --> Confirm{用户确认}
-  Confirm -->|是| Profile[版本化参考声音 / 活动指针]
-  Confirm -->|否| Describe
-  Text[Harness 回复文本] --> TTS[日常 Base TTS]
-  Profile --> TTS
-  TTS --> Play[音频设备 / 播放事件]
+  Description[声音描述与试听文字] --> Design[VoiceDesign 候选]
+  Design --> Listen[试听]
+  Listen --> Confirm{明确确认}
+  Confirm -->|确认| Store[不可变参考音频与版本]
+  Confirm -->|修改| Description
+  Store --> Active[活动声音选择]
+  Active --> TTS[日常 Base TTS]
 ```
 
-### 5.1 首版交互规则
+候选记录包含 `candidate_id`、`description`、`reference_audio`、`reference_text` 和 `model_revision`。
+已确认 `VoiceProfile` 的实际字段由 [`voice/base.py`](../src/oh_my_duck/voice/base.py) 定义：
 
-1. 用户显式开始录音，结束后提交一个完整音频片段。持续监听不是依赖。
-2. ASR 返回文本，bridge 按普通用户指令交给 harness。
-3. harness 决定工具调用和回复内容；语音模块不自行规划或确认任务成功。
-4. TTS 使用当前活动声音配置合成，音频适配器负责播放。
-5. 不需要语音时，文本入口仍可运行同一任务链路。
-
-**首版中断语义**：用户开始新录音时可以停止当前播音，避免把小鸭声音录入新指令；这不自动取消正在执行的动作。用户说“停下”并提交后，由 harness 调用取消 / 停止工具。录音按钮之外提供显式停止动作入口。未启用持续监听时，不承诺任意时刻说出“停”都会被接收。
-
-例如，跟随过程中按下录音问“你看见球了吗”，可暂停小鸭的播音，跟随技能继续运行；提交“不要跟了”后才取消跟随。普通暂停说话与取消动作是两个事件。
-
-### 5.2 模型角色
-
-| 阶段 | 初始模型选择 | 调用时机 |
-|---|---|---|
-| 识别 | `Qwen/Qwen3-ASR-0.6B` | 每次录音提交后；保留以后启用流式识别的可能 |
-| 声音设计 | `Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign` | setup 或用户修改音色时 |
-| 日常合成 | `Qwen/Qwen3-TTS-12Hz-0.6B-Base` | 根据已确认的参考音频与参考文本合成 |
-
-上述三个 Qwen 模型已在 `jd_B300` 的 GPU 5 完成文件推理验收：官方中文录音转写、VoiceDesign 候选生成、显式确认，以及两个独立进程使用同一活动音色版本合成中文语音。两段合成语音的 ASR 回读确认了文字内容；模型 commit、耗时、显存和音频文件见[语音验收记录](reports/voice-validation-2026-09-26.md)。Mac 内置扬声器播放、内置麦克风录制和远端 HTTP 推理已完成实际验证；独立 CPU 服务验证 `VoiceSession.speak` 完整播音与播音开始后的停止。录音回读与原文有「您好／你好」「小丫／小鸭」两处用字差异；Microduck 音频设备仍待接入。见[语音交互验收](reports/voice-interaction-validation-2026-09-29.md)。[S08][S09]
-
-0.6B Base 的核心用途是参考声音复用。日常语气 / 情绪的自由控制能力不作为该配置的已保证特性，也不依赖每次重新设计声音。后续若需更强表达控制，再比较相应模型与接口。
-
-### 5.3 Setup 流程
-
-1. 用户输入声音描述，例如：“声音明亮、有一点沙哑，说话轻快但不尖锐。”
-2. 使用固定试听文本生成候选音频，例如：“你好呀，我是你的小鸭。以后我们一起探索吧。”
-3. 用户试听，可修改描述重新生成。
-4. **用户确认**后，创建不可变的声音版本，保存参考音频、文本和生成来源。
-5. 将该版本设为活动声音，后续对话自动复用。
-
-取消 setup 不替换已有声音。新建小鸭尚未确认音色时可继续使用文本；不暗中选定一个永久声音。修改音色沿用相同流程，并保留上一版以便回退。
-
-### 5.4 VoiceProfile 提案
-
-```json
-{
-  "schema_version": 1,
-  "persona_id": "duck-001",
-  "voice_id": "voice-001",
-  "revision": 1,
-  "description": "明亮、略带沙哑，轻快但不尖锐",
-  "language": "zh",
-  "reference_audio": "voices/voice-001/v1/reference.wav",
-  "reference_text": "你好呀，我是你的小鸭。以后我们一起探索吧。",
-  "design_model": "Qwen/Qwen3-TTS-12Hz-1.7B-VoiceDesign",
-  "synthesis_model": "Qwen/Qwen3-TTS-12Hz-0.6B-Base",
-  "model_revisions": {},
-  "reference_sha256": "<在生成并保存音频后计算>",
-  "confirmed_at": "<用户确认时间>"
-}
-```
-
-这是示例结构。`model_revisions` 在实际 setup 中记录模型权重和推理实现版本，不能在发布配置中留空。衍生的 speaker prompt / embedding 可缓存，但参考音频和文本是可重建配置的持久来源；模型更新后按兼容性重新构建缓存。
-
-活动声音指针与不可变版本分开存储，避免生成失败覆盖现有音色。一个 persona 可在仿真和真机间使用同一声音；物理机器人编号不决定声音模型的内部状态。
-
-### 5.5 最小服务接口
-
-| 接口（本项目提案） | 返回 |
-|---|---|
-| `transcribe(audio, language_hint?)` | `text, language?, audio_id, duration_ms`；置信度只有模型提供时才返回 |
-| `design_voice(description, sample_text)` | `candidate_id, audio_id, reference_text` |
-| `confirm_voice(candidate_id, persona_id)` | `voice_id, revision` |
-| `synthesize(text, voice_id, revision)` | `audio_id, format, sample_rate, duration?` |
-| `play_audio(audio_id)` | `playback_id`，随后产生开始 / 完成 / 中断事件 |
-| `stop_playback(playback_id)` | `stopped, played_ms` |
-
-声音选择不放在每一条普通回复中由大脑自由生成。bridge 将已选声音自动附到 TTS 请求上，保证用户设定的持久性。
-
-### 5.6 音频设备接入
-
-官方当前音频 worker 已使用机载麦克风进行摸头声音检测，且代码注明采集设备为单客户端。[S10] 真机适配须从共享采音路径分发数据，或明确安排采集所有权，不能让多个服务同时独占打开设备。
-
-本次已确认采音实现，尚未确认一个可直接复用的完整远程 ASR 音频接口。开发 M2 时核查音频传输与播放路径；不把架构文档里的双向音频目标当作现成能力。首版不要求机器人同时播音与录音；以后开放双向持续音频时再加入并实测回声消除。
-
-## 6. Harness 接入与统一工具协议
-
-### 6.1 通用 harness 接口约束
-
-当前部署直接使用固定 EDH 源码的 `startServer`、`SessionEnvironment`、`EmbodiedBackend`、`execution.start`、ActionGate 与 Verifier。MicroDuck worker 负责实际传感器、官方策略推断和 MuJoCo/BAM 物理执行；上层通过 `additionalTools` 读取公开传感器并设置策略命令。正式目标检查由环境与 Verifier 执行：
-
-- 提交用户文本，并携带录音、会话和请求来源。
-- 注册工具描述、参数 schema 和实际设备能力。
-- 将观察、任务进度、结果及中断事件交给 harness。
-- 接收待播报文本和工具调用。
-- 使用 harness 提供的任务标识与取消机制。
-
-策略每次产生 14 个关节 offset，ActionGate 批准后执行四个 0.005 秒 MuJoCo/BAM 子步。暂停先使旧 generation 失效并排空设备动作，随后发布新观测与停止确认。切换策略需要真实停止样本及确认边界；目标检查读取独立原生状态。
-
-### 6.2 工具示例
-
-下列名称属于本项目，不表示官方已有同名 API。
-
-| 工具 | 主要参数 | 结果 / 运行方式 | 首版阶段 |
-|---|---|---|---|
-| `get_capabilities` | `robot_id` | 传感器、技能、格式、后端和限制 | M1 |
-| `read_sensor` | `sensor, max_age_ms, frame?` | 数据引用、采集时间、有效性、坐标系 | M1 基础状态；M3 RGB / ToF |
-| `get_robot_state` | `robot_id` | 姿态、执行技能、运动、健康状态 | M1 |
-| `look_at` | `target, frame` | 请求结果与可达性；必要时持续保持 | M3 |
-| `inspect` | `direction / region` | 转头 / 扫描后的观察及观察姿态 | M3 |
-| `run_skill` | `skill_id, parameters` | `task_id`；长期运行采用任务状态协议 | M1 |
-| `get_task_status` | `task_id` | 状态、进度证据、终止原因 | M1 |
-| `cancel_task` | `task_id, reason` | 取消请求及最终取消状态 | M1 |
-| `stop_motion` | `robot_id` | 请求停止当前运动，报告实际结果 | M1 |
-| `follow_object` | `target_id, desired_distance` | 跟随任务，内部保持目标跟踪与速度反馈 | M3 / 后续策略 |
-| `approach_object` | `target_id, stop_distance` | 有到达条件的接近任务 | M3 |
-
-`read_sensor` 是读取测量，不等于已经知道物体身份。目标检测 / 识别可以由上层 VLM 读取图像完成，也可注册独立的感知模型工具。`follow_object` 的 `target_id` 必须指向有来源、最近观测时间和有效状态的目标记录。
-
-### 6.3 任务结果与中断
-
-长时间工具遵循以下概念状态：
-
-`accepted → running → succeeded / failed / cancelled`
-
-取消可经过 `cancelling`。收到取消请求不代表物理动作已停止；最终状态来自执行适配器的确认或已定义的超时处理。官方原始命令被接受也不自动等于用户目标完成。
-
-请求携带 `request_id`、`task_id`、`robot_id` 和 `session_id`。重复请求不应重复触发一次性动作；旧任务的迟到结果要关联原始任务，不能重新启动已取消的动作。取消协议机制由 harness 复用，Microduck 适配器实现机器人侧停止与状态映射。
-
-例如，`approach_object` 必须通过新鲜观察确认目标距离达到阈值后再返回到达，而不是发出一次速度命令后立即返回成功。
-
-### 6.4 谁负责快速反馈
-
-上层大脑决定“跟谁”“何时查看进度”“是否换任务”，可以按需调用 `read_sensor` 和 `get_task_status`。工具内部的执行器按自身频率处理必要的连续反馈；板载行走策略维持 50 Hz 控制。[S11]
-
-这样的分工允许大脑推理变慢或偶尔不调用传感器时，已经启动的技能仍按定义运行。工具声明目标丢失、观测过期、连接中断、超时后的行为，不能无限沿用最后一个有效速度。
-
-头部扫描与视觉跟随可能争用相机朝向。工具声明 `motion`、`head`、`mouth` 等资源要求；通用 harness 负责协调，后端保证电机命令有单一仲裁入口。首版可简单串行执行争用相同资源的技能。
-
-## 7. 仿真与真机共用后端
-
-```mermaid
-flowchart LR
-  Tools[同一工具参数与结果语义] --> Interface[RobotBackend]
-  Interface --> Sim[仿真适配]
-  Interface --> Real[真机适配]
-  Sim --> Sensor[带时间 / 坐标 / 有效性的观察]
-  Real --> Sensor
-  Sensor --> Tools
-```
-
-### 7.1 相同语义，不承诺相同数值
-
-`RobotBackend` 是项目内部的后端接口。运行配置选择 `isaac` 或 `microduck`，工具不据此改变参数含义。
-
-| 接口概念 | Isaac 后端 | 真机后端 |
-|---|---|---|
-| 相机 | 仿真相机 / 渲染输出 | 官方视频帧获取路径 |
-| ToF | 8×8 区域测距模型 | `tofd` 的测距与状态 |
-| 姿态与关节 | 模拟传感器 / 状态适配 | 官方运行时状态与传感器 |
-| 速度 / 注视 / 技能 | 仿真执行适配器 | 官方机器人控制协议 |
-| 录音与播放 | 电脑音频设备 | 机载麦克风和扬声器 |
-| 任务结果 | 统一条件的评估器 | 相同语义，依赖实际观测 |
-
-两个后端返回不同的测量值是正常的。通用性要求相同单位、参考坐标系、动作含义、结果类型、取消方式与能力发现。
-
-### 7.2 SensorFrame 提案
-
-关键字段：`sensor_id, robot_id, episode_id, sequence, capture_time, clock_domain, received_at, frame_id, validity, payload_ref, calibration_revision`。
-
-- 大图像与音频返回对象引用，不将全部二进制内容塞入工具 JSON。
-- 跨机器时不能直接相减各自的单调时钟；记录时钟域和同步估计，或明确只能使用本地接收年龄。
-- 时间对齐不能只靠最新值：头部转动时，ToF 和 RGB 要关联采集时刻的关节与姿态。
-- `max_age_ms` 表示工具允许的最大数据年龄；拿不到符合要求的数据就返回 `stale`。
-- ToF 至少区分有效测距、无有效目标、测量无效 / 未知。未知区域不能当作可通行空间。
-
-### 7.3 坐标、校准与身份
-
-采用米、弧度、秒。与官方协议一致，身体参考系 `x` 向前、`y` 向左、`z` 向上。[S04] 所有向量和姿态标明参考系，四元数顺序写入接口定义，不能直接依赖模拟器默认顺序。
-
-`robot_id` 表示设备 / 模拟实体；`persona_id` 表示小鸭的持续身份；`episode_id` 表示一次执行记录。声音可跨后端复用，经验记录必须标注 `sim` / `real`，默认分开检索，防止把仿真中的找到物体当作现实经历。
-
-### 7.4 传感器仿真
-
-- RGB：使用可配置相机内外参和安装位置；最终硬件参数确认后再校准。
-- ToF：从 8×8 分区测距近似开始，后续标定区域聚合、噪声、无效返回及延迟；理想单射线仅是最初近似，不等于完整 ToF 物理模型。
-- IMU：明确重力、角速度、安装偏差、噪声及延迟。
-- Actor 输入只使用部署端实际可获得的信息。世界真值可用于奖励、critic 或评测，但不得泄露给声明可部署的 actor。
-
-例如，“走到球前”可用世界坐标计算训练奖励，但实际导航输入应来自相机 / 测距 / 可部署估计器。
-
-## 8. Policy 与技能扩展设计
-
-### 8.1 策略类别
-
-| 适配器类别 | 典型输入 | 典型输出 | 部署边界 |
-|---|---|---|---|
-| `joint_policy` | 本体观测 + 命令 | 14 维关节策略动作 | 满足官方完整契约时可导出到官方板载运行时 |
-| `velocity_policy` | 图像 / ToF / 目标 | 身体速度命令 | 可在外部主机运行，复用板载行走策略 |
-| `action_sequence_policy` | 图像 / 语言 / 状态 | 一段动作或动作块 | 需要专门定义动作含义、时序与执行适配 |
-| `composite_skill` | 参数化任务 | 多步骤工具或策略执行 | 调度机制复用 harness，机器人细节由工具提供 |
-
-VLN / VLA 是策略类别，不是即插即用的硬件兼容证明。例如一个为机械臂输出末端位姿的 VLA 不能直接把动作数组映射成 Microduck 的腿部舵机；需任务匹配、动作适配与必要训练。
-
-### 8.2 SkillSpec 提案
-
-每个技能至少声明：
-
-- `skill_id, version, description, parameter_schema`；
-- 所需传感器、硬件版本、前置姿态和互斥资源；
-- `policy_kind, observation_schema, action_schema, update_hz`；
-- 可运行后端、推理设备及推理运行时；
-- 成功、失败、超时、目标丢失和取消条件；
-- 策略文件与校验值、训练配置和评测报告。
-
-例如，跟随技能声明依赖相机、占用头部与运动资源，目标丢失后停止并回报；坐下技能声明从支持的姿态启动，达到坐姿才结束。
-
-## 9. 双训练后端、sim2sim 与部署
-
-```mermaid
-flowchart LR
-  MJ[官方 mjlab / MuJoCo-Warp] --> Export[归一化 ONNX / manifest / 版本]
-  Isaac[Isaac Lab / Newton] --> Export
-  Export --> Cross[固定场景 sim2sim]
-  Cross --> Replay[官方 CPU MuJoCo / BAM 回放]
-  Replay --> SimOK[sim_validated]
-  SimOK --> Real[后续板载与真机验收]
-  Real --> RealOK[hardware_validated]
-```
-
-### 9.0 训练后端边界与评测矩阵
-
-训练后端 `mujoco` 指官方 mjlab / MuJoCo-Warp，训练后端 `isaac-newton` 指 Isaac Lab / Newton。它们与第 7 节的仿真/真机执行后端属于不同维度。公共层负责关节与观测动作契约、命令时序、评测格式、来源记录；任务管理、物理步进、执行器和训练启动由各后端适配。两套 Python 环境独立。
-
-```mermaid
-flowchart LR
-  Entry[omd.py 统一入口] --> MJ[mjlab / MuJoCo-Warp]
-  Entry -.迁移中.-> IN[Isaac Lab / Newton]
-  MJ --> Policy[归一化 ONNX + 版本记录]
-  IN -.-> Policy
-  Policy --> Eval[相同命令 / 初态 / 指标]
-  Eval --> Replay[CPU MuJoCo / BAM]
-  Eval -.待实现.-> NewtonEval[Isaac / Newton]
-  Replay --> Evidence[轨迹 / 指标 / 离屏视频]
-  NewtonEval -.-> Evidence
-```
-
-目标矩阵覆盖两种训练来源 × 两种评测后端，额外保留官方 CPU MuJoCo/BAM 部署回放。逐格记录是否通过，不因同为 MuJoCo-Warp solver 就假设完全一致。无真机时最多标记 `sim_validated`。
-
-### 9.1 迁移起点
-
-Isaac Lab 调研时最新发布页列出 `v3.0.0-beta2.patch1`；Newton 集成仍标记为 Beta。初期选择固定发布版本或已验证提交，并记录其匹配的 Newton、MuJoCo Warp、Warp、Python 与训练库版本，不能混用滚动文档里的依赖。[S12][S13]
-
-本项目不要求完整 Isaac Sim 在所有场景中运行。根据固定版本实际支持的功能，纯物理训练可评估 kit-less 路径；相机渲染方案另行验证。
-
-### 9.2 第一项任务：平地速度跟踪
-
-依次完成：
-
-1. 官方环境可复现，记录训练配置和基线指标。
-2. 从官方 MJCF 与配置提取几何、关节、碰撞、质量惯量、默认姿态和执行器参数。
-3. 验证选定 Isaac 版本的资产导入路径；若需要 USD，记录可复现转换流程并比较导入前后的物理参数。
-4. 实现 BAM 适配，验证单关节响应、延迟、摩擦和接触。
-5. 对齐 actor 观测、动作处理、奖励、终止、reset 与随机化。
-6. 用同一官方策略在两套环境交叉评估，再在 Isaac 中训练策略。
-7. 导出兼容包，经官方 MuJoCo 回放后再进行真机验证。
-
-### 9.3 执行器与物理一致性
-
-官方 BAM 配方涉及电压控制、摩擦、负载下电压变化和延迟；齿隙版本有被动关节和编码器反馈处理。[S14] 不能用通用理想 PD 替换后就宣称完成 sim-to-real 配方迁移。
-
-核对重点：
-
-- 摩擦与阻尼由何处计算，是否需要修改 solver 字段；避免重复处理或遗漏。
-- 延迟的单位与更新频率，物理子步与策略控制步的区别。
-- 每个并行环境独立的随机化状态、延迟缓存与 reset。
-- 足部 / 身体碰撞形状、接触参数、关节限位、惯量和 armature。
-- 被动齿隙关节不进入 14 维动作，但需要正确进入物理与编码器观测。
-
-先复现普通行走模型；齿隙变体是后续对照，除非目标基线策略本身依赖该变体。
-
-### 9.4 官方策略契约
-
-当前官方运行时使用 `obs[1,61] → actions[1,14]`，控制频率 50 Hz。[S11]
-
-| 索引，左闭右开 | 宽度 | 语义 |
-|---|---:|---|
-| `[0,3)` | 3 | 身体坐标系角速度 |
-| `[3,6)` | 3 | 身体坐标系重力投影 |
-| `[6,20)` | 14 | 关节位置减默认姿态，排除嘴部 |
-| `[20,34)` | 14 | 关节速度，排除嘴部 |
-| `[34,48)` | 14 | 上一帧缩放前的策略动作 |
-| `[48,51)` | 3 | 速度命令 |
-| `[51,55)` | 4 | 头 / 颈命令 |
-| `[55,61)` | 6 | 身体姿态命令，当前未绑定轴遵循官方零填充规则 |
-
-兼容还要求关节名称与顺序、单位、默认姿态、动作缩放 / 裁剪、输入归一化和命令编码一致。官方 exporter 把观测归一化包含在 ONNX 图中，并附加元数据。[S15]
-
-**兼容导出模式只适用于满足这套契约的 joint policy。** 视觉导航或具有不同观测的策略不能只修改文件后缀或 manifest 就宣称可被官方运行时加载。
-
-### 9.5 策略包
-
-提议交付结构：
-
-```text
-policy-package/
-  policy.onnx
-  manifest.json              # 遵循官方可接受的字段与语义
-  compatibility.json         # 本项目检查结果、关节映射、归一化与运行时要求
-  training-config.yaml
-  versions.json
-  eval.json
-```
-
-`manifest.json` 适配官方 schema 2，包括 `model_api`、维度、机器人类型、策略类型、命令编码和训练 / 评测信息。[S16] 额外内部数据保存在旁侧文件，避免假设官方运行时会读取自定义字段。日常部署继续复用官方加载与更新机制。
-
-### 9.6 验证顺序
-
-格式与数值一致性 → 单关节与接触 → 官方策略交叉评估 → 新策略训练 → CPU MuJoCo 回放 → 板载加载 / 推理 → 真机任务评测。
-
-同一观测批次应验证训练端推理和 ONNX 推理输出一致；同一测试状态应验证 Python 观测构建与官方运行时契约一致。性能比较固定 GPU、环境数、渲染设置和测量范围，分别报告仿真吞吐、显存及达到相同任务指标的训练时间。
-
-通过仿真验证后只能标记 `sim_validated`。真机阶段完成前，不能标记 `hardware_validated`。
-
-## 10. 记录、长期经验与可回放性
-
-### 10.1 Episode 数据
-
-记录项至少包括：
-
-- persona / robot / backend / session / episode 标识；
-- 录音与 ASR 文本引用、使用的语音模型；
-- 工具请求、参数、返回、任务状态和取消原因；
-- 关键传感器帧及校准版本；
-- 实际执行命令、policy 版本、运行状态与结果证据；
-- 回复文本、声音版本、音频与已播放进度；
-- 仿真场景、随机种子与软件版本，或真机硬件 / 运行时版本。
-
-轻量事件日志可以持续保存，原始音视频按配置采样和保留。首版先记录任务前后关键帧和短录音，不强制持续保存高码率视频。
-
-### 10.2 与 harness memory 的关系
-
-本项目提供证据和事件，harness 决定总结、检索与长期保存什么。对外输出的经验应保留证据引用，并区分用户陈述、模型判断与实际测量。
-
-例：“用户喜欢较慢语速”来自用户偏好；“本次红球接近成功”来自任务结果；“可能是上次的球”属于模型推测，不能写成身份确认。
-
-更新声音应保留版本引用，历史回放使用当时版本。语音被中断时记录播放位置；若无法精确对齐到文字，明确标记“部分播放”，不编造用户已听到的句子范围。
-
-### 10.3 回放的范围
-
-- **事件回放**：查看系统听到、看到、调用和执行了什么。
-- **仿真重跑**：使用固定版本、场景与种子进行可比较实验，不承诺跨版本逐位确定性。
-- **硬件记录回放**：默认只分析记录，不自动向机器人重新发送历史动作。
-
-## 11. 开发结构与配置建议
-
-项目源码统一位于 `src/oh_my_duck/`，依赖环境位于 `environments/`。
-
-| 职责 | 当前目录与入口 |
+| 字段 | 含义 |
 | --- | --- |
-| 公开命令 | `cli/`、`omd.py` |
-| 应用服务、工具与技能 | `agentic/application.py`、`agentic/tools/`、`agentic/skills/` |
-| 原生任务接口与 HTTP 客户端 | `agentic/harness/base.py`、`integrations/native_client.py` |
-| EDH 物理环境、设备、会话与通信 | `integrations/edh/`；Node 部署位于根目录 `integrations/edh/` |
-| 身份、传感器、任务与事件 | `core/contracts/` |
-| 在线机器人与 policy 执行 | `robotics/backends/`、`robotics/policies/`、`robotics/microduck/` |
-| 主动感知 | `perception/` |
-| ASR、固定音色与音频设备 | `voice/` |
-| 经验记录与原生回放导出 | `experience/` |
-| 任务、MDP、Newton/MuJoCo、PPO、导出与评估 | `rl/` |
-| 运动、原生任务与发布验收 | `validation/` |
-| 依赖安装与进程管理 | `infrastructure/` |
-| 版本、场景、训练、语音与发布配置 | `configs/` |
-| 模块与实际运行检查 | `tests/`、`scripts/` |
+| `persona_id`, `voice_id`, `revision` | 持续身份、声音身份和不可变版本 |
+| `reference_audio` | `PayloadRef`：绝对本地 URI、`audio/wav` 和原始 SHA256 |
+| `reference_text` | 参考音频对应的文字 |
+| `design_model_revision` | VoiceDesign 模型与固定 revision |
+| `synthesis_model_revision` | Base TTS 模型与固定 revision |
+| `confirmed_at` | 明确确认的时间 |
 
-`ApplicationServices.harness` 使用 `HarnessBridge` 声明的 `open`、`submit`、
-`status`、`wait`、`stop`、`close`，具体实现为 `NativeTaskClient`。语音入口使用同一
-客户端。原生服务管理工具注册、规划与经验资料，任务记录保留会话身份、执行领域和正式结果。
-`ToolCatalog` 使用 `jsonschema` 检查 Draft 2020-12 Schema，注册时检查声明，调用时
-检查有限数值与完整参数，随后执行 handler。运行工具需要 `validation` extra 或锁定环境。
+SQLite 保存版本历史和活动选择，参考 WAV 按内容 SHA256 保存。确认请求具有一致性检查；
+冲突并发写入在事务中拒绝。未确认候选、生成失败和取消 setup 保持现有活动音色。
+衍生模型缓存可重建，持久来源为已确认的参考音频、文字和模型版本。
 
-`omd status` 展示软件成熟度，连接设备后的能力由实际后端返回。应用接口导入时不启动
-模拟器、Torch 或语音模型。在线执行与批量训练分别位于 `robotics/backends/` 和
-`rl/backends/`。具体入口见[应用源码说明](../src/oh_my_duck/agentic/README.md)、
-[架构说明](architecture.md)和[原生部署](harness-native-integration.md)。
+### 5.4 服务与音频设备
 
-实际配置包括 `configs/upstream.json`、`configs/training.json`、
-`configs/simulation-demo/` 和 `configs/experiments/runtime-release-acceptance.json`。场景参数使用
-共用 JSON Schema；模型、场景、policy 和声音版本分别保存来源资料。
+| 接口 | 结果 |
+| --- | --- |
+| `SpeechRecognition.transcribe(audio, language_hint=...)` | 转写文字 |
+| `VoiceDesign.design(description, reference_text)` | `VoiceCandidate` |
+| `SQLiteVoiceProfileStore.confirm_candidate(...)` | 保存并选择已确认版本 |
+| `SpeechSynthesis.synthesize(text, profile)` | `PayloadRef` WAV |
+| `AudioDevice.begin_recording()` / `finish_recording(recording_id)` | 录音身份与音频引用 |
+| `AudioDevice.play(audio)` / `stop_playback(playback_id)` | 播放身份与实际状态 |
+| `AudioDevice.wait_playback(playback_id)` / `close()` | 完成等待与资源释放 |
 
-## 12. 分阶段交付与验收
+HTTP 服务提供 `/v1/transcriptions` 和 `/v1/speech`。客户端核对输入音频 SHA256、
+返回模型身份、persona、voice revision、编码与输出 SHA256。服务通过本机回环地址或明确的 SSH 转发连接。
+实现和操作见[语音源码说明](../src/oh_my_duck/voice/README.md)、[语音交互](voice-interaction.md)与[音色资料](voice-profiles.md)。
 
-| 阶段 | 交付内容 | 验收条件 | 主要依赖 |
-|---|---|---|---|
-| M0 上游基线 | 两仓库结构 / 依赖审计、版本锁定、官方策略基线、硬件能力清单 | 官方链路可重现；记录未验证项 | 可用 GPU、官方资产 / 策略 |
-| M1 训练与通用工具 | Isaac 行走任务、BAM 适配、官方兼容导出、基础工具、两个后端契约 | 同一工具脚本可运行；交叉评估通过；真机状态单独标记 | M0；硬件验证需要真机 |
-| M2 语音与固定声音 | 录音转写、setup 试听确认、持久声音、日常合成、播放中断、bridge | 重启 / 新会话不改变声音；语音能触发技能并反馈结果 | M1 工具；原生 Harness |
-| M3 主动感知 | RGB / ToF、read_sensor、look / inspect、受限接近或跟随示例 | 上层能查询进度；目标丢失与过期数据有明确行为 | 传感器、校准、策略 |
-| M4 开源可复现版本 | episode 回放、评测场景、扩展教程、完整参考应用 | 新用户按文档复现仿真演示；真机步骤与限制清楚 | M1–M3 |
+真机音频接入需要核查官方采音 worker 的单客户端所有权，建立共享采集或明确的采集调度。
+机载录音和播放、运动背景下识别、传输延迟及必要的回声处理通过实际设备验收。
 
-整体框架先完成接口、依赖边界、入口和测试；M0 审计与官方复现仍是正式 Isaac 迁移的前置。M1 是第一个核心工程里程碑。M2 不需要等待复杂视觉导航成熟，使用基础动作即可完成语音闭环。
+## 6. 原生 Harness 与工具
 
-### 12.1 必须验证的行为
+当前接入使用固定 EDH 的 `startServer`、`SessionEnvironment`、`EmbodiedBackend`、
+`execution.start`、ActionGate 和独立 Verifier。`NativeTaskClient` 提供
+`open`、`submit`、`status`、`wait`、`stop`、`close`，应用和语音使用同一接口。
+任务等待要求有限的正数时间，调用者等待超时保持原生任务执行。
 
-| 测试 / 评测 | 具体例子 | 验收依据 |
-|---|---|---|
-| 后端契约 | 同一个坐下请求分别发往仿真与真机 | 参数与结果含义一致，能力缺失可解释 |
-| 观测 / 导出 | 固定状态构建 61 维观测，并比较 ONNX 输出 | 关节、单位、归一化与数值误差满足约定 |
-| 执行取消 | 行走时取消，再送达旧任务结果 | 已取消任务不会被旧结果重新激活 |
-| 固定声音 | 生成多种长度文本，重启后继续合成 | 主观试听与声音一致性评估；配置引用相同 |
-| 声音修改 | 新音色生成失败 / 用户未确认 | 当前活动音色不变 |
-| 语音控制 | 安静与舵机运动背景下识别“坐下 / 转身 / 停下” | 指令意图正确率及端到端延迟 |
-| 传感器有效性 | 断开 ToF、注入过期帧 | 返回不可用 / 过期，不伪造距离 |
-| 跟随反馈 | 目标移出视野 | 技能按声明停止 / 回报，不无限延续速度 |
-| 经验记录 | 仿真成功、真机失败、播放中断 | 域、结果与证据均可区分 |
+### 6.1 当前工具
 
-### 12.2 指标与通过门槛
+| 工具 | 主要参数 | 实际语义 |
+| --- | --- | --- |
+| `microduck.policy_catalog` | 无 | 当前注册 policy、来源、模型与适用条件 |
+| `microduck.scene_info` | 无 | 场景、目标、配置和可用感知 source |
+| `microduck.select_policy` | `policy_name` | 选择当前任务使用的 policy |
+| `microduck.transition_policy` | `policy_name` | 在规定执行边界切换 policy |
+| `microduck.set_command` | `command`, `max_control_steps` | twist/head/body/posture，有限控制步 |
+| `microduck.walk` | `distance_m`, `speed_m_s` | 按当前身体朝向测量有符号位移 |
+| `microduck.rotate` | `angle_deg`, `angular_speed_deg_s` | 测量相对 yaw，返回实际平移 |
+| `microduck.read_sensor` | `sensor` | head RGB、ToF、IMU、joint state 或 odometry |
+| `microduck.observe` | 可选 `prompt`, `source` | 确认边界的传感器、进度、目标与剩余预算 |
+| `microduck.inspect_scene` | `prompt`, `source` | 当前帧目标框、距离、bearing 与标注图像 |
+| `microduck.task_progress` | 无 | 原生执行、停止、目标条件和实际计数 |
+| `microduck.wait_for_motion` | 无 | 等待原生确认边界 |
+| `microduck.finish_policy` | `execution_id`, `generation`, `boundary_id` | 原生 `policy_stop` 与新鲜终止状态 |
 
-运动：跌倒率、速度跟踪误差、脚滑、任务成功率、板载推理耗时及控制周期达标情况。
+Schema 与实现位于 [`integrations/edh/server.mjs`](../integrations/edh/server.mjs) 和
+[`integrations/edh/session.py`](../src/oh_my_duck/integrations/edh/session.py)。
+`walk` 接受 −10 至 +10 米，幅度至少 0.1 米；速度为 0.1–0.4 m/s，默认 0.4。
+`rotate` 接受 −360 至 +360 度，幅度至少 10 度；角速度为 10–55 deg/s，默认 45。
+完成要求为最多 0.05 米或 5 度误差，以及五个连续实际停止样本。
+标准脚转向同时使用前向、侧向和 yaw 命令，路线规划需要考虑测得的平移。
+`walk` 和 `rotate` 在确认的暂停边界准备请求，随后通过原生 `execution.start` 或
+`execution.resume` 执行。`wait_for_motion` 等待执行边界，物理停止依据测得状态单独检查。
+原始请求、完成误差与物理停止依据见[工具说明](metric-policy-tools.md)。
 
-语音：指令意图正确率、中文识别错误、录音结束至文本延迟、文本至首次播音延迟、停止播音延迟、峰值显存 / 内存、长短文本声音一致性。
+### 6.2 生命周期与权限
 
-系统：新鲜观测获取率、取消完成时间、掉线后的行为、回放记录完整性。
+长任务具有 `accepted`、`running`、`succeeded`、`failed`、`cancelled` 状态。
+取消请求与最终物理停止分别记录。命令绑定请求、任务、execution 和 generation；
+旧执行结果只能关联原有身份。重试保持世界物理状态并准备新执行所属的命令。
+重复准备请求和无效命令在接纳位置拒绝。
 
-此版本不虚构统一数值门槛。M0 在目标设备上测量官方基线，M1 / M2 开始前固定测试场景、样本数、统计方法与可接受退化范围。运动训练建议至少三个随机种子作初步比较；硬件数据不足时报告样本量，不把单次成功当作稳定性证明。
+每个 policy action 为 14 个 joint offset。ActionGate 接纳之后执行四个 0.005 秒子步。
+暂停使旧 generation 失效，设备完成已接纳动作，发布新鲜状态和暂停确认。
+`select_policy` 使用实际停止样本及确认边界。`transition_policy` 使用完整 episodic
+终止边界，保留姿态、速度与动作历史，接续 standing policy 恢复并测量物理停止。
+独立 Verifier 从原生目标状态读取结果。
+工具的成功条件、停止原因、ToF、外部接触、姿态和进度检查保留原始要求。
 
-## 13. 风险、未决项与后续研究
+### 6.3 扩展技能
 
-| 项目 | 当前处理 | 决策节点 |
-|---|---|---|
-| Isaac / Newton Beta API 变化 | 固定经过验证的版本组合，升级单独评测 | M0 |
-| BAM 与 solver 的耦合 | 先单关节 / 接触验证，再扩大训练 | M1 |
-| job 实际 GPU / 渲染环境 | 入口机可见 8×H200；worker 分配、CUDA 与 EGL 单独验证 | M0 / M2 |
-| 当前没有真机 | 本阶段专注仿真，硬件验收保持待完成 | 后续硬件阶段 |
-| 原生 Harness 版本变化 | 固定 EDH 源码提交与依赖版本，保留实际会话和物理执行证据 | M1 |
-| setup / 录音 UI 载体未选 | 显式录音为暂定方式，保持设备无关接口 | M2 |
-| 远程音频路径与采集所有权 | 核查现有 worker，建立共享或受控采集 | M2 |
-| 固定声音效果 | 使用参考音频版本化；跨文本、跨会话试听 | M2 |
-| ToF 与相机最终参数未定 | 能力发现 + 外参 / 参数版本化 | M3 |
-| NFC / 嘴部闭环技能 | 先核查真实接口，再做实验 | 后续 |
-| VLN / VLA 数据管线 | 先让 episode 日志可用；数据集格式、遥操作、训练方法另行设计 | 后续 |
+`SkillSpec` 声明身份、版本、参数 Schema、传感器、前置姿态、资源、policy 类型、
+观测动作格式、频率、后端、设备、终止条件、取消方式、权重 SHA256 和评估结果。
+`follow_object`、`approach_object`、`look_at` 与复合技能具有独立实现和验收要求。
+目标跟踪使用有来源、最近时间和有效状态的目标记录；目标丢失、观测过期、通信中断
+及超时具有明确的停止行为。工具内部维护必要的快速反馈，Harness 决定任务和观察时机。
+motion、head、mouth 资源通过通用调度与唯一电机仲裁入口协调。
 
-可研究的方向包括：利用转头选择观察视角；RGB + 稀疏 ToF 导航；技能发现与可组合执行；从真实失败记录生成训练场景；利用 NFC 为物体赋予可靠身份。每项研究须有自己的数据与评测，不作为第一版声音模块的前置条件。
+## 7. 传感器、感知与通用后端
 
-## 14. 迭代规则
+`RobotBackend` 保持单位、坐标、输入输出、有效性和取消语义。CPU MuJoCo/BAM、
+Isaac/Newton/BAM 与真机适配使用明确的配置和实际能力声明。
+场景导入采用打包的 JSON Schema，Python CLI 与原生 Node 使用相同检查。
 
-- 本文是 v0.1 设计基线。后续改变范围或接口时，先更新决策表和对应流程图，再同步实现。
-- 将“已决定 / 提案 / 已实现 / 已验证”分别记录，避免设计描述逐渐被误读成能力声明。
-- 模型切换不改变工具契约；后端切换不改变单位与输入输出语义；声音切换必须由用户主动确认。
-- 训练基线、机器人运行时、harness、语音模型分别记录版本。
-- 当前图示直接内嵌 Mermaid，随范围与模块关系同步更新；若后续提供 SVG / PNG 导出版，再与源图一并维护。原文引用的外部图稿未导入本仓库，现已替换为可随代码维护的内嵌图。
+`SensorFrame` 保留 sensor/robot/episode 身份、sequence、采集时间、时钟域、接收时间、
+frame、有效性、`PayloadRef` 和 calibration revision。大图像和音频通过引用传递。
+跨机器时间使用明确的时钟关联或本机接收年龄。RGB、ToF 与头部姿态关联同一采集状态。
+`Validity` 使用 `valid`、`no_target`、`invalid`、`stale` 和 `unavailable`。
+带有 `max_age_ms` 的扩展接口要求返回符合年龄条件的观测；无效和未知区域保留相应状态。
+长度使用米，内部角度使用弧度，时间使用秒；身体坐标 x 向前、y 向左、z 向上。
+quaternion 顺序在具体格式中声明。`robot_id` 表示设备，`persona_id` 表示持续身份，
+`episode_id` 表示一次执行记录。
 
-| 版本 | 日期 | 变更 |
-|---|---|---|
-| 0.1 | 2026-09-06 | 首次整合项目定位、Isaac 迁移、通用工具、轻量语音、持久音色与经验记录设计 |
-| 0.2 | 2026-09-06 | 双训练后端、sim2sim、Newton、headless 视频、原生 Harness、项目入口与文档同步 |
+| 感知部分 | 数据与要求 |
+| --- | --- |
+| RGB | 当前图像、真实 camera geometry、内外参与安装位置 |
+| ToF | 8×8 测距、状态、相应姿态；噪声、区域聚合、延迟和无效返回需要硬件标定 |
+| IMU | 重力、角速度、安装坐标、噪声与延迟 |
+| `simulator_ground_truth` | 原生 shape/segmentation、校准射线和真实几何距离，明确标记来源 |
+| `models` | SAM3.1 文本分割、YOLO26 框关联、实际 RGBD 距离与模型来源 |
+| 目标记录 | 当前帧身份、query、图像 SHA256、目标框、mask、距离和 bearing 来源 |
 
-## 15. 来源与证据边界
+可用 source 随当前配置公布；模型服务使用明确 endpoint，连接错误在调用位置返回。
+目标框、图像、模型与距离来源接受独立检查。带有目标标注的识别准确率、距离误差、
+移动目标跟踪和真机校准分别评估。
+世界真值用于评估、奖励或 critic；可部署 actor 只使用目标设备实际可获得的信息。
 
-以下来源已在前期讨论中查阅。上游 `main` 与在线文档会变化；实施时以锁定版本代码为准。所有本项目接口和性能验收方案均是设计提案，不是上游承诺。
+## 8. Policy 适配与扩展
 
-- **[S01]** [Microduck RL 官方仓库与说明](https://github.com/pollen-robotics/microduck_rl)：训练框架、任务与 sim-to-real 链路。
-- **[S02]** [训练项目依赖](https://github.com/pollen-robotics/microduck_rl/blob/main/pyproject.toml)：mjlab、Warp、BAM 依赖与版本关系。
-- **[S03]** [Microduck 运行时仓库](https://github.com/pollen-robotics/microduck)：板载服务与项目入口。
-- **[S04]** [官方 IPC 协议](https://github.com/pollen-robotics/microduck/blob/main/duck-ipc-proto/src/lib.rs)：命令、状态、参考坐标系与结果。
-- **[S05]** [官方硬件规格](https://pollen-robotics.com/microduck/press-kit/)：计算、音频、IMU、ToF、NFC 与未定型参数。
-- **[S06]** [ToF 驱动](https://github.com/pollen-robotics/microduck/blob/main/tof/src/sensor.rs)：两代传感器、64 区输出。
-- **[S07]** [ToF 几何转换](https://github.com/pollen-robotics/microduck/blob/main/kinematics/src/tof.rs)：测距到身体坐标系、姿态与地面处理。
-- **[S08]** [Qwen3-ASR-0.6B 模型说明](https://huggingface.co/Qwen/Qwen3-ASR-0.6B)：语言与推理模式。
-- **[S09]** [Qwen3-TTS 官方仓库](https://github.com/QwenLM/Qwen3-TTS)：VoiceDesign、Base 与 design-then-clone 流程。
-- **[S10]** [官方音频采集 worker](https://github.com/pollen-robotics/microduck/blob/main/pet-detect/src/worker.rs)：共享采音与当前实现。
-- **[S11]** [官方策略观测定义](https://github.com/pollen-robotics/microduck/blob/main/duck-control/src/obs.rs)：61 维输入、14 维输出与观测语义。
-- **[S12]** [Isaac Lab 发布记录](https://github.com/isaac-sim/IsaacLab/releases)：3.0 Beta 系列状态。
-- **[S13]** [Newton 后端说明](https://isaac-sim.github.io/IsaacLab/release/3.0.0/source/overview/core-concepts/physical-backends/newton/index.html)：solver、支持范围与成熟度。
-- **[S14]** [执行器配置](https://github.com/pollen-robotics/microduck_rl/blob/main/src/mjlab_microduck/robot/microduck_constants.py)与[摩擦 / 齿隙适配](https://github.com/pollen-robotics/microduck_rl/blob/main/src/mjlab_microduck/actuator/friction_dr_bam.py)：BAM 迁移依据。
-- **[S15]** [官方 ONNX 导出](https://github.com/pollen-robotics/microduck_rl/blob/main/scripts/export.py)：归一化与元数据。
-- **[S16]** [官方 policy manifest](https://github.com/pollen-robotics/microduck/blob/main/docs/policy-manifest.md)：策略包语义与部署字段。
+| 类型 | 输入 | 输出 | 接入要求 |
+| --- | --- | --- | --- |
+| `joint_policy` | 本体观测与命令 | 14 维关节动作 | 满足官方观测、映射、时序与归一化格式 |
+| `velocity_policy` | 图像、ToF、目标 | 身体速度命令 | 复用底层 locomotion，定义反馈和停止 |
+| `action_sequence_policy` | 图像、语言、状态 | 动作序列或 action chunk | 明确动作含义、时间、取消和设备资源 |
+| `composite_skill` | 参数化任务 | 多步骤工具与策略执行 | 复用 Harness 调度，声明实际结果条件 |
 
-### 2026-09-06：官方 BAM 与视频验证补充
+官方 policy 和已核验训练包进入共同 registry。`--policy-registry` 明确选择附加包；
+距离/角度工具的 locomotion policy 明确配置。每项包保留来源、manifest、模型、
+关节格式、推理输出、完整 episodic 时长和接续条件。
+登记、执行正确性、学习效果、物体效果及多场景泛化具有各自证据。
+VLN/VLA 模型需要匹配 Microduck 的传感器、动作、资源和任务，接口由实际适配器定义。
 
-官方 RSL-RL 和 MuJoCo SB3 的 walking smoke/导出已通过，SB3 原生恢复与 768 次 timeout 边界验证通过。Newton 直接调用官方 BAM，64 环境完成 600 次物理子步，电机力矩映射检查通过；官方 alpha 策略在两端完成相同 14 秒命令序列，但均未充分跟踪前进/转向。HOME 保持测试在官方 CPU BAM 和 Newton 均倒下，不能把 HOME 参考角度当作已验证平衡目标。Newton 的 5 个碰撞凸包、15 组碰撞关系和脚底接触参数已通过官方编译模型对照；通过显式接触对保留静态平面与官方脚底接触规则。修正后 700 步/14 秒 720p 回放通过，但完整任务迁移/训练和有效命令跟踪仍未完成。用户要求提高 Isaac 视频分辨率，现默认 1280×720，可配置宽高；720p/25fps worker 视频已验证。持续证据见 [official-rl-compliance](reports/official-rl-compliance.md)。
+## 9. 训练、物理与官方格式
 
+两个代表任务为 `Mjlab-Velocity-Flat-MicroDuck` 与 `Mjlab-StandUp-Flat-MicroDuck`。
+`mujoco` / `isaac-newton` 和 `rsl-rl` / `sb3` 独立选择，共八个代表组合。
+完整官方 registry 作为扩展清单维护。RSL-RL 使用原生 PPO 和 distributed learner；
+SB3 使用原生 PPO、VecEnv 与独立任务并行。具体配置和恢复行为由各 framework 保持。
 
-## Representative RL reproduction scope (2026-09-06)
+### 9.1 官方观测与动作
 
-用户收敛验收范围为官方 Flat Walking 与 Flat StandUp，覆盖 MuJoCo/mjlab 与 Isaac Lab/Newton、RSL-RL 与 SB3，共 8 个组合。完整 33 项官方任务仅作扩展清单，不能把注册当作复现通过。各框架保留原生 PPO：RSL-RL 使用原生多 GPU 分布式学习，SB3 使用向量环境与跨 GPU 独立任务并行，不引入异步 actor–learner。吞吐通过实际测量决定 GPU/环境数量。W&B 为标配但只用 offline，现有线上账号不是用户账号，禁止上传或同步。当前已验证结果保持原有范围，新增组合仍需 smoke、恢复、导出、有效行为与 sim2sim 验收。任务选择和日志默认值集中在 `configs/training.json`，详细矩阵见 [RL reproduction](rl-reproduction.md)。本地 main 已合并，新开发分支为 `feat/rl-task-reproduction`。
+| actor 索引，左闭右开 | 宽度 | 内容 |
+| --- | --- | --- |
+| `[0,3)` | 3 | 身体坐标角速度 |
+| `[3,6)` | 3 | 身体坐标重力投影 |
+| `[6,20)` | 14 | joint position 减 HOME，排除嘴部 |
+| `[20,34)` | 14 | joint velocity，排除嘴部 |
+| `[34,48)` | 14 | 上一帧缩放前 action |
+| `[48,51)` | 3 | twist 命令 |
+| `[51,55)` | 4 | head/neck 命令 |
+| `[55,61)` | 6 | body 命令与官方未绑定轴零填充 |
 
+保持 `obs[1,61] → actions[1,14]`、14 个 named servo、canonical HOME、50 Hz、
+四个 0.005 秒子步、动作缩放和裁剪、sensor-view reward 与 native normalization。
+HOME 作为观测和动作参考使用，其物理保持效果需要实际测量。
 
-## 2026-09-06：任务源码归属调整
+### 9.2 物理与执行器
 
-根据用户要求，Microduck 的 task/MDP、actor/critic 配置、机器人模型、BAM 扩展、runner、导出与 CPU 回放迁入 `src/oh_my_duck`，成为项目内可编辑源码。`UPSTREAM.json` 与 Apache-2.0 许可证保留官方来源；缓存仓库只作对照，不再提供 Microduck 运行时任务。MuJoCo 两种框架与 Isaac 的共享机器人/BAM 引用已切换；通用 mjlab、Isaac Lab、Newton 和原生 PPO 仍作为依赖。初始 33 项配置清单在命名空间变更之外与官方基线一致，验收仍只覆盖 Walking/StandUp。
+迁移使用官方 BAM XL330 M6、物理子步延迟、负载摩擦、电压行为、per-world friction、
+非累积随机化、正确的 passive joint 与 encoder 映射。reset 清理各 world 的状态和缓存。
+碰撞形状、foot contact、接触过滤、材质、惯量、armature 和 joint limit 逐项比较。
+Newton manager 在 CUDA graph capture 之前编译官方 contact model，保持 solver 数据所有权。
+单关节响应、负载、延迟、接触和相同状态的观测具有独立数值验证。
 
-这是源码归属迁移，不等于完整 Isaac 任务接入或有效策略训练完成。迁移后 GPU smoke、恢复、导出和 Isaac 新指纹资产重建仍待验证；此前训练结果属于旧入口。扩展入口及下一步见 [Microduck package](rl-task-extension.md) 与 [迁移交接](reports/owned-task-migration.md)。
+### 9.3 训练与导出验收
 
+新组合执行官方 64-env/5-iteration smoke、有限 reward/state 与 penalty sign 检查、
+native checkpoint 保存和恢复、normalizer-aware export、数值 parity、CPU MuJoCo/BAM
+部署回放及行为评估。训练效果使用预先声明的场景、命令、seed、指标和 checkpoint 规则。
+吞吐、显存、学习曲线和任务成功率分别记录。退化行为按实际课程阶段诊断。
 
-### 2026-09-06：框架重构进行中
+导出使用官方 `run_export` 和 runner export。策略包遵循官方 schema 2 与 publisher 格式；
+来源、checkpoint、归一化、兼容信息、配置、版本、SHA256 和评估保留在包及旁侧记录中。
+训练推理与 ONNX 使用同一批观测比较，导出后在两种 backend 及 CPU/BAM 使用固定 battery。
+仿真通过标记 `sim_validated`，板载和实际设备的任务通过后标记 `hardware_validated`。
+本地包校验和公开发布分别执行。
 
-用户进一步明确：源码接管不足以完成集成，需要重构为框架能力。现新增核心层 `oh_my_duck.rl.training.tasks` 和唯一任务注册源 `configs/tasks.json`，CLI、SB3 和原生 mjlab 注册均从该源读取；支持不含 MicroDuck 的自定义任务 ID，后端绑定缺失时明确拒绝。原 7,000 余行 MDP 已拆为 commands、observations、events、curricula、terminations、state 与 reward families，兼容修补移入后端模块；226 个有效函数/类保持原定义逻辑，仅增加显式模块依赖。完整 Newton 任务绑定、GPU 重新验收和有效策略训练继续进行，不视为已完成。usage 限制按用户最新指令取消。
+W&B 使用 [`configs/training.json`](../configs/training.json) 的 online 模式及已核对账号，
+明确的 `WANDB_MODE` 可指定模式，全部 worker 保留实际设置和本地记录。
+RL 目前停止，checkpoint、日志、policy 包、失败记录和视频完整保留。
+操作和行为范围见[framework](rl-frameworks.md)、[代表任务](rl-reproduction.md)、
+[campaign](rl-campaigns.md)及[运行验收](runtime-release-acceptance.md)。
 
-## 2026-09-06 — approved domain architecture refactor
+## 10. Episode 与长期经验
 
-业务实现统一进入 `src/oh_my_duck`，按 RL、agentic、robotics、perception、voice、experience、core 和 infrastructure 分层。训练依赖锁独立保存在 `environments/`；任务、MDP、机器人和策略配置均为项目源码。外部 harness 保持规划/记忆职责，尚未实现的适配器不声明可用。详见 [architecture.md](architecture.md)。
+记录保留 persona/robot/backend/session/episode 身份、录音与转写、工具请求参数和返回、
+任务状态、取消原因、传感器与校准、实际命令和 policy、物理结果、回复文字、声音版本、
+音频与播放进度、场景、seed、源码和依赖版本。事件日志与原始音视频按明确配置保存。
 
-迁移后轻量测试 21 项、MuJoCo/SB3/官方 MDP 与 manifest 测试 53 项通过；新训练入口和 Newton 任务适配仍需 GPU 验证。双任务 × 双后端 × 双框架的训练、恢复、导出与回放验收尚未全部完成。旧代码清理在对应验证通过后执行。
+Harness 决定总结、检索和长期保存内容。经验保留证据引用，并区分用户陈述、模型判断、
+实际测量以及 simulation/real domain。历史回放引用当时的声音版本。
+部分播放记录实际位置，无法确定已播放文字范围时保留相应限制。
 
-**目录重构验证更新**：MuJoCo 两个代表任务 × 两种原生 PPO 的短训练、恢复与归一化导出已通过。Newton 的完整任务桥接仍处于物理/MDP gate，尚未开放任务注册；不能据此声明双后端行为验收完成。源码快照、失败记录和细节见 [domain-refactor.md](reports/domain-refactor.md)。
+`omd replay` 提供原生会话管理与 terminal run 导出。事件回放展示实际请求和结果；
+仿真重跑固定源码、场景和 seed，并记录跨版本差异。硬件日志回放用于资料分析，
+动作重新执行具有独立调用和设备条件。
 
-**执行方式更新（2026-09-06，用户最新指示）**：单 GPU 开发、验证和训练直接在开发机 headless 运行；涉及多 GPU 的实验再提交 job。此前已提交任务保留其独立证据记录。
+## 11. 源码、配置与公开入口
 
-**Newton 任务接入更新（2026-09-06）**：Walking/StandUp 已通过实际物理与 MDP 门槛并注册共用运行时；StandUp 使用项目内 Isaac manager 在 graph 捕获前精确编译官方接触规则。两个原生 PPO 共用任务入口，恢复、导出及行为验收继续按独立门槛记录。导出的官方 MuJoCo 元数据参考与策略训练后端分别标注。详见 `docs/reports/domain-refactor.md`。
+| 职责 | 目录与入口 |
+| --- | --- |
+| 公开命令 | `cli/`、`omd.py`、`python -m oh_my_duck` |
+| 应用、工具与技能 | `agentic/application.py`、`agentic/tools/`、`agentic/skills/` |
+| 原生任务客户端 | `agentic/harness/base.py`、`integrations/native_client.py` |
+| EDH 环境、设备、会话与通信 | `src/oh_my_duck/integrations/edh/` |
+| 原生 Node 部署与角色 | 根目录 `integrations/edh/` |
+| 数据类型与身份 | `core/contracts/` |
+| 在线执行、policy 与模型 | `robotics/backends/`、`robotics/policies/`、`robotics/microduck/` |
+| 感知 | `perception/` |
+| WAV、音色、模型、HTTP、设备和会话 | `voice/` |
+| Episode 与原生导出 | `experience/` |
+| Task、MDP、simulator、PPO、export 与 evaluation | `rl/` |
+| 运动、原生任务和发布验收 | `validation/` |
+| 安装、环境和所属进程 | `infrastructure/` |
+| 固定版本、训练、场景和发布计划 | `configs/` |
+| 锁定依赖 | `environments/` |
 
+应用接口导入保持 simulator、Torch 和语音模型的延迟加载。
+`ToolCatalog` 注册时验证完整 JSON Schema Draft 2020-12，调用时验证有限 JSON 参数。
+`omd status` 读取软件成熟度；在线能力由后端提供。
+源码定位见[architecture](architecture.md)，使用方式见[getting started](getting-started.md)。
 
-### 2026-09-08：当前目标为官方效果复现，再验证扩展效果
+## 12. 交付与验收
 
-先复现 MuJoCo/native RSL-RL 的 Walking 与 StandUp，再让 Newton 与 SB3 达到
-相同任务标准；不以 smoke、reward 上升或流程完成替代策略效果。官方固定 commit
-的独立对照环境仅用于实验，不成为项目运行时依赖。两任务原版/重构版的编译模型、
-初始观测和 reset 状态已对照，四个 64-env/5-iteration PPO smoke 已完成。
+| 里程碑 | 交付内容 | 通过条件 |
+| --- | --- | --- |
+| M0 | 官方来源、版本、代码审读、策略和硬件信息 | 能指向实际实现并复现官方链路，记录阅读覆盖和未知项目 |
+| M1 | 两个训练 backend、BAM、导出、基础工具与执行适配 | 格式和时序一致、实际物理证据、有效行为与交叉评估 |
+| M2 | 显式录音、ASR、setup、固定 TTS、播放和任务中断 | 同一任务链路、跨会话音色、实际停止及音频设备证据 |
+| M3 | RGB/ToF、主动观察、目标接近与跟随 | 新鲜测量、距离条件、目标丢失与取消结果 |
+| M4 | 记录、回放、参考应用、安装与扩展教程 | 干净环境复现公开声明的流程，每项能力关联验收报告 |
 
-GPU 7 上现有四条 MuJoCo 长训练：原版与重构版各训练两个代表任务。原版使用
-seed 42、4096 环境和官方完整预算（Walking 50,000 / StandUp 15,000 轮）；
-归一化导出与数值对照已通过。三个 Newton 学习器用 SIGSTOP 暂挂，保留进程及
-checkpoint，后续验证身份再 SIGCONT；三个此前停止的 SB3 尝试单独保留。
-所有训练 headless、W&B offline，尚未达到长期行为验收标准。
+运动评估包含跌倒、命令跟踪、脚滑、成功率、板载推理及控制周期。
+语音评估包含意图正确率、中文错误、转写与首次播音延迟、停止延迟、资源和音色一致性。
+系统评估包含观测新鲜度、取消完成时间、通信中断行为和记录完整性。
+固定声音、修改声音、迟到结果、过期测量、目标丢失、sim/real 经验及后端语义分别检查。
+报告明确样本数、场景、统计方法、阈值、源码和未验收范围。
 
-Walking scoring v2 保留稳定性/误差检查，并要求每个运动指令阶段至少 50%
-同方向平均响应，排除原地站立误判；它不改变官方 reward，也不单独代表步态达标。
-CPU BAM 已修正 joint/DOF 摩擦约束索引并通过 3 项真实物理/reset 测试。
-修正后 A/B 回放完成，但 Walking 2000 和已发布 alpha 仍基本不前进，StandUp
-2500 仍只通过站姿/坐姿，未通过俯卧/仰卧起立。不能把该修复当作收敛问题已解决。
-相同状态的干净 61 维观测与速度坐标数值对照通过。250 轮原版/重构版对照已完成，
-两边均未通过完整任务，早期 reward 接近；没有证据将早期不足归因于重构，
-但长期效果与多 seed 行为仍待验证。
+## 13. 需要独立推进的能力
 
-详细诊断、失败尝试、资源测量和视频证据集中在
-[baseline audit](reports/official-baseline-audit-2026-09-08.md)；当前优先完成
-官方与重构版同训练轮数的行为对照，再推进扩展验收。
+当前源码 Newton 求解与首次 kernel 初始化、长导航和严格动作精度、多场景泛化、
+识别准确率、图像输入独立 VLN、物体抓取和携带效果、自训练行为、Microduck 音频和传感器、
+板载部署与真机任务继续按各自验收推进。UI 载体、NFC、全双工和通用 VLA 数据需要相应设计与评估。
+API 或依赖升级固定新版本并重新检查受影响路径。
 
+GPU 工作使用[六阶段发布验收](runtime-release-acceptance.md)，保留实际模型、传感器、
+policy、ActionGate、正式 verdict、MP4 和进程释放。CPU 成果和准备检查分别提供证据。
+具体执行次序和各步骤完整要求见[执行计划](Agentic%20Microduck%20-%20Execution%20Plan%20v0.1.md)。
 
-**当前诊断更新（2026-09-08）**：修正后的 CPU/BAM 八组合执行重验已完成，20 个
-720p 视频及有限 61/14 轨迹通过检查；短策略的行为仍全部失败。StandUp 在相同
-16 组 reset 样本中的坐姿起立通过数由 2000/2250 轮的 13 降到 2500/2750 轮的
-10/8，俯卧及仰卧始终为 0。项目内该训练已在 2985 轮暂停并保留进程，原版双任务
-和项目内 Walking 继续。课程恢复计数与实际阶段对照正常。另开受控实验遵循官方
-源码建议，只将身体角速度惩罚减半；原版及默认配方不变。2250 轮中间评估的
-坐姿起立由 13/16 改善为 16/16，但俯卧/仰卧仍各为 0/16，尚未复现恢复能力。
-实验继续到固定的 2500 轮，再完成成对采样及视频验证。
-详见 [StandUp recovery diagnosis](reports/standup-recovery-diagnosis-2026-09-08.md)。
+## 14. 维护要求
 
-
-**SB3 实验入口补充**：campaign 可逐 run 声明原生 SB3 `learning_rate`，所有训练
-阶段一致传递；恢复时不能用不同学习率的旧检查结果跳过前置验证。四组合 1e-4
-配置已准备并通过 dry run，但尚未启动或验证收敛。官方任务配方和 RSL 原生自适应
-PPO 保持不变。详见 [RL campaigns](rl-campaigns.md)。
-
-
-**成功策略参照（2026-09-08）**：官方发布的 `alpha_stand` 在项目 CPU/BAM 中通过
-16 组起始采样 × 4 姿态（64/64）及四个视频回放，原生 MuJoCo 与 Isaac/Newton 各四场景也通过。
-这证明当前接口/CPU 模型能够执行真实恢复动作，但该发布文件缺少具体训练
-checkpoint 来源，不能替代我们自己的训练复现。两后端共八个原生视频已通过检查；
-Newton 使用已约定的 `SolverMuJoCo` 路径。
-轨迹、接触与视频证据见 [published-policy reference](reports/published-policy-reference-2026-09-08.md)。
-
-
-**行为验收补充（2026-09-08）**：Walking 3000 在普通原生回放中前进响应为 36.4%，
-只把推力设为零便降到 0.98%；转向仍有 83.4%。固定条件的原生回放和 CPU/BAM
-都近乎静止，因此不能把受推后的运动算作自主步行。40 组同输入 BAM 计算对照通过，
-积分器及固定延迟对照均未恢复步态。项目内 Walking 已在 3299 轮暂停，保留 3250
-checkpoint；原版双任务继续。角速度惩罚减半的 StandUp 实验完成 2500 轮，
-成对坐姿起立由默认 10/16 提高为 15/16，但俯卧/仰卧仍各 0/16，尚未达到目标。
-原版/重构版 1000 轮对照也均未通过完整任务。详见
-[Walking diagnosis](reports/walking-transfer-diagnosis-2026-09-08.md) 和
-[StandUp diagnosis](reports/standup-recovery-diagnosis-2026-09-08.md)。
-
-
-**优先级确认**：用户再次明确先复现官方配方的训练能力，再验证项目内相同配方，
-然后完成 Newton/SB3 等价扩展。准备中的第二个 StandUp 动作变化惩罚实验未启动，
-暂缓调参支线；不将诊断配方写入默认任务。已有角速度诊断的八个最终视频和本地
-策略包检查完成，但恢复能力仍不合格。可查看本地视频对照页
-`outputs/previews/review-0908-01/index.html`，其中明确区分默认自训练、官方发布参照
-和调参诊断。官方发布权重对应的具体训练 run 来源仍需查清，不能假定它与当前
-固定版本默认配方相同。
+每次迭代同步设计、执行计划、implementation status、CLI maturity 和相关源码说明。
+功能使用独立 feature branch，相关运行与检查通过后合入并推送 main。
+实验使用固定源码、独立输出目录、明确资源和原始资料；失败产物保留。
+图示随模块和接口更新。模型与后端变化保持工具单位和结果语义，声音变化由用户明确确认。
+版本和来源以配置、源码、依赖锁和独立报告为依据。
