@@ -103,6 +103,11 @@ environments/voice-client/.venv/bin/python omd.py voice-session \
 默认值为 4096，接受范围为 256–8192；原生 context compaction 保留对应输出空间。
 模型没有完成输出时保留原生错误与停止边界。
 
+原生 compaction 管理历史摘要。模型适配代码通过 `purpose=compaction`
+说明辅助请求的作用范围：摘要保存原有任务指令、待执行动作与验证要求。
+当前用户指令、工具权限和实际执行状态继续由原生任务记录管理。
+实现位于仓库根目录的 `integrations/edh/model-context.mjs`。
+
 文件方式也能在同一会话内依次执行多个真实录音。`--context-previous-task`
 明确让每项后续任务引用上一项成功任务；该参数需要至少两个输入文件。
 

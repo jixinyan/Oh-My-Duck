@@ -33,6 +33,7 @@ Application, robot, training, shared acceptance and replay modules live in `src/
 | --- | --- | --- |
 | Public commands | `cli/` | `cli/__init__.py`, `cli/validation.py` |
 | Native EDH physical session | `integrations/edh/` | `environment.py`, `device.py`, `session.py`, `worker.py` |
+| 原生模型、传输与摘要调用 | 仓库根目录 `integrations/edh/` | `server.mjs`、`model-transport.mjs`、`model-context.mjs`；原生 Harness 管理 agent loop 与 compaction |
 | Shared native CPU/Newton scene configuration | `integrations/edh/` | `scene.schema.json`, `scene_configuration.py`; Node admission in `integrations/edh/scene-configuration.mjs` at the repository root |
 | Application dependencies, tools and skills | `agentic/` | [Source map](../src/oh_my_duck/agentic/README.md), `application.py`, `harness/base.py`, `tools/`, `skills/` |
 | Native task HTTP client | `integrations/` | `native_client.py`; implements `HarnessBridge` for voice and application services |
@@ -56,6 +57,7 @@ Application, robot, training, shared acceptance and replay modules live in `src/
 | Experience and replay export | `experience/` | `harness_replay.py` |
 | Measured policy acceptance | `validation/metric/` | `plans.py`, `case.py`, `campaign.py`, `verify.py`, `policy.py` |
 | Native task, pose and navigation acceptance | `validation/harness/` | `control.py`, `metric_admission.py`, `motion_guard.py`, `pose.py`, `pose_records.py`, `replay.py`, `navigation.py` |
+| 连续任务与语音历史引用检查 | `validation/harness/` | `task_continuation.py`、`voice_context.py` |
 | Registered policy package admission and execution | `validation/harness/` | `registry.py`, `package_execution.py` |
 | Release preparation and package checks | `validation/release/` | `plans.py`, `worker.py`, `campaign.py`, `package.py` |
 | CPU Newton asset audit | `validation/release/` | `assets.py` / `omd validate model-assets` |

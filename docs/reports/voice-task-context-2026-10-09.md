@@ -20,21 +20,28 @@
 - `goal_scope_id` 与 `goal_bound_sequence` 标识当前任务的目标证据；
   `held_ticks` 从零开始，新的实际 policy 控制步增加计数。
   目标范围、upright 条件和原始任务预算继续由场景管理。
+- 原生 `open_task` 初始化目标记录；`bind_task` 核查任务身份。
+  `execution.start` 保持当前任务的目标编号与起始 sequence。
 - policy 工具调用权限来自 `tools_and_limits.allowed_tools`；所选 policy
   产生的关节 action 通过 ActionGate 接纳。
 - `omd harness --max-output-tokens` 设置 256–8192 的模型输出预算，
   默认 4096；原生 context compaction 使用对应的输出空间。
+- 原生 `purpose=compaction` 标识摘要辅助调用。模型适配代码说明这项
+  请求的作用范围，摘要保留原有用户指令、当前意图、待执行动作和验证要求。
+  工具调用与 agent loop 继续由原生 Harness 管理。
 
 实现位置为 `integrations/native_client.py`、`cli/voice_task.py`、
 `voice/session.py`、`integrations/edh/session.py` 和
 `integrations/edh/roles/planner.md`，均位于 `src/oh_my_duck/`。
 独立检查通过 `omd validate task-continuation` 和
 `omd validate voice-context` 提供，源码位于 `validation/harness/`。
+Node 模型适配代码位于仓库根目录的 `integrations/edh/model-context.mjs`，
+传输继续使用原生 OpenAI Responses 或 Chat Completions adapter。
 
 ## CPU 物理检查
 
-`task-goal-continuation-20261009-02` 使用源码
-`e8caab2903d930296e9ed88c48c722fa237da6c2`、固定原生 Harness
+`task-goal-continuation-20261009-03` 使用源码
+`8d6cac45aeb7702fafc182b3254becab7b999e4d`、固定原生 Harness
 `8a5e685b22d032207f53db20454f0992a4ad60fd` 和官方 policy
 `1b56c396825c052a4e26e95cf2b8d8298af9e9b4`。
 执行环境为 MuJoCo 3.8.0、BAM 1.0.1、ONNX Runtime 1.29.0、NumPy 2.5.2，
@@ -50,27 +57,29 @@ renderer 为 Mesa llvmpipe，CUDA 保持未初始化。
 300 次物理步骤。后一任务的 `task_start` 与前一任务最终位姿、速度、
 episode 和 sequence 一致，取得新的目标记录。两项执行通过 ActionGate
 结束，记录 `policy_stop`、device confirmation 和资源释放。
+每项任务从 `task_start`、`execution.start` 到结束保留相同的目标编号
+和起始 sequence。
 这个检查的初始位置保持在目标之外，其范围为任务绑定与执行生命周期。
 
 全部检查共执行 300 次控制、1,200 次物理步骤。
 远程原始目录为
-`/home/jixin/workspace/code/Oh-My-Duck/outputs/acceptance/task-goal-continuation-20261009-02/`，
+`/home/jixin/workspace/code/Oh-My-Duck/outputs/acceptance/task-goal-continuation-20261009-03/`，
 保存两份 action 记录、`native-tasks.json` 与 `result.json`。
 本地副本位于
-`outputs/acceptance/voice-task-context-20261009-06-install/`。
+`outputs/acceptance/voice-task-context-20261009-09-install/`。
 保存记录的独立复核确认四项不同的目标记录、两个原生执行、
 300 次控制、1,200 次物理步骤和任务间连续状态，
 结果位于同一目录的 `independent-task-goal-audit.json`。
 
 ## 接口与安装检查
 
-源码 `3c5179903f5b7c16c5bd653d067231debc5c756f` 的四项接口测试文件
+源码 `8d6cac45aeb7702fafc182b3254becab7b999e4d` 的四项接口测试文件
 通过 101 项测试及 5 项子测试，包含历史引用格式、等待条件、共享应用接口
 与场景接纳检查。
 独立安装的 wheel 和 sdist 检查通过 438 个源码与资源文件、三份 license、
 29 项 CLI 调用，并通过已保存真实控制记录的 ONNX 与物理指标复核。
 这些保存记录使用其各自注明的执行版本。
-安装报告位于 `outputs/acceptance/voice-task-context-20261009-07-install/`。
+安装报告位于 `outputs/acceptance/voice-task-context-20261009-09-install/`。
 
 ## 模型任务验收范围
 
