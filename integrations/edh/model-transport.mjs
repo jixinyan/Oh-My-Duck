@@ -7,7 +7,7 @@ function preserveResponsesToolParameters(baseURL) {
   const previous = globalThis.fetch;
   globalThis.fetch = async (input, options) => {
     const request = new Request(input, options);
-    if (request.url !== endpoint || request.method !== 'POST') return previous(input, options);
+    if (request.url !== endpoint || request.method !== 'POST') return previous(request);
     const body = await request.json();
     if (body.tools !== undefined) {
       if (!Array.isArray(body.tools)) throw new Error('Responses tools 必须为数组');
