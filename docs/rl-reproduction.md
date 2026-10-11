@@ -38,6 +38,13 @@ python omd.py train --backend isaac-newton --rl-framework sb3 -- Mjlab-StandUp-F
 python omd.py eval --backend isaac-newton -- --task Mjlab-StandUp-Flat-MicroDuck --policy outputs/export/policy.onnx --output outputs/replay --video
 ```
 
+评估任务选项同时支持 `--task NAME` 和 `--task=NAME`，两种写法使用相同入口。
+`--task` 必须提供值并且只出现一次。训练命令使用第一个位置参数选择注册任务；
+Isaac/Newton 的 PD 诊断模式使用明确的
+`--task Omd-Microduck-PD-Diagnostic-v0`。运行名称和输出目录按原样传给框架。
+参数入口、实际 CLI 与独立安装检查见
+[训练参数验证](reports/training-arguments-2026-10-11.md)。
+
 ## Native PPO and throughput
 
 Both backends use project-owned orchestration around the native RSL-RL learner and

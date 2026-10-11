@@ -5,6 +5,24 @@
   "entry_point": "omd.py",
   "release_readiness": {
     "state": "acceptance_in_progress",
+    "rl_launch_arguments": {
+      "state": "native_argument_routing_public_cli_and_independent_installation_verified",
+      "source_revision": "5123a422d0b29b0aa22cf12cc4c8d2fe99db0c67",
+      "module": "oh_my_duck.rl.training.arguments",
+      "argument_and_import_tests_passed": 27,
+      "evaluation_routes_verified": 6,
+      "native_training_commands_verified": 20,
+      "public_cli_processes_exited": 8,
+      "installed_files_verified": 444,
+      "licenses_verified": 3,
+      "mac_cli_checks": 30,
+      "linux_cli_checks": 28,
+      "tests": "outputs/acceptance/training-arguments-tests-20261011-03.xml",
+      "independent_handoff": "outputs/acceptance/training-arguments-handoff-20261011-01.json",
+      "report": "docs/reports/training-arguments-2026-10-11.md",
+      "training_execution_performed": false,
+      "gpu_acceptance_performed": false
+    },
     "native_preparation": {
       "state": "node_sdk_policies_models_and_installation_verified_cpu_runtime_pending",
       "source_revision": "bcbc2c32a33e8446d23cf6c9f647d0e28b5a14f6",

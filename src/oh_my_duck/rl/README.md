@@ -19,6 +19,14 @@ Microduck environment definitions, motors and policy contracts are owned source.
 | 归一化导出与本地 policy package | `artifacts/` |
 | 任务评估、sim2sim、CPU/BAM 与视频 | `evaluation/` |
 
+`training/arguments.py` 使用 `argparse` 读取唯一的 `--task` 选项，支持
+`--task NAME` 和 `--task=NAME`。`training/registry.py` 与
+`training/isaac_newton.py` 共同使用这个入口选择评估任务；
+`training/frameworks.py` 负责生成 RSL-RL、SB3 的原生命令。
+训练任务继续使用第一个位置参数；诊断模式使用明确的
+`--task Omd-Microduck-PD-Diagnostic-v0`。各框架的其他参数完整传递。
+验证记录见[训练参数验证](../../../docs/reports/training-arguments-2026-10-11.md)。
+
 GPU 原生状态读取位于 `infrastructure/gpu_inventory.py`。
 `experiments/scaling.py` 使用该模块测量显存及竞争进程；
 `experiments/gpu_pool.py` 管理本项目 campaign 的设备租用；
