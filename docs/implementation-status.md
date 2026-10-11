@@ -27,6 +27,7 @@ work requirements and dependencies are in the
 | 原生准备入口 | Mac 与 Linux 公开准备、固定 SDK 与 pnpm、11 项实际下载、两台主机原生 Luna 调用；Linux 九阶段退出、28 个 SDK 文件、锁定 CPU 环境及新环境连续物理运行通过；[入口记录](reports/native-preparation-2026-10-11.md) | 干净环境中的完整模型任务流程和声明场景覆盖 |
 | 原生 MuJoCo renderer | 显式 OSMesa；Linux 本地与 Mac→SSH 会话；300 次控制、1,200 次物理步骤；150 次独立 ONNX 与 RGB 复核；两台主机各 28 项独立安装调用；[运行记录](reports/native-renderer-2026-10-11.md) | 完整模型导航与对应场景验收 |
 | 原生 context 设置 | 默认 headroom、摘要预算和图像历史；两台主机六项实际 SDK 预算检查；四项来源文件与各 28 项独立安装调用；[配置记录](reports/native-context-preparation-2026-10-11.md) | 原始预算下的完整模型任务与重复执行结果 |
+| 原生 Responses 工具参数 | SDK 参数 Schema、实际 Luna 可选参数调用与正式报告读取；传输关闭；两台主机各 28 项独立安装调用；[调用记录](reports/native-tool-parameters-2026-10-11.md) | 原始目标和预算下的完整导航任务验收 |
 | GPU 资源读取 | 公共 CSV 模块、实际设备及重复进程记录、31 项检查、占用拒绝及持续空闲检查 | 每次分配重新检查实际状态；当前 GPU 运行验收保持停止 |
 | Core types, tools and recording | Complete Draft 2020-12 Schemas, finite arguments, actual handlers, request identity, JSONL/native events, original image hashes and MP4 | New tools require their actual implementation and relevant execution evidence |
 | Native Harness | Fixed EDH, actual models, official policies, sensors, ActionGate and independent Verifier; CPU text/recorded-voice office tasks passed | Current-source multi-scene long navigation and repeated task statistics |

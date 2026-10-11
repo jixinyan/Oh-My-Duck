@@ -8,6 +8,7 @@
 | Native session lifecycle, control tools, metric motion and ActionGate boundaries | [session.py](session.py) |
 | JSONL process transport, request dispatch and disconnect cleanup | [worker.py](worker.py) |
 | Stable executable module and class imports | [../edh_native.py](../edh_native.py) |
+| 原生 Responses 参数与模型传输审计 | [model-transport.mjs](../../../../integrations/edh/model-transport.mjs) |
 
 The server launches `python -m oh_my_duck.integrations.edh_native` locally or
 through SSH. CPU MuJoCo/BAM and Isaac Newton/BAM use the same native session,

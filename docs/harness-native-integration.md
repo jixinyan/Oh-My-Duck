@@ -119,6 +119,10 @@ dispatcher，并恢复原有 dispatcher。实际模型检查与正式任务使�
 
 `--data-dir` 中的 `model-transport.jsonl` 保存模型请求身份、HTTP 状态、Responses 结束状态、服务错误和 token 用量。记录不包含认证 header、请求内容或模型文字。SSE 使用固定 EDH 依赖的 `eventsource-parser` 读取；模型数据原样进入原生 adapter，服务错误立即终止当前请求。
 
+Responses function tools 明确使用 `strict: false`，保留原生 SDK 的可选参数
+和完整 Schema。SDK 负责接纳参数、工具权限和执行；关闭服务时恢复模型传输
+资源。实际 Luna 报告读取和独立安装检查见[工具调用记录](reports/native-tool-parameters-2026-10-11.md)。
+
 在分配 GPU 仿真前，使用相同的私有配置检查实际模型请求：
 
 ```sh

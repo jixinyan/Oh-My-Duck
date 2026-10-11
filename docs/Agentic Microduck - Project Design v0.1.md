@@ -43,6 +43,8 @@ Oh My Duck 为 Microduck 提供仿真、训练、技能工具、主动感知、�
 见[renderer 验收](reports/native-renderer-2026-10-11.md)。
 原生 context 设置、六项 SDK 预算计算和两台主机的独立安装见
 [context 准备](reports/native-context-preparation-2026-10-11.md)；完整模型任务继续独立验收。
+原生 Responses 参数、Luna 正式报告读取、传输关闭及两台主机独立安装见
+[工具调用检查](reports/native-tool-parameters-2026-10-11.md)。
 [发布模型设置](reports/release-model-settings-2026-10-09.md)保存实际 SDK 调用、统一模型预算与查询期限的检查结果。
 GPU 验收与 RL 保持停止。后续获得执行授权时，同时最多使用一张空闲 GPU 2–4；
 设备要求没有 compute PID 且持续零 utilization。其他用户和项目的进程保留。

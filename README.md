@@ -43,6 +43,7 @@ This is the target experience. The project is under active development; [impleme
 | 原生 SDK 准备、官方策略下载、实际模型连接与锁定 CPU 环境运行 | [公开准备入口](docs/reports/native-preparation-2026-10-11.md) |
 | 显式 CPU 渲染、Linux 本地与 SSH worker、连续物理运行及独立安装 | [原生 renderer](docs/reports/native-renderer-2026-10-11.md) |
 | 原生 context 设置、SDK 预算计算与独立安装 | [Context 准备](docs/reports/native-context-preparation-2026-10-11.md) |
+| 原生 Responses 工具参数、Luna 正式报告读取与传输关闭 | [工具调用检查](docs/reports/native-tool-parameters-2026-10-11.md) |
 
 GPU 验收与 RL 当前保持停止。当前源码的 Newton 运行、多场景长导航、识别准确率、
 学习行为与 Microduck 设备需要各自的验收；范围和执行要求见

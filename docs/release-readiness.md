@@ -36,6 +36,12 @@ The release workflow uses recorded speech, the pinned native Harness, official p
 
 ## Runtime preparation
 
+原生 Responses function tools 明确设置 `strict: false`，保留 SDK 参数定义。
+Luna 的两个实际响应完成可选参数调用、正式报告读取和结果反馈；
+传输关闭、原始资料与两台主机各 28 项独立安装调用通过，见
+[工具调用检查](reports/native-tool-parameters-2026-10-11.md)。
+完整导航使用原始目标、预算及独立任务记录验收。
+
 原生 context 设置集中于 `integrations/edh/model-context.mjs`。
 Mac 与 Linux 的六项实际 SDK 预算检查和独立安装通过，模型输出预算
 `8192` 时的触发阈值为 `20480` tokens。原始预算下的完整 CPU 模型

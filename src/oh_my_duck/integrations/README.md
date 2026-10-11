@@ -8,6 +8,7 @@
 | 物理环境、设备、工具、ActionGate 与 worker 通信 | [edh/README.md](edh/README.md) |
 | 保留的原生 worker 模块入口 | `edh_native.py` |
 | Node 服务、原生模型调用与传输记录 | 仓库根目录 [integrations/edh/server.mjs](../../../integrations/edh/server.mjs) |
+| 原生 Responses 可选参数、Request 正文与传输关闭 | 仓库根目录 [integrations/edh/model-transport.mjs](../../../integrations/edh/model-transport.mjs) |
 | 原生 compaction 设置与摘要请求身份 | 仓库根目录 [integrations/edh/model-context.mjs](../../../integrations/edh/model-context.mjs)；`nativeContextManagement` 和 `assignmentModelAdapter` |
 
 `model_settings.py` 由 `cli/harness.py`、`validation/release/campaign.py`
