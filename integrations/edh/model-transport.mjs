@@ -2,7 +2,28 @@ import { appendFileSync, mkdirSync } from 'node:fs';
 import { dirname } from 'node:path';
 import { randomUUID } from 'node:crypto';
 
-export function identifyModelClient(undici, baseURL, createParser, auditPath) {
+function preserveResponsesToolParameters(baseURL) {
+  const endpoint = `${baseURL.replace(/\/$/, '')}/responses`;
+  const previous = globalThis.fetch;
+  globalThis.fetch = async (input, options) => {
+    const request = new Request(input, options);
+    if (request.url !== endpoint || request.method !== 'POST') return previous(input, options);
+    const body = await request.json();
+    if (body.tools !== undefined) {
+      if (!Array.isArray(body.tools)) throw new Error('Responses tools 必须为数组');
+      body.tools = body.tools.map((tool) => tool.type === 'function' && tool.strict === undefined
+        ? { ...tool, strict: false } : tool);
+    }
+    request.headers.delete('content-length');
+    return previous(new Request(request, { body: JSON.stringify(body) }));
+  };
+  return () => { globalThis.fetch = previous; };
+}
+
+export function identifyModelClient(undici, baseURL, createParser, auditPath,
+  modelAPI = 'chat-completions') {
+  if (!['chat-completions', 'responses'].includes(modelAPI))
+    throw new Error('Model API is invalid');
   const origin = new URL(baseURL).origin;
   mkdirSync(dirname(auditPath), { recursive: true });
   const record = (value) => appendFileSync(auditPath,
@@ -77,7 +98,9 @@ export function identifyModelClient(undici, baseURL, createParser, auditPath) {
     return dispatch({ ...options, headers }, new ModelResponseAudit(handler, options));
   });
   undici.setGlobalDispatcher(dispatcher);
+  const restoreFetch = modelAPI === 'responses' ? preserveResponsesToolParameters(baseURL) : null;
   return async () => {
+    restoreFetch?.();
     undici.setGlobalDispatcher(previous);
     await dispatcher.close();
   };

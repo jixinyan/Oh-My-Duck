@@ -48,7 +48,7 @@ const { createParser } = createRequire(resolve(edhRoot,
   'harness/agent-runtime/models/package.json'))('eventsource-parser');
 const closeModelTransport = identifyModelClient(
   await import(resolve(edhRoot, 'node_modules/undici/index.js')), baseURL, createParser,
-  resolve(dataDirectory, 'model-transport.jsonl'));
+  resolve(dataDirectory, 'model-transport.jsonl'), modelAPI);
 if (process.env.OMD_CHECK_MODEL === '1') {
   const adapter = new ModelAdapter({ baseURL,
     models: [{ id: model, inputModalities: ['text', 'image'], contextWindow: 32768, maxTokens: maxOutputTokens }],
