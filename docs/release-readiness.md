@@ -39,8 +39,14 @@ The release workflow uses recorded speech, the pinned native Harness, official p
 `omd setup-harness` 准备固定原生 SDK、pnpm、官方策略和锁定 CPU 环境，
 保存输入 SHA256、原始下载、日志和所属进程退出记录。Mac 的公开准备与两台主机的
 实际 Luna 调用通过；独立安装核查 443 个文件、三份许可证和 Mac 30 项、Linux 28 项
-公开命令。Linux 完整 CPU 环境及新环境物理运行继续验收，见
+公开命令。Linux 完整锁定 CPU 环境通过九个准备阶段及 28 个 SDK 文件检查；
+新环境执行 300 次控制、1,200 次物理步骤，独立复核 150 次 ONNX 动作和
+150 张原始 RGB 图像，资源全部释放。完整模型任务流程与声明场景仍按对应要求验收，见
 [原生准备入口](reports/native-preparation-2026-10-11.md)。
+
+共同的 RL 参数入口通过 27 项检查、六项评估入口、20 项原生训练命令和
+八次公开 CLI 调用。该源码的独立安装检查通过 444 个文件、三份许可证和
+Mac 30 项、Linux 28 项公开命令，见[训练参数检查](reports/training-arguments-2026-10-11.md)。
 
 Native metric tool schemas advertise default speeds, units and measured completion
 requirements. Actual Luna calls passed four bounded CPU motions, Node startup,

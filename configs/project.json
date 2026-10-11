@@ -24,7 +24,7 @@
       "gpu_acceptance_performed": false
     },
     "native_preparation": {
-      "state": "node_sdk_policies_models_and_installation_verified_cpu_runtime_pending",
+      "state": "locked_cpu_runtime_continuous_physics_and_independent_installation_verified",
       "source_revision": "bcbc2c32a33e8446d23cf6c9f647d0e28b5a14f6",
       "command": "omd setup-harness",
       "runtime_check": "omd doctor --runtime cpu-apartment",
@@ -36,6 +36,8 @@
       "mac_cli_checks": 30,
       "linux_cli_checks": 28,
       "mac_preparation_stages_exited": 6,
+      "linux_preparation_stages_exited": 9,
+      "native_python_sdk_files_verified": 28,
       "official_downloads_verified": 11,
       "native_model_requests_verified": 2,
       "model": "gpt-6-luna",
@@ -45,11 +47,17 @@
       "admission_tests_passed": 140,
       "sdk_import_tests_passed": 23,
       "saved_policy_controls_verified": 1208,
-      "linux_locked_cpu_preparation_verified": false,
-      "new_cpu_physical_execution_verified": false,
+      "linux_locked_cpu_preparation_verified": true,
+      "new_cpu_physical_execution_verified": true,
+      "new_policy_control_steps": 300,
+      "new_raw_sim_steps": 1200,
+      "independent_onnx_actions": 150,
+      "independent_head_rgb_frames": 150,
+      "maximum_action_error": 0.0,
       "report": "docs/reports/native-preparation-2026-10-11.md",
-      "entry_handoff": "outputs/acceptance/native-preparation-entry-handoff-20261011-01.json",
+      "entry_handoff": "outputs/acceptance/native-preparation-entry-handoff-20261011-02.json",
       "cuda_initialized": false,
+      "agent_navigation_acceptance_performed": false,
       "gpu_acceptance_performed": false
     },
     "release_model_settings": {

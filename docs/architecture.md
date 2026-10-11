@@ -52,7 +52,7 @@ Application, robot, training, shared acceptance and replay modules live in `src/
 | Newton collision masks and explicit contact pairs | `rl/backends/isaac_newton/task_binding/` | `collision_model.py` |
 | Official solver materials and contact tables | `rl/backends/isaac_newton/task_binding/` | `contact_model.py`, `manager.py` |
 | Native PPO | `rl/learners/` | `rsl_rl/`, `sb3/` |
-| Training registration and dispatch | `rl/training/`, `rl/experiments/` | `tasks.py`, `frameworks.py`, `campaign.py` |
+| Training registration and dispatch | `rl/training/`, `rl/experiments/` | `arguments.py` 读取任务选项；`tasks.py`、`registry.py`、`isaac_newton.py`、`frameworks.py`、`campaign.py`；[RL 源码说明](../src/oh_my_duck/rl/README.md) |
 | Export and deployment rehearsal | `rl/artifacts/`, `rl/evaluation/` | Export, schema-2 packaging and metrics |
 | Active perception | `perception/` | [Source map](../src/oh_my_duck/perception/README.md); `frames.py` for RGBD/PNG admission, `rgbd.py` for measurements, `validation.py` for source consistency, `client.py`/`service.py` for models and HTTP; `mujoco.py` owns actual CPU render geometry and apartment target labels |
 | Voice interaction | `voice/` | [Source map](../src/oh_my_duck/voice/README.md); `audio.py` for shared WAV/URI/SHA256 operations; `qwen.py` for model inference; `profiles.py` for confirmed voices; `service.py`, `remote.py`, `session.py`, `device.py` for HTTP, sessions and audio devices |

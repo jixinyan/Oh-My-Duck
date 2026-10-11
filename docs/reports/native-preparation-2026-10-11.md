@@ -1,4 +1,4 @@
-# 原生 Harness 准备入口与模型调用
+# 原生 Harness 准备、模型调用与 CPU 执行
 
 固定实现源码：`bcbc2c32a33e8446d23cf6c9f647d0e28b5a14f6`。
 
@@ -55,17 +55,43 @@ Mac 使用新下载的官方策略复核保存的 1,208 次实际输入输出，
 - `outputs/acceptance/native-preparation-20261011-02-install/downloaded-policies.json`
 - `outputs/acceptance/native-preparation-linux-20261011-01/package-audit-client.json`
 
-## CPU 环境与执行要求
+## 锁定 CPU 环境与连续物理运行
 
 完整准备流程使用 `environments/cpu-apartment/uv.lock`，安装固定原生 Python SDK，
 并通过 `omd doctor --runtime cpu-apartment` 检查实际依赖、CPU Torch、MuJoCo、
 十个 ONNX 和 Python SDK 文件。SDK 检查逐个比较安装文件与固定源码。
 
-当前 Linux 完整锁定环境仍在安装依赖，对应准备结果和新环境的连续物理运行
-尚未完成验收。已有 Node、策略、模型和安装记录保留各自的通过范围。
+Linux 的新环境通过公开准备入口完成九个阶段，全部所属进程正常退出。
+实际依赖为 CPU Torch `2.9.1+cpu`、MuJoCo `3.8.0`、mjlab `1.3.0`、
+BAM `1.0.1`、Warp `1.12.0` 和 ONNX Runtime `1.30.0`。
+28 个原生 Python SDK 文件逐个通过固定源码 SHA256 检查；十个策略实际执行
+CPU ONNX 推理。Torch 的 CUDA 版本为 `None`，整个流程没有初始化 CUDA。
+
+准备使用与锁定文件一致的 Torch 和 Warp wheel，分别核查固定 SHA256 后通过
+UV 安装，完整 `uv sync --locked` 核查所有依赖。环境路径为
+`.envs/native-preparation-cpu-20261011-02`，SDK 路径为
+`.cache/edh-native-preparation-linux-20261011-02`。
+
+新环境通过 `omd validate task-continuation` 执行两个直接任务和两个原生
+worker 任务，共 300 次控制、1,200 次物理步骤。连续任务保持当前物理状态、
+episode 与 sequence，每项任务保存独立的起始状态和目标范围。
+只读检查保持物理时间，执行结束具有设备确认，所有会话和所属进程正常关闭。
+
+独立复核重新计算 150 次实际的 61→14 ONNX 动作，最大误差为零；
+核对实际 HOME、动作缩放、controller target 和每次四个物理步骤。
+150 张原始 head RGB PNG 完整解码通过，均为 `320×240`，像素具有有效内容；
+图像统计、采集时间和 `8×8` ToF 数据均与实际记录一致。
+本项检查没有执行模型导航任务；此前模型调用和任务验收使用各自的原始记录。
 GPU 验收与 RL 保持停止；Newton 运行和 Microduck 设备保留独立验收要求。
 
-入口交付复核见 `outputs/acceptance/native-preparation-entry-handoff-20261011-01.json`，
+证据：
+
+- `outputs/acceptance/native-preparation-linux-setup-20261011-02/result.json`
+- `outputs/acceptance/native-preparation-linux-setup-20261011-02/independent.json`
+- `outputs/acceptance/native-preparation-continuation-linux-20261011-02/`
+- `outputs/acceptance/native-preparation-continuation-runner-linux-20261011-02/`
+
+入口交付复核见 `outputs/acceptance/native-preparation-entry-handoff-20261011-02.json`，
 核查两个模型响应、安装文件、命令结束、测试 XML、实际接纳拒绝、保存资料和
 用户修改的资产依赖文件。完整项目范围继续见[设计](../Agentic%20Microduck%20-%20Project%20Design%20v0.1.md)
 和[执行计划](../Agentic%20Microduck%20-%20Execution%20Plan%20v0.1.md)。

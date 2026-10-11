@@ -40,7 +40,7 @@ This is the target experience. The project is under active development; [impleme
 | Walking/StandUp 训练包登记、执行与 policy 接续 | [Policy registry](docs/policy-registry.md)、[训练包验收](docs/reports/policy-packages-2026-10-08.md) |
 | Qwen CPU 推理、音色持久保存与任务中断 | [模型与音色](docs/reports/qwen-cpu-validation-2026-10-08.md)、[执行中断](docs/reports/cpu-voice-task-2026-10-08.md) |
 | CPU 原生执行、资产、依赖与独立安装 | [CPU 开发验收](docs/reports/cpu-development-readiness-2026-10-08.md) |
-| 原生 SDK 准备、官方策略下载与实际模型连接 | [公开准备入口](docs/reports/native-preparation-2026-10-11.md) |
+| 原生 SDK 准备、官方策略下载、实际模型连接与锁定 CPU 环境运行 | [公开准备入口](docs/reports/native-preparation-2026-10-11.md) |
 
 GPU 验收与 RL 当前保持停止。当前源码的 Newton 运行、多场景长导航、识别准确率、
 学习行为与 Microduck 设备需要各自的验收；范围和执行要求见

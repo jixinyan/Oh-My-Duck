@@ -24,7 +24,7 @@ work requirements and dependencies are in the
 | CLI/application | 原生服务、验证与记录、场景 Schema、policy package 与语音；444 个安装文件、三份 license、Mac 30 项与 Linux 28 项 CLI 调用 | 完整工作流程在独立环境中的执行检查 |
 | RL 参数入口 | 共同的 `argparse` 模块、27 项检查、六项评估入口、20 项原生训练命令和八次实际 CLI 调用；[验证记录](reports/training-arguments-2026-10-11.md) | 原生物理与训练验收使用各自声明的任务标准 |
 | 发布模型设置 | 共享模型与 API 参数；实际原生 Luna 调用；六阶段、四场景完整发布前检查；查询期限与失败记录 | 声明的实际 GPU 导航运行验收 |
-| 原生准备入口 | Mac 公开准备、固定 SDK 与 pnpm、11 项实际下载、两台主机的原生 Luna 调用和独立安装通过；[入口记录](reports/native-preparation-2026-10-11.md) | Linux 完整锁定 CPU 环境及新环境连续物理运行 |
+| 原生准备入口 | Mac 与 Linux 公开准备、固定 SDK 与 pnpm、11 项实际下载、两台主机原生 Luna 调用；Linux 九阶段退出、28 个 SDK 文件、锁定 CPU 环境及新环境连续物理运行通过；[入口记录](reports/native-preparation-2026-10-11.md) | 干净环境中的完整模型任务流程和声明场景覆盖 |
 | GPU 资源读取 | 公共 CSV 模块、实际设备及重复进程记录、31 项检查、占用拒绝及持续空闲检查 | 每次分配重新检查实际状态；当前 GPU 运行验收保持停止 |
 | Core types, tools and recording | Complete Draft 2020-12 Schemas, finite arguments, actual handlers, request identity, JSONL/native events, original image hashes and MP4 | New tools require their actual implementation and relevant execution evidence |
 | Native Harness | Fixed EDH, actual models, official policies, sensors, ActionGate and independent Verifier; CPU text/recorded-voice office tasks passed | Current-source multi-scene long navigation and repeated task statistics |
@@ -69,6 +69,7 @@ Linux 独立安装检查通过 438 个文件和 27 项 CLI 调用。
 | Training package tools | Actual Walking/StandUp packages; 725 controls, 145 frames, 87 stopped samples, full episodic duration and transition | [Registered packages](reports/policy-packages-2026-10-08.md) |
 | Head/body commands | 575 controls, actual positive/negative pitch and body-height response, return, 115 camera frames and stopped-state audit | [Pose tools](reports/native-pose-2026-10-08.md) |
 | Policy and motion evidence | Continuous five-motion sequence, 1208 independently recomputed ONNX actions with zero error, measured state and stopping | [Validation modules](reports/validation-modules-2026-10-08.md) |
+| 新锁定 CPU 环境 | 九个准备阶段正常退出；300 次控制、1,200 次物理步骤、连续任务状态保留；150 次独立 ONNX 动作与 150 张原始 RGB 图像核查通过，资源全部释放 | [原生准备与执行](reports/native-preparation-2026-10-11.md) |
 | Application and scene interfaces | Actual native session lifecycle, complete tool Schemas, common scene configuration and independent installation | [Application](reports/native-application-interfaces-2026-10-08.md), [scenes](reports/native-scene-configuration-2026-10-08.md) |
 | Native campaign inputs | Integer counts, finite proportions, actual CLI admission and unchanged committed plans; Linux checks passed | [Training inputs](reports/campaign-input-admission-2026-10-08.md) |
 | Newton assets and contacts | Both variants, complete converted inputs, OpenUSD provider, actual CPU contact configuration, solver tables and Office/Hospital geometry | [CPU readiness](reports/cpu-development-readiness-2026-10-08.md) |

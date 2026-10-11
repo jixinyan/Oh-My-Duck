@@ -31,7 +31,7 @@ Oh My Duck 为 Microduck 提供仿真、训练、技能工具、主动感知、�
 | 感知 | 当前 CPU RGBD、真实 CPU YOLO 与原始像素测量复核；固定源码 Newton RGBD 和 SAM3.1 + YOLO26 服务记录 | 当前 SAM GPU 验收、独立标注评估、目标跟踪和真机校准 |
 | 训练与导出 | Walking/StandUp × 两个 backend × 两个原生 PPO 的执行流程、恢复、归一化导出与回放记录 | 自训练有效行为、多个 seed、sim2sim 与最终评估 |
 | Newton 资产与准备 | 两种机器人、Office/Hospital 几何、CPU solver/contact、依赖检查与发布准备通过 | 当前源码的实际 GPU 求解、初始化、渲染及完整运行验收 |
-| 安装与扩展 | 443 个 source/resource 文件、三份许可证、Mac 30 项及 Linux 28 项安装调用通过；公开原生准备、两台主机实际 Luna 调用、六阶段发布前检查及资源接纳检查 | Linux 完整锁定 CPU 环境及新环境连续物理运行；从干净环境复现所声明的完整流程 |
+| 安装与扩展 | 444 个 source/resource 文件、三份许可证、Mac 30 项及 Linux 28 项安装调用通过；公开原生准备、两台主机实际 Luna 调用；锁定 Linux CPU 环境九阶段、28 个 SDK 文件及新环境 300 次控制、1,200 次物理步骤通过；六阶段发布前检查及资源接纳检查 | 从干净环境复现所声明的完整模型任务流程及场景覆盖 |
 | 真机 | 统一接口和官方运行时来源已记录 | 实际 Microduck 的传输、音频、传感器、控制与任务验收 |
 
 证据入口：[当前状态](implementation-status.md)、[CPU 开发验证](reports/cpu-development-readiness-2026-10-08.md)、
@@ -421,6 +421,8 @@ Harness 决定总结、检索和长期保存内容。经验保留证据引用，
 应用接口导入保持 simulator、Torch 和语音模型的延迟加载。
 `omd setup-harness` 提供 SDK、固定 pnpm、官方策略和锁定 CPU 环境的准备入口，
 保存每个阶段的来源、实际导入与推理结果、日志和所属进程退出记录。
+锁定 Linux CPU 环境已通过真实连续任务、150 次独立 ONNX 动作和 150 张原始 RGB
+图像检查，具体范围见[准备与执行记录](reports/native-preparation-2026-10-11.md)。
 `ToolCatalog` 注册时验证完整 JSON Schema Draft 2020-12，调用时验证有限 JSON 参数。
 `omd status` 读取软件成熟度；在线能力由后端提供。
 源码定位见[architecture](architecture.md)，使用方式见[getting started](getting-started.md)。
