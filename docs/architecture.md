@@ -33,7 +33,7 @@ Application, robot, training, shared acceptance and replay modules live in `src/
 | --- | --- | --- |
 | Public commands | `cli/` | `cli/__init__.py`, `cli/validation.py` |
 | Native EDH physical session | `integrations/edh/` | `environment.py`, `device.py`, `session.py`, `worker.py` |
-| 原生模型、传输与摘要调用 | 仓库根目录 `integrations/edh/` | `server.mjs`、`model-transport.mjs`、`model-context.mjs`；原生 Harness 管理 agent loop 与 compaction |
+| 原生模型、传输与摘要调用 | 仓库根目录 `integrations/edh/` | `server.mjs`、`model-transport.mjs`；`model-context.mjs` 定义 `nativeContextManagement` 与摘要请求身份；原生 Harness 管理 agent loop 与 compaction |
 | Shared native CPU/Newton scene configuration | `integrations/edh/` | `scene.schema.json`, `scene_configuration.py`; Node admission in `integrations/edh/scene-configuration.mjs` at the repository root |
 | Application dependencies, tools and skills | `agentic/` | [Source map](../src/oh_my_duck/agentic/README.md), `application.py`, `harness/base.py`, `tools/`, `skills/` |
 | Native task HTTP client | `integrations/` | `native_client.py`; implements `HarnessBridge` for voice and application services |
@@ -56,7 +56,7 @@ Application, robot, training, shared acceptance and replay modules live in `src/
 | Export and deployment rehearsal | `rl/artifacts/`, `rl/evaluation/` | Export, schema-2 packaging and metrics |
 | Active perception | `perception/` | [Source map](../src/oh_my_duck/perception/README.md); `frames.py` for RGBD/PNG admission, `rgbd.py` for measurements, `validation.py` for source consistency, `client.py`/`service.py` for models and HTTP; `mujoco.py` owns actual CPU render geometry and apartment target labels |
 | Voice interaction | `voice/` | [Source map](../src/oh_my_duck/voice/README.md); `audio.py` for shared WAV/URI/SHA256 operations; `qwen.py` for model inference; `profiles.py` for confirmed voices; `service.py`, `remote.py`, `session.py`, `device.py` for HTTP, sessions and audio devices |
-| Experience and replay export | `experience/` | `harness_replay.py` |
+| Episode 记录与原生导出 | `experience/` | `base.py` 的 `EpisodeRecorder`、`jsonl.py` 的 `JsonlEpisodeRecorder`、`harness_replay.py` 的 `export_run`；身份与时钟字段位于 `core/contracts/events.py` |
 | Measured policy acceptance | `validation/metric/` | `plans.py`, `case.py`, `campaign.py`, `verify.py`, `policy.py` |
 | Native task, pose and navigation acceptance | `validation/harness/` | `control.py`, `metric_admission.py`, `motion_guard.py`, `pose.py`, `pose_records.py`, `replay.py`, `navigation.py` |
 | 连续任务与语音历史引用检查 | `validation/harness/` | `task_continuation.py`、`voice_context.py` |

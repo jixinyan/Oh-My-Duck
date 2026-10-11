@@ -12,6 +12,15 @@ websockets 依赖使用 CPU 环境中的锁定版本。安装检查逐个比较 
 文件与固定源码，并读取原生 physical Schema。
 凭证和模型服务设置在后续启动时提供。
 
+原生上下文设置位于仓库根目录 `integrations/edh/model-context.mjs` 的
+`nativeContextManagement`。部署声明 `32768` tokens 的上下文容量，模型
+输出预算通过 `--max-output-tokens` 设置。原生 SDK 使用额外的
+`4096`-token headroom；compaction 的 `thresholdRatio` 为 `0.7`，
+`retainRatio` 为 `0.15`，摘要输出上限为 `8192` tokens。
+模型输出预算为 `8192` 时，原生 SDK 计算的触发阈值为 `20480`，
+保留预算为 `3686` tokens。图像历史由原生 `VisualHistory` 管理，
+最多保留十二张图像；原始事件与 attachment 来源继续保存。
+
 Linux 无界面 CPU 仿真通过 `--mujoco-renderer osmesa` 明确选择软件渲染。
 Ubuntu 22.04 amd64 的固定 OSMesa 可以使用已有准备命令安装：
 

@@ -23,6 +23,27 @@
       "training_execution_performed": false,
       "gpu_acceptance_performed": false
     },
+    "native_context": {
+      "state": "native_budget_and_independent_installation_verified_navigation_pending",
+      "source_revision": "bece543ff1cd4ed65ff3321ca6bdd54382cf2820",
+      "native_harness_revision": "8a5e685b22d032207f53db20454f0992a4ad60fd",
+      "module": "integrations/edh/model-context.mjs",
+      "context_window": 32768,
+      "headroom_tokens": 4096,
+      "summary_max_tokens": 8192,
+      "max_history_images": 12,
+      "actual_native_budget_checks": 6,
+      "high_output_budget_threshold_tokens": 20480,
+      "high_output_budget_retained_tokens": 3686,
+      "installed_files_verified": 444,
+      "licenses_verified": 3,
+      "mac_cli_checks": 28,
+      "linux_cli_checks": 28,
+      "model_navigation_acceptance_performed": false,
+      "gpu_acceptance_performed": false,
+      "report": "docs/reports/native-context-preparation-2026-10-11.md",
+      "independent_handoff": "outputs/acceptance/native-context-preparation-handoff-20261011-01.json"
+    },
     "native_renderer": {
       "state": "local_and_ssh_cpu_sessions_physics_and_independent_installation_verified",
       "source_revision": "16d1fd574ea71d726f37884cfa5f054bba6dbdab",

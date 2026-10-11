@@ -296,6 +296,9 @@ Mac 与 Linux 公开准备、两台主机模型调用与独立安装通过；新
 1,200 次物理步骤；独立复核 150 次 ONNX 动作与 150 张 RGB 图像。
 该固定源码在两台主机各通过 444 个文件、三份许可证和 28 项安装调用，
 完整模型导航继续按原有任务标准验收，见[renderer 记录](reports/native-renderer-2026-10-11.md)。
+原生 context 设置集中于 `model-context.mjs`，两台主机的六项 SDK 预算检查
+及各 28 项独立安装调用通过，见[context 准备](reports/native-context-preparation-2026-10-11.md)。
+完整模型任务保留原始目标、停止边界和执行预算，按独立 Verifier 结果验收。
 
 交付 README、source map、教程、环境和版本矩阵、policy 来源、评估方法及已验收范围。
 通过条件为他人能够按文档运行所声明的功能并找到扩展位置，真实设备支持对应具体设备证据。

@@ -36,6 +36,11 @@ The release workflow uses recorded speech, the pinned native Harness, official p
 
 ## Runtime preparation
 
+原生 context 设置集中于 `integrations/edh/model-context.mjs`。
+Mac 与 Linux 的六项实际 SDK 预算检查和独立安装通过，模型输出预算
+`8192` 时的触发阈值为 `20480` tokens。原始预算下的完整 CPU 模型
+导航继续独立验收，见[context 准备](reports/native-context-preparation-2026-10-11.md)。
+
 `omd harness --mujoco-renderer osmesa` 在实际仿真主机上设置 CPU renderer，
 本地与 SSH worker 使用相同的启动入口。Linux 本地和 Mac→SSH 实际会话、
 300 次控制及 1,200 次物理步骤通过；独立核查 150 次 ONNX 动作与 150 张原始
