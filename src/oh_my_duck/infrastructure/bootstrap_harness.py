@@ -135,9 +135,14 @@ def main() -> int:
                 "--locked", "--no-dev", "--no-editable", "--python", "3.12"],
                 output=output, cwd=root, environment=cpu_variables)
             python = (cpu_environment / "bin/python").absolute()
+            run_stage("python-sdk", [uv, "pip", "install", "--python", str(python), "--no-deps",
+                "--reinstall-package", "edh-physical-harness", str(source / "harness/physical-runtime")],
+                output=output, cwd=root, environment=environment)
+            verify_edh_source(source)
             result["cpu_runtime"] = json.loads(run_stage("cpu-runtime", [str(python),
                 "-m", "oh_my_duck", "doctor", "--runtime", "cpu-apartment", "--catalog",
-                str(args.policy_dir.resolve())], output=output, cwd=output, environment=environment))
+                str(args.policy_dir.resolve()), "--edh-source", str(source)],
+                output=output, cwd=output, environment=environment))
             result.update(cpu_environment_prepared=True, cpu_environment=str(cpu_environment))
         result["passed"] = True
     finally:

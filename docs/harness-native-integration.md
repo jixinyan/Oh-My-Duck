@@ -7,6 +7,9 @@
 `packageManager` 使用 pnpm 11.19.0，通过 `--frozen-lockfile` 安装全部工作区依赖。
 命令检查源码清洁状态、原生 SDK 导出与 physical Schema，按固定 SHA256 获取
 manifest 和十项官方 ONNX，安装 `environments/cpu-apartment/uv.lock` 声明的 CPU 环境。
+Python SDK 由固定源码的 `harness/physical-runtime` 安装；其 jsonschema 与
+websockets 依赖使用 CPU 环境中的锁定版本。安装检查逐个比较 SDK Python
+文件与固定源码，并读取原生 physical Schema。
 凭证和模型服务设置在后续启动时提供。
 
 ```sh
@@ -26,6 +29,7 @@ python omd.py setup-harness --edh-repository "$EDH_ROOT" \
 ```sh
 CUDA_VISIBLE_DEVICES='' .cache/cpu-apartment-locked-venv/bin/omd doctor \
   --runtime cpu-apartment \
+  --edh-source .cache/edh/8a5e685b22d032207f53db20454f0992a4ad60fd \
   --catalog .cache/official-policies/1b56c396825c052a4e26e95cf2b8d8298af9e9b4
 ```
 

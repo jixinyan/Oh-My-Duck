@@ -27,7 +27,7 @@ EDH Git 仓库。统一入口准备 SDK、十项官方策略和锁定 CPU 环境
 
 ```bash
 python omd.py setup-harness --edh-repository "$EDH_ROOT" --output outputs/setup/harness-new
-CUDA_VISIBLE_DEVICES='' .cache/cpu-apartment-locked-venv/bin/omd doctor --runtime cpu-apartment --catalog .cache/official-policies/1b56c396825c052a4e26e95cf2b8d8298af9e9b4
+CUDA_VISIBLE_DEVICES='' .cache/cpu-apartment-locked-venv/bin/omd doctor --runtime cpu-apartment --edh-source .cache/edh/8a5e685b22d032207f53db20454f0992a4ad60fd --catalog .cache/official-policies/1b56c396825c052a4e26e95cf2b8d8298af9e9b4
 ```
 
 该命令保存每个阶段的来源、日志和进程退出记录。模型连接、实际任务和录制通过

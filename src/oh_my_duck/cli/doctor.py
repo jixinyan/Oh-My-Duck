@@ -60,6 +60,35 @@ def scene_assets(root, config):
             "public_map_sha256": hashlib.sha256(paths["public_map_path"].read_bytes()).hexdigest()}
 
 
+def python_sdk(source: Path) -> dict:
+    from oh_my_duck.integrations.native_runtime import EDH_REVISION, verify_edh_source
+
+    source = verify_edh_source(source)
+    import physical_harness
+    from physical_harness.execution.worker import NativeWorkerSession
+    from physical_harness.validation import ContractValidator
+
+    installed = Path(physical_harness.__file__).resolve(strict=True).parent
+    if not installed.is_relative_to(Path(sys.prefix).resolve(strict=True)):
+        raise RuntimeError("原生 Python SDK 必须安装在当前环境中")
+    prefix = "harness/physical-runtime/src/physical_harness/"
+    names = subprocess.check_output(["git", "-C", str(source), "ls-files", "--", prefix], text=True).splitlines()
+    digests = {}
+    for name in names:
+        if name.endswith(".py"):
+            expected = hashlib.sha256((source / name).read_bytes()).hexdigest()
+            if hashlib.sha256((installed / name.removeprefix(prefix)).read_bytes()).hexdigest() != expected:
+                raise RuntimeError(f"安装的原生 Python SDK 与固定源码不一致: {name}")
+            digests[name] = expected
+    if not digests or not isinstance(NativeWorkerSession, type):
+        raise RuntimeError("原生 Python SDK 文件或 worker 导出不完整")
+    schema = source / "harness/contracts/schema/physical.schema.json"
+    ContractValidator.from_path(schema)
+    return {"revision": EDH_REVISION, "installed_directory": str(installed),
+            "source_files_verified": len(digests), "source_sha256": digests,
+            "physical_schema_sha256": hashlib.sha256(schema.read_bytes()).hexdigest()}
+
+
 def main():
     parser = argparse.ArgumentParser(description="检查实际依赖、服务、策略和场景资产")
     parser.add_argument("--runtime", choices=("voice-client", "cpu-apartment", "isaac-newton"), required=True)
@@ -69,10 +98,13 @@ def main():
     parser.add_argument("--harness-url")
     parser.add_argument("--scene-config", type=Path)
     parser.add_argument("--catalog", type=Path)
+    parser.add_argument("--edh-source", type=Path, help="核对安装的原生 Python SDK 与固定 EDH 源码")
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
     if args.metadata_only and args.runtime != "isaac-newton":
         raise ValueError("metadata-only 适用于 Isaac/Newton 环境检查")
+    if args.edh_source is not None and args.runtime != "cpu-apartment":
+        raise ValueError("edh-source 适用于 CPU 环境的原生 Python SDK 检查")
     root = project_root() if args.runtime == "isaac-newton" or args.scene_config is not None else None
     result = {"scope": "Installed runtime and asset/service readiness; behavioral acceptance separate",
         "runtime": args.runtime, "cuda_runtime_checked": False, "checks": {}}
@@ -82,7 +114,7 @@ def main():
         "cpu-apartment": {"torch": "2.9.1+cpu" if sys.platform == "linux" else "2.9.1",
             "mujoco": "3.8.0", "mjlab": "1.3.0", "better-actuator-models": "1.0.1",
             "warp-lang": "1.12.0", "scipy": "1.18.1", "onnx": "1.23.1",
-            "onnxruntime": "1.30.0", "jsonschema": "4.25.1"},
+            "onnxruntime": "1.30.0", "jsonschema": "4.25.1", "edh-physical-harness": "0.0.0"},
         "isaac-newton": {"torch": "2.10.0+cu130", "newton": "1.2.1",
             "warp-lang": "1.13.0", "mujoco": "3.8.0", "mujoco-warp": "3.8.0.3", "jsonschema": "4.25.1"},
     }[args.runtime]
@@ -100,6 +132,8 @@ def main():
         if torch.cuda.is_initialized() or torch.version.cuda is not None:
             raise RuntimeError("CPU 环境要求 CPU Torch 且没有 CUDA 初始化")
         checks["cpu_libraries"] = {"mujoco": mujoco.mj_versionString(), "torch_cuda": torch.version.cuda}
+        if args.edh_source is not None:
+            checks["native_python_sdk"] = python_sdk(args.edh_source)
     if args.runtime == "voice-client":
         import sounddevice as sd
         import soundfile as sf
