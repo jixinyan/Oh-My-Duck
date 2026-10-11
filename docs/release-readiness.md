@@ -36,6 +36,11 @@ The release workflow uses recorded speech, the pinned native Harness, official p
 
 ## Runtime preparation
 
+SSH CPU worker 明确使用空的 `CUDA_VISIBLE_DEVICES`。实际进程检查、原生
+session 关闭、资源释放及 worker 数量归零通过；服务退出状态为零。
+两台主机各 28 项独立安装调用通过，见
+[CPU worker 检查](reports/native-cpu-ssh-2026-10-11.md)。
+
 原生 Responses function tools 明确设置 `strict: false`，保留 SDK 参数定义。
 Luna 的两个实际响应完成可选参数调用、正式报告读取和结果反馈；
 传输关闭、原始资料与两台主机各 28 项独立安装调用通过，见

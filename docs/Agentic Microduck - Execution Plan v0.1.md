@@ -301,6 +301,9 @@ Mac 与 Linux 公开准备、两台主机模型调用与独立安装通过；新
 原生 Responses 参数、实际 Luna 正式报告读取、传输关闭和两台主机各 28 项
 独立安装调用通过，见[工具调用检查](reports/native-tool-parameters-2026-10-11.md)。
 完整模型任务保留原始目标、停止边界和执行预算，按独立 Verifier 结果验收。
+SSH CPU worker 的 CUDA visibility 为空，实际会话关闭后 worker 数量归零、
+资源释放和服务正常退出；两台主机各 28 项独立安装调用通过，见
+[CPU worker 记录](reports/native-cpu-ssh-2026-10-11.md)。
 
 交付 README、source map、教程、环境和版本矩阵、policy 来源、评估方法及已验收范围。
 通过条件为他人能够按文档运行所声明的功能并找到扩展位置，真实设备支持对应具体设备证据。

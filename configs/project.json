@@ -67,6 +67,28 @@
       "report": "docs/reports/native-tool-parameters-2026-10-11.md",
       "independent_handoff": "outputs/acceptance/native-tools-handoff-20261011-01.json"
     },
+    "native_cpu_ssh": {
+      "state": "remote_cpu_cuda_visibility_lifecycle_and_independent_installation_verified",
+      "source_revision": "7b94665bb116aeb411597f67c459b4f19647e901",
+      "native_harness_revision": "8a5e685b22d032207f53db20454f0992a4ad60fd",
+      "module": "integrations/edh/server.mjs",
+      "worker_host": "jd_B300",
+      "remote_cpu_cuda_visibility_empty": true,
+      "native_sessions_verified": 1,
+      "cpu_worker_count_before": 0,
+      "cpu_worker_count_during": 1,
+      "cpu_worker_count_after": 0,
+      "session_resources_released": true,
+      "server_exit_code": 0,
+      "installed_files_verified": 444,
+      "licenses_verified": 3,
+      "mac_cli_checks": 28,
+      "linux_cli_checks": 28,
+      "model_navigation_acceptance_performed": false,
+      "gpu_acceptance_performed": false,
+      "report": "docs/reports/native-cpu-ssh-2026-10-11.md",
+      "independent_handoff": "outputs/acceptance/native-cpu-ssh-handoff-20261011-01.json"
+    },
     "native_renderer": {
       "state": "local_and_ssh_cpu_sessions_physics_and_independent_installation_verified",
       "source_revision": "16d1fd574ea71d726f37884cfa5f054bba6dbdab",

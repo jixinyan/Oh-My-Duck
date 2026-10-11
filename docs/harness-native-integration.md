@@ -36,6 +36,12 @@ CUDA_VISIBLE_DEVICES='' .cache/cpu-apartment-locked-venv/bin/omd harness \
 SSH worker 使用同一 `infrastructure/headless.py` 入口启动原生 runtime；
 该选项要求 CPU MuJoCo 场景。
 
+SSH CPU worker 明确设置 `CUDA_VISIBLE_DEVICES=''`；该设置在远程进程中生效。
+会话关闭后要求原生资源释放、worker 退出和所属服务正常结束，
+验证记录见[CPU worker 检查](reports/native-cpu-ssh-2026-10-11.md)。
+Mac 承担模型连接的长时间检查可以使用 `caffeinate -is` 包含实际启动命令，
+系统唤醒要求随该命令结束而释放。
+
 ```sh
 python omd.py setup-harness --edh-repository "$EDH_ROOT" \
   --output outputs/setup/harness-new

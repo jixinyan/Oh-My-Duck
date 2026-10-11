@@ -44,6 +44,7 @@ This is the target experience. The project is under active development; [impleme
 | 显式 CPU 渲染、Linux 本地与 SSH worker、连续物理运行及独立安装 | [原生 renderer](docs/reports/native-renderer-2026-10-11.md) |
 | 原生 context 设置、SDK 预算计算与独立安装 | [Context 准备](docs/reports/native-context-preparation-2026-10-11.md) |
 | 原生 Responses 工具参数、Luna 正式报告读取与传输关闭 | [工具调用检查](docs/reports/native-tool-parameters-2026-10-11.md) |
+| SSH CPU worker 的 CUDA 设置、原生会话关闭与进程退出 | [CPU worker 检查](docs/reports/native-cpu-ssh-2026-10-11.md) |
 
 GPU 验收与 RL 当前保持停止。当前源码的 Newton 运行、多场景长导航、识别准确率、
 学习行为与 Microduck 设备需要各自的验收；范围和执行要求见
