@@ -7,6 +7,11 @@ const compactionScope = [
   '任务停止请求或权限变化。保留实际停止请求与当前不确定性，引用资料保持其来源。',
 ].join('\n');
 
+export const nativeContextManagement = Object.freeze({
+  compaction: Object.freeze({ thresholdRatio: 0.7, retainRatio: 0.15, maxTokens: 8192 }),
+  visualHistory: Object.freeze({ maxImages: 12 }),
+});
+
 export function assignmentModelAdapter(ModelAdapter) {
   return class extends ModelAdapter {
     stream(options) {

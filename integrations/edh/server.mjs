@@ -5,7 +5,7 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createInterface } from 'node:readline';
 import { identifyModelClient } from './model-transport.mjs';
-import { assignmentModelAdapter } from './model-context.mjs';
+import { assignmentModelAdapter, nativeContextManagement } from './model-context.mjs';
 import { createRequire } from 'node:module';
 import { perceptionSources, validateSceneConfiguration } from './scene-configuration.mjs';
 
@@ -273,11 +273,7 @@ const server = await startServer({
       resolveImage: (ref, signal) => images.readImageRequest(ref,
         { maxPixels: 1024 * 1024, maxBytes: 2 * 1024 * 1024 }, signal),
     }) }],
-    contextManagement: {
-      compaction: { thresholdRatio: 0.7, retainRatio: 0.15,
-        headroomTokens: maxOutputTokens, maxTokens: 8192 },
-      visualHistory: { maxImages: 12 },
-    },
+    contextManagement: nativeContextManagement,
     assignmentLifetimeMs: 3_600_000,
     tasks: {},
     additionalTools: {
