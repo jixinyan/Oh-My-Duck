@@ -36,6 +36,12 @@ The release workflow uses recorded speech, the pinned native Harness, official p
 
 ## Runtime preparation
 
+`omd setup-harness` 准备固定原生 SDK、pnpm、官方策略和锁定 CPU 环境，
+保存输入 SHA256、原始下载、日志和所属进程退出记录。Mac 的公开准备与两台主机的
+实际 Luna 调用通过；独立安装核查 443 个文件、三份许可证和 Mac 30 项、Linux 28 项
+公开命令。Linux 完整 CPU 环境及新环境物理运行继续验收，见
+[原生准备入口](reports/native-preparation-2026-10-11.md)。
+
 Native metric tool schemas advertise default speeds, units and measured completion
 requirements. Actual Luna calls passed four bounded CPU motions, Node startup,
 17 import tests and independent installation. See
