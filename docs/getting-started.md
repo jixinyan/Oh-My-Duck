@@ -22,6 +22,17 @@ environments. See [Newton details](isaac-newton.md) for dependency and physics g
 
 ## Inspect CPU workflows
 
+原生任务需要 Node.js 22.19.0 或更新版本、npm、Git、uv，以及包含固定提交的
+EDH Git 仓库。统一入口准备 SDK、十项官方策略和锁定 CPU 环境：
+
+```bash
+python omd.py setup-harness --edh-repository "$EDH_ROOT" --output outputs/setup/harness-new
+CUDA_VISIBLE_DEVICES='' .cache/cpu-apartment-locked-venv/bin/omd doctor --runtime cpu-apartment --catalog .cache/official-policies/1b56c396825c052a4e26e95cf2b8d8298af9e9b4
+```
+
+该命令保存每个阶段的来源、日志和进程退出记录。模型连接、实际任务和录制通过
+[原生部署](harness-native-integration.md)中的公开流程执行。
+
 ```bash
 python omd.py status
 python omd.py harness --help

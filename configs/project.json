@@ -5,6 +5,16 @@
   "entry_point": "omd.py",
   "release_readiness": {
     "state": "acceptance_in_progress",
+    "native_preparation": {
+      "state": "implemented_acceptance_pending",
+      "command": "omd setup-harness",
+      "runtime_check": "omd doctor --runtime cpu-apartment",
+      "native_harness_revision": "8a5e685b22d032207f53db20454f0992a4ad60fd",
+      "official_policy_revision": "1b56c396825c052a4e26e95cf2b8d8298af9e9b4",
+      "pnpm_version": "11.19.0",
+      "cuda_initialized": false,
+      "gpu_acceptance_performed": false
+    },
     "release_model_settings": {
       "state": "native_model_metadata_preflight_timeout_and_independent_installation_verified",
       "source_revision": "fcef953523703afe22382ee31ec07deddb271aa9",

@@ -76,7 +76,7 @@ def main():
                    "CUDA_VISIBLE_DEVICES": ""}
     environment.pop("PYTHONPATH", None)
     cli = Path(sys.prefix) / "bin/omd"
-    commands = [["--help"], ["tasks"], ["frameworks"], ["status"], ["doctor", "--runtime", "voice-client"],
+    commands = [["--help"], ["setup-harness", "--help"], ["tasks"], ["frameworks"], ["status"], ["doctor", "--runtime", "voice-client"],
                 ["voice", "--help"], ["voice-task", "--help"], ["voice-session", "--help"],
                 ["harness", "--help"], ["sim", "--help"], ["validate", "--help"], ["replay", "--help"],
                 ["validate", "metric-audit", "--help"], ["validate", "policy-audit", "--help"],

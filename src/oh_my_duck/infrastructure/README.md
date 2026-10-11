@@ -3,6 +3,7 @@
 | 需要定位的功能 | 入口文件 |
 | --- | --- |
 | 官方源码、模型及隔离环境准备 | `bootstrap.py`、`bootstrap_isaac.py` |
+| 固定原生 Harness、官方策略与 CPU 环境准备 | `bootstrap_harness.py` / `omd setup-harness` |
 | 安装的 OpenUSD 来源及文件检查 | `usd_runtime.py` |
 | GPU 设备、显存、compute PID 与独占检查 | `gpu_inventory.py` |
 | 本项目启动进程的取消与退出记录 | `owned_process.py` |

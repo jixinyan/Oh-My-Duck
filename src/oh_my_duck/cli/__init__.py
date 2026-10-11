@@ -14,6 +14,7 @@ COMMANDS = {
     "status": (None, "Show component implementation status without initializing hardware"),
     "doctor": (None, "Check installed runtime dependencies, actual services, policies and scene assets"),
     "setup": ("bootstrap.py", "Fetch pinned sources/models and prepare a backend environment"),
+    "setup-harness": ("bootstrap_harness.py", "Prepare the pinned native Harness, official policies and CPU environment"),
     "preview": ("preview.py", "Render checkpoint videos and a local gallery; optionally watch training"),
     "diagnose": ("diagnostics.py", "Run frozen-policy reward and transfer diagnostics on allocated GPUs"),
     "campaign": ("campaign.py", "Run independent native RL pipelines, one per allocated GPU"),

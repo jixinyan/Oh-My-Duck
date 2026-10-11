@@ -2,22 +2,37 @@
 
 `omd harness` 启动固定版本 EDH `8a5e685b22d032207f53db20454f0992a4ad60fd` 的 `startServer`。OMD 的 `integrations/edh/` 定义团队、工具与部署；`oh_my_duck.integrations.edh_native` 使用原生 `NativeWorkerSession`、`NativeActionDevice`、ActionGate 与独立 Verifier。CPU MuJoCo/BAM 公寓的官方 ONNX 策略目录固定为 `pollen-robotics/microduck-policies@1b56c396825c052a4e26e95cf2b8d8298af9e9b4`。EDH 源码及其工作目录保持独立，模型凭证仅从私有配置或进程环境读取。
 
-在 OMD 根目录建立忽略 Git 的缓存目录，准备固定 EDH 工作目录与 Node 依赖：
+`omd setup-harness` 使用已有 EDH Git 仓库中的固定提交建立独立源码副本。
+需要 Node.js 22.19.0 或更新版本、npm、Git 和 uv。执行时从 SDK 的
+`packageManager` 使用 pnpm 11.19.0，通过 `--frozen-lockfile` 安装全部工作区依赖。
+命令检查源码清洁状态、原生 SDK 导出与 physical Schema，按固定 SHA256 获取
+manifest 和十项官方 ONNX，安装 `environments/cpu-apartment/uv.lock` 声明的 CPU 环境。
+凭证和模型服务设置在后续启动时提供。
 
 ```sh
-mkdir -p .cache/tmp .cache/uv .cache/edh
-git -C "$EDH_ROOT" worktree add --detach "$PWD/.cache/edh/8a5e685b22d032207f53db20454f0992a4ad60fd" 8a5e685b22d032207f53db20454f0992a4ad60fd
-cd .cache/edh/8a5e685b22d032207f53db20454f0992a4ad60fd
-TMPDIR="$PWD/../../tmp" pnpm install --frozen-lockfile
+python omd.py setup-harness --edh-repository "$EDH_ROOT" \
+  --output outputs/setup/harness-new
 ```
 
-`EDH_ROOT` 指向已有 EDH Git 仓库。CPU 环境使用 `environments/cpu-apartment/uv.lock`，在 OMD 根目录执行：
+`EDH_ROOT` 指向包含固定提交的已有 EDH Git 仓库。默认 SDK、策略和 Python
+路径与 `omd harness` 相同。`--edh-source`、`--policy-dir` 和
+`--cpu-environment` 可以明确选择独立目录。输出目录必须为新的目录；
+`result.json`、各阶段日志、下载原件和所属进程退出记录保存在该目录。
+现有源码和策略必须通过来源检查。仿真 worker 已在其他主机准备时，
+`--skip-cpu-environment` 仅执行 Node 与策略准备，记录明确保留 CPU 环境状态。
+
+锁定 CPU 环境可以通过同一公开入口检查：
 
 ```sh
-TMPDIR="$PWD/.cache/tmp" UV_CACHE_DIR="$PWD/.cache/uv" UV_PROJECT_ENVIRONMENT="$PWD/.cache/cpu-apartment-locked-venv" uv sync --project environments/cpu-apartment --locked --no-dev
+CUDA_VISIBLE_DEVICES='' .cache/cpu-apartment-locked-venv/bin/omd doctor \
+  --runtime cpu-apartment \
+  --catalog .cache/official-policies/1b56c396825c052a4e26e95cf2b8d8298af9e9b4
 ```
 
-官方策略文件按照 `src/oh_my_duck/robotics/microduck/official_policies.py` 的固定 revision、文件名和 SHA256 准备于 `.cache/official-policies/1b56c396825c052a4e26e95cf2b8d8298af9e9b4/`。启动前 CLI 检查 EDH HEAD 与受 Git 管理源码的清洁状态；策略加载时检查官方 manifest 与 ONNX 文件。
+官方来源与 SHA256 位于 `robotics/microduck/policy_sources.py`，该模块只包含来源资料。
+`official_policies.py` 检查 manifest、图结构、joint/HOME、61/14 维度及实际 CPU 推理。
+`integrations/native_runtime.py` 由准备与启动共同检查固定 EDH HEAD 和源码清洁状态。
+依赖、SDK 导入和推理检查具有各自范围；正式任务通过实际模型与独立 Verifier 验收。
 
 有私有 Codex provider TOML 时运行：
 

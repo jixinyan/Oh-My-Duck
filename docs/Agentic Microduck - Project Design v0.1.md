@@ -418,6 +418,8 @@ Harness 决定总结、检索和长期保存内容。经验保留证据引用，
 | 锁定依赖 | `environments/` |
 
 应用接口导入保持 simulator、Torch 和语音模型的延迟加载。
+`omd setup-harness` 提供 SDK、固定 pnpm、官方策略和锁定 CPU 环境的准备入口，
+保存每个阶段的来源、实际导入与推理结果、日志和所属进程退出记录。
 `ToolCatalog` 注册时验证完整 JSON Schema Draft 2020-12，调用时验证有限 JSON 参数。
 `omd status` 读取软件成熟度；在线能力由后端提供。
 源码定位见[architecture](architecture.md)，使用方式见[getting started](getting-started.md)。

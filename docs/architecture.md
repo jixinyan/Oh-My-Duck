@@ -1,6 +1,6 @@
 # Architecture and extension guide
 
-The implementation covers the full Project Design. The source map lists module responsibilities, public entry points and extension boundaries.
+The source map lists module responsibilities, public entry points and extension boundaries. Verified behavior is recorded in the implementation status and capability reports.
 
 ## Dependency direction
 
@@ -38,9 +38,10 @@ Application, robot, training, shared acceptance and replay modules live in `src/
 | Application dependencies, tools and skills | `agentic/` | [Source map](../src/oh_my_duck/agentic/README.md), `application.py`, `harness/base.py`, `tools/`, `skills/` |
 | Native task HTTP client | `integrations/` | `native_client.py`; implements `HarnessBridge` for voice and application services |
 | 原生 Harness 与发布流程模型设置 | `integrations/` | [接入说明](../src/oh_my_duck/integrations/README.md)；`model_settings.py` 验证并传递模型、API、reasoning effort 与 token 预算 |
+| 固定 Harness 准备与来源检查 | `infrastructure/`、`integrations/` | `bootstrap_harness.py` / `omd setup-harness`；`native_runtime.py` 供准备与启动共同使用 |
 | Shared types and configuration | `core/` | `core/paths.py` |
 | Online robot execution | `robotics/backends/` | `simulation.py`, `isaac_official.py` |
-| Official robot assets and policies | `robotics/microduck/` | `official_policies.py` |
+| Official robot assets and policies | `robotics/microduck/` | `policy_sources.py` 保存固定来源与 SHA256；`official_policies.py` 加载与检查模型 |
 | Native joint graph and training-package catalogue | `robotics/policies/` | `joint_onnx.py`, `catalogue.py` |
 | Task families | `rl/tasks/<family>/` | `environment.py`, `ppo.py` |
 | Shared task variants | `rl/tasks/shared/` | Symmetry and terrain definitions |

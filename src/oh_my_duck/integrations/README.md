@@ -4,6 +4,7 @@
 | --- | --- |
 | 会话、任务提交、历史引用、等待与停止 | `native_client.py` |
 | 共享模型标识、API、reasoning effort 与 token 预算 | `model_settings.py` |
+| 固定 SDK 来源与受 Git 管理源码检查 | `native_runtime.py`；准备和启动共同调用 |
 | 物理环境、设备、工具、ActionGate 与 worker 通信 | [edh/README.md](edh/README.md) |
 | 保留的原生 worker 模块入口 | `edh_native.py` |
 | Node 服务、原生模型调用与传输记录 | 仓库根目录 [integrations/edh/server.mjs](../../../integrations/edh/server.mjs) |

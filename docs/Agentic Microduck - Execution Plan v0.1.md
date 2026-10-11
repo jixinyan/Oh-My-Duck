@@ -285,6 +285,9 @@ MP4 包含实际场景、head RGB、公开 agentic trace、工具参数、结果
 依赖环境保持锁定与分离，使用实际依赖验证对应功能。
 wheel 和 source distribution 检查 source/resources、许可证、项目目录之外的 CLI 和原始资料复核。
 从干净环境执行公开流程，核对模型、场景和资产的获取与分发条件。
+原生 SDK、固定 pnpm、十项官方策略和锁定 CPU 环境通过 `omd setup-harness`
+准备，`doctor --runtime cpu-apartment` 检查实际依赖与 ONNX 推理。
+准备记录保留固定来源、原始下载、阶段日志和所属进程退出状态。
 
 交付 README、source map、教程、环境和版本矩阵、policy 来源、评估方法及已验收范围。
 通过条件为他人能够按文档运行所声明的功能并找到扩展位置，真实设备支持对应具体设备证据。

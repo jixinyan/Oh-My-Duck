@@ -12,10 +12,8 @@ from urllib.parse import urlsplit
 
 from oh_my_duck.core.paths import project_root
 from oh_my_duck.integrations.model_settings import add_model_arguments, resolve_model_settings, validate_model_options
-
-
-EDH_REVISION = "8a5e685b22d032207f53db20454f0992a4ad60fd"
-POLICY_REVISION = "1b56c396825c052a4e26e95cf2b8d8298af9e9b4"
+from oh_my_duck.integrations.native_runtime import EDH_REVISION, verify_edh_source
+from oh_my_duck.robotics.microduck.policy_sources import OFFICIAL_REVISION as POLICY_REVISION
 
 
 def main() -> int:
@@ -67,19 +65,7 @@ def main() -> int:
         validate_scene_configuration(scene_configuration)
         if scene_configuration["backend"] == "cpu-mujoco-bam" and args.worker_cuda_device is not None:
             raise ValueError("CPU apartment scenes require no CUDA device assignment")
-    edh_source = args.edh_source.resolve(strict=True)
-    revision = subprocess.run(
-        ["git", "-C", str(edh_source), "rev-parse", "HEAD"],
-        check=True, capture_output=True, text=True,
-    ).stdout.strip()
-    if revision != EDH_REVISION:
-        raise ValueError("EDH source revision differs from the pinned native runtime")
-    changed = subprocess.run(
-        ["git", "-C", str(edh_source), "status", "--porcelain", "--untracked-files=no"],
-        check=True, capture_output=True, text=True,
-    ).stdout
-    if changed:
-        raise RuntimeError("Pinned EDH source contains tracked changes")
+    edh_source = verify_edh_source(args.edh_source)
     if args.remote_provider_config is not None:
         if not args.ssh_host or not args.remote_python:
             raise ValueError("Remote provider configuration requires an SSH host and Python 3.11+")

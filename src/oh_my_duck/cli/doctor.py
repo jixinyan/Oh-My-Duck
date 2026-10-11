@@ -2,8 +2,10 @@ import argparse
 import hashlib
 from importlib.metadata import version
 import json
+import os
 from pathlib import Path
 import subprocess
+import sys
 from urllib.parse import urlsplit
 from urllib.request import urlopen
 
@@ -60,7 +62,7 @@ def scene_assets(root, config):
 
 def main():
     parser = argparse.ArgumentParser(description="检查实际依赖、服务、策略和场景资产")
-    parser.add_argument("--runtime", choices=("voice-client", "isaac-newton"), required=True)
+    parser.add_argument("--runtime", choices=("voice-client", "cpu-apartment", "isaac-newton"), required=True)
     parser.add_argument("--metadata-only", action="store_true")
     parser.add_argument("--asr-url")
     parser.add_argument("--tts-url")
@@ -75,14 +77,29 @@ def main():
     result = {"scope": "Installed runtime and asset/service readiness; behavioral acceptance separate",
         "runtime": args.runtime, "cuda_runtime_checked": False, "checks": {}}
     checks = result["checks"]
-    dependencies = ({"httpx": "0.28.1", "numpy": "2.5.3", "sounddevice": "0.5.6", "soundfile": "0.14.0"}
-        if args.runtime == "voice-client" else {"torch": "2.10.0+cu130", "newton": "1.2.1",
-            "warp-lang": "1.13.0", "mujoco": "3.8.0", "mujoco-warp": "3.8.0.3", "jsonschema": "4.25.1"})
+    dependencies = {
+        "voice-client": {"httpx": "0.28.1", "numpy": "2.5.3", "sounddevice": "0.5.6", "soundfile": "0.14.0"},
+        "cpu-apartment": {"torch": "2.9.1+cpu" if sys.platform == "linux" else "2.9.1",
+            "mujoco": "3.8.0", "mjlab": "1.3.0", "better-actuator-models": "1.0.1",
+            "warp-lang": "1.12.0", "scipy": "1.18.1", "onnx": "1.23.1",
+            "onnxruntime": "1.30.0", "jsonschema": "4.25.1"},
+        "isaac-newton": {"torch": "2.10.0+cu130", "newton": "1.2.1",
+            "warp-lang": "1.13.0", "mujoco": "3.8.0", "mujoco-warp": "3.8.0.3", "jsonschema": "4.25.1"},
+    }[args.runtime]
     for package, expected in dependencies.items():
         installed = version(package)
         if installed != expected:
             raise RuntimeError(f"{package}: 需要 {expected}，当前版本为 {installed}")
         checks[package] = installed
+    if args.runtime == "cpu-apartment":
+        if os.environ.get("CUDA_VISIBLE_DEVICES") != "":
+            raise ValueError("CPU 环境检查要求 CUDA_VISIBLE_DEVICES 为空")
+        import mujoco
+        import torch
+
+        if torch.cuda.is_initialized() or torch.version.cuda is not None:
+            raise RuntimeError("CPU 环境要求 CPU Torch 且没有 CUDA 初始化")
+        checks["cpu_libraries"] = {"mujoco": mujoco.mj_versionString(), "torch_cuda": torch.version.cuda}
     if args.runtime == "voice-client":
         import sounddevice as sd
         import soundfile as sf
