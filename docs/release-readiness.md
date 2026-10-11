@@ -36,6 +36,12 @@ The release workflow uses recorded speech, the pinned native Harness, official p
 
 ## Runtime preparation
 
+`omd harness --mujoco-renderer osmesa` 在实际仿真主机上设置 CPU renderer，
+本地与 SSH worker 使用相同的启动入口。Linux 本地和 Mac→SSH 实际会话、
+300 次控制及 1,200 次物理步骤通过；独立核查 150 次 ONNX 动作与 150 张原始
+RGB 图像。该固定源码在 Mac 与 Linux 分别通过 444 个文件、三份许可证和
+28 项项目目录之外的 CLI 检查。具体范围见[原生 renderer](reports/native-renderer-2026-10-11.md)。
+
 `omd setup-harness` 准备固定原生 SDK、pnpm、官方策略和锁定 CPU 环境，
 保存输入 SHA256、原始下载、日志和所属进程退出记录。Mac 的公开准备与两台主机的
 实际 Luna 调用通过；独立安装核查 443 个文件、三份许可证和 Mac 30 项、Linux 28 项

@@ -12,6 +12,21 @@ websockets 依赖使用 CPU 环境中的锁定版本。安装检查逐个比较 
 文件与固定源码，并读取原生 physical Schema。
 凭证和模型服务设置在后续启动时提供。
 
+Linux 无界面 CPU 仿真通过 `--mujoco-renderer osmesa` 明确选择软件渲染。
+Ubuntu 22.04 amd64 的固定 OSMesa 可以使用已有准备命令安装：
+
+```sh
+CUDA_VISIBLE_DEVICES='' python omd.py setup --backend mujoco --software-renderer --skip-env
+CUDA_VISIBLE_DEVICES='' .cache/cpu-apartment-locked-venv/bin/omd harness \
+  --provider-config "$PRIVATE_PROVIDER_CONFIG" --mujoco-renderer osmesa
+```
+
+启动入口设置 MuJoCo 与 PyOpenGL 的 renderer，并将已准备的本地动态库路径传递给
+新进程。使用系统 OSMesa 时，由系统提供对应动态库及其依赖。
+`--mujoco-renderer` 同样适用于 SSH CPU worker，设置在实际仿真主机上生效。
+SSH worker 使用同一 `infrastructure/headless.py` 入口启动原生 runtime；
+该选项要求 CPU MuJoCo 场景。
+
 ```sh
 python omd.py setup-harness --edh-repository "$EDH_ROOT" \
   --output outputs/setup/harness-new

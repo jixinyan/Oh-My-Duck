@@ -9,7 +9,7 @@
 | 本项目启动进程的取消与退出记录 | `owned_process.py` |
 | 远程验收进程及控制通道 | `acceptance_supervisor.py` |
 | 后端与原生训练入口选择 | `run.py` |
-| EGL 与 headless 环境设置 | `headless.py` |
+| EGL、OSMesa 与新进程的渲染环境 | `headless.py`；`omd harness --mujoco-renderer` 用于本地与 SSH CPU worker |
 | W&B 配置及训练记录 | `tracking.py` |
 | 源码、依赖与文件 SHA256 | `provenance.py` |
 | 不可变任务源码副本 | `snapshot.py` |

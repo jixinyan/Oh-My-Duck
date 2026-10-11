@@ -39,6 +39,8 @@ Oh My Duck 为 Microduck 提供仿真、训练、技能工具、主动感知、�
 连续语音历史、音频动态库与资源检查分别见[任务历史](reports/voice-task-context-2026-10-09.md)、
 [音频动态库](reports/native-audio-readiness-2026-10-09.md)、[GPU 状态读取](reports/gpu-inventory-2026-10-09.md)。
 原生 SDK、策略下载、实际模型与独立安装记录见[准备入口验收](reports/native-preparation-2026-10-11.md)。
+显式 CPU renderer 的本地与 SSH 会话、连续物理执行及两台主机的独立安装验证
+见[renderer 验收](reports/native-renderer-2026-10-11.md)。
 [发布模型设置](reports/release-model-settings-2026-10-09.md)保存实际 SDK 调用、统一模型预算与查询期限的检查结果。
 GPU 验收与 RL 保持停止。后续获得执行授权时，同时最多使用一张空闲 GPU 2–4；
 设备要求没有 compute PID 且持续零 utilization。其他用户和项目的进程保留。
@@ -423,6 +425,8 @@ Harness 决定总结、检索和长期保存内容。经验保留证据引用，
 保存每个阶段的来源、实际导入与推理结果、日志和所属进程退出记录。
 锁定 Linux CPU 环境已通过真实连续任务、150 次独立 ONNX 动作和 150 张原始 RGB
 图像检查，具体范围见[准备与执行记录](reports/native-preparation-2026-10-11.md)。
+`omd harness --mujoco-renderer osmesa` 在导入 MuJoCo 之前设置 Linux CPU
+渲染与动态库，SSH worker 通过同一 `infrastructure/headless.py` 入口启动。
 `ToolCatalog` 注册时验证完整 JSON Schema Draft 2020-12，调用时验证有限 JSON 参数。
 `omd status` 读取软件成熟度；在线能力由后端提供。
 源码定位见[architecture](architecture.md)，使用方式见[getting started](getting-started.md)。
