@@ -172,8 +172,17 @@ function workerTransport(controlPort) {
       throw new Error('Remote worker CUDA device is invalid');
     assignments.push(`CUDA_VISIBLE_DEVICES=${remoteWorker.cuda_device}`);
   }
+  const workerArguments = [remoteWorker.python, '-u', '-m', 'oh_my_duck.integrations.edh_native'];
+  if (remoteWorker.mujoco_renderer !== null && remoteWorker.mujoco_renderer !== undefined) {
+    if (!['egl', 'osmesa'].includes(remoteWorker.mujoco_renderer))
+      throw new Error('Remote MuJoCo renderer is invalid');
+    if (sceneConfiguration?.backend === 'isaac-newton')
+      throw new Error('Remote MuJoCo renderer requires a CPU scene');
+    workerArguments.unshift(remoteWorker.python, '-m', 'oh_my_duck.infrastructure.headless',
+      '--mujoco-renderer', remoteWorker.mujoco_renderer, '--');
+  }
   const command = `cd ${shellQuote(remoteWorker.root)} && exec env ${assignments.join(' ')} ` +
-    `${shellQuote(remoteWorker.python)} -u -m oh_my_duck.integrations.edh_native 3>&1 1>&2`;
+    `${workerArguments.map(shellQuote).join(' ')} 3>&1 1>&2`;
   return {
     command: ['ssh', '-T', '-o', 'BatchMode=yes', '-o', 'ExitOnForwardFailure=yes',
       '-o', 'ServerAliveInterval=30', '-o', 'ServerAliveCountMax=3',

@@ -81,3 +81,29 @@ def install_osmesa():
         raise RuntimeError("Missing system dependencies for OSMesa: " + dependencies)
     (cache / "provenance.json").write_text(json.dumps(spec, indent=2) + "\n")
     print("Optional OSMesa installed in", cache / "osmesa")
+
+
+def main():
+    import argparse
+    import shutil
+    from oh_my_duck.core.paths import project_root
+
+    parser = argparse.ArgumentParser(description="Start a process with explicit MuJoCo rendering settings")
+    parser.add_argument("--mujoco-renderer", choices=("egl", "osmesa"), required=True)
+    parser.add_argument("command", nargs=argparse.REMAINDER)
+    arguments = parser.parse_args()
+    command = arguments.command
+    if command and command[0] == "--":
+        command = command[1:]
+    if not command:
+        parser.error("A child command is required after --")
+    project_root()
+    executable = shutil.which(command[0])
+    if executable is None:
+        raise FileNotFoundError(command[0])
+    os.execve(executable, [executable, *command[1:]],
+              rendering_environment(arguments.mujoco_renderer))
+
+
+if __name__ == "__main__":
+    main()

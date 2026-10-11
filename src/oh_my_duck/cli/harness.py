@@ -29,6 +29,8 @@ def main() -> int:
     parser.add_argument("--cpu-python", type=Path,
                         default=root / ".cache/cpu-apartment-locked-venv/bin/python")
     parser.add_argument("--simulation-python", type=Path)
+    parser.add_argument("--mujoco-renderer", choices=("egl", "osmesa"),
+                        help="Choose the CPU MuJoCo renderer on the simulation host")
     add_model_arguments(parser)
     parser.add_argument("--check-model", action="store_true")
     parser.add_argument("--worker-host", type=str)
@@ -65,6 +67,8 @@ def main() -> int:
         validate_scene_configuration(scene_configuration)
         if scene_configuration["backend"] == "cpu-mujoco-bam" and args.worker_cuda_device is not None:
             raise ValueError("CPU apartment scenes require no CUDA device assignment")
+        if scene_configuration["backend"] == "isaac-newton" and args.mujoco_renderer is not None:
+            raise ValueError("--mujoco-renderer requires a CPU MuJoCo scene")
     edh_source = verify_edh_source(args.edh_source)
     if args.remote_provider_config is not None:
         if not args.ssh_host or not args.remote_python:
@@ -131,6 +135,7 @@ def main() -> int:
             "host": args.worker_host, "root": args.worker_root,
             "python": args.worker_python, "edh_source": args.worker_edh_source,
             "policy_dir": args.worker_policy_dir, "cuda_device": args.worker_cuda_device,
+            "mujoco_renderer": args.mujoco_renderer,
         }
     elif any(value is not None for value in (*worker_paths, args.worker_cuda_device)):
         raise ValueError("Remote worker options require --worker-host")
@@ -163,6 +168,10 @@ def main() -> int:
         raise FileNotFoundError("Node.js is required for the pinned EDH runtime")
     node = Path(node_command).resolve(strict=True)
     environment = dict(os.environ)
+    if args.mujoco_renderer is not None and remote_worker is None:
+        from oh_my_duck.infrastructure.headless import rendering_environment
+
+        environment = rendering_environment(args.mujoco_renderer)
     environment.update({
         "OMD_EDH_SOURCE": str(edh_source),
         "OMD_CPU_PYTHON": str(simulation_python),
