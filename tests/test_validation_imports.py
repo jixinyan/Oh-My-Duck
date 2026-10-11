@@ -11,6 +11,7 @@ ROOT = Path(__file__).resolve().parents[1]
 
 
 @pytest.mark.parametrize("module", [
+    "oh_my_duck.rl.training.arguments",
     "oh_my_duck.infrastructure.bootstrap_harness",
     "oh_my_duck.integrations.native_runtime",
     "oh_my_duck.robotics.microduck.policy_sources",

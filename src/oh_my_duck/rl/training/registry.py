@@ -3,6 +3,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable, Sequence
 
+from oh_my_duck.rl.training.arguments import task_selection
 from oh_my_duck.rl.training.base import BackendCommand, TrainingBackend
 
 
@@ -36,7 +37,7 @@ class MujocoTrainingBackend:
         interpreter = self.root / ".envs/mujoco/bin/python"
         if not interpreter.exists():
             raise BackendUnavailable("Run python omd.py setup first")
-        if operation == 'eval' and '--task' in arguments:
+        if operation == 'eval' and task_selection(arguments) is not None:
             return BackendCommand((str(interpreter), '-m', 'oh_my_duck.rl.evaluation.task',
                 *arguments, '--backend', 'mujoco'), self.root,
                 {'PYTHONPATH': str(self.root/'src'), 'MUJOCO_GL': 'egl', 'MPLBACKEND': 'Agg'})

@@ -1,13 +1,15 @@
 """Process adapter for the isolated Isaac/Newton package; no simulator imports."""
 from pathlib import Path
 from typing import Sequence
+
+from oh_my_duck.rl.training.arguments import task_selection
 from oh_my_duck.rl.training.base import BackendCommand
 
 DIAGNOSTIC_TASK = "Omd-Microduck-PD-Diagnostic-v0"
 
 
-def is_diagnostic(arguments):
-    return DIAGNOSTIC_TASK in arguments or '--task='+DIAGNOSTIC_TASK in arguments
+def is_diagnostic(arguments: Sequence[str]) -> bool:
+    return task_selection(arguments) == DIAGNOSTIC_TASK
 
 
 def require_task(root, arguments):
@@ -32,7 +34,7 @@ class IsaacNewtonTrainingBackend:
             raise BackendUnavailable("Run python omd.py setup --backend isaac-newton first; Newton is never replaced by PhysX")
         if operation not in {"assets", "probe", "train", "eval", "export"}:
             raise ValueError(f"Unsupported Isaac/Newton operation: {operation}")
-        if operation == 'eval' and '--task' in arguments:
+        if operation == 'eval' and task_selection(arguments) is not None:
             return BackendCommand((str(interpreter), '-m', 'oh_my_duck.rl.evaluation.task',
                 *arguments, '--backend', 'isaac-newton'), self.root,
                 {'PYTHONPATH': str(self.root/'src'), 'MUJOCO_GL': 'egl', 'MPLBACKEND': 'Agg'})
@@ -46,13 +48,6 @@ class IsaacNewtonTrainingBackend:
             # the learned actor and normalizer come from the explicit checkpoint.
             return BackendCommand((str(self.root / '.envs/mujoco/bin/python'), '-m', 'oh_my_duck.rl.artifacts.export', *arguments),
                 self.root, self.environment())
-        if operation == "train":
-            tasks = [arg.split("=", 1)[1] for arg in arguments if arg.startswith("--task=")]
-            for index, arg in enumerate(arguments):
-                if arg == "--task" and index + 1 < len(arguments):
-                    tasks.append(arguments[index + 1])
-            if tasks != [DIAGNOSTIC_TASK]:
-                raise BackendUnavailable("BAM locomotion training is not implemented. Only explicit --task " + DIAGNOSTIC_TASK + " is available for pipeline diagnostics.")
         return BackendCommand((str(interpreter), "-m", "oh_my_duck.rl.backends.isaac_newton." + operation, *arguments), self.root, self.environment())
 
     def environment(self):
