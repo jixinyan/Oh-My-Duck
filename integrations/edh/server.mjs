@@ -171,6 +171,8 @@ function workerTransport(controlPort) {
     if (!Number.isSafeInteger(remoteWorker.cuda_device) || remoteWorker.cuda_device < 0)
       throw new Error('Remote worker CUDA device is invalid');
     assignments.push(`CUDA_VISIBLE_DEVICES=${remoteWorker.cuda_device}`);
+  } else {
+    assignments.push("CUDA_VISIBLE_DEVICES=''");
   }
   const workerArguments = [remoteWorker.python, '-u', '-m', 'oh_my_duck.integrations.edh_native'];
   if (remoteWorker.mujoco_renderer !== null && remoteWorker.mujoco_renderer !== undefined) {
