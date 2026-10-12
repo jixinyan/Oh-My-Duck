@@ -36,3 +36,5 @@ FLEURS 中文与英文全部 1,592 条真实录音及识别指标已通过独立
 公开复核入口为 `omd validate asr-audit`，位于
 [`validation/asr_corpus.py`](../validation/asr_corpus.py)。它读取原始 Parquet、
 全部转写记录与实际 WAV，重新计算识别错误率及耗时指标。
+语料准备与测量入口为 `omd validate asr-prepare` 和 `omd validate asr-measure`，
+分别位于 `validation/asr_preparation.py` 与 `validation/asr_measurement.py`。

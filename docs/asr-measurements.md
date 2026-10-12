@@ -1,4 +1,43 @@
-# ASR 语料复核
+# ASR 语料准备、测量与复核
+
+`omd validate asr-prepare` 获取固定 FLEURS test 语料，核验上游 LFS SHA256、
+文件尺寸、许可与完整录音数量。`omd validate asr-measure` 使用项目的
+Qwen ASR 在 CPU Float32 执行全部转写，保存逐条录音、来源、文本和耗时。
+`omd validate asr-audit` 独立复核保存资料。
+
+模型运行使用 `environments/voice-asr/uv.lock`；语料与指标依赖由
+`oh-my-duck[asr-evaluation]` 提供。将这项 extra 安装到对应的 ASR 环境。
+测量使用固定且没有 tracked 修改的 Git 源码目录，安装的 Qwen 与测量模块
+必须和该目录的文件摘要一致。
+
+```bash
+omd validate asr-prepare \
+  --cache-directory .cache/fleurs-corpus \
+  --dataset-revision 70bb2e84b976b7e960aa89f1c648e09c59f894dd \
+  --languages cmn_hans_cn en_us \
+  --output outputs/asr-corpus-NEW
+
+CUDA_VISIBLE_DEVICES='' omd validate asr-measure \
+  --corpus outputs/asr-corpus-NEW/result.json \
+  --source-root /absolute/path/fixed-project-source \
+  --model-revision 5eb144179a02acc5e5ba31e748d22b0cf3e303b0 \
+  --cpu-threads 8 \
+  --output outputs/asr-measurement-NEW
+
+omd validate asr-audit \
+  --capture outputs/asr-measurement-NEW \
+  --corpus outputs/asr-corpus-NEW/result.json \
+  --source-root /absolute/path/fixed-project-source \
+  --runner /absolute/path/fixed-project-source/src/oh_my_duck/validation/asr_measurement.py \
+  --expected-model Qwen/Qwen3-ASR-0.6B@5eb144179a02acc5e5ba31e748d22b0cf3e303b0 \
+  --output outputs/asr-measurement-NEW/independent-audit.json
+```
+
+三个入口均要求新的输出路径。测量按原始 Parquet 的完整数量执行，逐条
+保存并刷新 `predictions.jsonl`；模型调用或输入检查失败时终止，已生成资料
+保留。`result.json` 仅在完整语料全部完成后生成。
+
+## 独立复核
 
 `omd validate asr-audit` 根据完整的 FLEURS test 语料，核验实际转写记录、
 原始录音和汇总指标。实现位于 `src/oh_my_duck/validation/asr_corpus.py`。

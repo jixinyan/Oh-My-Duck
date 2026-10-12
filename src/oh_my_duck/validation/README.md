@@ -21,6 +21,7 @@
 | Audit an independent package installation | `omd validate package-audit` | `release/package.py` |
 | Run model perception or audit original RGBD measurements | `omd validate perception` | `perception.py` |
 | 复核完整真实录音语料与 ASR 指标 | `omd validate asr-audit` | `asr_corpus.py` |
+| 准备固定真实语料与执行全部 Qwen 转写 | `omd validate asr-prepare`, `omd validate asr-measure` | `asr_preparation.py`, `asr_measurement.py` |
 
 ASR 记录格式和复核参数见[语料复核](../../../docs/asr-measurements.md)。
 
