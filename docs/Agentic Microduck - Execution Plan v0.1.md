@@ -304,6 +304,9 @@ Mac 与 Linux 公开准备、两台主机模型调用与独立安装通过；新
 SSH CPU worker 的 CUDA visibility 为空，实际会话关闭后 worker 数量归零、
 资源释放和服务正常退出；两台主机各 28 项独立安装调用通过，见
 [CPU worker 记录](reports/native-cpu-ssh-2026-10-11.md)。
+两个 seed 的完整 CPU 模型任务、正式 Verifier、原始事件与相机资料、停止进度、
+会话资源释放及所属服务退出通过独立检查，见
+[重复导航验收](reports/native-cpu-navigation-2026-10-11.md)。
 
 交付 README、source map、教程、环境和版本矩阵、policy 来源、评估方法及已验收范围。
 通过条件为他人能够按文档运行所声明的功能并找到扩展位置，真实设备支持对应具体设备证据。

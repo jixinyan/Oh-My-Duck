@@ -24,11 +24,12 @@ work requirements and dependencies are in the
 | CLI/application | 原生服务、验证与记录、场景 Schema、policy package 与语音；444 个安装文件、三份 license、Mac 30 项与 Linux 28 项 CLI 调用 | 完整工作流程在独立环境中的执行检查 |
 | RL 参数入口 | 共同的 `argparse` 模块、27 项检查、六项评估入口、20 项原生训练命令和八次实际 CLI 调用；[验证记录](reports/training-arguments-2026-10-11.md) | 原生物理与训练验收使用各自声明的任务标准 |
 | 发布模型设置 | 共享模型与 API 参数；实际原生 Luna 调用；六阶段、四场景完整发布前检查；查询期限与失败记录 | 声明的实际 GPU 导航运行验收 |
-| 原生准备入口 | Mac 与 Linux 公开准备、固定 SDK 与 pnpm、11 项实际下载、两台主机原生 Luna 调用；Linux 九阶段退出、28 个 SDK 文件、锁定 CPU 环境及新环境连续物理运行通过；[入口记录](reports/native-preparation-2026-10-11.md) | 干净环境中的完整模型任务流程和声明场景覆盖 |
-| 原生 MuJoCo renderer | 显式 OSMesa；Linux 本地与 Mac→SSH 会话；300 次控制、1,200 次物理步骤；150 次独立 ONNX 与 RGB 复核；两台主机各 28 项独立安装调用；[运行记录](reports/native-renderer-2026-10-11.md) | 完整模型导航与对应场景验收 |
-| 原生 context 设置 | 默认 headroom、摘要预算和图像历史；两台主机六项实际 SDK 预算检查；四项来源文件与各 28 项独立安装调用；[配置记录](reports/native-context-preparation-2026-10-11.md) | 原始预算下的完整模型任务与重复执行结果 |
-| 原生 Responses 工具参数 | SDK 参数 Schema、实际 Luna 可选参数调用与正式报告读取；传输关闭；两台主机各 28 项独立安装调用；[调用记录](reports/native-tool-parameters-2026-10-11.md) | 原始目标和预算下的完整导航任务验收 |
-| SSH CPU worker | 实际进程的 CUDA visibility 为空；关闭后进程数量归零、session 释放资源、服务退出状态为零；两台主机各 28 项独立安装调用；[会话记录](reports/native-cpu-ssh-2026-10-11.md) | 原始目标、预算与独立 Verifier 下的完整模型导航 |
+| 原生准备入口 | Mac 与 Linux 公开准备、固定 SDK 与 pnpm、11 项实际下载、两台主机原生 Luna 调用；Linux 九阶段退出、28 个 SDK 文件、锁定 CPU 环境及新环境连续物理运行通过；[入口记录](reports/native-preparation-2026-10-11.md) | 声明场景覆盖与连续语音任务 |
+| 原生 MuJoCo renderer | 显式 OSMesa；Linux 本地与 Mac→SSH 会话；300 次控制、1,200 次物理步骤；150 次独立 ONNX 与 RGB 复核；两台主机各 28 项独立安装调用；[运行记录](reports/native-renderer-2026-10-11.md) | 多场景完整模型导航 |
+| 原生 context 设置 | 默认 headroom、摘要预算和图像历史；两台主机六项实际 SDK 预算检查；四项来源文件与各 28 项独立安装调用；[配置记录](reports/native-context-preparation-2026-10-11.md) | 多场景长任务与更广泛的重复执行统计 |
+| 原生 Responses 工具参数 | SDK 参数 Schema、实际 Luna 可选参数调用与正式报告读取；传输关闭；两台主机各 28 项独立安装调用；[调用记录](reports/native-tool-parameters-2026-10-11.md) | 多场景长任务与更广泛的模型任务统计 |
+| SSH CPU worker | 实际进程的 CUDA visibility 为空；关闭后进程数量归零、session 释放资源、服务退出状态为零；两台主机各 28 项独立安装调用；[会话记录](reports/native-cpu-ssh-2026-10-11.md) | 多场景完整模型导航 |
+| 原生 CPU 重复导航 | 两个 seed 完整 Luna 任务成功，正式 Verifier 通过；1,411 次控制、5,644 次物理步骤、2,661 条事件、281 张 observer 图像和 37 条停止进度记录通过独立检查；[验收记录](reports/native-cpu-navigation-2026-10-11.md) | 多场景长导航、独立图像导航和更广泛的重复任务统计 |
 | GPU 资源读取 | 公共 CSV 模块、实际设备及重复进程记录、31 项检查、占用拒绝及持续空闲检查 | 每次分配重新检查实际状态；当前 GPU 运行验收保持停止 |
 | Core types, tools and recording | Complete Draft 2020-12 Schemas, finite arguments, actual handlers, request identity, JSONL/native events, original image hashes and MP4 | New tools require their actual implementation and relevant execution evidence |
 | Native Harness | Fixed EDH, actual models, official policies, sensors, ActionGate and independent Verifier; CPU text/recorded-voice office tasks passed | Current-source multi-scene long navigation and repeated task statistics |

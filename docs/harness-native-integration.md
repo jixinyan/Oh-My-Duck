@@ -41,6 +41,8 @@ SSH CPU worker 明确设置 `CUDA_VISIBLE_DEVICES=''`；该设置在远程进程
 验证记录见[CPU worker 检查](reports/native-cpu-ssh-2026-10-11.md)。
 Mac 承担模型连接的长时间检查可以使用 `caffeinate -is` 包含实际启动命令，
 系统唤醒要求随该命令结束而释放。
+两个 seed 的完整 Luna CPU 导航、原始事件与图像、正式 Verifier 和资源释放
+已通过独立检查，见[重复任务验收](reports/native-cpu-navigation-2026-10-11.md)。
 
 ```sh
 python omd.py setup-harness --edh-repository "$EDH_ROOT" \

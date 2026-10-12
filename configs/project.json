@@ -67,6 +67,33 @@
       "report": "docs/reports/native-tool-parameters-2026-10-11.md",
       "independent_handoff": "outputs/acceptance/native-tools-handoff-20261011-01.json"
     },
+    "native_cpu_navigation": {
+      "state": "native_model_cpu_navigation_two_seeds_independently_verified",
+      "source_revision": "7b94665bb116aeb411597f67c459b4f19647e901",
+      "native_harness_revision": "8a5e685b22d032207f53db20454f0992a4ad60fd",
+      "official_policy_revision": "1b56c396825c052a4e26e95cf2b8d8298af9e9b4",
+      "simulation": "cpu-mujoco-bam",
+      "model_host": "mac",
+      "worker_host": "jd_B300",
+      "model_settings": {
+        "model": "gpt-6-luna",
+        "model_api": "responses",
+        "reasoning_effort": "high",
+        "max_output_tokens": 8192
+      },
+      "seeds": [20260929, 20260930],
+      "control_steps": 1411,
+      "raw_sim_steps": 5644,
+      "events": 2661,
+      "observer_frames": 281,
+      "audited_stop_progress_count": 37,
+      "model_responses_completed": 137,
+      "session_resources_released": true,
+      "model_navigation_acceptance_performed": true,
+      "gpu_acceptance_performed": false,
+      "report": "docs/reports/native-cpu-navigation-2026-10-11.md",
+      "independent_handoff": "outputs/acceptance/native-cpu-navigation-handoff-20261011-01.json"
+    },
     "native_cpu_ssh": {
       "state": "remote_cpu_cuda_visibility_lifecycle_and_independent_installation_verified",
       "source_revision": "7b94665bb116aeb411597f67c459b4f19647e901",
