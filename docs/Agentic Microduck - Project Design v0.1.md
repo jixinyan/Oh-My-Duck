@@ -3,7 +3,7 @@ title: Agentic Microduck — 项目概览与详细设计
 version: 0.3
 status: Implementation in progress
 created: 2026-09-05
-updated: 2026-10-09
+updated: 2026-10-12
 tags:
   - microduck
   - embodied-ai
@@ -27,7 +27,7 @@ Oh My Duck 为 Microduck 提供仿真、训练、技能工具、主动感知、�
 | 范围 | 当前证据 | 完整验收要求 |
 | --- | --- | --- |
 | 原生模型与工具执行 | Luna CPU 文字、录音与连续任务、两项正式任务及历史引用、独立 Verifier、原始传感器、agentic MP4 和资源释放通过 | 当前源码的多场景长导航、全部动作精度及重复任务统计 |
-| 语音与固定音色 | 三个 Qwen 模型的实际 CPU 推理、四段 WAV 与全部 ASR 回读、36 项音色与参数测试通过 | 识别准确率、交互延迟、音质与 Microduck 音频设备 |
+| 语音与固定音色 | 三个 Qwen 模型的实际 CPU 推理、四段 WAV 与全部 ASR 回读、36 项音色与参数测试；FLEURS 全量 1,592 条真实录音与指标复核通过 | 机器人指令识别、噪声、交互延迟、音质与 Microduck 音频设备 |
 | 感知 | 当前 CPU RGBD、真实 CPU YOLO 与原始像素测量复核；固定源码 Newton RGBD 和 SAM3.1 + YOLO26 服务记录 | 当前 SAM GPU 验收、独立标注评估、目标跟踪和真机校准 |
 | 训练与导出 | Walking/StandUp × 两个 backend × 两个原生 PPO 的执行流程、恢复、归一化导出与回放记录 | 自训练有效行为、多个 seed、sim2sim 与最终评估 |
 | Newton 资产与准备 | 两种机器人、Office/Hospital 几何、CPU solver/contact、依赖检查与发布准备通过 | 当前源码的实际 GPU 求解、初始化、渲染及完整运行验收 |
@@ -179,7 +179,10 @@ Microduck 板载运行官方控制、传感器及音频路径。交互设备提�
 CPU 使用 Float32，CUDA 使用 BFloat16；设备参数在模型 SDK 导入和模型下载之前检查。
 ASR 与 TTS 各自使用锁定环境。模型身份保存在转写、合成和候选记录中。
 当前源码的实际 CPU 结果见[语音模块验证](reports/voice-audio-modules-2026-10-08.md)。
-音质、自由情绪控制、识别准确率和交互延迟均有各自的评估范围。
+FLEURS 中文与英文全部 1,592 条真实录音在 CPU Float32 路径完成测量，
+中文 CER 为 7.681%、英文 WER 为 5.306%；原始音频、转写及指标独立复核通过。
+测量环境、耗时与范围见[真实录音评估](reports/asr-corpus-2026-10-12.md)。
+音质、自由情绪控制、机器人指令识别和交互延迟均有各自的评估范围。
 
 ### 5.3 Setup 与版本
 

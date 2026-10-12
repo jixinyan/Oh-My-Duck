@@ -7,7 +7,7 @@
 [![Status: active development](https://img.shields.io/badge/status-active_development-blue)](docs/implementation-status.md)
 [![RL behavior: pending](https://img.shields.io/badge/RL_behavior-pending-orange)](docs/reports/rl-walking-low-speed-launch-2026-09-29.md)
 [![CPU motion: verified](https://img.shields.io/badge/CPU_motion-verified-2ea44f)](docs/reports/offline-release-validation-2026-10-07.md)
-[![CPU Luna navigation: verified](https://img.shields.io/badge/CPU_Luna_navigation-verified-2ea44f)](docs/reports/cpu-luna-navigation-2026-10-08.md)
+[![CPU Luna navigation: two seeds verified](https://img.shields.io/badge/CPU_Luna_navigation-2_seeds_verified-2ea44f)](docs/reports/native-cpu-navigation-2026-10-11.md)
 [![Voice: native task verified](https://img.shields.io/badge/voice-native_task_verified-green)](docs/reports/cpu-voice-navigation-2026-10-08.md)
 [![Release: acceptance in progress](https://img.shields.io/badge/release-acceptance_in_progress-blue)](docs/release-readiness.md)
 [![Isaac Office: agentic navigation verified](https://img.shields.io/badge/Isaac_Office-agentic_navigation_verified-green)](docs/reports/metric-camera-tools-2026-09-30.md)
@@ -39,6 +39,7 @@ This is the target experience. The project is under active development; [impleme
 | 原始 RGBD、可见目标、距离与 bearing | [CPU 感知](docs/reports/cpu-scene-perception-2026-10-08.md)、[感知来源](docs/reports/perception-source-capabilities-2026-10-08.md) |
 | Walking/StandUp 训练包登记、执行与 policy 接续 | [Policy registry](docs/policy-registry.md)、[训练包验收](docs/reports/policy-packages-2026-10-08.md) |
 | Qwen CPU 推理、音色持久保存与任务中断 | [模型与音色](docs/reports/qwen-cpu-validation-2026-10-08.md)、[执行中断](docs/reports/cpu-voice-task-2026-10-08.md) |
+| Qwen ASR 全量 FLEURS 中文与英文 1,592 条人声录音；独立音频与识别指标复核 | [真实录音测量](docs/reports/asr-corpus-2026-10-12.md) |
 | CPU 原生执行、资产、依赖与独立安装 | [CPU 开发验收](docs/reports/cpu-development-readiness-2026-10-08.md) |
 | 原生 SDK 准备、官方策略下载、实际模型连接与锁定 CPU 环境运行 | [公开准备入口](docs/reports/native-preparation-2026-10-11.md) |
 | 显式 CPU 渲染、Linux 本地与 SSH worker、连续物理运行及独立安装 | [原生 renderer](docs/reports/native-renderer-2026-10-11.md) |
@@ -47,7 +48,7 @@ This is the target experience. The project is under active development; [impleme
 | SSH CPU worker 的 CUDA 设置、原生会话关闭与进程退出 | [CPU worker 检查](docs/reports/native-cpu-ssh-2026-10-11.md) |
 | Luna、原生 Harness 与官方 policy 的两个 seed 完整 CPU 导航；两段 1080p agentic MP4 完整解码通过 | [重复任务验收](docs/reports/native-cpu-navigation-2026-10-11.md) |
 
-GPU 验收与 RL 当前保持停止。当前源码的 Newton 运行、多场景长导航、识别准确率、
+GPU 验收与 RL 当前保持停止。当前源码的 Newton 运行、多场景长导航、机器人指令识别、
 学习行为与 Microduck 设备需要各自的验收；范围和执行要求见
 [发布准备](docs/release-readiness.md)与[运行验收流程](docs/runtime-release-acceptance.md)。
 

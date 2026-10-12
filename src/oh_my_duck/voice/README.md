@@ -31,6 +31,8 @@ Public entry points are `omd voice`, `omd voice-task` and `omd voice-session` in
 [confirmed profiles](../../../docs/voice-profiles.md) and the
 [architecture source map](../../../docs/architecture.md#source-organization).
 
-真实录音语料的独立复核入口为 `omd validate asr-audit`，位于
+FLEURS 中文与英文全部 1,592 条真实录音及识别指标已通过独立复核，见
+[语料测量](../../../docs/reports/asr-corpus-2026-10-12.md)。
+公开复核入口为 `omd validate asr-audit`，位于
 [`validation/asr_corpus.py`](../validation/asr_corpus.py)。它读取原始 Parquet、
 全部转写记录与实际 WAV，重新计算识别错误率及耗时指标。

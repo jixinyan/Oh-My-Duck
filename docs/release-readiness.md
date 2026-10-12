@@ -99,8 +99,17 @@ Qwen ASR, Base TTS and VoiceDesign passed actual CPU Float32 inference in their
 separate frozen environments. The existing confirmed profile and database bytes
 remained unchanged. Three decoded WAV files, installed model admission, the active
 profile CLI and process release passed [CPU voice validation](reports/qwen-cpu-validation-2026-10-08.md).
-ASR text matches two of three generated utterances; recognition accuracy requires
-separate evaluation. Use `--device cpu` with `CUDA_VISIBLE_DEVICES=''` for CPU inference.
+Use `--device cpu` with `CUDA_VISIBLE_DEVICES=''` for CPU inference.
+
+Qwen ASR 已在 FLEURS 中文与英文完整 test 语料上转写 1,592 条人声录音。
+中文 CER 为 7.681%，英文 WER 为 5.306%；Apple M5 CPU Float32 的
+real-time factor 分别为 0.139558 和 0.153562。
+公开 `omd validate asr-audit` 独立复核全部原始音频、实际 WAV、转写和指标，
+六项数据拒绝检查通过，测量进程数量归零。
+445 个安装文件、三份许可证和 29 项公开命令通过独立安装检查。
+机器人指令意图、噪声、Microduck 麦克风与完整交互延迟具有各自的验收要求，
+见 [真实录音测量](reports/asr-corpus-2026-10-12.md) 与
+[公开复核入口](asr-measurements.md)。
 
 Application and voice share the native task service interface for opening,
 submitting, querying, waiting, stopping and closing. Tool registration and

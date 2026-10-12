@@ -5,6 +5,10 @@
 使用 `oh-my-duck[asr-evaluation]` 安装 Parquet、WAV 和识别指标依赖。
 当前入口支持 CPU Float32 的 Qwen ASR 记录。
 
+FLEURS 中文与英文完整 test 语料的 1,592 条实际录音已完成项目 ASR 推理与
+独立复核，中文 CER 7.681%、英文 WER 5.306%。环境、全部耗时、
+来源与数据拒绝检查见[真实录音测量](reports/asr-corpus-2026-10-12.md)。
+
 ```bash
 omd validate asr-audit \
   --capture /absolute/path/asr-capture \
