@@ -9,6 +9,7 @@
 [![CPU motion: verified](https://img.shields.io/badge/CPU_motion-verified-2ea44f)](docs/reports/offline-release-validation-2026-10-07.md)
 [![CPU Luna navigation: two seeds verified](https://img.shields.io/badge/CPU_Luna_navigation-2_seeds_verified-2ea44f)](docs/reports/native-cpu-navigation-2026-10-11.md)
 [![Voice: native task verified](https://img.shields.io/badge/voice-native_task_verified-green)](docs/reports/cpu-voice-navigation-2026-10-08.md)
+[![ASR: full corpus verified](https://img.shields.io/badge/ASR-1592_recordings_verified-2ea44f)](docs/reports/public-asr-workflow-2026-10-12.md)
 [![Release: acceptance in progress](https://img.shields.io/badge/release-acceptance_in_progress-blue)](docs/release-readiness.md)
 [![Isaac Office: agentic navigation verified](https://img.shields.io/badge/Isaac_Office-agentic_navigation_verified-green)](docs/reports/metric-camera-tools-2026-09-30.md)
 [![Isaac Hospital: roller and crouch verified](https://img.shields.io/badge/Isaac_Hospital-roller_and_crouch_verified-green)](docs/reports/multiskill-demos-2026-10-01.md)
@@ -40,6 +41,7 @@ This is the target experience. The project is under active development; [impleme
 | Walking/StandUp 训练包登记、执行与 policy 接续 | [Policy registry](docs/policy-registry.md)、[训练包验收](docs/reports/policy-packages-2026-10-08.md) |
 | Qwen CPU 推理、音色持久保存与任务中断 | [模型与音色](docs/reports/qwen-cpu-validation-2026-10-08.md)、[执行中断](docs/reports/cpu-voice-task-2026-10-08.md) |
 | Qwen ASR 全量 FLEURS 中文与英文 1,592 条人声录音；独立音频与识别指标复核 | [真实录音测量](docs/reports/asr-corpus-2026-10-12.md) |
+| 公开 ASR 语料准备、CPU 转写、原始音频与指标复核 | [安装与完整运行](docs/reports/public-asr-workflow-2026-10-12.md)、[操作说明](docs/asr-measurements.md) |
 | CPU 原生执行、资产、依赖与独立安装 | [CPU 开发验收](docs/reports/cpu-development-readiness-2026-10-08.md) |
 | 原生 SDK 准备、官方策略下载、实际模型连接与锁定 CPU 环境运行 | [公开准备入口](docs/reports/native-preparation-2026-10-11.md) |
 | 显式 CPU 渲染、Linux 本地与 SSH worker、连续物理运行及独立安装 | [原生 renderer](docs/reports/native-renderer-2026-10-11.md) |

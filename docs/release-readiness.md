@@ -111,6 +111,12 @@ real-time factor 分别为 0.139558 和 0.153562。
 见 [真实录音测量](reports/asr-corpus-2026-10-12.md) 与
 [公开复核入口](asr-measurements.md)。
 
+公开语料准备、CPU 转写与原始音频复核三个阶段完成全部 1,592 条录音。
+固定 ASR 环境与指标依赖安装、五次公开命令、七项输入拒绝检查通过；
+Mac 与 Linux 各核验 447 个文件、三份许可证和 31 项公开命令。
+Linux 实际加载 PortAudio 和 libsndfile。独立交接确认四个测量所属进程
+全部退出，所属 ASR 进程归零，见[公开流程验收](reports/public-asr-workflow-2026-10-12.md)。
+
 Application and voice share the native task service interface for opening,
 submitting, querying, waiting, stopping and closing. Tool registration and
 invocation use complete JSON Schema Draft 2020-12 and finite JSON values.

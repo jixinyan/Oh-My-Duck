@@ -5,6 +5,53 @@
   "entry_point": "omd.py",
   "release_readiness": {
     "state": "acceptance_in_progress",
+    "qwen_asr_public_workflow": {
+      "state": "full_cpu_corpus_public_workflow_and_two_host_installation_verified",
+      "source_revision": "0913bc5bc070f0d4ce50ef617201c16d418849b6",
+      "commands": ["omd validate asr-prepare", "omd validate asr-measure", "omd validate asr-audit"],
+      "model_revision": "Qwen/Qwen3-ASR-0.6B@5eb144179a02acc5e5ba31e748d22b0cf3e303b0",
+      "dataset_revision": "70bb2e84b976b7e960aa89f1c648e09c59f894dd",
+      "records": 1592,
+      "device": "cpu",
+      "dtype": "torch.float32",
+      "cpu_model": "Apple M5",
+      "threads": 8,
+      "measurements": {
+        "cmn_hans_cn": {
+          "records": 945,
+          "character_error_rate": 0.07680659544039707,
+          "audio_seconds": 11065.18,
+          "transcribe_seconds": 1580.5443397457711,
+          "real_time_factor": 0.14283946033826572,
+          "median_transcribe_seconds": 1.5007074170280248,
+          "p95_transcribe_seconds": 2.9330662910360843
+        },
+        "en_us": {
+          "records": 647,
+          "character_error_rate": 0.023228222647874438,
+          "word_error_rate": 0.05306093989680658,
+          "audio_seconds": 6387.9,
+          "transcribe_seconds": 994.3769967092667,
+          "real_time_factor": 0.15566571122110032,
+          "median_transcribe_seconds": 1.4348392919637263,
+          "p95_transcribe_seconds": 2.518627104582264
+        }
+      },
+      "public_stages_completed": 3,
+      "installed_documentation_commands_verified": 5,
+      "input_rejection_cases_verified": 7,
+      "installed_files_verified_per_host": 447,
+      "licenses_verified_per_host": 3,
+      "mac_cli_checks_verified": 31,
+      "linux_cli_checks_verified": 31,
+      "owned_process_count_after": 0,
+      "gpu_acceptance_performed": false,
+      "hardware_audio_acceptance_performed": false,
+      "robot_command_accuracy_acceptance_performed": false,
+      "capture_result": "outputs/acceptance/public-asr-cpu-mac-20261012-01/result.json",
+      "independent_handoff": "outputs/acceptance/public-asr-handoff-20261012-01/result.json",
+      "report": "docs/reports/public-asr-workflow-2026-10-12.md"
+    },
     "qwen_asr_corpus": {
       "state": "full_cpu_fleurs_original_audio_transcriptions_and_metrics_verified",
       "source_revision": "7b94665bb116aeb411597f67c459b4f19647e901",

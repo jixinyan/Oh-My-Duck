@@ -38,3 +38,6 @@ FLEURS 中文与英文全部 1,592 条真实录音及识别指标已通过独立
 全部转写记录与实际 WAV，重新计算识别错误率及耗时指标。
 语料准备与测量入口为 `omd validate asr-prepare` 和 `omd validate asr-measure`，
 分别位于 `validation/asr_preparation.py` 与 `validation/asr_measurement.py`。
+三个公开入口已完成全部 1,592 条录音；固定 ASR 环境与指标依赖的安装
+说明见[ASR 操作说明](../../../docs/asr-measurements.md)，完整运行资料见
+[公开流程验收](../../../docs/reports/public-asr-workflow-2026-10-12.md)。

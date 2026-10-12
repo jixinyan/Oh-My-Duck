@@ -21,7 +21,7 @@ work requirements and dependencies are in the
 | Component | Verified scope | Remaining acceptance |
 | --- | --- | --- |
 | Source organization | Owned code under `src/oh_my_duck`; native Node deployment under `integrations/edh`; capability source maps | Continue documenting new capability and adapter entry points |
-| CLI/application | 原生服务、验证与记录、场景 Schema、policy package 与语音；444 个安装文件、三份 license、Mac 30 项与 Linux 28 项 CLI 调用 | 完整工作流程在独立环境中的执行检查 |
+| CLI/application | 原生服务、验证与记录、场景 Schema、policy package 与语音；447 个安装文件、三份 license、Mac 与 Linux 各 31 项 CLI 调用 | 完整工作流程在独立环境中的执行检查 |
 | RL 参数入口 | 共同的 `argparse` 模块、27 项检查、六项评估入口、20 项原生训练命令和八次实际 CLI 调用；[验证记录](reports/training-arguments-2026-10-11.md) | 原生物理与训练验收使用各自声明的任务标准 |
 | 发布模型设置 | 共享模型与 API 参数；实际原生 Luna 调用；六阶段、四场景完整发布前检查；查询期限与失败记录 | 声明的实际 GPU 导航运行验收 |
 | 原生准备入口 | Mac 与 Linux 公开准备、固定 SDK 与 pnpm、11 项实际下载、两台主机原生 Luna 调用；Linux 九阶段退出、28 个 SDK 文件、锁定 CPU 环境及新环境连续物理运行通过；[入口记录](reports/native-preparation-2026-10-11.md) | 声明场景覆盖与连续语音任务 |
@@ -38,6 +38,7 @@ work requirements and dependencies are in the
 | Perception | Current CPU RGBD geometry, actual CPU YOLO, original-pixel measurement checks and saved-data audit; fixed-source Newton sensors and SAM3.1 + YOLO26 records | Current-source SAM mask/inference GPU acceptance, independently labelled accuracy, tracking and calibration |
 | Voice interaction | Shared audio module; three fixed Qwen CPU models, four decoded WAV files and four matching ASR texts; 36 profile/admission tests; confirmed profile/database preservation | Voice quality, command-corpus accuracy, interaction latency and Microduck devices |
 | ASR 真实录音 | FLEURS 中文与英文全部 1,592 条；中文 CER 7.681%、英文 WER 5.306%；原始录音、全部 WAV 与指标复核通过；六项数据拒绝、445 个安装文件与 29 项公开命令通过；[测量记录](reports/asr-corpus-2026-10-12.md) | 机器人命令意图、噪声、完整交互延迟与机载麦克风 |
+| ASR 公开流程 | 全部语料准备、真实 CPU 转写和独立复核；五次安装说明命令、七项输入拒绝；两个主机各 447 个安装文件、三份 license 与 31 项 CLI 调用；所属 ASR 进程归零；[流程记录](reports/public-asr-workflow-2026-10-12.md) | 机器人命令意图、噪声、交互延迟与设备评估 |
 | Voice task | Actual Qwen ASR → OpenAI `gpt-6-luna` high → native tools → formal Verifier → confirmed-profile feedback; CPU interruption and resource release | Live hardware recording/playback and broader speech-task statistics |
 | MuJoCo RL | Both representative tasks and both native PPO frameworks have training/resume/export/replay lifecycle evidence | Effective learned behavior and final representative acceptance |
 | Isaac/Newton RL | Both representative tasks and both native PPO frameworks have training/resume/export/replay lifecycle evidence | Current-source GPU execution, effective behavior and final evaluation |
@@ -67,6 +68,7 @@ Linux 独立安装检查通过 438 个文件和 27 项 CLI 调用。
 | Voice interruption | Actual ASR/model/tools/feedback; 1400 controls, 5600 substeps, 2427 events, 296 original images, two WAV files, unchanged profile and full cleanup | [Interruption](reports/cpu-voice-task-2026-10-08.md) |
 | Shared voice modules | 24 original definitions preserved; three actual Qwen CPU models; four WAV files and four matching ASR texts; 36 profile/admission tests; five process exits; 434 installed files and 26 calls | [Voice modules](reports/voice-audio-modules-2026-10-08.md) |
 | ASR 全量语料与独立复核 | FLEURS 1,592 条人声录音；CPU Float32、八个 threads；七次复核进程按预期退出，测量进程数量归零 | [真实录音测量](reports/asr-corpus-2026-10-12.md) |
+| ASR 公开安装与完整流程 | 三个阶段完成全部 1,592 条录音；五次安装说明命令、两个主机安装检查与四个所属进程退出通过 | [公开流程验收](reports/public-asr-workflow-2026-10-12.md) |
 | Native retries and goal evidence | Three executions preserve physical state; 200 controls, 800 substeps, six rejected starts, three read-only checks and independent ONNX parity | [Execution retries](reports/native-execution-retry-2026-10-08.md) |
 | Metric tool parameters | Actual Luna four-motion execution, declared units/default speeds and original error/stop requirements | [Tool parameters](reports/metric-tool-guidance-2026-10-08.md) |
 | Metric admission and wait | Duplicate requests, explicit command replacement, caller deadlines, measured motion and physical resource closure; finite positive native waits | [Metric lifecycle](reports/metric-request-admission-2026-10-08.md), [wait admission](reports/native-wait-admission-2026-10-08.md) |

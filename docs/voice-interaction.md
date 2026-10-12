@@ -19,17 +19,22 @@ TMPDIR="$PWD/.cache/tmp" uv sync --project environments/voice --frozen
 
 本机只需安装 client，远端分别安装 ASR 与 TTS。`omd.py` 会把项目的 `src` 目录加入 Python 搜索路径；独立验收脚本运行时显式设置 `PYTHONPATH=src`。模型服务启动时加载一次明确指定的模型 commit，使用一个 Uvicorn worker。指定物理 GPU 时设置 `CUDA_VISIBLE_DEVICES`，服务参数使用映射后的 `--device cuda:0`。音色设计及确认沿用[音色资料说明](voice-profiles.md)。TTS 服务的 `--data-dir` 必须是已确认音色资料目录；每次请求调用 `SQLiteVoiceProfileStore.active(persona_id)` 并核对该版本保存的 Base 模型 revision。
 
-在远端对应环境中启动两个服务，以下端口均绑定远端本机。先用 `nvidia-smi` 核对当前空闲设备，并把 `GPU_ID` 设置成获得使用许可的物理 GPU 编号。2026-09-29 的 GPU5 验收服务已经关闭，GPU5 随后分配给 RL 训练；下面的命令不表示该设备目前可用。
+在对应环境中启动两个 CPU 服务，端口均绑定服务所在主机的回环地址。
 
 ```bash
-TMPDIR="$PWD/.cache/tmp" CUDA_VISIBLE_DEVICES="$GPU_ID" environments/voice-asr/.venv/bin/python omd.py voice-service asr \
+TMPDIR="$PWD/.cache/tmp" CUDA_VISIBLE_DEVICES='' environments/voice-asr/.venv/bin/python omd.py voice-service asr \
   --data-dir .cache/voice-runtime/asr \
-  --model-revision 5eb144179a02acc5e5ba31e748d22b0cf3e303b0 --device cuda:0 --port 18761
+  --model-revision 5eb144179a02acc5e5ba31e748d22b0cf3e303b0 --device cpu --port 18761
 
-TMPDIR="$PWD/.cache/tmp" CUDA_VISIBLE_DEVICES="$GPU_ID" environments/voice/.venv/bin/python omd.py voice-service tts \
+TMPDIR="$PWD/.cache/tmp" CUDA_VISIBLE_DEVICES='' environments/voice/.venv/bin/python omd.py voice-service tts \
   --data-dir .cache/voice-runtime/profiles \
-  --model-revision 5d83992436eae1d760afd27aff78a71d676296fc --device cuda:0 --port 18762
+  --model-revision 5d83992436eae1d760afd27aff78a71d676296fc --device cpu --port 18762
 ```
+
+GPU 验收与 RL 当前保持停止。后续获得执行授权时，服务使用一张没有 compute
+PID、持续零 utilization 的物理设备 2–4，并明确设置 `CUDA_VISIBLE_DEVICES`；
+模型使用映射后的 `--device cuda:0`。
+完整 FLEURS 语料的准备、CPU 转写与独立复核见 [ASR 测量流程](asr-measurements.md)。
 
 客户端所在主机建立 SSH 本地端口转发：
 

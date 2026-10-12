@@ -48,6 +48,10 @@ ASR/TTS environments, explicit recording, confirmed profiles and interruption.
 Actual CPU task, model and installation evidence is listed in
 [CPU readiness](reports/cpu-development-readiness-2026-10-08.md).
 
+Qwen ASR 的真实录音评估使用公开 `asr-prepare`、`asr-measure` 和 `asr-audit`
+入口，在独立 ASR 环境中完成固定语料下载、全部 CPU 转写和原始录音复核。
+安装与完整命令见 [ASR 测量流程](asr-measurements.md)。
+
 ## Train and evaluate after GPU execution resumes
 
 GPU acceptance and RL remain stopped. Subsequent authorized single-GPU execution

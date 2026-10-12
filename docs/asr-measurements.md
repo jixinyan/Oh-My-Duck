@@ -11,24 +11,28 @@ Qwen ASR 在 CPU Float32 执行全部转写，保存逐条录音、来源、文�
 必须和该目录的文件摘要一致。
 
 ```bash
-omd validate asr-prepare \
+mkdir -p .cache/tmp
+TMPDIR="$PWD/.cache/tmp" uv sync --project environments/voice-asr --frozen --no-editable
+TMPDIR="$PWD/.cache/tmp" uv pip install --python environments/voice-asr/.venv/bin/python '.[asr-evaluation]'
+
+environments/voice-asr/.venv/bin/omd validate asr-prepare \
   --cache-directory .cache/fleurs-corpus \
   --dataset-revision 70bb2e84b976b7e960aa89f1c648e09c59f894dd \
   --languages cmn_hans_cn en_us \
   --output outputs/asr-corpus-NEW
 
-CUDA_VISIBLE_DEVICES='' omd validate asr-measure \
+CUDA_VISIBLE_DEVICES='' environments/voice-asr/.venv/bin/omd validate asr-measure \
   --corpus outputs/asr-corpus-NEW/result.json \
-  --source-root /absolute/path/fixed-project-source \
+  --source-root "$PWD" \
   --model-revision 5eb144179a02acc5e5ba31e748d22b0cf3e303b0 \
   --cpu-threads 8 \
   --output outputs/asr-measurement-NEW
 
-omd validate asr-audit \
+environments/voice-asr/.venv/bin/omd validate asr-audit \
   --capture outputs/asr-measurement-NEW \
   --corpus outputs/asr-corpus-NEW/result.json \
-  --source-root /absolute/path/fixed-project-source \
-  --runner /absolute/path/fixed-project-source/src/oh_my_duck/validation/asr_measurement.py \
+  --source-root "$PWD" \
+  --runner "$PWD/src/oh_my_duck/validation/asr_measurement.py" \
   --expected-model Qwen/Qwen3-ASR-0.6B@5eb144179a02acc5e5ba31e748d22b0cf3e303b0 \
   --output outputs/asr-measurement-NEW/independent-audit.json
 ```
@@ -47,6 +51,8 @@ omd validate asr-audit \
 FLEURS 中文与英文完整 test 语料的 1,592 条实际录音已完成项目 ASR 推理与
 独立复核，中文 CER 7.681%、英文 WER 5.306%。环境、全部耗时、
 来源与数据拒绝检查见[真实录音测量](reports/asr-corpus-2026-10-12.md)。
+三个公开入口已完成相同完整语料的准备、转写和独立复核，
+安装与逐阶段资料见[公开流程验收](reports/public-asr-workflow-2026-10-12.md)。
 
 ```bash
 omd validate asr-audit \
