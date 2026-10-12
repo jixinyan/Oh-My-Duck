@@ -22,6 +22,8 @@
 | Run model perception or audit original RGBD measurements | `omd validate perception` | `perception.py` |
 | 复核完整真实录音语料与 ASR 指标 | `omd validate asr-audit` | `asr_corpus.py` |
 
+ASR 记录格式和复核参数见[语料复核](../../../docs/asr-measurements.md)。
+
 Use the corresponding command with `--help` for required paths and parameters.
 `omd replay` handles session open/task/status/export/close through
 `experience/harness_replay.py`. Process ownership and cancellation belong to
