@@ -30,3 +30,7 @@ Public entry points are `omd voice`, `omd voice-task` and `omd voice-session` in
 [`cli/`](../cli/). See [voice interaction](../../../docs/voice-interaction.md),
 [confirmed profiles](../../../docs/voice-profiles.md) and the
 [architecture source map](../../../docs/architecture.md#source-organization).
+
+真实录音语料的独立复核入口为 `omd validate asr-audit`，位于
+[`validation/asr_corpus.py`](../validation/asr_corpus.py)。它读取原始 Parquet、
+全部转写记录与实际 WAV，重新计算识别错误率及耗时指标。

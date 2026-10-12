@@ -89,6 +89,7 @@ def main():
                 ["validate", "pose", "--help"], ["validate", "pose-audit", "--help"],
                 ["validate", "policy-registry", "--help"], ["validate", "policy-packages", "--help"]]
     commands.append(["validate", "perception", "--help"])
+    commands.append(["validate", "asr-audit", "--help"])
     if args.policy_record is not None:
         commands.append(["validate", "policy-audit", "--directory", str(args.policy_record.resolve(strict=True)),
                          "--catalog", str(args.catalog.resolve(strict=True)), "--output",

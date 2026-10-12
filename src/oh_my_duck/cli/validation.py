@@ -25,6 +25,7 @@ COMMANDS = {
     "release-plan": ("release.plans", "检查声明的全部阶段、配置和指令"),
     "model-assets": ("release.assets", "使用 CPU 核验 USD 碰撞、官方材质和 Newton 导入"),
     "perception": ("perception", "执行模型感知并独立复核原始 RGBD 距离与方向"),
+    "asr-audit": ("asr_corpus", "复核全部真实录音、ASR 转写、识别错误率与推理耗时"),
     "package-audit": ("release.package", "检查 wheel、源码包和独立安装的 CLI"),
 }
 

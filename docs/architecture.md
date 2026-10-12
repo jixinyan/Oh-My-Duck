@@ -64,6 +64,7 @@ Application, robot, training, shared acceptance and replay modules live in `src/
 | Release preparation and package checks | `validation/release/` | `plans.py`, `worker.py`, `campaign.py`, `package.py` |
 | CPU Newton asset audit | `validation/release/` | `assets.py` / `omd validate model-assets` |
 | Model perception and independent RGBD audit | `validation/` | `perception.py` / `omd validate perception` |
+| 原始录音语料与 ASR 指标复核 | `validation/` | `asr_corpus.py` / `omd validate asr-audit` |
 | Setup and process ownership | `infrastructure/` | [资源管理说明](../src/oh_my_duck/infrastructure/README.md)；`gpu_inventory.py`、`bootstrap_isaac.py`、`usd_runtime.py`、`owned_process.py`、`acceptance_supervisor.py` |
 | 本地与 SSH CPU 渲染设置 | `cli/harness.py`、`infrastructure/headless.py` | `--mujoco-renderer` 为新进程配置 EGL 或 OSMesa；Node 原生部署将设置交给实际 worker |
 
