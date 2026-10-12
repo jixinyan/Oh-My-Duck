@@ -307,6 +307,8 @@ SSH CPU worker 的 CUDA visibility 为空，实际会话关闭后 worker 数量�
 两个 seed 的完整 CPU 模型任务、正式 Verifier、原始事件与相机资料、停止进度、
 会话资源释放及所属服务退出通过独立检查，见
 [重复导航验收](reports/native-cpu-navigation-2026-10-11.md)。
+对应的两段 1080p agentic MP4 完成全部 665 帧解码，原始相机文件、
+来源摘要与运动时序检查通过；视频保存实际工具调用和正式任务结果。
 
 交付 README、source map、教程、环境和版本矩阵、policy 来源、评估方法及已验收范围。
 通过条件为他人能够按文档运行所声明的功能并找到扩展位置，真实设备支持对应具体设备证据。

@@ -41,6 +41,8 @@ Mac 模型服务与 `jd_B300` SSH CPU worker 完成两个 seed 的原生办公�
 释放和所属服务退出通过。独立检查核验 1,411 次控制、5,644 次物理步骤、
 2,661 条事件、281 张 observer 图像和 37 条停止进度记录，见
 [重复任务验收](reports/native-cpu-navigation-2026-10-11.md)。
+两段 1080p agentic MP4 完整解码通过，时长为 28.8 与 37.7 秒，
+同时核验原始 observer、head RGB、编码信息和来源摘要。
 
 SSH CPU worker 明确使用空的 `CUDA_VISIBLE_DEVICES`。实际进程检查、原生
 session 关闭、资源释放及 worker 数量归零通过；服务退出状态为零。

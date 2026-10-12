@@ -92,7 +92,19 @@
       "model_navigation_acceptance_performed": true,
       "gpu_acceptance_performed": false,
       "report": "docs/reports/native-cpu-navigation-2026-10-11.md",
-      "independent_handoff": "outputs/acceptance/native-cpu-navigation-handoff-20261011-01.json"
+      "independent_handoff": "outputs/acceptance/native-cpu-navigation-handoff-20261011-01.json",
+      "video_validation": {
+        "state": "two_agentic_navigation_mp4s_fully_decoded",
+        "width": 1920,
+        "height": 1080,
+        "fps": 10,
+        "seeds": [20260929, 20260930],
+        "frames_decoded": [288, 377],
+        "duration_s": [28.8, 37.7],
+        "head_rgb_frames": [8, 10],
+        "observer_frames": [116, 165],
+        "receipt": "outputs/acceptance/native-cpu-navigation-video-20261011-01/result.json"
+      }
     },
     "native_cpu_ssh": {
       "state": "remote_cpu_cuda_visibility_lifecycle_and_independent_installation_verified",

@@ -49,6 +49,8 @@ SSH CPU worker 的实际 CUDA 设置、会话关闭、资源释放、进程退�
 独立安装见[CPU worker 检查](reports/native-cpu-ssh-2026-10-11.md)。
 同一固定实现的两个 seed 完整 CPU 模型任务、正式 Verifier、原始资料复核
 及会话资源释放通过，见[重复导航验收](reports/native-cpu-navigation-2026-10-11.md)。
+两段 1080p MP4 将实际工具调用、observer 画面、head RGB 与正式判定放在
+同一画面，完整解码、相机原始文件和运动时序检查通过。
 [发布模型设置](reports/release-model-settings-2026-10-09.md)保存实际 SDK 调用、统一模型预算与查询期限的检查结果。
 GPU 验收与 RL 保持停止。后续获得执行授权时，同时最多使用一张空闲 GPU 2–4；
 设备要求没有 compute PID 且持续零 utilization。其他用户和项目的进程保留。

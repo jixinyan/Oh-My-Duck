@@ -36,6 +36,25 @@ upright 条件及五个保持样本；每项任务保留 4,000-control/1,800-sec
 独立结果：`outputs/acceptance/native-cpu-navigation-handoff-20261011-01.json`。
 完整原始 JSONL、事件、相机图像、模型连接记录和进程资料均保留。
 
+## Agentic MP4
+
+两段视频使用原始 observer 图像、head RGB、工具调用与正式任务结果。
+编码为 1920 × 1080、H.264、10 FPS，全部帧通过独立 FFmpeg 解码。
+视频包含实际记录的指令和执行事件；该运行没有记录模型内部 reasoning。
+
+| seed | video duration | decoded frames | observer PNG | head RGB PNG |
+| --- | --- | --- | --- | --- |
+| 20260929 | 28.8 seconds | 288 | 116 | 8 |
+| 20260930 | 37.7 seconds | 377 | 165 | 10 |
+
+模型等待时间按 60 倍压缩。运动时间保留相邻 observer 图像的仿真间隔，
+最小播放比例为 1.0；head RGB 显示最近一次实际采集并标明采集序号。
+每张原始 PNG 的摘要、尺寸和像素变化通过独立数值检查。
+
+视频路径为上述证据目录中各 seed 的 `agentic-navigation.mp4`。
+完整解码、相机检查、来源摘要及所属解码进程退出记录见
+`outputs/acceptance/native-cpu-navigation-video-20261011-01/result.json`。
+
 验收范围为该固定实现、官方办公室场景、Alpha Walking 和两个既定 seed。
 多场景长导航、独立图像导航、Newton 运行与 Microduck 设备继续使用各自的
 验收要求。GPU 验收与 RL 保持停止。
