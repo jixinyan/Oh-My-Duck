@@ -89,6 +89,8 @@ def main():
                 ["validate", "pose", "--help"], ["validate", "pose-audit", "--help"],
                 ["validate", "policy-registry", "--help"], ["validate", "policy-packages", "--help"]]
     commands.append(["validate", "perception", "--help"])
+    commands.append(["validate", "tracking", "--help"])
+    commands.append(["validate", "tracking-audit", "--help"])
     commands.append(["validate", "asr-audit", "--help"])
     commands.append(["validate", "asr-prepare", "--help"])
     commands.append(["validate", "asr-measure", "--help"])

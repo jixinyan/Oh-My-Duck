@@ -6,23 +6,7 @@ import numpy as np
 from PIL import Image, ImageDraw
 
 from oh_my_duck.perception.rgbd import measure_target
-
-
-APARTMENT_OBJECTS = {
-    "kit_counter": "counter", "kit_fridge": "fridge", "kit_island": "table",
-    "kit_stool1": "chair", "kit_stool2": "chair", "liv_sofa": "sofa",
-    "liv_table": "table", "liv_tv_stand": "cabinet", "liv_shelf": "shelf",
-    "liv_books": "books", "liv_lamp": "lamp", "liv_chair": "chair",
-    "liv_plant": "plant", "cor_console": "table", "cor_coat_rack": "rack",
-    "cor_shoes": "rack", "bed_base": "bed", "bed_pillow": "pillow",
-    "bed_blanket": "blanket", "bed_ns_l": "table", "bed_ns_r": "table",
-    "bed_wardrobe": "cabinet", "bed_dresser": "cabinet", "off_desk": "desk",
-    "off_chair": "chair", "off_shelf": "shelf", "off_cabinet": "cabinet",
-    "off_plant": "plant", "bth_tub": "bathtub", "bth_vanity": "sink",
-    "bth_mirror": "mirror", "bth_toilet": "toilet", "bth_rail": "rail",
-    "dock": "dock", "obj_0": "block", "obj_1": "block", "obj_2": "block",
-    "obj_3": "block", "ball_0": "ball", "ball_1": "ball", "ball_2": "ball",
-}
+from oh_my_duck.perception.apartment_objects import APARTMENT_OBJECTS
 
 
 def capture_world_points(renderer):

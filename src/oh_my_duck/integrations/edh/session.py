@@ -15,7 +15,8 @@ from physical_harness.validation import ContractValidator
 
 from oh_my_duck.integrations.edh.device import MicroDuckActionDevice
 from oh_my_duck.integrations.edh.environment import MicroDuckEnvironment
-from oh_my_duck.robotics.backends.simulation import STOP_SAMPLES
+from oh_my_duck.perception.tracking import TargetTracker, TrackingParameters
+from oh_my_duck.robotics.backends.simulation import CONTROL_DT, STOP_SAMPLES
 from oh_my_duck.robotics.microduck.motion_guard import MotionGuard
 from oh_my_duck.robotics.microduck.metric_motion import MetricMotion
 from oh_my_duck.robotics.microduck.target_motion import TargetApproachMotion
@@ -37,6 +38,7 @@ class MicroDuckWorkerSession(NativeWorkerSession):
         self._guard_tof_boundary_id: str | None = None
         self._metric_motion: MetricMotion | TargetApproachMotion | None = None
         self._target_observation: dict[str, Any] | None = None
+        self._target_tracker = TargetTracker(TrackingParameters(control_period_s=CONTROL_DT))
         self._task_start: dict[str, Any] | None = None
 
     async def _await_motion_cleanup(self) -> None:
@@ -107,6 +109,7 @@ class MicroDuckWorkerSession(NativeWorkerSession):
         return count
 
     def _remember_targets(self, result: dict, source: str) -> None:
+        self._target_tracker.update(result, source)
         self._target_observation = deepcopy({key: result[key] for key in
             ("episode_id", "sequence", "observed_at", "prompt", "targets")})
         self._target_observation["source"] = source
@@ -446,24 +449,42 @@ class MicroDuckWorkerSession(NativeWorkerSession):
                 if args["sensor"] == "joint_state" and "passive_joints" in measured:
                     result["measurements"]["passive_joints"] = measured["passive_joints"]
             elif operation == "inspect_scene":
-                await self._await_motion_cleanup()
-                snapshot = self._require_gate().snapshot()
-                if snapshot["state"] not in ("paused", "ended") or not snapshot["device_confirmed"]:
-                    raise RuntimeError("Perception requires a confirmed paused execution boundary")
-                prompt = args["prompt"]
-                if not isinstance(prompt, str) or not prompt.strip() or len(prompt) > 120:
-                    raise ValueError("Perception prompt must contain 1–120 characters")
-                self._environment.require_perception_source(args["source"])
-                if args["source"] == "simulator_ground_truth":
-                    result = await self._device.on_owner(lambda: backend.inspect_scene(prompt))
-                elif args["source"] == "models":
-                    from oh_my_duck.perception.client import PerceptionClient
-                    endpoint = self._environment.configuration["perception_endpoint"]
-                    frame = await self._device.on_owner(backend.perception_frame)
-                    result = await asyncio.to_thread(PerceptionClient(endpoint).inspect, frame, prompt)
-                else:
-                    raise ValueError("Unknown perception source")
-                self._remember_targets(result, args["source"])
+                async with self._control_lock:
+                    await self._await_motion_cleanup()
+                    snapshot = self._require_gate().snapshot()
+                    if snapshot["state"] not in ("paused", "ended") or not snapshot["device_confirmed"]:
+                        raise RuntimeError("Perception requires a confirmed paused execution boundary")
+                    prompt = args["prompt"]
+                    if not isinstance(prompt, str) or not prompt.strip() or len(prompt) > 120:
+                        raise ValueError("Perception prompt must contain 1–120 characters")
+                    self._environment.require_perception_source(args["source"])
+                    if args["source"] == "simulator_ground_truth":
+                        result = await self._device.on_owner(lambda: backend.inspect_scene(prompt))
+                    elif args["source"] == "models":
+                        from oh_my_duck.perception.client import PerceptionClient
+                        endpoint = self._environment.configuration["perception_endpoint"]
+                        frame = await self._device.on_owner(backend.perception_frame)
+                        result = await asyncio.to_thread(PerceptionClient(endpoint).inspect, frame, prompt)
+                    else:
+                        raise ValueError("Unknown perception source")
+                    current = self._require_gate().snapshot()
+                    observed = await self._device.on_owner(backend.observe_control)
+                    if (any(current[key] != snapshot[key] for key in ("execution_id", "generation", "state",
+                            "boundary_id", "device_confirmed")) or
+                            result["episode_id"] != observed["episode_id"] or
+                            result["sequence"] != observed["sequence"]):
+                        raise RuntimeError("Physical boundary changed during perception")
+                    self._require_control_lease(run_task_id)
+                    self._remember_targets(result, args["source"])
+            elif operation == "read_track":
+                if set(args) - {"track_id", "max_age_ms"}:
+                    raise ValueError("Track query contains unsupported arguments")
+                async with self._control_lock:
+                    await self._await_motion_cleanup()
+                    observed = await self._device.on_owner(backend.observe_control)
+                    self._require_control_lease(run_task_id)
+                    result = self._target_tracker.read(args["track_id"], episode_id=observed["episode_id"],
+                        sequence=observed["sequence"], max_age_ms=args.get("max_age_ms", 60000))
             elif operation in ("progress", "wait_for_motion"):
                 if operation == "wait_for_motion":
                     await self._wait_motion_boundary()
@@ -660,6 +681,7 @@ class MicroDuckWorkerSession(NativeWorkerSession):
         self._guard_tof_boundary_id = None
         self._metric_motion = None
         self._target_observation = None
+        self._target_tracker.clear()
         return opened
 
     async def start(self, arguments: dict[str, Any]) -> dict[str, Any]:

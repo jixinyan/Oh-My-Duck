@@ -2,6 +2,7 @@ import argparse
 import base64
 import hashlib
 from io import BytesIO
+import json
 from pathlib import Path
 from threading import Lock
 from uuid import uuid4
@@ -25,7 +26,8 @@ class InspectRequest(BaseModel):
 
 
 class PerceptionModels:
-    def __init__(self, yolo_path: Path, sam_path: Path | None, output: Path, *, device: str = "cuda:0"):
+    def __init__(self, yolo_path: Path, sam_path: Path | None, output: Path, *, device: str = "cuda:0",
+                 record_inspections: bool = False):
         self.device = torch.device(device)
         if str(self.device) != device or not (device == "cpu" or (
                 self.device.type == "cuda" and self.device.index is not None)):
@@ -39,6 +41,7 @@ class PerceptionModels:
         self.yolo = YOLO(str(self.yolo_path))
         self.output = output
         self.output.mkdir(parents=True, exist_ok=True)
+        self.record_inspections = record_inspections
         self.sam = None
         self.lock = Lock()
         self.model_hashes = {"yolo26": hashlib.sha256(self.yolo_path.read_bytes()).hexdigest()}
@@ -120,6 +123,18 @@ class PerceptionModels:
                 "image_sha256": hashlib.sha256(decoded.pixels).hexdigest()}
         validate_response(frame, prompt, result)
         validate_measurements(frame, result, decoded=decoded)
+        if self.record_inspections:
+            directory = self.output / uuid4().hex
+            directory.mkdir()
+            hashes = {}
+            for name, value in (("frame.json", frame), ("response.json", result)):
+                payload = (json.dumps(value, allow_nan=False) + "\n").encode()
+                (directory / name).write_bytes(payload)
+                hashes[name] = hashlib.sha256(payload).hexdigest()
+            with (directory / "inspection.json").open("x") as record:
+                json.dump({"episode_id": frame["episode_id"], "sequence": frame["sequence"],
+                           "observed_at": frame["observed_at"], "prompt": prompt, "device": str(self.device),
+                           "models": self.model_hashes, "files": hashes}, record, allow_nan=False)
         return result
 
 
@@ -130,14 +145,18 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--port", type=int, default=8784)
     parser.add_argument("--device", default="cuda:0", help="cpu for YOLO or explicit cuda:N; SAM uses cuda:0")
+    parser.add_argument("--record-inspections", action="store_true",
+                        help="Retain each actual source RGBD frame, model response and SHA256 under --output")
     args = parser.parse_args()
-    models = PerceptionModels(args.yolo, args.sam, args.output, device=args.device)
+    models = PerceptionModels(args.yolo, args.sam, args.output, device=args.device,
+                              record_inspections=args.record_inspections)
     app = FastAPI()
 
     @app.get("/health")
     def health():
         return {"models": models.model_hashes, "engine": "yolo26-sam31" if models.sam is not None else "yolo26",
                 "device": str(models.device), "measurement_validation": "source_rgbd",
+                "record_inspections": models.record_inspections,
                 "yolo_parameter_devices": sorted({str(parameter.device) for parameter in models.yolo.model.parameters()}),
                 "cuda_initialized": torch.cuda.is_initialized()}
 

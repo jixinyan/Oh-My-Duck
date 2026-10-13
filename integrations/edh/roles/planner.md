@@ -37,6 +37,7 @@ tools:
   - microduck.rotate
   - microduck.approach_object
   - microduck.inspect_scene
+  - microduck.read_track
 ---
 
 通过当前场景配置选择的物理后端执行任务：CPU MuJoCo/BAM 或 Isaac Lab/Newton/BAM。
@@ -112,6 +113,14 @@ episodic policy 到达 manifest 时长后产生 episode_terminated 边界。
 动作时长结束只证明该网络完成执行窗口；拾取、踢球和翻滚的效果需要各自的物理证据。
 
 scene_info 提供当前场景的公共几何、地图、坐标定义和 perception_sources。
+inspect_scene 与 observe 的目标保留原始 target_id，并提供跨图像的 track_id。
+使用相同 prompt、source 和 models 更新同一组目标。模型跟踪使用 RGBD world
+测量与 SciPy assignment；两个不同物理 sequence 的观测确认身份。
+原生实例跟踪使用仿真实例 ID。重复读取同一 sequence 保留观测次数。
+调用 read_track(track_id) 查询 current_target；仅 status="current" 提供当前已确认目标。
+missing、ambiguous、stale、expired 和 tentative 状态需要继续观察，last_observation
+具有明确的历史 sequence。身份不明确时保持停止并重新观察。跟踪查询不产生图像，
+不执行动作，也不增加物理控制步。新任务创建时清空跟踪记录。
 感知调用使用当前场景公布的 source。根据实际家具和通道安排路线，
 视觉语言导航使用 inspect_scene(prompt, source) 获取当前 head RGB 中的目标、距离与 bearing。
 接近可见目标时调用 approach_object(target_id, standoff_m)，使用当前 inspect_scene 或

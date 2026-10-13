@@ -207,6 +207,7 @@ function tool(operation, properties, required, services) {
       finish_policy: 'End the current policy at a confirmed paused boundary; the native independent Verifier then checks the goal.',
       set_command: 'Set a bounded policy command at a confirmed paused boundary. Each command runs for 5–100 actual control steps. After proximity, contact, or stall, read fresh ToF and change twist before renewed motion; zero twist remains available for stopping.',
       read_sensor: 'Read a current physical MicroDuck RGB, ToF, IMU, joint, or odometry sensor.',
+      read_track: 'Read a stable track_id returned by inspect_scene or observe. The result identifies the original source, query, model hashes and last measured target. current_target is provided only for a confirmed target observed at the current physical sequence within max_age_ms. Other states are tentative, missing, ambiguous, stale or expired; their last_observation is historical. This tool does not capture a new image or advance physics. Reobserve with the same prompt and source to update a track. Model tracks need two distinct physical sequences for confirmation; repeated reads do not count.',
       inspect_scene: `Inspect current head RGB for a named object and return visible targets, bounding boxes, surface distance in meters and bearing in degrees. Available sources: ${availablePerceptionSources.join(', ')}. simulator_ground_truth uses native geometry; models uses the configured YOLO26/SAM service. The result labels detection, mask and distance sources. Requires a confirmed paused execution. Positive bearing means left. Reobserve after movement; targets are tied to one episode and sequence.`,
       task_progress: 'Read current physical position, velocity, contact evidence, bounded-command status, native motion-pause reason and goal_check. goal_check contains the actual native target bounds, upright requirements and held/required ticks at this physical sequence. Check it before ending the policy; the independent Verifier issues the formal verdict.',
       observe: 'Read head RGB, ToF, IMU, all joints, odometry, metric progress, motion guard, goal_check, current boundary and remaining native budget in one confirmed paused sample. goal_check contains the actual native target and hold evidence; repeated reads do not advance the hold. Optional prompt and source must be provided together to include frame-bound perception. This reads fresh ToF for guarded recovery. Reuse this result for the current boundary.',
@@ -315,6 +316,12 @@ const server = await startServer({
         prompt: { type: 'string', minLength: 1, maxLength: 120 },
         source: { type: 'string', enum: availablePerceptionSources },
       }, ['prompt', 'source'], { images }),
+      'microduck.read_track': tool('read_track', {
+        track_id: { type: 'string', minLength: 1, maxLength: 512,
+          description: 'Stable track_id returned by the current episode perception results.' },
+        max_age_ms: { type: 'integer', minimum: 100, maximum: 60000, default: 60000,
+          description: 'Maximum age of the original measured target, in milliseconds.' },
+      }, ['track_id'], { images }),
       'microduck.walk': tool('walk', {
         distance_m: { type: 'number', minimum: -10, maximum: 10,
           description: 'Signed displacement along the current body heading, in meters. Magnitude must be at least 0.1 m. Completion requires a measured position error of at most 0.05 m and five stopped samples.' },

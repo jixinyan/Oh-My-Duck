@@ -25,6 +25,8 @@ COMMANDS = {
     "release-plan": ("release.plans", "检查声明的全部阶段、配置和指令"),
     "model-assets": ("release.assets", "使用 CPU 核验 USD 碰撞、官方材质和 Newton 导入"),
     "perception": ("perception", "执行模型感知并独立复核原始 RGBD 距离与方向"),
+    "tracking": ("harness.tracking", "使用原生工具、实际 CPU 模型和移动目标验证跟踪"),
+    "tracking-audit": ("tracking_records", "复核跟踪记录、原始模型帧和实例像素"),
     "asr-audit": ("asr_corpus", "复核全部真实录音、ASR 转写、识别错误率与推理耗时"),
     "asr-prepare": ("asr_preparation", "下载固定 FLEURS 语料并检查完整数量与上游文件"),
     "asr-measure": ("asr_measurement", "使用 Qwen CPU 模型转写完整语料并保存识别指标"),
