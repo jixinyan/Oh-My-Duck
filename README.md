@@ -40,6 +40,7 @@ This is the target experience. The project is under active development; [impleme
 | 米制前进、角度转向、读取传感器、停止与保留物理状态的重试 | [工具参数](docs/metric-policy-tools.md)、[原生重试](docs/reports/native-execution-retry-2026-10-08.md) |
 | 原始 RGBD、可见目标、距离与 bearing | [CPU 感知](docs/reports/cpu-scene-perception-2026-10-08.md)、[感知来源](docs/reports/perception-source-capabilities-2026-10-08.md) |
 | 读取当前目标 → 调用接近工具 → 停止 → 正式 Verifier | [目标工具与场景](docs/native-target-approach.md)、[CPU 模型任务与视频记录](docs/reports/target-approach-2026-10-12.md) |
+| 查询同一目标 → 移动后重新观察 → 确认当前测量 → 正式 Verifier；实际 YOLO26 连续关联 | [目标跟踪工具](docs/native-target-tracking.md)、[CPU 跟踪与 agentic MP4](docs/reports/target-tracking-2026-10-12.md) |
 | Walking/StandUp 训练包登记、执行与 policy 接续 | [Policy registry](docs/policy-registry.md)、[训练包验收](docs/reports/policy-packages-2026-10-08.md) |
 | Qwen CPU 推理、音色持久保存与任务中断 | [模型与音色](docs/reports/qwen-cpu-validation-2026-10-08.md)、[执行中断](docs/reports/cpu-voice-task-2026-10-08.md) |
 | Qwen ASR 全量 FLEURS 中文与英文 1,592 条人声录音；独立音频与识别指标复核 | [真实录音测量](docs/reports/asr-corpus-2026-10-12.md) |
@@ -112,6 +113,13 @@ surface distance and bearing. The isolated SAM3.1 + YOLO26 service performs
 text-prompt segmentation and box association; the explicit `simulator_ground_truth`
 source uses native shape masks and calibrated ray distances. Results retain their
 detection, mask and distance sources. See [perception tools](docs/perception-navigation.md).
+
+Observations attach stable `track_id` values to measured targets.
+`microduck.read_track(track_id, max_age_ms)` reports current, tentative, missing,
+ambiguous, stale or expired state, with the original observation time and source.
+Model association requires two consecutive measured frames. See
+[target tracking](docs/native-target-tracking.md) and its
+[actual CPU task and video](docs/reports/target-tracking-2026-10-12.md).
 
 Recorded Hospital and Office tasks demonstrate multiple official policies:
 `roller` and `crouch` for locomotion and body motion; `sitstand`, `alpha_stand`,

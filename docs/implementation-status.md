@@ -1,6 +1,6 @@
 # Implementation status
 
-Updated: 2026-10-12.
+Updated: 2026-10-13.
 
 ## Execution conditions
 
@@ -21,7 +21,7 @@ work requirements and dependencies are in the
 | Component | Verified scope | Remaining acceptance |
 | --- | --- | --- |
 | Source organization | Owned code under `src/oh_my_duck`; native Node deployment under `integrations/edh`; capability source maps | Continue documenting new capability and adapter entry points |
-| CLI/application | 原生服务、验证与记录、场景 Schema、policy package 与语音；447 个安装文件、三份 license、Mac 与 Linux 各 31 项 CLI 调用 | 完整工作流程在独立环境中的执行检查 |
+| CLI/application | 原生服务、验证与记录、场景 Schema、policy package 与语音；454 个安装文件、三份 license、Mac 与 Linux 各 33 项 CLI 调用 | 声明的完整任务在独立环境中的执行检查 |
 | RL 参数入口 | 共同的 `argparse` 模块、27 项检查、六项评估入口、20 项原生训练命令和八次实际 CLI 调用；[验证记录](reports/training-arguments-2026-10-11.md) | 原生物理与训练验收使用各自声明的任务标准 |
 | 发布模型设置 | 共享模型与 API 参数；实际原生 Luna 调用；六阶段、四场景完整发布前检查；查询期限与失败记录 | 声明的实际 GPU 导航运行验收 |
 | 原生准备入口 | Mac 与 Linux 公开准备、固定 SDK 与 pnpm、11 项实际下载、两台主机原生 Luna 调用；Linux 九阶段退出、28 个 SDK 文件、锁定 CPU 环境及新环境连续物理运行通过；[入口记录](reports/native-preparation-2026-10-11.md) | 声明场景覆盖与连续语音任务 |
@@ -34,9 +34,10 @@ work requirements and dependencies are in the
 | Core types, tools and recording | Complete Draft 2020-12 Schemas, finite arguments, actual handlers, request identity, JSONL/native events, original image hashes and MP4 | New tools require their actual implementation and relevant execution evidence |
 | Native Harness | Fixed EDH, actual models, official policies, sensors, ActionGate and independent Verifier; CPU text/recorded-voice office tasks passed | Current-source multi-scene long navigation and repeated task statistics |
 | Policy tools | Metric units, pose response, policy transitions, bounded commands, state-preserving retries, progress and stop evidence | All long-distance precision, current Newton controller and object effects |
-| 可见目标接近 | Luna 调用 `approach_object` 的正式 CPU 任务通过；223 次控制、892 次物理子步，距离误差 4.7 毫米；两组控制测量、中断、330 步前进/旋转回归、76 项场景与导入检查；两台主机各 449 个安装文件和 31 项命令；917 帧 agentic MP4 完整解码；[验收记录](reports/target-approach-2026-10-12.md) | 连续目标跟踪、模型感知来源的完整目标任务、Newton 与真机执行 |
+| 可见目标接近 | Luna 调用 `approach_object` 的正式 CPU 任务通过；223 次控制、892 次物理子步，距离误差 4.7 毫米；两组控制测量、中断、330 步前进/旋转回归、76 项场景与导入检查；两台主机各 449 个安装文件和 31 项命令；917 帧 agentic MP4 完整解码；[验收记录](reports/target-approach-2026-10-12.md) | 模型感知来源的完整目标任务、Newton 与真机执行 |
+| 连续目标跟踪 | 原生 `read_track`、实际移动物体与 YOLO26 图像关联通过；425 次控制、1,700 次子步、85 张图像与逐动作 ONNX 复核；正式 Luna 任务查询同一目标的两个 sequence，975 帧 agentic MP4 完整解码；[验收记录](reports/target-tracking-2026-10-12.md) | 自主跟随、模型来源完整任务、物体交叉、长时间遮挡、Newton 与真机执行 |
 | Policy registry | Ten official joint graphs and registered training packages; actual CPU Walking/StandUp package execution, complete episodic duration and continuation | Learned behavior, scene generalization and hardware |
-| Perception | Current CPU RGBD geometry, actual CPU YOLO, original-pixel measurement checks and saved-data audit; fixed-source Newton sensors and SAM3.1 + YOLO26 records | Current-source SAM mask/inference GPU acceptance, independently labelled accuracy, tracking and calibration |
+| Perception | Current CPU RGBD geometry, actual CPU YOLO, original-pixel measurement checks, source-bound tracking and saved-data audit; fixed-source Newton sensors and SAM3.1 + YOLO26 records | Current-source SAM mask/inference GPU acceptance, independently labelled accuracy, crossings/long occlusion and calibration |
 | Voice interaction | Shared audio module; three fixed Qwen CPU models, four decoded WAV files and four matching ASR texts; 36 profile/admission tests; confirmed profile/database preservation | Voice quality, command-corpus accuracy, interaction latency and Microduck devices |
 | ASR 真实录音 | FLEURS 中文与英文全部 1,592 条；中文 CER 7.681%、英文 WER 5.306%；原始录音、全部 WAV 与指标复核通过；六项数据拒绝、445 个安装文件与 29 项公开命令通过；[测量记录](reports/asr-corpus-2026-10-12.md) | 机器人命令意图、噪声、完整交互延迟与机载麦克风 |
 | ASR 公开流程 | 全部语料准备、真实 CPU 转写和独立复核；五次安装说明命令、七项输入拒绝；两个主机各 447 个安装文件、三份 license 与 31 项 CLI 调用；所属 ASR 进程归零；[流程记录](reports/public-asr-workflow-2026-10-12.md) | 机器人命令意图、噪声、交互延迟与设备评估 |
@@ -75,6 +76,7 @@ Linux 独立安装检查通过 438 个文件和 27 项 CLI 调用。
 | Metric admission and wait | Duplicate requests, explicit command replacement, caller deadlines, measured motion and physical resource closure; finite positive native waits | [Metric lifecycle](reports/metric-request-admission-2026-10-08.md), [wait admission](reports/native-wait-admission-2026-10-08.md) |
 | Current CPU perception | Five rendered states, 1253 native geometry intersections, target distance/bearing and unchanged physics during reads | [CPU perception](reports/cpu-scene-perception-2026-10-08.md) |
 | Model RGBD measurements | Five actual CPU YOLO frames/targets, independent distance/position/bearing checks, 90 rejected alterations, three process exits, 436 installed files and 27 CLI calls | [Measurement validation](reports/perception-measurements-2026-10-08.md) |
+| 原生目标跟踪与模型查询 | 动态实例、实际 YOLO26 连续关联、425 次 ONNX 动作、十次原始 capture、八项查询拒绝、正式 Luna 任务与 975 帧完整视频解码通过 | [连续目标验收](reports/target-tracking-2026-10-12.md) |
 | Configured perception sources | Shared Python/Node admission, native metadata/tool schema and two actual CPU sessions | [Source selection](reports/perception-source-capabilities-2026-10-08.md) |
 | Training package tools | Actual Walking/StandUp packages; 725 controls, 145 frames, 87 stopped samples, full episodic duration and transition | [Registered packages](reports/policy-packages-2026-10-08.md) |
 | Head/body commands | 575 controls, actual positive/negative pitch and body-height response, return, 115 camera frames and stopped-state audit | [Pose tools](reports/native-pose-2026-10-08.md) |
@@ -145,7 +147,7 @@ Source and result references:
 Release acceptance includes clean installation, declared native workflows,
 source/model/scene provenance, actual physical goals, fixed voice, original media,
 independent audits and complete resource closure. Remaining product capabilities
-include labelled perception accuracy, tracking, independent image-driven VLN/VLA,
+include labelled perception accuracy, autonomous following, independent image-driven VLN/VLA,
 object effects, learned-policy behavior and actual Microduck integration.
 Code, assets, weights and drivers retain separate license and distribution records.
 

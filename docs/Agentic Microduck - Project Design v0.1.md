@@ -3,7 +3,7 @@ title: Agentic Microduck — 项目概览与详细设计
 version: 0.3
 status: Implementation in progress
 created: 2026-09-05
-updated: 2026-10-12
+updated: 2026-10-13
 tags:
   - microduck
   - embodied-ai
@@ -267,6 +267,7 @@ Planner 使用原生 `skills.search` 与 `skills.load` 读取持久经验。
 | `microduck.read_sensor` | `sensor` | head RGB、ToF、IMU、joint state 或 odometry |
 | `microduck.observe` | 可选 `prompt`, `source` | 确认边界的传感器、进度、目标与剩余预算 |
 | `microduck.inspect_scene` | `prompt`, `source` | 当前帧目标框、距离、bearing 与标注图像 |
+| `microduck.read_track` | `track_id`, `max_age_ms` | 当前物理 sequence 的跟踪状态、原始测量时间、来源与当前目标 |
 | `microduck.task_progress` | 无 | 原生执行、停止、目标条件和实际计数 |
 | `microduck.wait_for_motion` | 无 | 等待原生确认边界 |
 | `microduck.finish_policy` | `execution_id`, `generation`, `boundary_id` | 原生 `policy_stop` 与新鲜终止状态 |
@@ -306,8 +307,12 @@ Schema 与实现位于 [`integrations/edh/server.mjs`](../integrations/edh/serve
 `SkillSpec` 声明身份、版本、参数 Schema、传感器、前置姿态、资源、policy 类型、
 观测动作格式、频率、后端、设备、终止条件、取消方式、权重 SHA256 和评估结果。
 `approach_object` 已具有原生工具和测量控制实现；`follow_object`、`look_at` 与复合技能
-具有独立实现和验收要求。动态目标跟踪需要连续观测和跨帧身份管理。
-目标跟踪使用有来源、最近时间和有效状态的目标记录；目标丢失、观测过期、通信中断
+具有独立实现和验收要求。动态目标身份由原生 worker 的 `TargetTracker` 维护，
+`read_track` 读取当前物理 sequence 的状态。RGBD 模型关联需要两次连续新测量，
+原生实例使用实例身份；来源、query 与模型 SHA256 分别保存。重复图像保持原始确认次数，
+重新创建任务清除跟踪记录，编号在同一个 worker 生命周期中保持唯一。
+参数、状态与实际 CPU 记录见[目标跟踪说明](native-target-tracking.md)。
+自主跟随使用有来源、最近时间和有效状态的目标记录；目标丢失、观测过期、通信中断
 及超时具有明确的停止行为。工具内部维护必要的快速反馈，Harness 决定任务和观察时机。
 motion、head、mouth 资源通过通用调度与唯一电机仲裁入口协调。
 

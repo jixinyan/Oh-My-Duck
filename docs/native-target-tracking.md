@@ -79,8 +79,16 @@ device, model hashes and the SHA256 of both data files. Recording is opt-in.
 
 Public CPU validation commands are:
 
+The native runtime is the locked `environments/cpu-apartment` environment.
+The actual perception service runs in its isolated model environment with
+`--device cpu --record-inspections`. Keep `CUDA_VISIBLE_DEVICES=''` for both.
+Prepare OSMesa through the native setup entry point and select it explicitly
+before importing MuJoCo. Independent record audits require the declared
+`validation` package extra, including SciPy.
+
 ```bash
-omd validate tracking --catalog POLICY_DIRECTORY --edh-source HARNESS_DIRECTORY \
+python -m oh_my_duck.infrastructure.headless --mujoco-renderer osmesa -- \
+  omd validate tracking --catalog POLICY_DIRECTORY --edh-source HARNESS_DIRECTORY \
   --endpoint http://127.0.0.1:PORT --inspections SERVICE_RECORD_DIRECTORY \
   --output NEW_CAPTURE_DIRECTORY
 
@@ -103,3 +111,5 @@ The model task uses
 [`apartment-target-tracking.json`](../configs/simulation-demo/apartment-target-tracking.json).
 Source locations are listed in the
 [perception source map](../src/oh_my_duck/perception/README.md).
+Actual CPU execution, model task, independent installation and video evidence
+are recorded in the [acceptance report](reports/target-tracking-2026-10-12.md).

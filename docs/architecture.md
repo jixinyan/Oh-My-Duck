@@ -55,12 +55,14 @@ Application, robot, training, shared acceptance and replay modules live in `src/
 | Native PPO | `rl/learners/` | `rsl_rl/`, `sb3/` |
 | Training registration and dispatch | `rl/training/`, `rl/experiments/` | `arguments.py` 读取任务选项；`tasks.py`、`registry.py`、`isaac_newton.py`、`frameworks.py`、`campaign.py`；[RL 源码说明](../src/oh_my_duck/rl/README.md) |
 | Export and deployment rehearsal | `rl/artifacts/`, `rl/evaluation/` | Export, schema-2 packaging and metrics |
-| Active perception | `perception/` | [Source map](../src/oh_my_duck/perception/README.md); `frames.py` for RGBD/PNG admission, `rgbd.py` for measurements, `validation.py` for source consistency, `client.py`/`service.py` for models and HTTP; `mujoco.py` owns actual CPU render geometry and apartment target labels |
+| Active perception | `perception/` | [Source map](../src/oh_my_duck/perception/README.md); `frames.py` for RGBD/PNG admission, `rgbd.py` for measurements, `validation.py` for source consistency, `client.py`/`service.py` for models and HTTP; `mujoco.py` owns CPU render geometry and `apartment_objects.py` identifies native instances |
+| 连续目标身份与查询 | `perception/`、`integrations/edh/` | `tracking.py` 维护有来源的 RGBD 关联；原生 `session.py` 处理 `read_track` 与当前物理边界；Node 工具 Schema 位于根目录 `integrations/edh/server.mjs` |
 | Voice interaction | `voice/` | [Source map](../src/oh_my_duck/voice/README.md); `audio.py` for shared WAV/URI/SHA256 operations; `qwen.py` for model inference; `profiles.py` for confirmed voices; `service.py`, `remote.py`, `session.py`, `device.py` for HTTP, sessions and audio devices |
 | Episode 记录与原生导出 | `experience/` | `base.py` 的 `EpisodeRecorder`、`jsonl.py` 的 `JsonlEpisodeRecorder`、`harness_replay.py` 的 `export_run`；身份与时钟字段位于 `core/contracts/events.py` |
 | Measured policy acceptance | `validation/metric/` | `plans.py`, `case.py`, `campaign.py`, `verify.py`, `policy.py` |
 | Native task, pose and navigation acceptance | `validation/harness/` | `control.py`, `metric_admission.py`, `motion_guard.py`, `pose.py`, `pose_records.py`, `replay.py`, `navigation.py` |
 | 目标接近记录检查 | `validation/harness/` | `target_approach.py` 重算原始目标距离、误差和停止；`replay.py` 的 `--require-target-approach` 检查完整正式任务 |
+| 连续目标记录检查 | `validation/`、`validation/harness/` | `tracking_records.py` 核查实际 RGBD、原生实例像素与 policy；`harness/tracking.py` 执行 CPU 原生测试；`harness/target_tracking.py` 核查查询身份，供 `replay.py --require-target-tracking` 使用 |
 | 连续任务与语音历史引用检查 | `validation/harness/` | `task_continuation.py`、`voice_context.py` |
 | Registered policy package admission and execution | `validation/harness/` | `registry.py`, `package_execution.py` |
 | Release preparation and package checks | `validation/release/` | `plans.py`, `worker.py`, `campaign.py`, `package.py` |
