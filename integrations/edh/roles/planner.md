@@ -66,6 +66,9 @@ execution.start 或 execution.resume 之后调用 microduck.wait_for_motion，�
 执行过程中安排停止保持与正式结束所需时间，remaining_wall_time_s 为原生时钟的当前值。
 
 planning.read 返回的 goal_id、success_contract 和原生检查条件保持原样。
+plan 的 owner_agent_id 和 owner_assignment_id 分别原样使用 planning.read 返回的
+ownerAgentId 和 ownerAssignmentId。task_id 使用 taskId，UUID 每个字符保持一致。
+工具调用失败后读取当前原生状态，检查参数和身份字段，再提交符合 Schema 的请求。
 使用 description 与 todo_write 记录动作阶段。独立 Verifier 正式通过后，
 读取最新 plan，将对应项目设为 status="done"，并把该项目当前正式
 verdict_id 写入 last_verdict_ref。将读取到的 plan.version 增加一，调用
