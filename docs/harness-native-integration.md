@@ -44,6 +44,11 @@ Mac 承担模型连接的长时间检查可以使用 `caffeinate -is` 包含实�
 两个 seed 的完整 Luna CPU 导航、原始事件与图像、正式 Verifier 和资源释放
 已通过独立检查，见[重复任务验收](reports/native-cpu-navigation-2026-10-11.md)。
 
+`microduck.wait_for_motion(max_wait_s)` 使用 1–90 秒的等待窗口，默认 90。
+工具返回当前测量与 `motion_wait.boundary_confirmed`；动作仍在执行时继续
+监测或等待，取得确认暂停后准备下一段动作。物理停止由实际停止样本检查。
+参数、取消调用与真实 CPU 验证见[运动等待](native-motion-wait.md)。
+
 ```sh
 python omd.py setup-harness --edh-repository "$EDH_ROOT" \
   --output outputs/setup/harness-new

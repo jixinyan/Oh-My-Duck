@@ -13,7 +13,8 @@ bearing、制动和停止。原生 ActionGate、执行预算、ToF、外部接�
 
 调用需要确认的暂停边界、五个测得的停止样本，以及当前 episode 和物理 sequence
 的有效 RGBD 目标。准备之后通过 `execution.resume` 执行，再使用
-`microduck.wait_for_motion` 等待暂停边界，读取 `microduck.observe` 或
+`microduck.wait_for_motion(max_wait_s)` 返回当前进度与边界确认状态，
+确认暂停后读取 `microduck.observe` 或
 `microduck.task_progress` 中的 `metric_motion`。
 
 ```json

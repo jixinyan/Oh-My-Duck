@@ -269,7 +269,7 @@ Planner 使用原生 `skills.search` 与 `skills.load` 读取持久经验。
 | `microduck.inspect_scene` | `prompt`, `source` | 当前帧目标框、距离、bearing 与标注图像 |
 | `microduck.read_track` | `track_id`, `max_age_ms` | 当前物理 sequence 的跟踪状态、原始测量时间、来源与当前目标 |
 | `microduck.task_progress` | 无 | 原生执行、停止、目标条件和实际计数 |
-| `microduck.wait_for_motion` | 无 | 等待原生确认边界 |
+| `microduck.wait_for_motion` | `max_wait_s` | 1–90 秒等待窗口，返回当前物理进度与边界确认状态 |
 | `microduck.finish_policy` | `execution_id`, `generation`, `boundary_id` | 原生 `policy_stop` 与新鲜终止状态 |
 
 Schema 与实现位于 [`integrations/edh/server.mjs`](../integrations/edh/server.mjs) 和
@@ -279,7 +279,10 @@ Schema 与实现位于 [`integrations/edh/server.mjs`](../integrations/edh/serve
 完成要求为最多 0.05 米或 5 度误差，以及五个连续实际停止样本。
 标准脚转向同时使用前向、侧向和 yaw 命令，路线规划需要考虑测得的平移。
 `walk` 和 `rotate` 在确认的暂停边界准备请求，随后通过原生 `execution.start` 或
-`execution.resume` 执行。`wait_for_motion` 等待执行边界，物理停止依据测得状态单独检查。
+`execution.resume` 执行。`wait_for_motion` 返回当前物理进度与
+`motion_wait.boundary_confirmed`，动作执行期间继续监测或等待。
+确认暂停后准备下一段动作；物理停止依据测得状态单独检查。
+实际 CPU 运行、取消等待与原始动作复核见[运动等待](native-motion-wait.md)。
 原始请求、完成误差与物理停止依据见[工具说明](metric-policy-tools.md)。
 
 `approach_object(target_id, standoff_m)` 使用当前 `inspect_scene` 或 `observe` 返回的
