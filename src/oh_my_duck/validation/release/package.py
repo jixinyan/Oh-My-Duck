@@ -91,6 +91,7 @@ def main():
     commands.append(["validate", "perception", "--help"])
     commands.append(["validate", "tracking", "--help"])
     commands.append(["validate", "tracking-audit", "--help"])
+    commands.append(["validate", "motion-wait", "--help"])
     commands.append(["validate", "asr-audit", "--help"])
     commands.append(["validate", "asr-prepare", "--help"])
     commands.append(["validate", "asr-measure", "--help"])

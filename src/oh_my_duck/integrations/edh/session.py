@@ -79,14 +79,26 @@ class MicroDuckWorkerSession(NativeWorkerSession):
             },
         }
 
-    async def _wait_motion_boundary(self) -> None:
-        # shield 保留原生执行；调用超时由调用者处理，停止仍需确认原生边界。
-        async with asyncio.timeout(90):
-            snapshot = self._require_gate().snapshot()
-            if snapshot["state"] not in ("paused", "ended") or not snapshot["device_confirmed"]:
-                pump = self._pump
-                if pump is not None:
-                    await asyncio.shield(pump)
+    async def _wait_motion_boundary(self, max_wait_s: int = 90) -> None:
+        if type(max_wait_s) is not int or not 1 <= max_wait_s <= 90:
+            raise ValueError("max_wait_s 必须为 1–90 的整数")
+        loop = asyncio.get_running_loop()
+        deadline = loop.time() + max_wait_s
+        snapshot = self._require_gate().snapshot()
+        if snapshot["state"] not in ("paused", "ended") or not snapshot["device_confirmed"]:
+            pump = self._pump
+            if pump is None:
+                raise RuntimeError("Native motion wait requires its active policy pump")
+            # 等待窗口结束时保留原生 Task；完成的 Task 传播实际执行错误。
+            completed, _ = await asyncio.wait({pump}, timeout=max_wait_s)
+            if not completed:
+                return
+            await pump
+        cleanup = self._motion_cleanup_task
+        if cleanup is not None:
+            completed, _ = await asyncio.wait({cleanup}, timeout=max(0, deadline - loop.time()))
+            if not completed:
+                return
             await self._await_motion_cleanup()
         snapshot = self._require_gate().snapshot()
         if snapshot["state"] not in ("paused", "ended") or not snapshot["device_confirmed"]:
@@ -488,9 +500,17 @@ class MicroDuckWorkerSession(NativeWorkerSession):
                         sequence=observed["sequence"], max_age_ms=args.get("max_age_ms", 60000))
             elif operation in ("progress", "wait_for_motion"):
                 if operation == "wait_for_motion":
-                    await self._wait_motion_boundary()
+                    if set(args) - {"max_wait_s"}:
+                        raise ValueError("运动等待参数包含未知字段")
+                    await self._wait_motion_boundary(args.get("max_wait_s", 90))
                 observed = await self._device.on_owner(self._control_observation)
                 result = self._progress_result(observed)
+                if operation == "wait_for_motion":
+                    execution = result["execution"]
+                    result["motion_wait"] = {
+                        "max_wait_s": args.get("max_wait_s", 90),
+                        "boundary_confirmed": execution["state"] in ("paused", "ended") and execution["device_confirmed"],
+                    }
             elif operation == "observe":
                 async with self._control_lock:
                     await self._await_motion_cleanup()

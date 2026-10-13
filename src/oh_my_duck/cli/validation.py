@@ -15,6 +15,7 @@ COMMANDS = {
     "policy-registry": ("harness.registry", "核验登记的 policy 包、来源、命令通道与 CPU 推断"),
     "policy-packages": ("harness.package_execution", "执行登记的长期及限定时长 policy 并检查原生控制"),
     "motion-guard": ("harness.motion_guard", "检查真实运动暂停、恢复与终止"),
+    "motion-wait": ("harness.motion_wait", "检查等待窗口、取消调用与实际运动边界"),
     "pose": ("harness.pose", "执行官方 CPU 头部与身体姿态命令验证"),
     "pose-audit": ("harness.pose_records", "复核姿态命令、物理响应、相机与原生动作记录"),
     "replay": ("harness.replay", "检查原生 agent、tool、sensor 与 Verifier 记录"),

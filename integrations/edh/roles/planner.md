@@ -63,6 +63,9 @@ odometry、metric_motion、motion_guard、goal_check 和 execution 剩余预算�
 prompt 与 source；当前边界已有结果可以直接使用，读取相同 sequence 不会增加停止样本。
 execution.start 或 execution.resume 之后调用 microduck.wait_for_motion，等待原生暂停边界，
 然后 observe 当前状态。wait_for_motion 保留 ActionGate、原始运动检查和执行时限。
+max_wait_s 允许 1–90 秒，默认 90；工具返回实际进度与 motion_wait.boundary_confirmed。
+该字段为 false 时，根据当前 execution 状态继续监测或等待。取得确认暂停边界后
+准备下一段动作；停止状态通过实际 stopped_samples 检查。
 执行过程中安排停止保持与正式结束所需时间，remaining_wall_time_s 为原生时钟的当前值。
 
 planning.read 返回的 goal_id、success_contract 和原生检查条件保持原样。

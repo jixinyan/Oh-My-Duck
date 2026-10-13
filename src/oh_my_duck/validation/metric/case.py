@@ -98,10 +98,16 @@ async def run(args):
         prior = session._status
         await session.resume({"owner_id": "planner", "execution_id": prior["execution_id"],
                               "boundary_id": prior["boundary_event_id"], "state_version": prior["state_version"]})
-        first = await call("wait_for_motion", {})
+        first = await wait_motion()
         second = await call("wait_for_motion", {})
         if first["sequence"] != second["sequence"] or first["execution"]["boundary_id"] != second["execution"]["boundary_id"]:
             raise AssertionError("Waiting on an existing boundary changed the native execution")
+
+    async def wait_motion():
+        result = await call("wait_for_motion", {})
+        while not result["motion_wait"]["boundary_confirmed"]:
+            result = await call("wait_for_motion", {})
+        return result
 
     async def observe_boundary():
         first = await call("observe", {})
@@ -139,7 +145,7 @@ async def run(args):
                    "owner_assignment_id": "metric-acceptance", "idempotency_key": uuid4().hex}
         await session.start({"request": request, "native_task_id": "metric-tools",
                              "observation_ttl_s": 30, "device_timeout_s": 120, "policy_timeout_s": 30})
-        await call("wait_for_motion", {})
+        await wait_motion()
         for _ in range(3):
             progress = await call("progress", {})
             if progress["fallen"]:
