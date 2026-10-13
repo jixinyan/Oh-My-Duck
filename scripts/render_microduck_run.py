@@ -343,6 +343,16 @@ def tool_summary(event: dict) -> str:
         return (f"{tool} · {result['prompt']} · captured seq {result['sequence']}\n"
                 f"detection: {result['detection_source']} · distance: {result['distance_source']}\n" +
                 "\n".join(targets or ["No visible target"]))
+    elif tool == "microduck.read_track":
+        observation = result["last_observation"]
+        target = observation["target"]
+        text = (f"{tool} · {result['status']} · current seq {result['sequence']}"
+                f" · measured seq {observation['sequence']}\n"
+                f"{result['source']} · {result['track_id']}\n"
+                f"{target['label']} · measured age {result['age_ms']:.0f} ms")
+        if target["distance_status"] == "valid":
+            text += f" · measured distance {target['distance_m']:.2f} m"
+        return text
     elif tool == "microduck.set_command":
         visible = selected(result, ("effective_after_sequence", "command"))
     elif tool in ("microduck.walk", "microduck.rotate", "microduck.approach_object"):
