@@ -18,6 +18,7 @@ from oh_my_duck.integrations.edh.environment import MicroDuckEnvironment
 from oh_my_duck.robotics.backends.simulation import STOP_SAMPLES
 from oh_my_duck.robotics.microduck.motion_guard import MotionGuard
 from oh_my_duck.robotics.microduck.metric_motion import MetricMotion
+from oh_my_duck.robotics.microduck.target_motion import TargetApproachMotion
 
 
 class MicroDuckWorkerSession(NativeWorkerSession):
@@ -34,7 +35,8 @@ class MicroDuckWorkerSession(NativeWorkerSession):
         self._motion_guard: dict[str, Any] | None = None
         self._motion_cleanup_task: asyncio.Task[None] | None = None
         self._guard_tof_boundary_id: str | None = None
-        self._metric_motion: MetricMotion | None = None
+        self._metric_motion: MetricMotion | TargetApproachMotion | None = None
+        self._target_observation: dict[str, Any] | None = None
         self._task_start: dict[str, Any] | None = None
 
     async def _await_motion_cleanup(self) -> None:
@@ -103,6 +105,11 @@ class MicroDuckWorkerSession(NativeWorkerSession):
         if type(count) is not int or not self.MIN_COMMAND_STEPS <= count <= self.MAX_COMMAND_STEPS:
             raise ValueError("MicroDuck command requires 5 to 100 control steps")
         return count
+
+    def _remember_targets(self, result: dict, source: str) -> None:
+        self._target_observation = deepcopy({key: result[key] for key in
+            ("episode_id", "sequence", "observed_at", "prompt", "targets")})
+        self._target_observation["source"] = source
 
     def _bind_motion_segment(self, command_result: dict[str, Any], count: int,
                              preserve_guard: bool = False) -> None:
@@ -284,7 +291,7 @@ class MicroDuckWorkerSession(NativeWorkerSession):
             operation = request["operation"]
             args = require_object(request.get("arguments", {}))
             backend = self._environment._backend()
-            if operation in ("walk", "rotate"):
+            if operation in ("walk", "rotate", "approach_object"):
                 async with self._control_lock:
                     await self._await_motion_cleanup()
                     self._require_control_lease(run_task_id)
@@ -301,11 +308,22 @@ class MicroDuckWorkerSession(NativeWorkerSession):
                         raise RuntimeError("Resolve the measured motion hazard before metric navigation")
                     def prepare_metric():
                         self._require_control_lease(run_task_id)
+                        current = self._require_gate().snapshot()
+                        if any(current[key] != snapshot[key] for key in
+                               ("execution_id", "generation", "state", "boundary_id", "device_confirmed")):
+                            raise RuntimeError("运动准备期间原生执行边界已经改变")
                         if backend._stopped_samples < STOP_SAMPLES:
                             raise RuntimeError("Metric motion requires five measured stopped samples")
                         measured = backend._native_state()
-                        motion = MetricMotion(operation, args, measured,
-                            robot_model=getattr(backend, "robot_model", "allcollisions"))
+                        robot_model = getattr(backend, "robot_model", "allcollisions")
+                        if operation == "approach_object":
+                            if self._target_observation is None:
+                                raise RuntimeError("目标接近要求当前 inspect_scene 或 observe 的感知结果")
+                            motion = TargetApproachMotion(args, self._target_observation, measured,
+                                episode_id=backend.episode_id, sequence=backend._sequence,
+                                robot_model=robot_model)
+                        else:
+                            motion = MetricMotion(operation, args, measured, robot_model=robot_model)
                         motion.request_id = request["request_id"]
                         locomotion = backend.catalog.locomotion_policy(
                             getattr(backend, "robot_model", "allcollisions"))
@@ -321,10 +339,14 @@ class MicroDuckWorkerSession(NativeWorkerSession):
                               "policy_name": selected["policy_name"],
                               "start_position_m": motion.start_position, "start_yaw_rad": motion.start_yaw,
                               "distance_tolerance_m": motion.DISTANCE_TOLERANCE_M,
-                              "angle_tolerance_deg": motion.ANGLE_TOLERANCE_DEG,
                               "execution_id": snapshot["execution_id"],
                               "generation": snapshot["generation"], "boundary_id": snapshot["boundary_id"],
                               "next_action": "execution.resume"}
+                    if operation == "approach_object":
+                        result.update(target_observation=motion.target_observation,
+                                      standoff_m=motion.amount)
+                    else:
+                        result["angle_tolerance_deg"] = motion.ANGLE_TOLERANCE_DEG
             elif operation == "set_command":
                 async with self._control_lock:
                     await self._await_motion_cleanup()
@@ -441,6 +463,7 @@ class MicroDuckWorkerSession(NativeWorkerSession):
                     result = await asyncio.to_thread(PerceptionClient(endpoint).inspect, frame, prompt)
                 else:
                     raise ValueError("Unknown perception source")
+                self._remember_targets(result, args["source"])
             elif operation in ("progress", "wait_for_motion"):
                 if operation == "wait_for_motion":
                     await self._wait_motion_boundary()
@@ -478,6 +501,8 @@ class MicroDuckWorkerSession(NativeWorkerSession):
                             perception["sequence"] != observed["sequence"]))):
                         raise RuntimeError("Physical boundary changed during combined observation")
                     self._require_control_lease(run_task_id)
+                    if perception is not None:
+                        self._remember_targets(perception, source)
                     if (self._motion_guard is not None and snapshot["state"] == "paused" and
                             snapshot["execution_id"] == self._motion_guard["execution_id"] and
                             observed["sequence"] >= self._motion_guard["sequence"]):
@@ -634,6 +659,7 @@ class MicroDuckWorkerSession(NativeWorkerSession):
         self._motion_guard = None
         self._guard_tof_boundary_id = None
         self._metric_motion = None
+        self._target_observation = None
         return opened
 
     async def start(self, arguments: dict[str, Any]) -> dict[str, Any]:
@@ -663,6 +689,7 @@ class MicroDuckWorkerSession(NativeWorkerSession):
         command = await self._device.on_owner(prepare_command)
         self._require_control_lease(self._run_task_id)
         self._metric_motion = None
+        self._target_observation = None
         self._bind_motion_segment(command, self.DEFAULT_COMMAND_STEPS)
 
     async def resume(self, arguments: dict[str, Any]) -> dict[str, Any]:

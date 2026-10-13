@@ -213,6 +213,7 @@ function tool(operation, properties, required, services) {
       wait_for_motion: 'Wait up to 90 seconds for the currently admitted native policy motion to reach a confirmed paused or ended boundary, then return measured progress and remaining budget. Call after execution.start or execution.resume; inspect the result before preparing another action. This does not issue actions or confirm physical rest.',
       walk: 'Prepare the configured locomotion policy to move a signed distance in meters along the current heading, using 0.4 m/s unless a speed is supplied. Defaults are alpha_walking for standard feet and roller for the roller model; a policy registry can explicitly select another perpetual twist policy. Positive moves forward; negative moves backward. The parameter range describes accepted commands; policy tracking depends on the current scene and measured response. Requires a confirmed paused execution and five measured stopped samples, with no pending metric request. Call execution.resume afterward. Native odometry controls completion and braking; read task_progress.metric_motion after the pause.' + metricRecovery,
       rotate: 'Prepare the configured locomotion policy to turn by a signed angle in degrees, using 45 degrees/second unless an angular speed is supplied. Defaults are alpha_walking for standard feet and roller for the roller model; a policy registry can explicitly select another perpetual twist policy. Standard feet use coupled forward/lateral/yaw motion, so reserve room for translation and remeasure the position afterward. The measured translation_xy_m is reported. Positive is counterclockwise around world +Z; negative is clockwise. Requires a confirmed paused execution and five measured stopped samples, with no pending metric request. Call execution.resume afterward. Accumulated measured yaw controls completion and braking; read task_progress.metric_motion after the pause.' + metricRecovery,
+      approach_object: 'Prepare locomotion toward a visible target measured by the most recent inspect_scene or observe result. Supply its exact target_id and desired horizontal standoff_m from the captured world surface point. The observation must be from the current episode and control sequence with valid RGBD and satisfy max_age_ms, which defaults to 60000 ms. The captured point remains fixed throughout this motion. Requires a confirmed paused execution, five measured stopped samples and no pending motion. Call execution.resume afterward. Completion requires at most 0.05 m distance error and five stopped samples; task_progress.metric_motion retains the original target and measured result. Native proximity, contact and stall guards remain active.' + metricRecovery,
     }[operation],
     parameters: { type: 'object', properties, required, additionalProperties: false },
     output: {
@@ -326,6 +327,16 @@ const server = await startServer({
         angular_speed_deg_s: { type: 'number', minimum: 10, maximum: 55, default: 45,
           description: 'Requested yaw policy command in degrees/second. Omit to use 45 degrees/second. Standard feet also command 0.2 m/s forward and 0.25 m/s lateral throughout the turn; slower yaw can require more travel space.' },
       }, ['angle_deg'], { images }),
+      'microduck.approach_object': tool('approach_object', {
+        target_id: { type: 'string', minLength: 1, maxLength: 256,
+          description: 'Exact visible target_id from the latest current-frame inspect_scene or observe result.' },
+        standoff_m: { type: 'number', minimum: 0.2, maximum: 2.0,
+          description: 'Desired horizontal body distance to the captured world surface point, in meters.' },
+        speed_m_s: { type: 'number', minimum: 0.1, maximum: 0.4, default: 0.4,
+          description: 'Requested body-forward locomotion speed, in meters/second.' },
+        max_age_ms: { type: 'integer', minimum: 100, maximum: 60000, default: 60000,
+          description: 'Maximum age of the admitted perception observation, in milliseconds.' },
+      }, ['target_id', 'standoff_m'], { images }),
     },
     launchProfiles: {
       [nativeTaskId]: {
