@@ -10,6 +10,7 @@ from pathlib import Path
 from PIL import Image
 
 from oh_my_duck.validation.harness.target_approach import audit_target_approach
+from oh_my_duck.validation.harness.target_tracking import audit_target_tracking
 
 PROGRESS_TOOLS = {"microduck.task_progress", "microduck.observe", "microduck.wait_for_motion"}
 
@@ -160,6 +161,7 @@ def main() -> None:
     parser.add_argument("--require-stop-progress", action="store_true")
     parser.add_argument("--require-metric-tools", action="store_true")
     parser.add_argument("--require-target-approach", action="store_true")
+    parser.add_argument("--require-target-tracking", action="store_true")
     arguments = parser.parse_args()
     root = arguments.export_dir.resolve(strict=True)
     manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
@@ -198,12 +200,15 @@ def main() -> None:
         required_calls.add("microduck__walk")
     if arguments.require_target_approach:
         required_calls.add("microduck__approach_object")
+    if arguments.require_target_tracking:
+        required_calls.add("microduck__read_track")
     if missing := required_calls - set(calls):
         raise AssertionError(f"Original trace lacks required tool calls: {sorted(missing)}")
     if "execution__pause" not in calls:
         audit_motion_guard_pauses(events, manifest["runId"])
     tool_results = [event["detail"] for event in events if event["type"] == "tool.completed"]
     target_audit = audit_target_approach(tool_results) if arguments.require_target_approach else None
+    tracking_audit = audit_target_tracking(tool_results) if arguments.require_target_tracking else None
     if arguments.require_metric_tools:
         prepared = {item["result"]["request_id"]: item["result"] for item in tool_results
                     if item["tool"] == "microduck.walk"}
@@ -372,6 +377,7 @@ def main() -> None:
         "audited_stop_progress_count": stop_progress_count,
         "strict_metric_targets_required": arguments.require_metric_tools,
         "target_approach_audit": target_audit,
+        "target_tracking_audit": tracking_audit,
         "checker_source_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
     }, ensure_ascii=False, sort_keys=True))
 

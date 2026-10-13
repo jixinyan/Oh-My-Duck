@@ -210,6 +210,8 @@ async def run_case(args, source: str, output: Path) -> dict:
         sequence = (await call("progress", {}))["sequence"]
         await asyncio.sleep(0.2)
         assert (await call("progress", {}))["sequence"] == sequence
+        record["task_closed"] = await session.close_task()
+        assert record["task_closed"]["closed"]
         task_id = uuid4().hex
         await session.open_task({"native_task_id": "tracking-tools", "run_task_id": task_id,
                                  "catalog_task_id": "tracking-tools"})
