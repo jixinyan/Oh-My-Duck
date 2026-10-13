@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 
 from jsonschema import Draft202012Validator
 
@@ -42,7 +43,8 @@ def audit_motion_wait(events: list[dict]) -> dict:
                 motion["stopped_samples"] != result["stopped_samples"]):
             raise AssertionError("Motion wait requires one physical sequence for measured motion progress")
         if boundary_confirmed:
-            if not any(boundary["sequence"] < event["sequence"] and
+            if not any(datetime.fromisoformat(boundary["detail"]["execution"]["boundary_at"].replace("Z", "+00:00")) <=
+                datetime.fromisoformat(event["at"].replace("Z", "+00:00")) and
                 all(boundary["detail"]["execution"][key] == execution[key]
                     for key in ("execution_id", "state", "device_confirmed")) and
                 boundary["detail"]["execution"]["boundary_event_id"] == execution["boundary_id"]
