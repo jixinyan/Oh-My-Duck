@@ -35,6 +35,7 @@ tools:
   - microduck.wait_for_motion
   - microduck.walk
   - microduck.rotate
+  - microduck.approach_object
   - microduck.inspect_scene
 ---
 
@@ -113,6 +114,13 @@ episodic policy 到达 manifest 时长后产生 episode_terminated 边界。
 scene_info 提供当前场景的公共几何、地图、坐标定义和 perception_sources。
 感知调用使用当前场景公布的 source。根据实际家具和通道安排路线，
 视觉语言导航使用 inspect_scene(prompt, source) 获取当前 head RGB 中的目标、距离与 bearing。
+接近可见目标时调用 approach_object(target_id, standoff_m)，使用当前 inspect_scene 或
+observe 返回的原始 target_id。standoff_m 表示机器人到所观察表面点的水平距离，
+允许 0.2–2.0 米，默认速度为 0.4 m/s。观测需要属于当前 episode 和物理 sequence，
+具有有效 RGBD 测量；max_age_ms 允许 100–60000，默认 60000。
+准备动作后调用 execution.resume，再通过 wait_for_motion 和 observe 检查完成情况。
+该动作使用当前观测中的固定 world 表面点，完成要求距离误差不超过 0.05 米，
+并取得五个实际停止样本。目标移动后的新位置需要重新观察并准备新的动作。
 source=models 调用已配置的 perception 服务；source=simulator_ground_truth 明确使用原生
 实例几何与射线距离。每段行走或转向后重新观察，保留目标的 episode、sequence 和来源。
 不可将 simulator ground truth 结果描述为模型识别。目标未出现在图像中时，执行观察与

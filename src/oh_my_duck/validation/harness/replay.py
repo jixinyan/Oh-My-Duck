@@ -9,6 +9,8 @@ from pathlib import Path
 
 from PIL import Image
 
+from oh_my_duck.validation.harness.target_approach import audit_target_approach
+
 PROGRESS_TOOLS = {"microduck.task_progress", "microduck.observe", "microduck.wait_for_motion"}
 
 def require_one(events: list[dict], event_type: str) -> dict:
@@ -25,7 +27,8 @@ def audit_motion_guard_pauses(events: list[dict], run_id: str, warmup_policy: st
                 for event in completed_commands}
     metric_commands = {event["detail"]["result"]["request_id"]: event for event in events
                        if event["type"] == "tool.completed" and
-                       event["detail"].get("tool") in ("microduck.walk", "microduck.rotate")}
+                       event["detail"].get("tool") in
+                       ("microduck.walk", "microduck.rotate", "microduck.approach_object")}
     if len(commands) != len(completed_commands):
         raise AssertionError("Physical command request identities are duplicated")
     guarded = [event for event in events if event["type"] == "tool.completed" and
@@ -156,6 +159,7 @@ def main() -> None:
     parser.add_argument("--prior-export", type=Path)
     parser.add_argument("--require-stop-progress", action="store_true")
     parser.add_argument("--require-metric-tools", action="store_true")
+    parser.add_argument("--require-target-approach", action="store_true")
     arguments = parser.parse_args()
     root = arguments.export_dir.resolve(strict=True)
     manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
@@ -186,16 +190,20 @@ def main() -> None:
         raise AssertionError("Original trace lacks actual sensor and measured-progress tool calls")
     if arguments.prior_export is None:
         required_calls.update(("microduck__policy_catalog", "execution__resume"))
-        if not set(calls) & {"microduck__select_policy", "microduck__walk", "microduck__rotate"}:
+        if not set(calls) & {"microduck__select_policy", "microduck__walk", "microduck__rotate",
+                             "microduck__approach_object"}:
             raise AssertionError("Original trace lacks an official policy selection tool")
     if arguments.require_metric_tools:
         required_calls.discard("microduck__select_policy")
         required_calls.add("microduck__walk")
+    if arguments.require_target_approach:
+        required_calls.add("microduck__approach_object")
     if missing := required_calls - set(calls):
         raise AssertionError(f"Original trace lacks required tool calls: {sorted(missing)}")
     if "execution__pause" not in calls:
         audit_motion_guard_pauses(events, manifest["runId"])
     tool_results = [event["detail"] for event in events if event["type"] == "tool.completed"]
+    target_audit = audit_target_approach(tool_results) if arguments.require_target_approach else None
     if arguments.require_metric_tools:
         prepared = {item["result"]["request_id"]: item["result"] for item in tool_results
                     if item["tool"] == "microduck.walk"}
@@ -272,12 +280,15 @@ def main() -> None:
             raise AssertionError("Retained task did not continue its confirmed physical episode")
     if not any(item.get("tool") == "microduck.select_policy" and
                item["result"]["policy_name"] == "alpha_walking" or
-               item.get("tool") == "microduck.walk" and item["result"]["policy_name"] == "alpha_walking"
+               item.get("tool") in ("microduck.walk", "microduck.approach_object") and
+               item["result"]["policy_name"] == "alpha_walking"
                for item in selection_results):
         raise AssertionError("Alpha Walking policy selection was not confirmed")
     if not any(item.get("tool") == "microduck.set_command" and
                item["result"]["command"]["twist"][0] > 0 or
-               item.get("tool") == "microduck.walk" and item["result"]["arguments"]["distance_m"] > 0
+               item.get("tool") == "microduck.walk" and item["result"]["arguments"]["distance_m"] > 0 or
+               item.get("tool") == "microduck.approach_object" and
+               item["result"]["target_observation"]["target"]["distance_xy_m"] > item["result"]["standoff_m"]
                for item in tool_results):
         raise AssertionError("A forward policy command was not confirmed")
     positions = [item["result"]["body_position_m"] for item in tool_results
@@ -360,6 +371,7 @@ def main() -> None:
         "environment": environment, "observer_size": observer_size,
         "audited_stop_progress_count": stop_progress_count,
         "strict_metric_targets_required": arguments.require_metric_tools,
+        "target_approach_audit": target_audit,
         "checker_source_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
     }, ensure_ascii=False, sort_keys=True))
 
