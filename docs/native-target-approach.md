@@ -101,13 +101,17 @@ omd harness \
 ```bash
 omd validate replay outputs/model-target/replay \
   --expected-verdict passed --expected-stop-reason policy_stop \
-  --require-stop-progress --require-target-tracking --require-model-perception
+  --require-stop-progress --require-target-tracking \
+  --require-model-perception --require-motion-wait
 ```
 
 `--require-model-perception` 要求每个接近请求使用原始模型检测、相同模型 SHA256 和有效
 RGBD 几何，并具有测得的完成和停止记录。`--require-target-tracking` 检查同一目标在不同
-物理 sequence 上的当前查询。该场景的实际 Luna 任务、原始像素复核与 MP4 见
-[模型目标任务记录](reports/model-target-task-2026-10-13.md)。
+物理 sequence 上的当前查询。`--require-motion-wait` 核验动作中的进度查询、
+确认边界及对应的原始模型调用。该场景使用一秒与九十秒窗口，
+执行指导与返回状态见[运动等待](native-motion-wait.md)。
+实际 Luna 任务、原始像素复核、正式 Verifier 与 MP4 见
+[模型等待任务记录](reports/model-motion-wait-2026-10-13.md)。
 
 ## 源码
 

@@ -21,7 +21,7 @@ work requirements and dependencies are in the
 | Component | Verified scope | Remaining acceptance |
 | --- | --- | --- |
 | Source organization | Owned code under `src/oh_my_duck`; native Node deployment under `integrations/edh`; capability source maps | Continue documenting new capability and adapter entry points |
-| CLI/application | 原生服务、验证与记录、场景 Schema、policy package 与语音；455 个安装文件、三份 license、Mac 与 Linux 各 34 项 CLI 调用 | 声明的完整任务在独立环境中的执行检查 |
+| CLI/application | 原生服务、验证与记录、场景 Schema、policy package 与语音；456 个安装文件、三份 license、Mac 与 Linux 各 34 项 CLI 调用 | 声明的完整任务在独立环境中的执行检查 |
 | RL 参数入口 | 共同的 `argparse` 模块、27 项检查、六项评估入口、20 项原生训练命令和八次实际 CLI 调用；[验证记录](reports/training-arguments-2026-10-11.md) | 原生物理与训练验收使用各自声明的任务标准 |
 | 发布模型设置 | 共享模型与 API 参数；实际原生 Luna 调用；六阶段、四场景完整发布前检查；查询期限与失败记录 | 声明的实际 GPU 导航运行验收 |
 | 原生准备入口 | Mac 与 Linux 公开准备、固定 SDK 与 pnpm、11 项实际下载、两台主机原生 Luna 调用；Linux 九阶段退出、28 个 SDK 文件、锁定 CPU 环境及新环境连续物理运行通过；[入口记录](reports/native-preparation-2026-10-11.md) | 声明场景覆盖与连续语音任务 |
@@ -34,7 +34,7 @@ work requirements and dependencies are in the
 | Core types, tools and recording | Complete Draft 2020-12 Schemas, finite arguments, actual handlers, request identity, JSONL/native events, original image hashes and MP4 | New tools require their actual implementation and relevant execution evidence |
 | Native Harness | Fixed EDH, actual models, official policies, sensors, ActionGate and independent Verifier; CPU text/recorded-voice office tasks passed | Current-source multi-scene long navigation and repeated task statistics |
 | Policy tools | Metric units, pose response, policy transitions, bounded commands, state-preserving retries, progress and stop evidence | All long-distance precision, current Newton controller and object effects |
-| 原生运动等待 | 1–90 秒窗口、真实进度和确认边界；461 次动作逐项 ONNX 误差为零；11 条等待、七项参数拒绝、取消等待与三次边界读取；100 项检查和两个主机安装通过；[运行记录](reports/motion-wait-progress-2026-10-13.md) | 新等待参数的完整模型任务、Newton 与真机执行 |
+| 原生运动等待 | 同一控制步的物理与 controller 进度；461 次动作 ONNX 误差为零、11 条等待与取消检查；完整 Luna 任务通过 Verifier，485 次控制、十条模型等待与九项记录拒绝；101 项检查、两个主机安装、157.5 秒 MP4 通过；[任务记录](reports/model-motion-wait-2026-10-13.md) | 长时间 SSH 服务管理连接的独立生命周期检查、多场景重复任务、Newton 与真机执行 |
 | 可见目标接近 | Luna 使用 YOLO26 检测调用 `approach_object` 的正式 CPU 任务通过；496 次控制、1,984 次子步、0.67 毫米误差；原始 RGBD、来源 SHA256、停止与 Verifier 通过复核，160 秒 MP4 完整解码；80 项场景与导入检查、两个主机各 454 文件和 33 项命令通过；[模型任务](reports/model-target-task-2026-10-13.md)、[控制测量与中断](reports/target-approach-2026-10-12.md) | 多场景重复模型任务、Newton 与真机执行 |
 | 连续目标跟踪 | 原生 `read_track`、移动物体与实际 YOLO26 关联通过；425 次控制与逐动作 ONNX 复核；正式模型感知任务在 sequence 85、95 查询同一目标并完成接近、停止与 Verifier；[连续关联](reports/target-tracking-2026-10-12.md)、[模型来源任务](reports/model-target-task-2026-10-13.md) | 自主跟随、物体交叉、长时间遮挡、Newton 与真机执行 |
 | Policy registry | Ten official joint graphs and registered training packages; actual CPU Walking/StandUp package execution, complete episodic duration and continuation | Learned behavior, scene generalization and hardware |
@@ -78,6 +78,7 @@ Linux 独立安装检查通过 438 个文件和 27 项 CLI 调用。
 | Current CPU perception | Five rendered states, 1253 native geometry intersections, target distance/bearing and unchanged physics during reads | [CPU perception](reports/cpu-scene-perception-2026-10-08.md) |
 | Model RGBD measurements | Five actual CPU YOLO frames/targets, independent distance/position/bearing checks, 90 rejected alterations, three process exits, 436 installed files and 27 CLI calls | [Measurement validation](reports/perception-measurements-2026-10-08.md) |
 | 原生目标跟踪与模型查询 | 动态实例、实际 YOLO26 连续关联、425 次 ONNX 动作、十次原始 capture、八项查询拒绝、正式 Luna 任务与 975 帧完整视频解码通过 | [连续目标验收](reports/target-tracking-2026-10-12.md) |
+| 模型动作等待与同步进度 | 61 次实际 Luna Responses、485 次控制、1,940 次子步、1,015 条事件、十条等待结果；原始 RGBD 与严格安装版回放通过；任务资源已释放，远程服务正常退出；服务 SSH 管理连接退出状态为 255 | [完整等待任务](reports/model-motion-wait-2026-10-13.md) |
 | Configured perception sources | Shared Python/Node admission, native metadata/tool schema and two actual CPU sessions | [Source selection](reports/perception-source-capabilities-2026-10-08.md) |
 | Training package tools | Actual Walking/StandUp packages; 725 controls, 145 frames, 87 stopped samples, full episodic duration and transition | [Registered packages](reports/policy-packages-2026-10-08.md) |
 | Head/body commands | 575 controls, actual positive/negative pitch and body-height response, return, 115 camera frames and stopped-state audit | [Pose tools](reports/native-pose-2026-10-08.md) |

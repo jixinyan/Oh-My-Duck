@@ -42,7 +42,7 @@ This is the target experience. The project is under active development; [impleme
 | 读取当前目标 → 调用接近工具 → 停止 → 正式 Verifier | [目标工具与场景](docs/native-target-approach.md)、[CPU 模型任务与视频记录](docs/reports/target-approach-2026-10-12.md) |
 | 查询同一目标 → 移动后重新观察 → 确认当前测量 → 正式 Verifier；实际 YOLO26 连续关联 | [目标跟踪工具](docs/native-target-tracking.md)、[CPU 跟踪与 agentic MP4](docs/reports/target-tracking-2026-10-12.md) |
 | YOLO26 检测 → 确认同一目标 → Agent 调用接近策略 → 停止 → 正式 Verifier | [模型场景与运行](docs/native-target-approach.md)、[原始 RGBD 与 160 秒 agentic MP4](docs/reports/model-target-task-2026-10-13.md) |
-| 运动等待窗口 → 当前物理进度 → 确认边界 → 下一段动作 | [等待工具](docs/native-motion-wait.md)、[实际动作与取消调用验证](docs/reports/motion-wait-progress-2026-10-13.md) |
+| 运动等待窗口 → 当前物理进度 → 确认边界 → 模型目标任务与 Verifier | [等待工具](docs/native-motion-wait.md)、[完整 Luna 任务与 1080p MP4](docs/reports/model-motion-wait-2026-10-13.md) |
 | Walking/StandUp 训练包登记、执行与 policy 接续 | [Policy registry](docs/policy-registry.md)、[训练包验收](docs/reports/policy-packages-2026-10-08.md) |
 | Qwen CPU 推理、音色持久保存与任务中断 | [模型与音色](docs/reports/qwen-cpu-validation-2026-10-08.md)、[执行中断](docs/reports/cpu-voice-task-2026-10-08.md) |
 | Qwen ASR 全量 FLEURS 中文与英文 1,592 条人声录音；独立音频与识别指标复核 | [真实录音测量](docs/reports/asr-corpus-2026-10-12.md) |

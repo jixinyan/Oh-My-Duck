@@ -38,6 +38,10 @@
 `boundary_confirmed` 来自 `paused` 或 `ended` 与 `device_confirmed`。
 物理停止通过速度和 `stopped_samples` 检查。需要静止的运动准备工具要求至少五个停止样本。
 
+进度读取等待当前控制步的原生发布和 controller 更新完成，随后读取同一物理 sequence
+的身体位置、`metric_motion`、停止样本与 `goal_check`。等待窗口结束后，该同步读取
+包含当前控制步完成和传感器通信所需的时间。
+
 Agent 在 `execution.start` 或 `execution.resume` 后调用该工具，
 检查返回状态并继续自己的监测过程。每个确认边界的原始测量均保留在 trace 中。
 取消等待调用保留当前 policy Task；用户停止动作通过 Harness 原生任务停止接口执行，
@@ -58,6 +62,29 @@ CUDA_VISIBLE_DEVICES='' python -m oh_my_duck.infrastructure.headless \
 验证覆盖短时窗口、取消等待、90 秒窗口结束后的继续执行、目标接近、
 暂停与终止后的重复读取、七项非法参数拒绝和实际停止保持。
 
+## 完整模型任务与记录检查
+
+[`apartment-model-target.json`](../configs/simulation-demo/apartment-model-target.json) 指导 Agent
+在每次执行或继续动作后使用 `max_wait_s=1` 查询进度，当前动作继续时使用
+`max_wait_s=90` 等待确认边界。目标检测使用 YOLO26；仿真 RGBD 提供几何距离。
+
+导出实际任务后执行公开检查：
+
+```sh
+omd validate replay outputs/model-target/replay \
+  --expected-verdict passed --expected-stop-reason policy_stop \
+  --require-stop-progress --require-target-tracking \
+  --require-model-perception --require-motion-wait
+```
+
+`--require-motion-wait` 要求同时存在继续执行和确认边界的工具结果，
+检查原始模型调用参数、对应的完成结果、同一物理 sequence 的测量、
+执行身份及原生 `boundary_at`。边界时间使用原生记录中的发生时间。
+
+固定源码的实际 Luna 任务通过独立 Verifier，保存十条等待结果、三次原始模型 RGBD
+观测、连续目标查询、测得的接近、停止和资源释放。该范围见
+[模型等待任务记录](reports/model-motion-wait-2026-10-13.md)。
+
 实现位置：
 
 | 内容 | 源码 |
@@ -66,6 +93,7 @@ CUDA_VISIBLE_DEVICES='' python -m oh_my_duck.infrastructure.headless \
 | Agent tool Schema | `integrations/edh/server.mjs` |
 | Planner 工具指导 | `integrations/edh/roles/planner.md` |
 | 实际 CPU 验证 | `src/oh_my_duck/validation/harness/motion_wait.py` |
+| 完整模型任务等待记录 | `src/oh_my_duck/validation/harness/motion_wait_records.py` |
 
-固定源码的真实 CPU 运行与独立 ONNX、物理记录和图像复核见
-[验证记录](reports/motion-wait-progress-2026-10-13.md)。
+固定源码的真实 CPU 动作、独立 ONNX、完整模型任务和 MP4 复核见
+[验证记录](reports/model-motion-wait-2026-10-13.md)。
