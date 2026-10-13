@@ -16,7 +16,8 @@ def verify(capture: Path, catalog: Path | None = None) -> dict:
     from oh_my_duck.perception.validation import validate_measurements, validate_response
     from oh_my_duck.validation.metric.policy import verify as verify_policy
 
-    totals = {"captures": 0, "native_pixel_identities": 0, "model_confirmed_observations": 0,
+    totals = {"control_steps": 0, "raw_sim_steps": 0,
+              "captures": 0, "native_pixel_identities": 0, "model_confirmed_observations": 0,
               "repeated_frames": 0, "observer_frames": 0, "invalid_measurements_rejected": 0}
     model_instances = {}
     model_sequences = set()
@@ -34,10 +35,25 @@ def verify(capture: Path, catalog: Path | None = None) -> dict:
         history = {}
         if not result["passed"] or result["cuda_initialized"] or not result["resources_closed"]:
             raise AssertionError("Tracking requires completed CPU sessions and released resources")
-        if len(samples) != result["control_steps"] or result["raw_sim_steps"] != result["control_steps"] * 4:
+        controls = {item["sequence"]: item for item in samples
+                    if item["control"] is not None and item["control"]["executed_actions"] > 0}
+        if len(controls) != result["control_steps"] or result["raw_sim_steps"] != result["control_steps"] * 4:
             raise AssertionError("Tracking requires original 50 Hz / four-substep policy evidence")
-        if [item["sequence"] for item in samples] != list(range(1, result["control_steps"] + 1)):
+        if sorted(controls) != list(range(1, result["control_steps"] + 1)):
             raise AssertionError("Tracking control samples contain gaps")
+        states = {}
+        for sample in samples:
+            sequence = sample["sequence"]
+            if type(sequence) is not int or not 0 <= sequence <= result["control_steps"]:
+                raise AssertionError("Tracking update has an invalid physical sequence")
+            physical = {key: value for key, value in sample.items() if key not in ("control", "phase")}
+            if sequence in states and states[sequence] != physical:
+                raise AssertionError("Repeated tracking update changed its physical measurement")
+            states[sequence] = physical
+        if catalog is not None and policy_audits[-1]["control_steps"] != len(controls):
+            raise AssertionError("Tracking controls differ from independent ONNX evidence")
+        totals["control_steps"] += result["control_steps"]
+        totals["raw_sim_steps"] += result["raw_sim_steps"]
         for row in records:
             perception = row["perception"]
             if perception["sequence"] != row["physical_sequence"]:
