@@ -345,7 +345,7 @@ def tool_summary(event: dict) -> str:
                 "\n".join(targets or ["No visible target"]))
     elif tool == "microduck.set_command":
         visible = selected(result, ("effective_after_sequence", "command"))
-    elif tool in ("microduck.walk", "microduck.rotate"):
+    elif tool in ("microduck.walk", "microduck.rotate", "microduck.approach_object"):
         visible = selected(result, ("prepared", "arguments", "policy_name", "next_action"))
     elif tool in ("microduck.task_progress", "microduck.observe", "microduck.wait_for_motion"):
         reason, distance, samples = progress_motion_evidence(result)
@@ -413,6 +413,8 @@ def native_target_text(target: dict) -> str:
         return target["room"]
     elif "target_xy_m" in target:
         return f"distance={target['distance_xy_m']:.3f}/{target['threshold_m']:.3f} m"
+    elif "body" in target:
+        return f"{target['body']} · distance={target['distance_xy_m']:.3f}/{target['threshold_m']:.3f} m"
     raise ValueError("Native verification target is unsupported")
 
 
