@@ -308,6 +308,15 @@ def selected(value: dict, names: tuple[str, ...]) -> dict:
     return {name: value[name] for name in names if name in value}
 
 
+def perception_summary(result: dict) -> str:
+    targets = [f"{target['label']} · {target['distance_m']:.2f} m · bearing {target['bearing_deg']:+.1f}°"
+               if target["distance_status"] == "valid" else
+               f"{target['label']} · {target['distance_status']}" for target in result.get("targets", [])[:3]]
+    return (f"{result['prompt']} · captured seq {result['sequence']}\n"
+            f"detection: {result['detection_source']} · distance: {result['distance_source']}\n" +
+            "\n".join(targets or ["No visible target"]))
+
+
 def tool_summary(event: dict) -> str:
     detail = event["detail"]
     tool = detail.get("tool", "tool")
@@ -337,12 +346,7 @@ def tool_summary(event: dict) -> str:
         elif result.get("sensor") == "joint_state":
             visible["joint_count"] = len(measurements["joint_names"])
     elif tool == "microduck.inspect_scene":
-        targets = [f"{target['label']} · {target['distance_m']:.2f} m · bearing {target['bearing_deg']:+.1f}°"
-                   if target["distance_status"] == "valid" else
-                   f"{target['label']} · {target['distance_status']}" for target in result.get("targets", [])[:3]]
-        return (f"{tool} · {result['prompt']} · captured seq {result['sequence']}\n"
-                f"detection: {result['detection_source']} · distance: {result['distance_source']}\n" +
-                "\n".join(targets or ["No visible target"]))
+        return f"{tool} · {perception_summary(result)}"
     elif tool == "microduck.read_track":
         observation = result["last_observation"]
         target = observation["target"]
@@ -372,7 +376,7 @@ def tool_summary(event: dict) -> str:
         if isinstance(execution, dict) and "remaining_wall_time_s" in execution:
             text += f"\nremaining {execution['remaining_wall_time_s']:.1f} s / {execution['remaining_actions']} controls"
         if perception := result.get("perception"):
-            text += f"\n{perception['prompt']} · {perception['distance_source']} · {len(perception['targets'])} targets"
+            text += f"\n{perception_summary(perception)}"
         if goal := result.get("goal_check"):
             evidence = goal["checks"]["goal_reached"]["evidence"]
             text += f"\ngoal={goal['complete']} · hold {evidence['held_ticks']}/{evidence['required_hold_ticks']}"
