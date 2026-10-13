@@ -61,5 +61,7 @@ Mac 和 Linux 各自在没有 tracked 改动的固定源码目录构建 wheel �
 
 源码位置见[Architecture](../architecture.md)，使用参数见
 [原生部署](../harness-native-integration.md#ssh-连接与远程进程)。
-完整模型任务服务管理、网络中断统计、GPU 与真机分别验收。
+同一安装版本的完整模型任务和服务管理见
+[完整任务运行](native-model-task-lifecycle-2026-10-13.md)。
+网络中断统计、GPU 与真机分别验收。
 用户原有 `environments/isaac-assets/uv.lock` 保持原有内容。

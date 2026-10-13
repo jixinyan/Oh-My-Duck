@@ -111,7 +111,7 @@ RGBD 几何，并具有测得的完成和停止记录。`--require-target-tracki
 确认边界及对应的原始模型调用。该场景使用一秒与九十秒窗口，
 执行指导与返回状态见[运动等待](native-motion-wait.md)。
 实际 Luna 任务、原始像素复核、正式 Verifier 与 MP4 见
-[模型等待任务记录](reports/model-motion-wait-2026-10-13.md)。
+[完整安装版任务](reports/native-model-task-lifecycle-2026-10-13.md)。
 
 ## 源码
 

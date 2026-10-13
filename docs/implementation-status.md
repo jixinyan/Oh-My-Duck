@@ -29,11 +29,12 @@ work requirements and dependencies are in the
 | 原生 context 设置 | 默认 headroom、摘要预算和图像历史；两台主机六项实际 SDK 预算检查；四项来源文件与各 28 项独立安装调用；[配置记录](reports/native-context-preparation-2026-10-11.md) | 多场景长任务与更广泛的重复执行统计 |
 | 原生 Responses 工具参数 | SDK 参数 Schema、实际 Luna 可选参数调用与正式报告读取；传输关闭；两台主机各 28 项独立安装调用；[调用记录](reports/native-tool-parameters-2026-10-11.md) | 多场景长任务与更广泛的模型任务统计 |
 | SSH CPU worker | 实际进程的 CUDA visibility 为空；关闭后进程数量归零、session 释放资源、服务退出状态为零；两台主机各 28 项独立安装调用；[会话记录](reports/native-cpu-ssh-2026-10-11.md) | 多场景完整模型导航 |
-| SSH 服务连接 | 共用 Python 参数、明确 keepalive、端口转发和参数拒绝；实际 CPU 服务连续空闲 660 秒，HTTP 转发保持有效；SSH 与服务退出 0、端口关闭；121 项检查、两个主机独立安装与原始模型任务安装版回放通过；[连接记录](reports/ssh-idle-lifecycle-2026-10-13.md) | 完整模型任务中的服务管理、多场景长时间连接与网络中断统计 |
+| SSH 服务连接 | 共用 Python 参数、明确 keepalive、端口转发和参数拒绝；实际 CPU 服务连续空闲 660 秒；完整模型任务的 SSH 与服务退出 0、端口关闭；121 项检查和两个主机独立安装通过；[连接记录](reports/ssh-idle-lifecycle-2026-10-13.md)、[任务运行](reports/native-model-task-lifecycle-2026-10-13.md) | 多场景长时间连接与网络中断统计 |
 | 原生 CPU 重复导航 | 两个 seed 完整 Luna 任务成功，正式 Verifier 通过；1,411 次控制、5,644 次物理步骤、2,661 条事件、281 张 observer 图像和 37 条停止进度记录通过独立检查；两段 1080p agentic MP4 的 665 帧完整解码通过；[验收记录](reports/native-cpu-navigation-2026-10-11.md) | 多场景长导航、独立图像导航和更广泛的重复任务统计 |
 | GPU 资源读取 | 公共 CSV 模块、实际设备及重复进程记录、31 项检查、占用拒绝及持续空闲检查 | 每次分配重新检查实际状态；当前 GPU 运行验收保持停止 |
 | Core types, tools and recording | Complete Draft 2020-12 Schemas, finite arguments, actual handlers, request identity, JSONL/native events, original image hashes and MP4 | New tools require their actual implementation and relevant execution evidence |
 | Native Harness | Fixed EDH, actual models, official policies, sensors, ActionGate and independent Verifier; CPU text/recorded-voice office tasks passed | Current-source multi-scene long navigation and repeated task statistics |
+| 安装版完整模型任务 | 实际 Luna 55 次 Responses、485 次控制、1,940 次子步、957 条事件；模型 RGBD、十条等待、目标跟踪、接近、正式 Verifier、严格回放与全部所属服务退出通过；149.6 秒 1080p MP4 全部 1,496 帧解码通过；[运行记录](reports/native-model-task-lifecycle-2026-10-13.md) | 多场景重复任务、独立语义准确率、Newton 与真机执行 |
 | Policy tools | Metric units, pose response, policy transitions, bounded commands, state-preserving retries, progress and stop evidence | All long-distance precision, current Newton controller and object effects |
 | 原生运动等待 | 同一控制步的物理与 controller 进度；461 次动作 ONNX 误差为零、11 条等待与取消检查；完整 Luna 任务通过 Verifier，485 次控制、十条模型等待与九项记录拒绝；101 项检查、两个主机安装、157.5 秒 MP4 通过；[任务记录](reports/model-motion-wait-2026-10-13.md) | 多场景重复任务、Newton 与真机执行 |
 | 可见目标接近 | Luna 使用 YOLO26 检测调用 `approach_object` 的正式 CPU 任务通过；496 次控制、1,984 次子步、0.67 毫米误差；原始 RGBD、来源 SHA256、停止与 Verifier 通过复核，160 秒 MP4 完整解码；80 项场景与导入检查、两个主机各 454 文件和 33 项命令通过；[模型任务](reports/model-target-task-2026-10-13.md)、[控制测量与中断](reports/target-approach-2026-10-12.md) | 多场景重复模型任务、Newton 与真机执行 |

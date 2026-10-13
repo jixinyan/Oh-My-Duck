@@ -84,6 +84,8 @@ omd validate replay outputs/model-target/replay \
 固定源码的实际 Luna 任务通过独立 Verifier，保存十条等待结果、三次原始模型 RGBD
 观测、连续目标查询、测得的接近、停止和资源释放。该范围见
 [模型等待任务记录](reports/model-motion-wait-2026-10-13.md)。
+独立安装后的完整任务、严格回放、全部服务关闭与 MP4 见
+[完整运行记录](reports/native-model-task-lifecycle-2026-10-13.md)。
 
 实现位置：
 

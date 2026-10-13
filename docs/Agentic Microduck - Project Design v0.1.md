@@ -26,7 +26,7 @@ Oh My Duck 为 Microduck 提供仿真、训练、技能工具、主动感知、�
 
 | 范围 | 当前证据 | 完整验收要求 |
 | --- | --- | --- |
-| 原生模型与工具执行 | Luna CPU 文字、录音与连续任务、两项正式任务及历史引用、独立 Verifier、原始传感器、agentic MP4 和资源释放通过 | 当前源码的多场景长导航、全部动作精度及重复任务统计 |
+| 原生模型与工具执行 | Luna CPU 文字、录音与连续任务、历史引用、独立 Verifier；安装版完整模型目标任务、原始 RGBD、严格回放、agentic MP4、全部所属服务退出和资源释放通过 | 当前源码的多场景长导航、全部动作精度及重复任务统计 |
 | 语音与固定音色 | 三个 Qwen 模型的实际 CPU 推理、四段 WAV 与全部 ASR 回读、36 项音色与参数测试；FLEURS 全量 1,592 条真实录音与指标复核通过 | 机器人指令识别、噪声、交互延迟、音质与 Microduck 音频设备 |
 | 感知 | 当前 CPU RGBD、真实 CPU YOLO 与原始像素测量复核；固定源码 Newton RGBD 和 SAM3.1 + YOLO26 服务记录 | 当前 SAM GPU 验收、独立标注评估、目标跟踪和真机校准 |
 | 训练与导出 | Walking/StandUp × 两个 backend × 两个原生 PPO 的执行流程、恢复、归一化导出与回放记录 | 自训练有效行为、多个 seed、sim2sim 与最终评估 |
@@ -51,6 +51,8 @@ SSH CPU worker 的实际 CUDA 设置、会话关闭、资源释放、进程退�
 及会话资源释放通过，见[重复导航验收](reports/native-cpu-navigation-2026-10-11.md)。
 两段 1080p MP4 将实际工具调用、observer 画面、head RGB 与正式判定放在
 同一画面，完整解码、相机原始文件和运动时序检查通过。
+安装版的实际 Luna 模型目标任务、SSH keepalive、全部服务关闭和 149.6 秒 MP4
+见[完整运行记录](reports/native-model-task-lifecycle-2026-10-13.md)。
 [发布模型设置](reports/release-model-settings-2026-10-09.md)保存实际 SDK 调用、统一模型预算与查询期限的检查结果。
 GPU 验收与 RL 保持停止。后续获得执行授权时，同时最多使用一张空闲 GPU 2–4；
 设备要求没有 compute PID 且持续零 utilization。其他用户和项目的进程保留。

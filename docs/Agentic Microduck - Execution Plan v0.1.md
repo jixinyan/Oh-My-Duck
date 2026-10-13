@@ -24,7 +24,8 @@ GPU 验收与 RL 保持停止。后续获得执行授权时，同时最多使用
 | 原生 Harness | 实际 Luna 文字、录音及连续任务；两项正式任务、历史引用、经验搜索、独立 Verifier、停止与原始资料核验 | 扩大声明场景的完整任务覆盖，保持实际目标和原有预算 |
 | Policy 工具 | 原生米制行走、角度转向、姿态、转换、重试及训练包 CPU 执行 | 当前源码 Newton 长导航、所有严格精度与学习行为 |
 | 原生运动等待 | 同一控制步的物理与 controller 进度；461 次动作 ONNX 误差为零、11 条实际等待；完整 Luna 任务通过 Verifier，485 次控制、十条模型等待、九项记录拒绝；101 项检查与 157.5 秒 MP4 通过；[任务记录](reports/model-motion-wait-2026-10-13.md) | 多场景重复任务与 Newton 执行 |
-| SSH 服务连接 | 共享参数、实际 CPU 服务空闲 660 秒、有效 HTTP 转发、SSH 与服务退出 0、端口关闭；121 项检查和两台主机安装通过；[连接记录](reports/ssh-idle-lifecycle-2026-10-13.md) | 完整模型任务服务管理与网络中断统计 |
+| SSH 服务连接 | 共享参数、实际 CPU 服务空闲 660 秒与完整模型任务；SSH 与服务退出 0、端口关闭；121 项检查和两台主机安装通过；[连接记录](reports/ssh-idle-lifecycle-2026-10-13.md) | 多场景长时间连接与网络中断统计 |
+| 安装版完整模型任务 | Luna 55 次实际 Responses、485 次控制、1,940 次子步、模型感知、跟踪、接近、正式 Verifier、严格回放和服务关闭；149.6 秒 MP4 全部 1,496 帧解码通过；[任务运行](reports/native-model-task-lifecycle-2026-10-13.md) | 多场景重复任务、独立语义准确率与 Newton 执行 |
 | 可见目标接近 | 原生 `approach_object`、Luna + YOLO26 完整 CPU 任务、原始 RGBD 与来源检查、独立 Verifier、0.67 毫米误差、160 秒 MP4；两个主机各 454 个安装文件和 33 项命令；[模型目标记录](reports/model-target-task-2026-10-13.md)、[控制与中断](reports/target-approach-2026-10-12.md) | 多场景重复模型任务与 Newton 执行 |
 | 连续目标跟踪 | 原生 `read_track`、动态实例与 YOLO26 连续关联、逐动作 ONNX 复核；完整模型来源任务查询相同目标的 sequence 85、95，接近和正式 Verifier 通过；[跟踪记录](reports/target-tracking-2026-10-12.md)、[模型目标记录](reports/model-target-task-2026-10-13.md) | 自主跟随、物体交叉与长时间遮挡、Newton 执行 |
 | 感知 | CPU RGBD 与几何复核、原始模型记录与目标跟踪，固定源码 SAM3.1 + YOLO26 服务记录 | 独立标注、识别准确率、距离误差与 calibration |
@@ -325,6 +326,11 @@ SSH CPU worker 的 CUDA visibility 为空，实际会话关闭后 worker 数量�
 [重复导航验收](reports/native-cpu-navigation-2026-10-11.md)。
 对应的两段 1080p agentic MP4 完成全部 665 帧解码，原始相机文件、
 来源摘要与运动时序检查通过；视频保存实际工具调用和正式任务结果。
+安装版在 Mac 运行实际 Luna，通过 SSH 驱动 Linux CPU MuJoCo/BAM。
+原始模型 RGBD、目标查询、接近、等待、停止与独立 Verifier 通过完整检查，
+所属 Harness、SSH 和 perception 服务均正常退出，资源释放与严格回放通过。
+该固定源码的两台主机安装及 149.6 秒 MP4 见
+[完整任务运行](reports/native-model-task-lifecycle-2026-10-13.md)。
 
 交付 README、source map、教程、环境和版本矩阵、policy 来源、评估方法及已验收范围。
 通过条件为他人能够按文档运行所声明的功能并找到扩展位置，真实设备支持对应具体设备证据。

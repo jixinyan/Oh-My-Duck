@@ -168,6 +168,8 @@ host、远程 command 和 forwarded ports 在建立连接前验证。
 检查远程服务退出、worker 数量和两端转发端口关闭。
 实际 CPU 服务空闲 660 秒的连接、HTTP 转发与关闭检查见
 [SSH 生命周期记录](reports/ssh-idle-lifecycle-2026-10-13.md)。
+同一安装版本的完整 Luna 模型任务、原始 RGBD、正式 Verifier、资料导出、
+全部服务退出和 agentic MP4 见[完整运行记录](reports/native-model-task-lifecycle-2026-10-13.md)。
 
 ## 远程 GPU 仿真
 

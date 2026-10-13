@@ -44,6 +44,7 @@ This is the target experience. The project is under active development; [impleme
 | YOLO26 检测 → 确认同一目标 → Agent 调用接近策略 → 停止 → 正式 Verifier | [模型场景与运行](docs/native-target-approach.md)、[原始 RGBD 与 160 秒 agentic MP4](docs/reports/model-target-task-2026-10-13.md) |
 | 运动等待窗口 → 当前物理进度 → 确认边界 → 模型目标任务与 Verifier | [等待工具](docs/native-motion-wait.md)、[完整 Luna 任务与 1080p MP4](docs/reports/model-motion-wait-2026-10-13.md) |
 | SSH keepalive → 长时间 CPU 服务 → 有效转发 → 进程与端口关闭 | [共享连接参数与十一分钟实际检查](docs/reports/ssh-idle-lifecycle-2026-10-13.md) |
+| 独立安装 → Luna → 模型感知 → 官方 policy → Verifier → 导出与服务关闭 | [完整 CPU 流程与 149.6 秒 agentic MP4](docs/reports/native-model-task-lifecycle-2026-10-13.md) |
 | Walking/StandUp 训练包登记、执行与 policy 接续 | [Policy registry](docs/policy-registry.md)、[训练包验收](docs/reports/policy-packages-2026-10-08.md) |
 | Qwen CPU 推理、音色持久保存与任务中断 | [模型与音色](docs/reports/qwen-cpu-validation-2026-10-08.md)、[执行中断](docs/reports/cpu-voice-task-2026-10-08.md) |
 | Qwen ASR 全量 FLEURS 中文与英文 1,592 条人声录音；独立音频与识别指标复核 | [真实录音测量](docs/reports/asr-corpus-2026-10-12.md) |
