@@ -40,6 +40,34 @@ class MicroDuckWorkerSession(NativeWorkerSession):
         self._target_observation: dict[str, Any] | None = None
         self._target_tracker = TargetTracker(TrackingParameters(control_period_s=CONTROL_DT))
         self._task_start: dict[str, Any] | None = None
+        self._progress_condition = asyncio.Condition()
+        self._processed_control_sequence = 0
+
+    async def _wait_control_progress(self, sequence: int) -> None:
+        async with self._progress_condition:
+            await self._progress_condition.wait_for(lambda: self._processed_control_sequence >= sequence)
+
+    async def _read_progress(self) -> dict:
+        while True:
+            observed = await self._device.on_owner(self._control_observation)
+            sequence = observed["sequence"]
+            if sequence == self._processed_control_sequence:
+                return self._progress_result(observed)
+            if sequence < self._processed_control_sequence:
+                continue
+            pump = self._pump
+            if pump is None:
+                raise RuntimeError("Native progress lacks the Task processing its physical control")
+            processed = asyncio.create_task(self._wait_control_progress(sequence))
+            try:
+                completed, _ = await asyncio.wait({processed, pump}, return_when=asyncio.FIRST_COMPLETED)
+                if pump in completed:
+                    await pump
+                    if self._processed_control_sequence < sequence:
+                        raise RuntimeError("Native policy ended before publishing its physical control progress")
+            finally:
+                processed.cancel()
+                await asyncio.gather(processed, return_exceptions=True)
 
     async def _await_motion_cleanup(self) -> None:
         task = self._motion_cleanup_task
@@ -503,8 +531,7 @@ class MicroDuckWorkerSession(NativeWorkerSession):
                     if set(args) - {"max_wait_s"}:
                         raise ValueError("运动等待参数包含未知字段")
                     await self._wait_motion_boundary(args.get("max_wait_s", 90))
-                observed = await self._device.on_owner(self._control_observation)
-                result = self._progress_result(observed)
+                result = await self._read_progress()
                 if operation == "wait_for_motion":
                     execution = result["execution"]
                     result["motion_wait"] = {
@@ -685,6 +712,7 @@ class MicroDuckWorkerSession(NativeWorkerSession):
         await self._device.on_owner(begin_goal)
         observed = await self._device.on_owner(self._control_observation)
         self._require_control_lease(run_task_id)
+        self._processed_control_sequence = observed["sequence"]
         self._task_start = {
             "run_task_id": run_task_id,
             **{key: observed[key] for key in ("episode_id", "sequence", "simulation_time_s", "goal_check")},
@@ -753,6 +781,17 @@ class MicroDuckWorkerSession(NativeWorkerSession):
         return await super().close_task()
 
     async def _on_segment(self, segment: dict[str, Any], receipt: dict[str, Any]) -> None:
+        try:
+            await self._process_control_segment(segment, receipt)
+        finally:
+            step = self._require_device().last_step
+            async with self._progress_condition:
+                if step is not None:
+                    self._processed_control_sequence = self._environment._navigation_samples[
+                        step.observation.observation_id]["sequence"]
+                self._progress_condition.notify_all()
+
+    async def _process_control_segment(self, segment: dict[str, Any], receipt: dict[str, Any]) -> None:
         await super()._on_segment(segment, receipt)
         gate = self._require_gate()
         snapshot = gate.snapshot()

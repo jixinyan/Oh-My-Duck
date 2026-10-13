@@ -69,6 +69,11 @@ async def run(args):
     async def call(operation, arguments):
         started = time.monotonic()
         result = await control(port, secret, task_id, operation, arguments)
+        if operation in {"progress", "wait_for_motion"} and result["metric_motion"] is not None:
+            motion = result["metric_motion"]
+            assert motion["sequence"] == result["sequence"]
+            assert motion["body_position_m"] == result["body_position_m"]
+            assert motion["stopped_samples"] == result["stopped_samples"]
         tools.append({"operation": operation, "arguments": arguments, "result": deepcopy(result),
                       "phase": phase, "elapsed_s": time.monotonic() - started})
         print(json.dumps({"operation": operation, "phase": phase, "sequence": result.get("sequence"),
