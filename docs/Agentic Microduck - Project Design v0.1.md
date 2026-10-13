@@ -287,6 +287,10 @@ Schema 与实现位于 [`integrations/edh/server.mjs`](../integrations/edh/serve
 准备请求，随后通过 `execution.resume` 执行。请求保留捕获的固定 world 表面点，
 根据实际身体位置控制距离与 bearing，完成要求为 0.05 米以内误差和五个停止样本。
 工具参数、记录复核与 CPU 场景见[目标接近说明](native-target-approach.md)。
+模型来源请求保留检测结果的 `models` SHA256；完整回放使用
+`--require-model-perception` 检查原始检测、请求来源、实际距离和停止。
+Luna + YOLO26 的实际 CPU 目标任务与原始 RGBD 复核见
+[模型任务记录](reports/model-target-task-2026-10-13.md)。
 
 ### 6.2 生命周期与权限
 

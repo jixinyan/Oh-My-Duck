@@ -113,3 +113,10 @@ Source locations are listed in the
 [perception source map](../src/oh_my_duck/perception/README.md).
 Actual CPU execution, model task, independent installation and video evidence
 are recorded in the [acceptance report](reports/target-tracking-2026-10-12.md).
+
+The [`apartment-model-target.json`](../configs/simulation-demo/apartment-model-target.json)
+scene uses actual YOLO26 observations for both target selection and approach.
+Add `--require-model-perception` to the replay command to require the original
+model detection and SHA256 on every approach request. The actual CPU task queried
+the same model track at sequences 85 and 95 before approaching and finishing with
+an independent passed verdict. See the [model task and MP4](reports/model-target-task-2026-10-13.md).

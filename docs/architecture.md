@@ -61,7 +61,7 @@ Application, robot, training, shared acceptance and replay modules live in `src/
 | Episode 记录与原生导出 | `experience/` | `base.py` 的 `EpisodeRecorder`、`jsonl.py` 的 `JsonlEpisodeRecorder`、`harness_replay.py` 的 `export_run`；身份与时钟字段位于 `core/contracts/events.py` |
 | Measured policy acceptance | `validation/metric/` | `plans.py`, `case.py`, `campaign.py`, `verify.py`, `policy.py` |
 | Native task, pose and navigation acceptance | `validation/harness/` | `control.py`, `metric_admission.py`, `motion_guard.py`, `pose.py`, `pose_records.py`, `replay.py`, `navigation.py` |
-| 目标接近记录检查 | `validation/harness/` | `target_approach.py` 重算原始目标距离、误差和停止；`replay.py` 的 `--require-target-approach` 检查完整正式任务 |
+| 目标接近记录检查 | `validation/harness/` | `target_approach.py` 重算原始目标距离、误差和停止；`replay.py` 的 `--require-target-approach` 检查正式任务，`--require-model-perception` 检查模型检测来源与原始 SHA256 |
 | 连续目标记录检查 | `validation/`、`validation/harness/` | `tracking_records.py` 核查实际 RGBD、原生实例像素与 policy；`harness/tracking.py` 执行 CPU 原生测试；`harness/target_tracking.py` 核查查询身份，供 `replay.py --require-target-tracking` 使用 |
 | 连续任务与语音历史引用检查 | `validation/harness/` | `task_continuation.py`、`voice_context.py` |
 | Registered policy package admission and execution | `validation/harness/` | `registry.py`, `package_execution.py` |

@@ -10,7 +10,7 @@
 [![CPU Luna navigation: two seeds verified](https://img.shields.io/badge/CPU_Luna_navigation-2_seeds_verified-2ea44f)](docs/reports/native-cpu-navigation-2026-10-11.md)
 [![Voice: native task verified](https://img.shields.io/badge/voice-native_task_verified-green)](docs/reports/cpu-voice-navigation-2026-10-08.md)
 [![ASR: full corpus verified](https://img.shields.io/badge/ASR-1592_recordings_verified-2ea44f)](docs/reports/public-asr-workflow-2026-10-12.md)
-[![Target approach: native CPU task verified](https://img.shields.io/badge/target_approach-native_CPU_task_verified-2ea44f)](docs/reports/target-approach-2026-10-12.md)
+[![Target approach: model RGBD task verified](https://img.shields.io/badge/target_approach-model_RGBD_task_verified-2ea44f)](docs/reports/model-target-task-2026-10-13.md)
 [![Release: acceptance in progress](https://img.shields.io/badge/release-acceptance_in_progress-blue)](docs/release-readiness.md)
 [![Isaac Office: agentic navigation verified](https://img.shields.io/badge/Isaac_Office-agentic_navigation_verified-green)](docs/reports/metric-camera-tools-2026-09-30.md)
 [![Isaac Hospital: roller and crouch verified](https://img.shields.io/badge/Isaac_Hospital-roller_and_crouch_verified-green)](docs/reports/multiskill-demos-2026-10-01.md)
@@ -41,6 +41,7 @@ This is the target experience. The project is under active development; [impleme
 | 原始 RGBD、可见目标、距离与 bearing | [CPU 感知](docs/reports/cpu-scene-perception-2026-10-08.md)、[感知来源](docs/reports/perception-source-capabilities-2026-10-08.md) |
 | 读取当前目标 → 调用接近工具 → 停止 → 正式 Verifier | [目标工具与场景](docs/native-target-approach.md)、[CPU 模型任务与视频记录](docs/reports/target-approach-2026-10-12.md) |
 | 查询同一目标 → 移动后重新观察 → 确认当前测量 → 正式 Verifier；实际 YOLO26 连续关联 | [目标跟踪工具](docs/native-target-tracking.md)、[CPU 跟踪与 agentic MP4](docs/reports/target-tracking-2026-10-12.md) |
+| YOLO26 检测 → 确认同一目标 → Agent 调用接近策略 → 停止 → 正式 Verifier | [模型场景与运行](docs/native-target-approach.md)、[原始 RGBD 与 160 秒 agentic MP4](docs/reports/model-target-task-2026-10-13.md) |
 | Walking/StandUp 训练包登记、执行与 policy 接续 | [Policy registry](docs/policy-registry.md)、[训练包验收](docs/reports/policy-packages-2026-10-08.md) |
 | Qwen CPU 推理、音色持久保存与任务中断 | [模型与音色](docs/reports/qwen-cpu-validation-2026-10-08.md)、[执行中断](docs/reports/cpu-voice-task-2026-10-08.md) |
 | Qwen ASR 全量 FLEURS 中文与英文 1,592 条人声录音；独立音频与识别指标复核 | [真实录音测量](docs/reports/asr-corpus-2026-10-12.md) |
@@ -120,6 +121,12 @@ ambiguous, stale or expired state, with the original observation time and source
 Model association requires two consecutive measured frames. See
 [target tracking](docs/native-target-tracking.md) and its
 [actual CPU task and video](docs/reports/target-tracking-2026-10-12.md).
+
+An actual CPU task uses YOLO26 detections to select a visible target, confirm its
+track across frames, invoke the official walking policy and finish with an
+independent passed verdict. The approach retains the detection model SHA256;
+RGBD distance comes from the simulator. The [model target task](docs/reports/model-target-task-2026-10-13.md)
+includes original-image checks and a 160-second agentic MP4.
 
 Recorded Hospital and Office tasks demonstrate multiple official policies:
 `roller` and `crouch` for locomotion and body motion; `sitstand`, `alpha_stand`,

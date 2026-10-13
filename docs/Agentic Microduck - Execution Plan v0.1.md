@@ -23,8 +23,8 @@ GPU 验收与 RL 保持停止。后续获得执行授权时，同时最多使用
 | --- | --- | --- |
 | 原生 Harness | 实际 Luna 文字、录音及连续任务；两项正式任务、历史引用、经验搜索、独立 Verifier、停止与原始资料核验 | 扩大声明场景的完整任务覆盖，保持实际目标和原有预算 |
 | Policy 工具 | 原生米制行走、角度转向、姿态、转换、重试及训练包 CPU 执行 | 当前源码 Newton 长导航、所有严格精度与学习行为 |
-| 可见目标接近 | 原生 `approach_object`、实际 Luna 调用、独立 Verifier、两组控制、中断和前进/旋转回归；两个主机的 449 文件安装检查；[目标记录](reports/target-approach-2026-10-12.md) | 模型感知来源的完整目标任务与 Newton 执行 |
-| 连续目标跟踪 | 原生 `read_track`、动态实例与实际 YOLO26 连续关联、逐动作 ONNX 复核、正式 Luna 查询和接近、完整 agentic MP4；[跟踪记录](reports/target-tracking-2026-10-12.md) | 自主跟随、物体交叉与长时间遮挡、模型来源完整任务、Newton 执行 |
+| 可见目标接近 | 原生 `approach_object`、Luna + YOLO26 完整 CPU 任务、原始 RGBD 与来源检查、独立 Verifier、0.67 毫米误差、160 秒 MP4；两个主机各 454 个安装文件和 33 项命令；[模型目标记录](reports/model-target-task-2026-10-13.md)、[控制与中断](reports/target-approach-2026-10-12.md) | 多场景重复模型任务与 Newton 执行 |
+| 连续目标跟踪 | 原生 `read_track`、动态实例与 YOLO26 连续关联、逐动作 ONNX 复核；完整模型来源任务查询相同目标的 sequence 85、95，接近和正式 Verifier 通过；[跟踪记录](reports/target-tracking-2026-10-12.md)、[模型目标记录](reports/model-target-task-2026-10-13.md) | 自主跟随、物体交叉与长时间遮挡、Newton 执行 |
 | 感知 | CPU RGBD 与几何复核、原始模型记录与目标跟踪，固定源码 SAM3.1 + YOLO26 服务记录 | 独立标注、识别准确率、距离误差与 calibration |
 | 语音 | 三个固定 Qwen 模型 CPU 推理、四段 WAV 与全部回读、36 项音色和参数测试；FLEURS 全量 1,592 条人声录音与独立复核 | 主观音质、机器人指令与噪声语料、交互延迟、机载设备 |
 | 资产与依赖 | 两种模型、Office/Hospital CPU 导入、官方 contact model 和发布准备 | 当前源码 GPU 求解、首次 kernel 初始化与渲染 |
