@@ -61,6 +61,7 @@ Application, robot, training, shared acceptance and replay modules live in `src/
 | Episode 记录与原生导出 | `experience/` | `base.py` 的 `EpisodeRecorder`、`jsonl.py` 的 `JsonlEpisodeRecorder`、`harness_replay.py` 的 `export_run`；身份与时钟字段位于 `core/contracts/events.py` |
 | Measured policy acceptance | `validation/metric/` | `plans.py`, `case.py`, `campaign.py`, `verify.py`, `policy.py` |
 | Native task, pose and navigation acceptance | `validation/harness/` | `control.py`, `metric_admission.py`, `motion_guard.py`, `pose.py`, `pose_records.py`, `replay.py`, `navigation.py` |
+| 原生运动等待与同步进度检查 | `integrations/edh/`、`validation/harness/` | `session.py` 同步当前控制步；`motion_wait.py` 执行真实 CPU 检查；`motion_wait_records.py` 由 `replay.py --require-motion-wait` 复核原始模型调用、进度及原生边界时间 |
 | 目标接近记录检查 | `validation/harness/` | `target_approach.py` 重算原始目标距离、误差和停止；`replay.py` 的 `--require-target-approach` 检查正式任务，`--require-model-perception` 检查模型检测来源与原始 SHA256 |
 | 连续目标记录检查 | `validation/`、`validation/harness/` | `tracking_records.py` 核查实际 RGBD、原生实例像素与 policy；`harness/tracking.py` 执行 CPU 原生测试；`harness/target_tracking.py` 核查查询身份，供 `replay.py --require-target-tracking` 使用 |
 | 连续任务与语音历史引用检查 | `validation/harness/` | `task_continuation.py`、`voice_context.py` |
@@ -70,6 +71,7 @@ Application, robot, training, shared acceptance and replay modules live in `src/
 | Model perception and independent RGBD audit | `validation/` | `perception.py` / `omd validate perception` |
 | 原始录音语料与 ASR 指标复核 | `validation/` | `asr_corpus.py` / `omd validate asr-audit` |
 | Setup and process ownership | `infrastructure/` | [资源管理说明](../src/oh_my_duck/infrastructure/README.md)；`gpu_inventory.py`、`bootstrap_isaac.py`、`usd_runtime.py`、`owned_process.py`、`acceptance_supervisor.py` |
+| SSH 参数与连接保持 | `infrastructure/ssh.py` | `ssh_command` 供 provider 读取、发布验收与语音检查使用；验证 host、command 和 forwarded ports，并设置 keepalive |
 | 本地与 SSH CPU 渲染设置 | `cli/harness.py`、`infrastructure/headless.py` | `--mujoco-renderer` 为新进程配置 EGL 或 OSMesa；Node 原生部署将设置交给实际 worker |
 
 `omd validate` selects an acceptance implementation through a lazy dispatcher.

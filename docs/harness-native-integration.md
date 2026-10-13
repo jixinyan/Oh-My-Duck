@@ -145,6 +145,30 @@ PYTHONPATH=src .cache/cpu-apartment-locked-venv/bin/python omd.py harness \
 
 该检查必须收到实际文本与正常结束事件；检查成功后退出。正式任务仍需完成图像、工具、物理执行与独立 Verifier 验收。
 
+## SSH 连接与远程进程
+
+Python 侧的 SSH 参数由 `infrastructure/ssh.py` 的 `ssh_command` 维护，
+供私有 provider 读取、发布流程和语音设备检查共同使用。
+Node worker 在 `integrations/edh/server.mjs` 中设置同样的三十秒 keepalive 间隔。
+
+| 参数 | 用途 |
+| --- | --- |
+| `BatchMode=yes` | 使用已经配置的认证方式 |
+| `ConnectTimeout=10` | Python 侧连接建立期限十秒 |
+| `ServerAliveInterval=30` | 应用没有消息时，每三十秒检查 SSH 连接 |
+| `ServerAliveCountMax=3` | 三次检查没有回应时终止所属连接；发布查询使用一次 |
+| `ExitOnForwardFailure=yes` | 端口转发建立失败时终止调用 |
+
+host、远程 command 和 forwarded ports 在建立连接前验证。
+本地转发仅绑定 `127.0.0.1`。进程结果、退出和资源释放使用
+`owned_process.py` 保存；远程验收的控制连接通过
+`acceptance_supervisor.py` 管理所属进程。模型凭证继续保留在进程内存。
+
+长时间服务连接使用相同 SSH 参数。调用结束后关闭所属控制连接，
+检查远程服务退出、worker 数量和两端转发端口关闭。
+实际 CPU 服务空闲 660 秒的连接、HTTP 转发与关闭检查见
+[SSH 生命周期记录](reports/ssh-idle-lifecycle-2026-10-13.md)。
+
 ## 远程 GPU 仿真
 
 Node Harness 可以运行在本机，Python native worker 通过 SSH 运行在 NVIDIA 主机。远程主机需要完整的 OMD 源码副本、锁定的仿真环境、固定 EDH Python runtime 与 schema、官方 policy，以及当前场景资源。远程端通过 stdout 发送原生结构化通信，日志使用 stderr；SSH 转发当前会话的控制端口。关闭会话时，原生 worker 确认释放物理设备，SSH 进程随之结束。
