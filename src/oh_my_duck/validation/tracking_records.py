@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 
 
-def verify(capture: Path) -> dict:
+def verify(capture: Path, catalog: Path | None = None) -> dict:
     import numpy as np
     from PIL import Image
 
@@ -14,11 +14,13 @@ def verify(capture: Path) -> dict:
     from oh_my_duck.perception.apartment_objects import APARTMENT_OBJECTS
     from oh_my_duck.perception.tracking import TargetTracker
     from oh_my_duck.perception.validation import validate_measurements, validate_response
+    from oh_my_duck.validation.metric.policy import verify as verify_policy
 
     totals = {"captures": 0, "native_pixel_identities": 0, "model_confirmed_observations": 0,
               "repeated_frames": 0, "observer_frames": 0, "invalid_measurements_rejected": 0}
     model_instances = {}
     model_sequences = set()
+    policy_audits = []
     digests = {}
     for source in ("simulator_ground_truth", "models"):
         directory = capture / source
@@ -26,6 +28,8 @@ def verify(capture: Path) -> dict:
         records = json.loads((directory / "captures.json").read_text())
         tools = json.loads((directory / "tools.json").read_text())
         samples = json.loads((directory / "samples.json").read_text())
+        if catalog is not None:
+            policy_audits.append(verify_policy(directory, catalog))
         tracker = TargetTracker()
         history = {}
         if not result["passed"] or result["cuda_initialized"] or not result["resources_closed"]:
@@ -61,6 +65,19 @@ def verify(capture: Path) -> dict:
                 image = decode_frame(frame).image
                 if segmentation.shape != (image.height, image.width, 2):
                     raise AssertionError("Native instance pixels differ from model image dimensions")
+            else:
+                frame = json.loads((directory / row["physical_frame"]).read_text())
+                original = decode_frame(frame)
+                for target in perception["targets"]:
+                    geom_ids = [index for index, name in enumerate(row["geom_names"])
+                                if name == target["target_id"] or name.startswith(target["target_id"] + "_")]
+                    mask = np.isin(segmentation[..., 0], geom_ids) & (segmentation[..., 1] == 5)
+                    pixels = original.points_world_m[mask & np.isfinite(original.points_world_m).all(axis=-1)]
+                    if target["valid_depth_pixels"] != len(pixels):
+                        raise AssertionError("Native track pixels differ from original depth")
+                    if len(pixels) >= 8:
+                        np.testing.assert_allclose(target["surface_position_world_m"], np.median(pixels, axis=0),
+                                                   rtol=0, atol=1e-6)
             for target in perception["targets"]:
                 identifier = target["track_id"]
                 if identifier is None:
@@ -144,6 +161,7 @@ def verify(capture: Path) -> dict:
     if len(model_sequences) < 2 or not model_instances:
         raise AssertionError("Tracking requires repeated original model observations with native instance pixels")
     return {"passed": True, **totals, "model_native_instances": model_instances, "input_sha256": digests,
+            "policy_audits": policy_audits,
             "scope": "Native tracking queries, actual CPU YOLO association and physically moving native ball",
             "autonomous_following_acceptance_performed": False, "gpu_acceptance_performed": False}
 
@@ -151,11 +169,12 @@ def verify(capture: Path) -> dict:
 def main():
     parser = argparse.ArgumentParser(description="复核原生目标跟踪、实际模型图像和实例像素")
     parser.add_argument("--capture", type=Path, required=True)
+    parser.add_argument("--catalog", type=Path, help="Recompute every admitted action using the original ONNX")
     parser.add_argument("--output", type=Path, required=True)
     args = parser.parse_args()
     if args.output.exists():
         raise FileExistsError(args.output)
-    result = verify(args.capture.resolve(strict=True))
+    result = verify(args.capture.resolve(strict=True), args.catalog)
     args.output.parent.mkdir(parents=True, exist_ok=True)
     with args.output.open("x") as file:
         json.dump(result, file, indent=2, allow_nan=False)

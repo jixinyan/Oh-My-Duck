@@ -52,7 +52,8 @@ async def run_case(args, source: str, output: Path) -> dict:
         if message["event"] == "update" and data.get("observation"):
             observation = session._latest_observation
             sample = session._environment._navigation_samples[observation.observation_id]
-            samples.append({**sample, "phase": phase, "body_twist": list(observation.state["body_twist"])})
+            samples.append({**sample, "phase": phase, "control": data.get("control"),
+                            "body_twist": list(observation.state["body_twist"])})
         elif message["event"] == "frame":
             name = f"frames/{len(frames):06d}.png"
             image = data["observation"]["images"]["observer_follow"]
@@ -104,6 +105,9 @@ async def run_case(args, source: str, output: Path) -> dict:
                 assert hashlib.sha256((output / captured).read_bytes()).hexdigest() == metadata["files"][name]
                 capture[field] = captured
             capture["device"] = metadata["device"]
+            original = json.loads((output / capture["frame"]).read_text())
+            assert original["rgb_png_base64"] == frame["rgb_png_base64"]
+            assert original["points_world_npy_base64"] == frame["points_world_npy_base64"]
         else:
             captured = f"capture-{index:03d}-physical-frame.json"
             _save(output / captured, frame)
