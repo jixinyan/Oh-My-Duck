@@ -1,4 +1,5 @@
 from datetime import datetime
+import math
 
 
 def audit_target_tracking(tool_results: list[dict]) -> dict:
@@ -23,6 +24,8 @@ def audit_target_tracking(tool_results: list[dict]) -> dict:
                     and target in observed["targets"]]
         if (not matching or target["track_id"] != result["track_id"] or
                 type(result["sequence"]) is not int or last["sequence"] > result["sequence"] or
+                type(result["max_age_ms"]) is not int or not 100 <= result["max_age_ms"] <= 60000 or
+                type(result["age_ms"]) not in (int, float) or not math.isfinite(result["age_ms"]) or result["age_ms"] < 0 or
                 datetime.fromisoformat(last["observed_at"]).utcoffset() is None):
             raise AssertionError("Track query lacks its original measured target")
         if result["source"] == "models":

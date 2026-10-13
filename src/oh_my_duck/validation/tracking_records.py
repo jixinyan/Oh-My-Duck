@@ -14,6 +14,7 @@ def verify(capture: Path, catalog: Path | None = None) -> dict:
     from oh_my_duck.perception.apartment_objects import APARTMENT_OBJECTS
     from oh_my_duck.perception.tracking import TargetTracker
     from oh_my_duck.perception.validation import validate_measurements, validate_response
+    from oh_my_duck.validation.harness.target_tracking import audit_target_tracking
     from oh_my_duck.validation.metric.policy import verify as verify_policy
 
     totals = {"control_steps": 0, "raw_sim_steps": 0,
@@ -22,6 +23,7 @@ def verify(capture: Path, catalog: Path | None = None) -> dict:
     model_instances = {}
     model_sequences = set()
     policy_audits = []
+    query_audits = []
     digests = {}
     for source in ("simulator_ground_truth", "models"):
         directory = capture / source
@@ -46,7 +48,8 @@ def verify(capture: Path, catalog: Path | None = None) -> dict:
             sequence = sample["sequence"]
             if type(sequence) is not int or not 0 <= sequence <= result["control_steps"]:
                 raise AssertionError("Tracking update has an invalid physical sequence")
-            physical = {key: value for key, value in sample.items() if key not in ("control", "phase")}
+            physical = {key: sample[key] for key in ("episode_id", "sequence", "body_position_m",
+                        "yaw_rad", "contact_evidence", "body_twist_world", "body_twist")}
             if sequence in states and states[sequence] != physical:
                 raise AssertionError("Repeated tracking update changed its physical measurement")
             states[sequence] = physical
@@ -151,6 +154,9 @@ def verify(capture: Path, catalog: Path | None = None) -> dict:
                         raise AssertionError("Tracking accepted changed geometry within one sequence")
             totals["captures"] += 1
         queries = [item["result"] for item in tools if item["operation"] == "read_track"]
+        query_audits.append(audit_target_tracking([
+            {"tool": "microduck." + item["operation"], "result": item["result"]}
+            for item in tools if item["operation"] in {"inspect_scene", "read_track"}]))
         if not any(query["status"] == "current" for query in queries) or not any(query["status"] == "stale" for query in queries):
             raise AssertionError("Native track queries require current and stale physical records")
         for query in queries:
@@ -177,7 +183,7 @@ def verify(capture: Path, catalog: Path | None = None) -> dict:
     if len(model_sequences) < 2 or not model_instances:
         raise AssertionError("Tracking requires repeated original model observations with native instance pixels")
     return {"passed": True, **totals, "model_native_instances": model_instances, "input_sha256": digests,
-            "policy_audits": policy_audits,
+            "policy_audits": policy_audits, "query_audits": query_audits,
             "scope": "Native tracking queries, actual CPU YOLO association and physically moving native ball",
             "autonomous_following_acceptance_performed": False, "gpu_acceptance_performed": False}
 
