@@ -14,6 +14,7 @@
 | Execute registered perpetual and episodic policies | `omd validate policy-packages` | `harness/package_execution.py` |
 | Exercise physical motion boundaries | `omd validate motion-guard` | `harness/motion_guard.py`, `harness/control.py` |
 | 检查等待窗口、取消调用与实际运动边界 | `omd validate motion-wait` | `harness/motion_wait.py` |
+| 复核原始模型等待调用、实际进度与确认边界 | `omd validate replay --require-motion-wait` | `harness/motion_wait_records.py` |
 | Measure official CPU head/body pose commands | `omd validate pose` | `harness/pose.py` |
 | Audit pose commands and native physical responses | `omd validate pose-audit` | `harness/pose_records.py` |
 | Audit native agent/task evidence | `omd validate replay` | `harness/replay.py` |

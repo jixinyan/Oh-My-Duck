@@ -11,6 +11,7 @@ from PIL import Image
 
 from oh_my_duck.validation.harness.target_approach import audit_target_approach
 from oh_my_duck.validation.harness.target_tracking import audit_target_tracking
+from oh_my_duck.validation.harness.motion_wait_records import audit_motion_wait
 
 PROGRESS_TOOLS = {"microduck.task_progress", "microduck.observe", "microduck.wait_for_motion"}
 
@@ -162,6 +163,8 @@ def main() -> None:
     parser.add_argument("--require-metric-tools", action="store_true")
     parser.add_argument("--require-target-approach", action="store_true")
     parser.add_argument("--require-target-tracking", action="store_true")
+    parser.add_argument("--require-motion-wait", action="store_true",
+                        help="Require original model waiting windows, active physical progress and confirmed native boundaries")
     parser.add_argument("--require-model-perception", action="store_true",
                         help="Require every admitted target approach to retain its original model detection and SHA256")
     arguments = parser.parse_args()
@@ -213,6 +216,7 @@ def main() -> None:
                     required_source="models" if arguments.require_model_perception else None)
                     if arguments.require_target_approach or arguments.require_model_perception else None)
     tracking_audit = audit_target_tracking(tool_results) if arguments.require_target_tracking else None
+    wait_audit = audit_motion_wait(events) if arguments.require_motion_wait else None
     if arguments.require_metric_tools:
         prepared = {item["result"]["request_id"]: item["result"] for item in tool_results
                     if item["tool"] == "microduck.walk"}
@@ -383,6 +387,7 @@ def main() -> None:
         "model_perception_required": arguments.require_model_perception,
         "target_approach_audit": target_audit,
         "target_tracking_audit": tracking_audit,
+        "motion_wait_audit": wait_audit,
         "checker_source_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),
     }, ensure_ascii=False, sort_keys=True))
 
