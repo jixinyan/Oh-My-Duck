@@ -42,6 +42,7 @@ class _Track:
     target: dict
     observations: int = 1
     velocity: np.ndarray = field(default_factory=lambda: np.zeros(3))
+    consecutive_observations: int = 1
 
 
 @dataclass
@@ -180,11 +181,13 @@ class TargetTracker:
                     if speed > self.parameters.maximum_speed_m_s:
                         velocity *= self.parameters.maximum_speed_m_s / speed
                     track = _Track(identifier, previous.first_sequence, sequence, result["observed_at"],
-                                   deepcopy(target), previous.observations + 1, velocity)
+                                   deepcopy(target), previous.observations + 1, velocity,
+                                   previous.consecutive_observations + 1 if previous.sequence == stream.sequence else 1)
                 status = ("confirmed" if source == "simulator_ground_truth" or
-                          track.observations >= self.parameters.confirmation_observations else "tentative")
+                          track.consecutive_observations >= self.parameters.confirmation_observations else "tentative")
                 target.update(track_id=identifier, tracking={"status": status,
-                    "observation_count": track.observations, "first_sequence": track.first_sequence,
+                    "observation_count": track.observations, "consecutive_observations": track.consecutive_observations,
+                    "first_sequence": track.first_sequence,
                     "previous_sequence": None if previous is None else previous.sequence,
                     "last_sequence": sequence, "association_distance_m": error})
                 track.target = deepcopy(target)

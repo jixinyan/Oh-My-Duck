@@ -195,6 +195,10 @@ async def run_case(args, source: str, output: Path) -> dict:
             await advance(50)
             await inspect()
             record["look_return_status"] = (await call("read_track", {"track_id": identifier}))["status"]
+            phase = "reconfirmed"
+            await advance(25)
+            await inspect()
+            record["reconfirmed_status"] = (await call("read_track", {"track_id": identifier}))["status"]
         final = await call("progress", {})
         record.update(track_id=identifier, control_steps=final["sequence"], raw_sim_steps=session._status["raw_sim_steps"],
                       final_execution=final["execution"], invalid_queries_rejected=4)
