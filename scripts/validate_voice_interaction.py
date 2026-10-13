@@ -15,6 +15,7 @@ import soundfile as sf
 
 from oh_my_duck.voice.device import PortAudioDevice
 from oh_my_duck.voice.remote import RemoteVoiceServices
+from oh_my_duck.infrastructure.ssh import ssh_command
 
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
@@ -28,7 +29,7 @@ def external_play(audio_path: Path, output_device: str) -> None:
 
 async def remote_text(host: str, command: str) -> str:
     process = await asyncio.create_subprocess_exec(
-        "ssh", "-o", "BatchMode=yes", host, command,
+        *ssh_command(host, command),
         stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
     )
     stdout, stderr = await process.communicate()

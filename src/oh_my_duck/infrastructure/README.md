@@ -7,6 +7,7 @@
 | 安装的 OpenUSD 来源及文件检查 | `usd_runtime.py` |
 | GPU 设备、显存、compute PID 与独占检查 | `gpu_inventory.py` |
 | 本项目启动进程的取消与退出记录 | `owned_process.py` |
+| SSH 参数、keepalive 与本地端口转发 | `ssh.py`；连接建立期限十秒、keepalive 间隔三十秒 |
 | 远程验收进程及控制通道 | `acceptance_supervisor.py` |
 | 后端与原生训练入口选择 | `run.py` |
 | EGL、OSMesa 与新进程的渲染环境 | `headless.py`；`omd harness --mujoco-renderer` 用于本地与 SSH CPU worker |

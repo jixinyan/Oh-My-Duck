@@ -19,6 +19,7 @@ from oh_my_duck.core.paths import project_root
 from oh_my_duck.experience.harness_replay import request, save_json
 from oh_my_duck.validation.release.plans import validate_plan
 from oh_my_duck.infrastructure.owned_process import owned_process
+from oh_my_duck.infrastructure.ssh import ssh_command
 from oh_my_duck.infrastructure.gpu_inventory import (
     GPU_QUERY, PROCESS_QUERY, compute_processes, gpu_devices, require_exclusive_device,
 )
@@ -28,9 +29,7 @@ from oh_my_duck.integrations.model_settings import (
 
 
 def ssh(args, command, **kwargs):
-    return subprocess.run(["ssh", "-T", "-o", "BatchMode=yes", "-o", "ConnectTimeout=10",
-                           "-o", "ServerAliveInterval=30", "-o", "ServerAliveCountMax=1",
-                           args.worker_host, command], **kwargs)
+    return subprocess.run(ssh_command(args.worker_host, command, server_alive_count_max=1), **kwargs)
 
 
 def gpu_query_timeout(deadline):
@@ -232,8 +231,7 @@ def main():
                                                 "--record", lifecycle, "--"] + command[5:]
                     remote_command = "cd " + shlex.quote(args.worker_root) + " && " + shlex.join(supervised)
                     try:
-                        with owned_process(["ssh", "-T", "-o", "BatchMode=yes", "-o", "ServerAliveInterval=30",
-                                            args.worker_host, remote_command],
+                        with owned_process(ssh_command(args.worker_host, remote_command),
                                            record_path=output / (stage["id"] + "-transport.json"),
                                            cancel_stdin=True, stdin=subprocess.PIPE,
                                            stdout=log, stderr=subprocess.STDOUT) as transport:

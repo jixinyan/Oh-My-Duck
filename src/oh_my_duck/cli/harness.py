@@ -11,6 +11,7 @@ import tomllib
 from urllib.parse import urlsplit
 
 from oh_my_duck.core.paths import project_root
+from oh_my_duck.infrastructure.ssh import ssh_command
 from oh_my_duck.integrations.model_settings import add_model_arguments, resolve_model_settings, validate_model_options
 from oh_my_duck.integrations.native_runtime import EDH_REVISION, verify_edh_source
 from oh_my_duck.robotics.microduck.policy_sources import OFFICIAL_REVISION as POLICY_REVISION
@@ -84,9 +85,9 @@ def main() -> int:
             "'token':t,'wire_api':p.get('wire_api','chat')}))"
         )
         remote = subprocess.run(
-            ["ssh", "-o", "BatchMode=yes", args.ssh_host,
-             f"{shlex.quote(args.remote_python)} -c {shlex.quote(code)} "
-             f"{shlex.quote(args.remote_provider_config)}"],
+            ssh_command(args.ssh_host,
+                        f"{shlex.quote(args.remote_python)} -c {shlex.quote(code)} "
+                        f"{shlex.quote(args.remote_provider_config)}"),
             check=True, capture_output=True, text=True,
         )
         selected = json.loads(remote.stdout)
