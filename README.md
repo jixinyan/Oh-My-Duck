@@ -10,6 +10,7 @@
 [![CPU Luna navigation: two seeds verified](https://img.shields.io/badge/CPU_Luna_navigation-2_seeds_verified-2ea44f)](docs/reports/native-cpu-navigation-2026-10-11.md)
 [![Voice: native task verified](https://img.shields.io/badge/voice-native_task_verified-green)](docs/reports/cpu-voice-navigation-2026-10-08.md)
 [![ASR: full corpus verified](https://img.shields.io/badge/ASR-1592_recordings_verified-2ea44f)](docs/reports/public-asr-workflow-2026-10-12.md)
+[![Target approach: native CPU task verified](https://img.shields.io/badge/target_approach-native_CPU_task_verified-2ea44f)](docs/reports/target-approach-2026-10-12.md)
 [![Release: acceptance in progress](https://img.shields.io/badge/release-acceptance_in_progress-blue)](docs/release-readiness.md)
 [![Isaac Office: agentic navigation verified](https://img.shields.io/badge/Isaac_Office-agentic_navigation_verified-green)](docs/reports/metric-camera-tools-2026-09-30.md)
 [![Isaac Hospital: roller and crouch verified](https://img.shields.io/badge/Isaac_Hospital-roller_and_crouch_verified-green)](docs/reports/multiskill-demos-2026-10-01.md)
@@ -38,6 +39,7 @@ This is the target experience. The project is under active development; [impleme
 | 文字指令 → 原生 Harness → 办公室导航 | [Luna CPU 导航](docs/reports/cpu-luna-navigation-2026-10-08.md) |
 | 米制前进、角度转向、读取传感器、停止与保留物理状态的重试 | [工具参数](docs/metric-policy-tools.md)、[原生重试](docs/reports/native-execution-retry-2026-10-08.md) |
 | 原始 RGBD、可见目标、距离与 bearing | [CPU 感知](docs/reports/cpu-scene-perception-2026-10-08.md)、[感知来源](docs/reports/perception-source-capabilities-2026-10-08.md) |
+| 读取当前目标 → 调用接近工具 → 停止 → 正式 Verifier | [目标工具与场景](docs/native-target-approach.md)、[CPU 模型任务与视频记录](docs/reports/target-approach-2026-10-12.md) |
 | Walking/StandUp 训练包登记、执行与 policy 接续 | [Policy registry](docs/policy-registry.md)、[训练包验收](docs/reports/policy-packages-2026-10-08.md) |
 | Qwen CPU 推理、音色持久保存与任务中断 | [模型与音色](docs/reports/qwen-cpu-validation-2026-10-08.md)、[执行中断](docs/reports/cpu-voice-task-2026-10-08.md) |
 | Qwen ASR 全量 FLEURS 中文与英文 1,592 条人声录音；独立音频与识别指标复核 | [真实录音测量](docs/reports/asr-corpus-2026-10-12.md) |

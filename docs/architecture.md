@@ -42,6 +42,7 @@ Application, robot, training, shared acceptance and replay modules live in `src/
 | Shared types and configuration | `core/` | `core/paths.py` |
 | Online robot execution | `robotics/backends/` | `simulation.py`, `isaac_official.py` |
 | Official robot assets and policies | `robotics/microduck/` | `policy_sources.py` 保存固定来源与 SHA256；`official_policies.py` 加载与检查模型 |
+| 米制运动与可见目标接近 | `robotics/microduck/` | `metric_motion.py` 控制距离和角度；`target_motion.py` 控制当前 RGBD 表面点的距离与 bearing |
 | Native joint graph and training-package catalogue | `robotics/policies/` | `joint_onnx.py`, `catalogue.py` |
 | Task families | `rl/tasks/<family>/` | `environment.py`, `ppo.py` |
 | Shared task variants | `rl/tasks/shared/` | Symmetry and terrain definitions |
@@ -59,6 +60,7 @@ Application, robot, training, shared acceptance and replay modules live in `src/
 | Episode 记录与原生导出 | `experience/` | `base.py` 的 `EpisodeRecorder`、`jsonl.py` 的 `JsonlEpisodeRecorder`、`harness_replay.py` 的 `export_run`；身份与时钟字段位于 `core/contracts/events.py` |
 | Measured policy acceptance | `validation/metric/` | `plans.py`, `case.py`, `campaign.py`, `verify.py`, `policy.py` |
 | Native task, pose and navigation acceptance | `validation/harness/` | `control.py`, `metric_admission.py`, `motion_guard.py`, `pose.py`, `pose_records.py`, `replay.py`, `navigation.py` |
+| 目标接近记录检查 | `validation/harness/` | `target_approach.py` 重算原始目标距离、误差和停止；`replay.py` 的 `--require-target-approach` 检查完整正式任务 |
 | 连续任务与语音历史引用检查 | `validation/harness/` | `task_continuation.py`、`voice_context.py` |
 | Registered policy package admission and execution | `validation/harness/` | `registry.py`, `package_execution.py` |
 | Release preparation and package checks | `validation/release/` | `plans.py`, `worker.py`, `campaign.py`, `package.py` |

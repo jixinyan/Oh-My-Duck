@@ -281,6 +281,12 @@ Schema 与实现位于 [`integrations/edh/server.mjs`](../integrations/edh/serve
 `execution.resume` 执行。`wait_for_motion` 等待执行边界，物理停止依据测得状态单独检查。
 原始请求、完成误差与物理停止依据见[工具说明](metric-policy-tools.md)。
 
+`approach_object(target_id, standoff_m)` 使用当前 `inspect_scene` 或 `observe` 返回的
+有效 RGBD 目标。观测绑定当前 episode、sequence 和时间；控制器在原生暂停边界
+准备请求，随后通过 `execution.resume` 执行。请求保留捕获的固定 world 表面点，
+根据实际身体位置控制距离与 bearing，完成要求为 0.05 米以内误差和五个停止样本。
+工具参数、记录复核与 CPU 场景见[目标接近说明](native-target-approach.md)。
+
 ### 6.2 生命周期与权限
 
 长任务具有 `accepted`、`running`、`succeeded`、`failed`、`cancelled` 状态。
@@ -299,7 +305,8 @@ Schema 与实现位于 [`integrations/edh/server.mjs`](../integrations/edh/serve
 
 `SkillSpec` 声明身份、版本、参数 Schema、传感器、前置姿态、资源、policy 类型、
 观测动作格式、频率、后端、设备、终止条件、取消方式、权重 SHA256 和评估结果。
-`follow_object`、`approach_object`、`look_at` 与复合技能具有独立实现和验收要求。
+`approach_object` 已具有原生工具和测量控制实现；`follow_object`、`look_at` 与复合技能
+具有独立实现和验收要求。动态目标跟踪需要连续观测和跨帧身份管理。
 目标跟踪使用有来源、最近时间和有效状态的目标记录；目标丢失、观测过期、通信中断
 及超时具有明确的停止行为。工具内部维护必要的快速反馈，Harness 决定任务和观察时机。
 motion、head、mouth 资源通过通用调度与唯一电机仲裁入口协调。
