@@ -29,6 +29,8 @@ ROOT = Path(__file__).resolve().parents[1]
     "oh_my_duck.validation.harness.pose_records",
     "oh_my_duck.validation.harness.registry",
     "oh_my_duck.validation.harness.package_execution",
+    "oh_my_duck.validation.harness.tracking",
+    "oh_my_duck.validation.tracking_records",
     "oh_my_duck.experience.harness_replay",
     "oh_my_duck.infrastructure.usd_runtime",
     "oh_my_duck.validation.release.assets",

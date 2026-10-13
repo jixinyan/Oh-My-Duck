@@ -69,12 +69,12 @@ def _timestamp(value: str) -> datetime:
 class TargetTracker:
     def __init__(self, parameters: TrackingParameters | None = None):
         self.parameters = TrackingParameters() if parameters is None else parameters
+        self._counter = 0
         self.clear()
 
     def clear(self) -> None:
         self._episode_id = None
         self._streams: dict[tuple, _Stream] = {}
-        self._counter = 0
 
     def _validate(self, result: dict, source: str) -> tuple:
         if source not in ("models", "simulator_ground_truth"):
