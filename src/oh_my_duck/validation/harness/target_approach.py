@@ -2,11 +2,14 @@ from datetime import datetime
 import math
 
 
-def audit_target_approach(tool_results: list[dict]) -> dict:
+def audit_target_approach(tool_results: list[dict], *, required_source: str | None = None) -> dict:
+    if required_source not in (None, "models", "simulator_ground_truth"):
+        raise ValueError("Target audit requires a supported perception source")
     prepared = {}
     observations = []
     completed = set()
     maximum_error = 0.0
+    sources, models = set(), {}
     for detail in tool_results:
         tool, result = detail["tool"], detail["result"]
         if tool == "microduck.inspect_scene":
@@ -28,6 +31,26 @@ def audit_target_approach(tool_results: list[dict]) -> dict:
                 target in observation["targets"]]
             if not matching:
                 raise AssertionError("Target preparation lacks its original recorded perception")
+            source = original["source"]
+            if required_source is not None and source != required_source:
+                raise AssertionError("Target preparation differs from the required perception source")
+            if source == "models":
+                identities = original.get("models", {})
+                if (not identities or not any(observation.get("models") == identities for observation in matching) or
+                        any(not isinstance(name, str) or not name or not isinstance(digest, str) or
+                            len(digest) != 64 or any(character not in "0123456789abcdef" for character in digest)
+                            for name, digest in identities.items()) or
+                        target["detection_source"] not in {"yolo26", "sam3.1"} or
+                        not any(observation["detection_source"] == target["detection_source"] for observation in matching)):
+                    raise AssertionError("Model target preparation lacks its original model identities")
+                for name, digest in identities.items():
+                    if name in models and models[name] != digest:
+                        raise AssertionError("Model identity changed during target approaches")
+                    models[name] = digest
+            elif source != "simulator_ground_truth" or not any(
+                    observation["detection_source"] == "simulator_ground_truth" for observation in matching):
+                raise AssertionError("Target preparation changed its original perception source")
+            sources.add(source)
             if (target["target_id"] != result["arguments"]["target_id"] or
                     target["distance_status"] != "valid" or target["valid_depth_pixels"] < 8 or
                     result["standoff_m"] != result["arguments"]["standoff_m"] or
@@ -71,4 +94,5 @@ def audit_target_approach(tool_results: list[dict]) -> dict:
     if not completed or completed != set(prepared):
         raise AssertionError("Every admitted target request requires measured completion")
     return {"completed_requests": len(completed), "maximum_error_m": maximum_error,
-            "distance_tolerance_m": 0.05, "required_stopped_samples": 5}
+            "distance_tolerance_m": 0.05, "required_stopped_samples": 5,
+            "perception_sources": sorted(sources), "models": models}

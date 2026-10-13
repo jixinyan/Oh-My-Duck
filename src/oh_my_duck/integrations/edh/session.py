@@ -113,6 +113,7 @@ class MicroDuckWorkerSession(NativeWorkerSession):
         self._target_observation = deepcopy({key: result[key] for key in
             ("episode_id", "sequence", "observed_at", "prompt", "targets")})
         self._target_observation["source"] = source
+        self._target_observation["models"] = deepcopy(result.get("models", {}))
 
     def _bind_motion_segment(self, command_result: dict[str, Any], count: int,
                              preserve_guard: bool = False) -> None:

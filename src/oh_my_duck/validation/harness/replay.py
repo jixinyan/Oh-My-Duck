@@ -162,6 +162,8 @@ def main() -> None:
     parser.add_argument("--require-metric-tools", action="store_true")
     parser.add_argument("--require-target-approach", action="store_true")
     parser.add_argument("--require-target-tracking", action="store_true")
+    parser.add_argument("--require-model-perception", action="store_true",
+                        help="Require every admitted target approach to retain its original model detection and SHA256")
     arguments = parser.parse_args()
     root = arguments.export_dir.resolve(strict=True)
     manifest = json.loads((root / "manifest.json").read_text(encoding="utf-8"))
@@ -198,7 +200,7 @@ def main() -> None:
     if arguments.require_metric_tools:
         required_calls.discard("microduck__select_policy")
         required_calls.add("microduck__walk")
-    if arguments.require_target_approach:
+    if arguments.require_target_approach or arguments.require_model_perception:
         required_calls.add("microduck__approach_object")
     if arguments.require_target_tracking:
         required_calls.add("microduck__read_track")
@@ -207,7 +209,9 @@ def main() -> None:
     if "execution__pause" not in calls:
         audit_motion_guard_pauses(events, manifest["runId"])
     tool_results = [event["detail"] for event in events if event["type"] == "tool.completed"]
-    target_audit = audit_target_approach(tool_results) if arguments.require_target_approach else None
+    target_audit = (audit_target_approach(tool_results,
+                    required_source="models" if arguments.require_model_perception else None)
+                    if arguments.require_target_approach or arguments.require_model_perception else None)
     tracking_audit = audit_target_tracking(tool_results) if arguments.require_target_tracking else None
     if arguments.require_metric_tools:
         prepared = {item["result"]["request_id"]: item["result"] for item in tool_results
@@ -376,6 +380,7 @@ def main() -> None:
         "environment": environment, "observer_size": observer_size,
         "audited_stop_progress_count": stop_progress_count,
         "strict_metric_targets_required": arguments.require_metric_tools,
+        "model_perception_required": arguments.require_model_perception,
         "target_approach_audit": target_audit,
         "target_tracking_audit": tracking_audit,
         "checker_source_sha256": hashlib.sha256(Path(__file__).read_bytes()).hexdigest(),

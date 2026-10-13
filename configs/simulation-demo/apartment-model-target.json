@@ -1,0 +1,9 @@
+{
+  "backend": "cpu-mujoco-bam",
+  "scene_id": "official-apartment-model-target",
+  "spawn_pose": {"x_m": -1.6, "y_m": -0.5, "yaw_rad": 3.141592653589793},
+  "goal": {"kind": "object", "object": "ball_0", "distance_m": 0.5, "hold_ticks": 5},
+  "perception_endpoint": "http://127.0.0.1:8784",
+  "task_instruction": "使用 source=models 和 prompt=objects 观察当前 head RGB，选择距离最近且 RGBD 测量有效的小型目标。保留模型返回的原始 label、target_id 和 track_id。执行有界的零 twist 控制命令，在不同物理 sequence 重新观察，让 read_track 对同一个目标取得至少两次 status=current 的查询。使用最新观测的 target_id 调用 approach_object，保持到所观察表面点 0.4 米的水平距离。完成后读取实际运动、目标保持与停止状态，执行至少 50 个零 twist 控制步，并通过独立 Verifier 完成正式任务。目标选择和接近均使用 models 的检测结果，仿真 RGBD 提供距离，模型的原始 label 保留在记录中。",
+  "budget": {"max_control_steps": 1000, "max_wall_time_s": 600}
+}

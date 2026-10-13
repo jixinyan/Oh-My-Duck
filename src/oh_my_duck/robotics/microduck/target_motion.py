@@ -54,6 +54,7 @@ class TargetApproachMotion:
         self.target_observation = deepcopy({key: observation[key] for key in
             ("episode_id", "sequence", "observed_at", "prompt", "source")})
         self.target_observation["target"] = deepcopy(target)
+        self.target_observation["models"] = deepcopy(observation.get("models", {}))
         self.target_observation.update(age_ms_at_admission=age_ms, max_age_ms=max_age_ms)
         self.robot_model = robot_model
         self.phase = "moving"
