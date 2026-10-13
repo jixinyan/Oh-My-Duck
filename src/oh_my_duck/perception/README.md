@@ -5,6 +5,8 @@
 | Active observation and target interfaces | `base.py` |
 | RGBD admission, PNG masks and YOLO box pixels | `frames.py` |
 | Target surface distance, interval, world position and body bearing | `rgbd.py` |
+| Stable target identities, association, confirmation and current-state queries | `tracking.py` |
+| Official apartment instance names and labels | `apartment_objects.py` |
 | Response identity and original-RGBD measurement verification | `validation.py` |
 | Explicit local model service or SSH-tunnel client | `client.py` |
 | YOLO26 and optional SAM3.1 inference | `service.py`, `sam31.py` |
@@ -12,6 +14,7 @@
 | Actual Newton ray data and scene targets | `../robotics/backends/isaac_official.py` |
 | Native `inspect_scene` and combined `observe` tools | `../integrations/edh/session.py` |
 | Model calls, retained source frames and independent measurement audit | `../validation/perception.py` / `omd validate perception` |
+| Native tracking execution and original-instance/measurement audit | `../validation/harness/tracking.py`, `../validation/tracking_records.py` |
 
 The client decodes the original RGB PNG, floating-point world coordinates and
 camera/body pose before making a model request. A missing depth pixel has three
@@ -37,3 +40,10 @@ YOLO can run explicitly on `cpu` or `cuda:N`. The pinned SAM predictor requires
 initialize CUDA. Runtime environment, model acquisition, scene configuration and
 public command examples are in
 [perception and navigation](../../../docs/perception-navigation.md).
+
+The optional service flag `--record-inspections` retains actual request RGBD,
+model responses and SHA256 manifests. Native tools attach stable `track_id`
+without changing the original detection identity or geometry. The worker uses
+the same tracker for both owned simulator backends. Query states and association
+parameters are documented in
+[native target tracking](../../../docs/native-target-tracking.md).

@@ -141,11 +141,10 @@ async def run_case(args, source: str, output: Path) -> dict:
         candidates = [target for target in initial["targets"] if target["track_id"] is not None]
         if source == "simulator_ground_truth":
             candidates = [target for target in candidates if target["target_id"] == "ball_0"]
-        else:
-            candidates = [target for target in candidates if target["label"] == "chair"]
         if not candidates:
             raise AssertionError("Actual scene and model require at least one measured target")
         target = candidates[0]
+        record["selected_target"] = deepcopy(target)
         identifier = target["track_id"]
         first = await call("read_track", {"track_id": identifier})
         assert first["status"] == ("current" if source == "simulator_ground_truth" else "tentative")
@@ -204,8 +203,10 @@ async def run_case(args, source: str, output: Path) -> dict:
             await inspect()
             record["reconfirmed_status"] = (await call("read_track", {"track_id": identifier}))["status"]
         final = await call("progress", {})
+        assert not final["fallen"] and final["stopped_samples"] >= 5
         record.update(track_id=identifier, control_steps=final["sequence"], raw_sim_steps=session._status["raw_sim_steps"],
-                      final_execution=final["execution"], invalid_queries_rejected=4)
+                      final_execution=final["execution"], invalid_queries_rejected=4,
+                      final_fallen=final["fallen"], final_stopped_samples=final["stopped_samples"])
         await session.pause({"execution_id": session._gate.snapshot()["execution_id"]}, terminal=True)
         sequence = (await call("progress", {}))["sequence"]
         await asyncio.sleep(0.2)

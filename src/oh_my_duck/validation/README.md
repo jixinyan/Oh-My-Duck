@@ -20,12 +20,16 @@
 | Audit saved navigation | `omd validate navigation-audit` | `harness/navigation_replay.py` |
 | Audit an independent package installation | `omd validate package-audit` | `release/package.py` |
 | Run model perception or audit original RGBD measurements | `omd validate perception` | `perception.py` |
+| Execute actual native CPU target tracking | `omd validate tracking` | `harness/tracking.py` |
+| Audit original tracking captures, pixels and optional ONNX actions | `omd validate tracking-audit` | `tracking_records.py` |
 | 复核完整真实录音语料与 ASR 指标 | `omd validate asr-audit` | `asr_corpus.py` |
 | 准备固定真实语料与执行全部 Qwen 转写 | `omd validate asr-prepare`, `omd validate asr-measure` | `asr_preparation.py`, `asr_measurement.py` |
 
 ASR 记录格式和复核参数见[语料复核](../../../docs/asr-measurements.md)。
 
 Use the corresponding command with `--help` for required paths and parameters.
+`omd validate replay --require-target-tracking` checks original target/query records
+at two physical sequences through `harness/target_tracking.py`.
 `omd replay` handles session open/task/status/export/close through
 `experience/harness_replay.py`. Process ownership and cancellation belong to
 `infrastructure/owned_process.py` and `infrastructure/acceptance_supervisor.py`.
